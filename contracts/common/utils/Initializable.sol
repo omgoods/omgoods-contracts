@@ -1,0 +1,30 @@
+// SPDX-License-Identifier: NONE
+pragma solidity 0.8.20;
+
+abstract contract Initializable {
+  // storage
+
+  bool internal _initialized;
+
+  // errors
+
+  error AlreadyInitialized();
+
+  // modifiers
+
+  modifier initializeOnce() {
+    if (_initialized) {
+      revert AlreadyInitialized();
+    }
+
+    _initialized = true;
+
+    _;
+  }
+
+  // external functions (getters)
+
+  function initialized() external view returns (bool) {
+    return _initialized;
+  }
+}

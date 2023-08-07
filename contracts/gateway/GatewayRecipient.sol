@@ -1,0 +1,47 @@
+// SPDX-License-Identifier: NONE
+pragma solidity 0.8.20;
+
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+
+abstract contract GatewayRecipient is Context {
+  // storage
+
+  address internal _gateway;
+
+  // internal functions (getters)
+
+  function _msgSender()
+    internal
+    view
+    virtual
+    override
+    returns (address sender)
+  {
+    if (msg.sender == _gateway) {
+      // solhint-disable-next-line no-inline-assembly
+      assembly {
+        sender := shr(96, calldataload(sub(calldatasize(), 20)))
+      }
+    } else {
+      sender = super._msgSender();
+    }
+
+    return sender;
+  }
+
+  function _msgData()
+    internal
+    view
+    virtual
+    override
+    returns (bytes calldata data)
+  {
+    if (msg.sender == _gateway) {
+      data = msg.data[:msg.data.length - 20];
+    } else {
+      data = super._msgData();
+    }
+
+    return data;
+  }
+}

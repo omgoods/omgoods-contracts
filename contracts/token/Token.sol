@@ -1,0 +1,56 @@
+// SPDX-License-Identifier: NONE
+pragma solidity 0.8.20;
+
+import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {Ownable} from "../common/access/Ownable.sol";
+import {Initializable} from "../common/utils/Initializable.sol";
+import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
+import {TokenRegistry} from "./TokenRegistry.sol";
+
+abstract contract Token is Ownable, Initializable, GatewayRecipient {
+  // storage
+
+  address internal _tokenRegistry;
+
+  // deployment functions
+
+  function _initialize(
+    address owner,
+    address gateway,
+    address tokenRegistry
+  ) internal initializeOnce {
+    _owner = owner;
+    _gateway = gateway;
+    _tokenRegistry = tokenRegistry;
+  }
+
+  // internal functions (getters)
+
+  function _msgSender()
+    internal
+    view
+    virtual
+    override(Context, GatewayRecipient)
+    returns (address)
+  {
+    return GatewayRecipient._msgSender();
+  }
+
+  function _msgData()
+    internal
+    view
+    virtual
+    override(Context, GatewayRecipient)
+    returns (bytes calldata)
+  {
+    return GatewayRecipient._msgData();
+  }
+
+  // internal functions (setters)
+
+  function _afterOwnerUpdated(address owner) internal override {
+    super._afterOwnerUpdated(owner);
+
+    TokenRegistry(_tokenRegistry).emitTokenOwnerUpdated(owner);
+  }
+}

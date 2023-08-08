@@ -1,18 +1,12 @@
 import { ethers } from 'hardhat';
+import { AddressLike } from 'ethers';
 
 const { deployContract, ZeroAddress } = ethers;
 
-export async function deployAccountRegistry(
-  options: {
-    owner?: string | Promise<string>;
-  } = {},
-) {
-  const { owner } = {
-    owner: ZeroAddress,
-    ...options,
-  };
-
-  const accountRegistry = await deployContract('AccountRegistry', [owner]);
+export async function deployAccountRegistry() {
+  const accountRegistry = await deployContract('AccountRegistry', [
+    ZeroAddress,
+  ]);
 
   return {
     accountRegistry,
@@ -21,7 +15,7 @@ export async function deployAccountRegistry(
 
 export async function setupAccountRegistry(
   options: {
-    gateway?: string | Promise<string>;
+    gateway?: AddressLike;
   } = {},
 ) {
   const { gateway } = {
@@ -31,16 +25,12 @@ export async function setupAccountRegistry(
 
   const { accountRegistry } = await deployAccountRegistry();
 
-  const accountImplementation = await deployContract('Account');
+  const accountImpl = await deployContract('AccountImpl');
 
-  await accountRegistry.initialize(
-    gateway,
-    accountRegistry.getAddress(),
-    accountImplementation.getAddress(),
-  );
+  await accountRegistry.initialize(gateway, accountRegistry, accountImpl);
 
   return {
     accountRegistry,
-    accountImplementation,
+    accountImpl,
   };
 }

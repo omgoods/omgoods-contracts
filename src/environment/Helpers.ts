@@ -26,10 +26,4 @@ export class Helpers {
 
     return getAddress(this.randomHex(20));
   }
-
-  randomSigner(options: {} = {}) {
-    const {
-      ethers: { getSigner },
-    } = this.hre;
-  }
 }

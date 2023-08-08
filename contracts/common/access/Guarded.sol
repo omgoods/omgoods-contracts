@@ -39,6 +39,12 @@ abstract contract Guarded is Ownable {
     _;
   }
 
+  // deployment functions
+
+  constructor(address owner) Ownable(owner) {
+    //
+  }
+
   // external functions (getters)
 
   function hasGuardian(address guardian) external view returns (bool) {
@@ -99,7 +105,7 @@ abstract contract Guarded is Ownable {
 
   // internal functions (setters)
 
-  function _setGuardians(address[] memory guardians) internal {
+  function _setGuardians(address[] calldata guardians) internal {
     uint256 len = guardians.length;
 
     for (uint256 index; index < len; ) {

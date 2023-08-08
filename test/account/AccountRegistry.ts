@@ -9,11 +9,10 @@ const { getSigners, ZeroAddress } = ethers;
 const { randomAddress } = helpers;
 
 describe('account/AccountRegistry', () => {
-  let owner: HardhatEthersSigner;
   let signers: HardhatEthersSigner[];
 
   before(async () => {
-    [owner, ...signers] = await getSigners();
+    [, ...signers] = await getSigners();
   });
 
   describe('# deployment functions', () => {
@@ -21,23 +20,6 @@ describe('account/AccountRegistry', () => {
 
     before(async () => {
       fixture = await loadFixture(deployAccountRegistry);
-    });
-
-    describe('constructor()', () => {
-      it('expect to deploy the contract', async () => {
-        const { accountRegistry } = fixture;
-
-        expect(await accountRegistry.getOwner()).eq(owner.address);
-      });
-
-      it('expect to deploy the contract with a custom owner', async () => {
-        const owner = randomAddress();
-        const { accountRegistry } = await deployAccountRegistry({
-          owner,
-        });
-
-        expect(await accountRegistry.getOwner()).eq(owner);
-      });
     });
 
     describe('initialize()', () => {
@@ -61,7 +43,7 @@ describe('account/AccountRegistry', () => {
           accountRegistry.initialize(ZeroAddress, ZeroAddress, ZeroAddress),
         ).revertedWithCustomError(
           accountRegistry,
-          'AccountImplementationIsTheZeroAddress',
+          'AccountImplIsTheZeroAddress',
         );
       });
 
@@ -70,17 +52,17 @@ describe('account/AccountRegistry', () => {
 
         const gateway = randomAddress();
         const entryPoint = randomAddress();
-        const accountImplementation = randomAddress();
+        const accountImpl = randomAddress();
 
         const tx = await accountRegistry.initialize(
           gateway,
           entryPoint,
-          accountImplementation,
+          accountImpl,
         );
 
         await expect(tx)
           .emit(accountRegistry, 'Initialized')
-          .withArgs(gateway, entryPoint, accountImplementation);
+          .withArgs(gateway, entryPoint, accountImpl);
       });
 
       describe('# after initialization', () => {

@@ -15,7 +15,7 @@ const func: DeployFunction = async (hre) => {
   } else {
     const { owner: from } = await getNamedAccounts();
     const { address: gateway } = await get('Gateway');
-    const { address: accountImplementation } = await get('Account');
+    const { address: accountImpl } = await get('AccountImpl');
 
     await execute(
       'AccountRegistry',
@@ -26,7 +26,7 @@ const func: DeployFunction = async (hre) => {
       'initialize',
       gateway,
       ZeroAddress, // TODO: add entry point address
-      accountImplementation,
+      accountImpl,
     );
   }
 };

@@ -7,10 +7,10 @@ abstract contract ProxyFactory {
   // internal functions (setters)
 
   function _createProxy(
-    address implementation,
+    address impl,
     bytes32 salt
   ) internal returns (address result) {
-    try new Proxy{salt: salt}(implementation) returns (Proxy proxy) {
+    try new Proxy{salt: salt}(impl) returns (Proxy proxy) {
       result = address(proxy);
     } catch {
       // solhint-disable-next-line no-empty-blocks

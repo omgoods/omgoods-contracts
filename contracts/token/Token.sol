@@ -14,12 +14,14 @@ abstract contract Token is Ownable, Initializable, GatewayRecipient {
 
   // deployment functions
 
+  constructor(address owner) Ownable(owner) {
+    //
+  }
+
   function _initialize(
-    address owner,
     address gateway,
     address tokenRegistry
   ) internal initializeOnce {
-    _owner = owner;
     _gateway = gateway;
     _tokenRegistry = tokenRegistry;
   }
@@ -34,16 +36,6 @@ abstract contract Token is Ownable, Initializable, GatewayRecipient {
     returns (address)
   {
     return GatewayRecipient._msgSender();
-  }
-
-  function _msgData()
-    internal
-    view
-    virtual
-    override(Context, GatewayRecipient)
-    returns (bytes calldata)
-  {
-    return GatewayRecipient._msgData();
   }
 
   // internal functions (setters)

@@ -1,6 +1,6 @@
-import { HardhatUserConfig } from 'hardhat/config';
 import 'hardhat-deploy';
 import '@nomicfoundation/hardhat-toolbox';
+import { HardhatUserConfig } from 'hardhat/config';
 import './src';
 
 const config: HardhatUserConfig = {

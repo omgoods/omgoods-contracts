@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.20;
 
-// solhint-disable no-unused-import
+// solhint-disable no-global-import
 
-import {EntryPoint} from "@account-abstraction/contracts/core/EntryPoint.sol";
-import {ERC20PresetFixedSupply as ERC20ExternalToken} from "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
+import "@account-abstraction/contracts/core/EntryPoint.sol";
+import "@openzeppelin/contracts/token/ERC20/presets/ERC20PresetFixedSupply.sol";
 
-// solhint-enable no-unused-import
+// solhint-enable no-global-import

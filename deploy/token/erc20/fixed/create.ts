@@ -16,7 +16,7 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer: from, owner } = await getNamedAccounts();
 
-  await deploy('ERC20FixedToken', {
+  await deploy('ERC20FixedTokenImpl', {
     from,
     log: true,
   });

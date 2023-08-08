@@ -40,8 +40,11 @@ abstract contract ERC20Token is IERC20Metadata, Token {
 
   // deployment functions
 
+  constructor(address owner) Token(owner) {
+    //
+  }
+
   function _initialize(
-    address owner,
     address gateway,
     address tokenRegistry,
     string calldata name_,
@@ -51,7 +54,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
 
     _symbol = symbol_;
 
-    _initialize(owner, gateway, tokenRegistry);
+    _initialize(gateway, tokenRegistry);
   }
 
   // external functions (getters)

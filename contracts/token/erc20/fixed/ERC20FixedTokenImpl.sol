@@ -1,13 +1,12 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.20;
 
-import {Ownable} from "../../../common/access/Ownable.sol";
 import {ERC20Token} from "../ERC20Token.sol";
 
-contract ERC20FixedToken is ERC20Token {
+contract ERC20FixedTokenImpl is ERC20Token {
   // deployment functions
 
-  constructor() Ownable(address(this)) {
+  constructor() ERC20Token(address(0)) {
     _initialized = true; // singleton
   }
 
@@ -19,7 +18,9 @@ contract ERC20FixedToken is ERC20Token {
     string calldata symbol_,
     uint256 totalSupply_
   ) external {
-    _initialize(owner, gateway, tokenRegistry, name_, symbol_);
+    _owner = owner;
+
+    _initialize(gateway, tokenRegistry, name_, symbol_);
 
     _mint(owner, totalSupply_);
   }

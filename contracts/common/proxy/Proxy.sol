@@ -3,17 +3,17 @@ pragma solidity 0.8.20;
 
 // solhint-disable no-unused-import
 
-import {PROXY_IMPLEMENTATION_SLOT} from "./constants.sol";
+import {PROXY_IMPL_SLOT} from "./constants.sol";
 
 // solhint-enable no-unused-import
 
 contract Proxy {
   // deployment functions
 
-  constructor(address implementation) {
+  constructor(address impl) {
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      sstore(PROXY_IMPLEMENTATION_SLOT, implementation)
+      sstore(PROXY_IMPL_SLOT, impl)
     }
   }
 
@@ -22,18 +22,11 @@ contract Proxy {
   fallback() external payable {
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      let implementation := sload(PROXY_IMPLEMENTATION_SLOT)
+      let impl := sload(PROXY_IMPL_SLOT)
 
       calldatacopy(0, 0, calldatasize())
 
-      let success := delegatecall(
-        gas(),
-        implementation,
-        0,
-        calldatasize(),
-        0,
-        0
-      )
+      let success := delegatecall(gas(), impl, 0, calldatasize(), 0, 0)
 
       returndatacopy(0, 0, returndatasize())
 

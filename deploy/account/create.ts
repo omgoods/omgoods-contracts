@@ -11,7 +11,7 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer: from, owner } = await getNamedAccounts();
 
-  await deploy('Account', {
+  await deploy('AccountImpl', {
     from,
     log: true,
   });

@@ -19,13 +19,13 @@ abstract contract TokenFactory is
 
   address internal _tokenRegistry;
 
-  address internal _tokenImplementation;
+  address internal _tokenImpl;
 
   // errors
 
   error TokenRegistryIsTheZeroAddress();
 
-  error TokenImplementationIsTheZeroAddress();
+  error TokenImplIsTheZeroAddress();
 
   error TokenOwnerIsTheZeroAddress();
 
@@ -42,19 +42,19 @@ abstract contract TokenFactory is
   function _initialize(
     address gateway,
     address tokenRegistry,
-    address tokenImplementation
+    address tokenImpl
   ) internal onlyOwner initializeOnce {
     if (tokenRegistry == address(0)) {
       revert TokenRegistryIsTheZeroAddress();
     }
 
-    if (tokenImplementation == address(0)) {
-      revert TokenImplementationIsTheZeroAddress();
+    if (tokenImpl == address(0)) {
+      revert TokenImplIsTheZeroAddress();
     }
 
     _gateway = gateway;
     _tokenRegistry = tokenRegistry;
-    _tokenImplementation = tokenImplementation;
+    _tokenImpl = tokenImpl;
   }
 
   // internal functions (getters)
@@ -69,19 +69,8 @@ abstract contract TokenFactory is
     return GatewayRecipient._msgSender();
   }
 
-  function _msgData()
-    internal
-    view
-    virtual
-    override(Context, GatewayRecipient)
-    returns (bytes calldata)
-  {
-    return GatewayRecipient._msgData();
-  }
-
   function _computeToken(bytes32 tokenSalt) internal view returns (address) {
-    return
-      ProxyHelper.computeProxy(_tokenRegistry, _tokenImplementation, tokenSalt);
+    return ProxyHelper.computeProxy(_tokenRegistry, _tokenImpl, tokenSalt);
   }
 
   // internal functions (setters)
@@ -93,7 +82,7 @@ abstract contract TokenFactory is
   ) internal returns (address) {
     return
       TokenRegistry(_tokenRegistry).createToken(
-        _tokenImplementation,
+        _tokenImpl,
         salt,
         initHash,
         guardianSignature

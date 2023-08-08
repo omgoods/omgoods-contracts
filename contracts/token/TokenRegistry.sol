@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.20;
 
-import {Ownable} from "../common/access/Ownable.sol";
 import {Guarded} from "../common/access/Guarded.sol";
 import {ProxyFactory} from "../common/proxy/ProxyFactory.sol";
 import {Initializable} from "../common/utils/Initializable.sol";
@@ -63,7 +62,7 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
 
   // deployment functions
 
-  constructor(address owner) Ownable(owner) {
+  constructor(address owner) Guarded(owner) {
     //
   }
 
@@ -130,14 +129,14 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
   }
 
   function createToken(
-    address tokenImplementation,
+    address tokenImpl,
     bytes32 salt,
     bytes32 initHash,
     bytes calldata guardianSignature
   ) external onlyTokenFactory returns (address token) {
     _verifyGuardianSignature(initHash, guardianSignature);
 
-    token = _createProxy(tokenImplementation, salt);
+    token = _createProxy(tokenImpl, salt);
 
     if (token == address(0)) {
       revert TokenAlreadyExists();

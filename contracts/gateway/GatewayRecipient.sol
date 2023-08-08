@@ -28,20 +28,4 @@ abstract contract GatewayRecipient is Context {
 
     return sender;
   }
-
-  function _msgData()
-    internal
-    view
-    virtual
-    override
-    returns (bytes calldata data)
-  {
-    if (msg.sender == _gateway) {
-      data = msg.data[:msg.data.length - 20];
-    } else {
-      data = super._msgData();
-    }
-
-    return data;
-  }
 }

@@ -15,7 +15,7 @@ const func: DeployFunction = async (hre) => {
     const { owner: from } = await getNamedAccounts();
     const { address: gateway } = await get('Gateway');
     const { address: tokenRegistry } = await get('ERC20TokenRegistry');
-    const { address: tokenImplementation } = await get('ERC20FixedToken');
+    const { address: tokenImpl } = await get('ERC20FixedTokenImpl');
 
     await execute(
       'ERC20FixedTokenFactory',
@@ -26,7 +26,7 @@ const func: DeployFunction = async (hre) => {
       'initialize',
       gateway,
       tokenRegistry,
-      tokenImplementation,
+      tokenImpl,
     );
   }
 };

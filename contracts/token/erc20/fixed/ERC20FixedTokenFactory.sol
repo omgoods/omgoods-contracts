@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 import {TokenFactory} from "../../TokenFactory.sol";
-import {ERC20FixedToken} from "./ERC20FixedToken.sol";
+import {ERC20FixedTokenImpl} from "./ERC20FixedTokenImpl.sol";
 
 contract ERC20FixedTokenFactory is TokenFactory {
   bytes32 private constant TOKEN_TYPE_HASH =
@@ -12,11 +12,7 @@ contract ERC20FixedTokenFactory is TokenFactory {
 
   // events
 
-  event Initialized(
-    address gateway,
-    address tokenRegistry,
-    address tokenImplementation
-  );
+  event Initialized(address gateway, address tokenRegistry, address tokenImpl);
 
   event TokenCreated(
     address token,
@@ -43,11 +39,11 @@ contract ERC20FixedTokenFactory is TokenFactory {
   function initialize(
     address gateway,
     address tokenRegistry,
-    address tokenImplementation
+    address tokenImpl
   ) external {
-    _initialize(gateway, tokenRegistry, tokenImplementation);
+    _initialize(gateway, tokenRegistry, tokenImpl);
 
-    emit Initialized(gateway, tokenRegistry, tokenImplementation);
+    emit Initialized(gateway, tokenRegistry, tokenImpl);
   }
 
   // external functions (getters)
@@ -90,7 +86,7 @@ contract ERC20FixedTokenFactory is TokenFactory {
       guardianSignature
     );
 
-    ERC20FixedToken(token).initialize(
+    ERC20FixedTokenImpl(token).initialize(
       owner,
       _gateway,
       _tokenRegistry,

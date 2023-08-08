@@ -8,7 +8,7 @@ import {ProxyHelper} from "../common/proxy/ProxyHelper.sol";
 import {Initializable} from "../common/utils/Initializable.sol";
 import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
 import {IAccountRegistry} from "./IAccountRegistry.sol";
-import {Account} from "./Account.sol";
+import {AccountImpl} from "./AccountImpl.sol";
 
 contract AccountRegistry is
   Ownable,
@@ -27,7 +27,7 @@ contract AccountRegistry is
 
   address private _entryPoint;
 
-  address private _accountImplementation;
+  address private _accountImpl;
 
   mapping(address => bytes32) private _accountSalts;
 
@@ -39,11 +39,7 @@ contract AccountRegistry is
 
   // events
 
-  event Initialized(
-    address gateway,
-    address entryPoint,
-    address accountImplementation
-  );
+  event Initialized(address gateway, address entryPoint, address accountImpl);
 
   event AccountCreated(address account);
 
@@ -77,7 +73,7 @@ contract AccountRegistry is
 
   error AccountIsTheZeroAddress();
 
-  error AccountImplementationIsTheZeroAddress();
+  error AccountImplIsTheZeroAddress();
 
   error AccountOwnerAlreadyExists();
 
@@ -106,19 +102,19 @@ contract AccountRegistry is
   function initialize(
     address gateway,
     address entryPoint,
-    address accountImplementation
+    address accountImpl
   ) external onlyOwner initializeOnce {
-    if (accountImplementation == address(0)) {
-      revert AccountImplementationIsTheZeroAddress();
+    if (accountImpl == address(0)) {
+      revert AccountImplIsTheZeroAddress();
     }
 
     _gateway = gateway;
 
     _entryPoint = entryPoint;
 
-    _accountImplementation = accountImplementation;
+    _accountImpl = accountImpl;
 
-    emit Initialized(gateway, entryPoint, accountImplementation);
+    emit Initialized(gateway, entryPoint, accountImpl);
   }
 
   // external functions (getters)
@@ -279,7 +275,7 @@ contract AccountRegistry is
 
     _createAccount(account, _msgSender());
 
-    Account(account).executeTransaction(to, value, data);
+    AccountImpl(account).executeTransaction(to, value, data);
 
     emit AccountTransactionExecuted(account, to, value, data);
   }
@@ -296,7 +292,7 @@ contract AccountRegistry is
 
     _createAccount(account, _msgSender());
 
-    Account(account).executeTransactions(to, value, data);
+    AccountImpl(account).executeTransactions(to, value, data);
 
     emit AccountTransactionsExecuted(account, to, value, data);
   }
@@ -328,15 +324,6 @@ contract AccountRegistry is
     return GatewayRecipient._msgSender();
   }
 
-  function _msgData()
-    internal
-    view
-    override(Context, GatewayRecipient)
-    returns (bytes calldata)
-  {
-    return GatewayRecipient._msgData();
-  }
-
   // private functions (getters)
 
   function _computeAccount(address saltOwner) private view returns (address) {
@@ -344,16 +331,15 @@ contract AccountRegistry is
   }
 
   function _computeAccount(bytes32 salt) private view returns (address) {
-    return
-      ProxyHelper.computeProxy(address(this), _accountImplementation, salt);
+    return ProxyHelper.computeProxy(address(this), _accountImpl, salt);
   }
 
   // private functions (setters)
 
   function _createAccountProxy(bytes32 salt) private {
-    address payable proxy = payable(_createProxy(_accountImplementation, salt));
+    address payable proxy = payable(_createProxy(_accountImpl, salt));
 
-    Account(proxy).initialize(_gateway, _entryPoint);
+    AccountImpl(proxy).initialize(_gateway, _entryPoint);
   }
 
   function _createAccount(

@@ -5,16 +5,16 @@ import {IAccount} from "@account-abstraction/contracts/interfaces/IAccount.sol";
 import {UserOperation} from "@account-abstraction/contracts/interfaces/UserOperation.sol";
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {ProxyImplementation} from "../common/proxy/ProxyImplementation.sol";
+import {ProxyImpl} from "../common/proxy/ProxyImpl.sol";
 import {Initializable} from "../common/utils/Initializable.sol";
 import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
 import {AccountHandlers} from "./AccountHandlers.sol";
 import {IAccountRegistry} from "./IAccountRegistry.sol";
 
-contract Account is
+contract AccountImpl is
   IAccount,
   IERC1271,
-  ProxyImplementation,
+  ProxyImpl,
   Initializable,
   GatewayRecipient,
   AccountHandlers

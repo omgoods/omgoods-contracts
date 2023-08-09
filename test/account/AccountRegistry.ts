@@ -2,7 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
-import { deployAccountRegistry, setupAccountRegistry } from './fixtures';
+import { deployAccountRegistry } from './fixtures';
 
 const { getSigners, ZeroAddress } = ethers;
 
@@ -78,7 +78,7 @@ describe('account/AccountRegistry', () => {
           }
         });
 
-        it('expect to revert when the contract is initialized', async () => {
+        it('expect to revert', async () => {
           const { accountRegistry } = fixture;
 
           await expect(
@@ -88,20 +88,4 @@ describe('account/AccountRegistry', () => {
       });
     });
   });
-
-  {
-    let fixture: Awaited<ReturnType<typeof setupAccountRegistry>>;
-
-    describe.skip('# external functions (getters)', () => {
-      beforeEach(async () => {
-        fixture = await loadFixture(setupAccountRegistry);
-      });
-    });
-
-    describe.skip('# external functions (setters)', () => {
-      beforeEach(async () => {
-        fixture = await loadFixture(setupAccountRegistry);
-      });
-    });
-  }
 });

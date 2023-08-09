@@ -4,7 +4,7 @@ import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
 import { deployGuardedMock } from './fixtures';
 
-const { getSigners, hashMessage, ZeroAddress } = ethers;
+const { getSigners, hashMessage, ZeroAddress, randomBytes } = ethers;
 
 const { randomAddress } = helpers;
 
@@ -53,7 +53,7 @@ describe('common/access/Guarded (using mock)', () => {
     });
 
     describe('verifyGuardianSignature() // mocked', () => {
-      const message = 'test-message';
+      const message = randomBytes(32);
       const hash = hashMessage(message);
 
       it('expect to revert when the signer is not a guardian', async () => {

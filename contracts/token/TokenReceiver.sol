@@ -6,7 +6,7 @@ import {IERC721Receiver} from "@openzeppelin/contracts/token/ERC721/IERC721Recei
 import {IERC777Recipient} from "@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol";
 import {IERC165} from "@openzeppelin/contracts/utils/introspection/IERC165.sol";
 
-abstract contract AccountHandlers is
+abstract contract TokenReceiver is
   IERC721Receiver,
   IERC777Recipient,
   IERC1155Receiver

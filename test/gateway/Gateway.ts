@@ -2,7 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
-import { deployGateway, setupGateway } from './fixtures';
+import { deployGateway } from './fixtures';
 
 const { getSigners, ZeroAddress } = ethers;
 
@@ -59,7 +59,7 @@ describe('gateway/Gateway', () => {
           }
         });
 
-        it('expect to revert when the contract is initialized', async () => {
+        it('expect to revert', async () => {
           const { gateway } = fixture;
 
           await expect(gateway.initialize(ZeroAddress)).revertedWithCustomError(
@@ -70,20 +70,4 @@ describe('gateway/Gateway', () => {
       });
     });
   });
-
-  {
-    let fixture: Awaited<ReturnType<typeof setupGateway>>;
-
-    describe.skip('# external functions (getters)', () => {
-      beforeEach(async () => {
-        fixture = await loadFixture(setupGateway);
-      });
-    });
-
-    describe.skip('# external functions (setters)', () => {
-      beforeEach(async () => {
-        fixture = await loadFixture(setupGateway);
-      });
-    });
-  }
 });

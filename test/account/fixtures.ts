@@ -1,7 +1,23 @@
 import { ethers } from 'hardhat';
 import { AddressLike } from 'ethers';
+import { createProxyAddressFactory } from '../common/proxy/helpers';
 
-const { deployContract, ZeroAddress } = ethers;
+const {
+  deployContract,
+  ZeroAddress,
+  getSigners,
+  resolveAddress,
+  getContractAt,
+  keccak256,
+} = ethers;
+
+export async function deployAccountImpl() {
+  const accountImpl = await deployContract('AccountImpl');
+
+  return {
+    accountImpl,
+  };
+}
 
 export async function deployAccountRegistry() {
   const accountRegistry = await deployContract('AccountRegistry', [
@@ -16,21 +32,52 @@ export async function deployAccountRegistry() {
 export async function setupAccountRegistry(
   options: {
     gateway?: AddressLike;
+    entryPoint?: AddressLike;
   } = {},
 ) {
-  const { gateway } = {
+  const { gateway, entryPoint } = {
     gateway: ZeroAddress,
+    entryPoint: ZeroAddress,
     ...options,
   };
 
   const { accountRegistry } = await deployAccountRegistry();
+  const { accountImpl } = await deployAccountImpl();
 
-  const accountImpl = await deployContract('AccountImpl');
+  await accountRegistry.initialize(gateway, entryPoint, accountImpl);
 
-  await accountRegistry.initialize(gateway, accountRegistry, accountImpl);
+  const computeAccountAddress = await createProxyAddressFactory(
+    accountRegistry,
+    accountImpl,
+    (owner) => keccak256(owner),
+  );
 
   return {
     accountRegistry,
     accountImpl,
+    computeAccountAddress,
+  };
+}
+
+export async function setupAccountImpl() {
+  const [saltOwner, gateway, entryPoint] = await getSigners();
+
+  const { accountRegistry, computeAccountAddress } = await setupAccountRegistry(
+    {
+      gateway,
+      entryPoint,
+    },
+  );
+
+  const accountImpl = await getContractAt(
+    'AccountImpl',
+    computeAccountAddress(await resolveAddress(saltOwner)),
+  );
+
+  await accountRegistry.forceAccountCreation(saltOwner);
+
+  return {
+    accountImpl,
+    accountRegistry,
   };
 }

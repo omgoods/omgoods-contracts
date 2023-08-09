@@ -8,7 +8,7 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ProxyImpl} from "../common/proxy/ProxyImpl.sol";
 import {Initializable} from "../common/utils/Initializable.sol";
 import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
-import {AccountHandlers} from "./AccountHandlers.sol";
+import {TokenReceiver} from "../token/TokenReceiver.sol";
 import {IAccountRegistry} from "./IAccountRegistry.sol";
 
 contract AccountImpl is
@@ -17,7 +17,7 @@ contract AccountImpl is
   ProxyImpl,
   Initializable,
   GatewayRecipient,
-  AccountHandlers
+  TokenReceiver
 {
   using ECDSA for bytes32;
 
@@ -127,13 +127,13 @@ contract AccountImpl is
         gas: type(uint256).max
       }(data);
 
-      if (success) {
-        IAccountRegistry(_accountRegistry).emitAccountTransactionExecuted(
-          _entryPoint,
-          missingAccountFunds,
-          data
-        );
-      }
+      (success); // always success
+
+      IAccountRegistry(_accountRegistry).emitAccountTransactionExecuted(
+        _entryPoint,
+        missingAccountFunds,
+        data
+      );
     }
 
     return result;
@@ -218,7 +218,10 @@ contract AccountImpl is
 
   function _verifyOwnerAccess(address sender) private view {
     if (
-      sender != address(this) && sender != _entryPoint && !_hasOwner(sender)
+      sender != address(this) &&
+      sender != _accountRegistry &&
+      sender != _entryPoint &&
+      !_hasOwner(sender)
     ) {
       revert MsgSenderIsNotTheAccountOwner();
     }

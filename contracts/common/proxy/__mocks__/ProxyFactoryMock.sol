@@ -10,7 +10,10 @@ contract ProxyFactoryMock is ProxyFactory {
 
   // external functions (setters)
 
-  function createProxy(address proxyImpl, bytes32 salt) external {
-    emit ProxyCreated(_createProxy(proxyImpl, salt));
+  function createProxy(
+    address proxyImpl,
+    bytes32 salt
+  ) external returns (address) {
+    return _createProxy(proxyImpl, salt);
   }
 }

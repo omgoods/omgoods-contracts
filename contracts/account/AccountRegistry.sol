@@ -79,6 +79,8 @@ contract AccountRegistry is
 
   error AccountOwnerDoesntExist();
 
+  error InvalidAccountOwner();
+
   error NotEnoughAccountOwners();
 
   error AccountOwnerIsTheZeroAddress();
@@ -226,9 +228,11 @@ contract AccountRegistry is
       }
     }
 
-    if (sender != owner) {
-      _addAccountOwner(account, owner);
+    if (sender == owner) {
+      revert InvalidAccountOwner();
     }
+
+    _addAccountOwner(account, owner);
   }
 
   function removeAccountOwner(address account, address owner) external {

@@ -44,9 +44,7 @@ describe('common/proxy/ProxyFactory (using mock)', () => {
 
         const proxy = computeProxyAddress(salt);
 
-        const tx = await proxyFactoryMock.createProxy(proxyImp, salt);
-
-        await expect(tx).emit(proxyFactoryMock, 'ProxyCreated').withArgs(proxy);
+        await proxyFactoryMock.createProxy(proxyImp, salt);
 
         expect(await getProxyImplAddress(proxy)).eq(proxyImp);
       });
@@ -54,14 +52,12 @@ describe('common/proxy/ProxyFactory (using mock)', () => {
       it('expect to return the zero address when a proxy has already been created', async () => {
         const { proxyFactoryMock } = fixture;
 
-        const tx = await proxyFactoryMock.createProxy(
-          createdProxy.proxyImp,
-          createdProxy.salt,
-        );
-
-        await expect(tx)
-          .emit(proxyFactoryMock, 'ProxyCreated')
-          .withArgs(ZeroAddress);
+        expect(
+          await proxyFactoryMock.createProxy.staticCall(
+            createdProxy.proxyImp,
+            createdProxy.salt,
+          ),
+        ).eq(ZeroAddress);
       });
     });
   });

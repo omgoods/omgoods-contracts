@@ -8,19 +8,9 @@ contract ProxyFactoryMock is ProxyFactory {
 
   event ProxyCreated(address proxy);
 
-  // errors
-
-  error ProxyAlreadyCreated();
-
   // external functions (setters)
 
-  function createProxy(address impl, bytes32 salt) external {
-    address proxy = _createProxy(impl, salt);
-
-    if (proxy == address(0)) {
-      revert ProxyAlreadyCreated();
-    }
-
-    emit ProxyCreated(proxy);
+  function createProxy(address proxyImpl, bytes32 salt) external {
+    emit ProxyCreated(_createProxy(proxyImpl, salt));
   }
 }

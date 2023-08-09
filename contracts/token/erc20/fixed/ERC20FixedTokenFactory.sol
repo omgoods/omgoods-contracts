@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.20;
 
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {TokenFactory} from "../../TokenFactory.sol";
 import {ERC20FixedTokenImpl} from "./ERC20FixedTokenImpl.sol";
 
-contract ERC20FixedTokenFactory is TokenFactory {
+contract ERC20FixedTokenFactory is EIP712, TokenFactory {
   bytes32 private constant TOKEN_TYPE_HASH =
     keccak256(
       "Token(address owner,string name,string symbol,uint256 totalSupply)"
@@ -32,7 +33,7 @@ contract ERC20FixedTokenFactory is TokenFactory {
     address owner,
     string memory name,
     string memory version
-  ) TokenFactory(owner, name, version) {
+  ) TokenFactory(owner) EIP712(name, version) {
     //
   }
 

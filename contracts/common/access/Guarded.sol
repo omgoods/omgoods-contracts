@@ -29,16 +29,6 @@ abstract contract Guarded is Ownable {
 
   error InvalidGuardianSignature();
 
-  // modifiers
-
-  modifier onlyGuardian() {
-    if (!_hasGuardian(_msgSender())) {
-      revert MsgSenderIsNotTheContractGuardian();
-    }
-
-    _;
-  }
-
   // deployment functions
 
   constructor(address owner) Ownable(owner) {
@@ -49,13 +39,6 @@ abstract contract Guarded is Ownable {
 
   function hasGuardian(address guardian) external view returns (bool) {
     return _hasGuardian(guardian);
-  }
-
-  function verifyGuardianSignature(
-    bytes32 messageHash,
-    bytes memory signature
-  ) external view {
-    _verifyGuardianSignature(messageHash, signature);
   }
 
   // external functions (setters)
@@ -92,7 +75,7 @@ abstract contract Guarded is Ownable {
 
   function _verifyGuardianSignature(
     bytes32 hash,
-    bytes memory signature
+    bytes calldata signature
   ) internal view {
     if (!_hasGuardian(hash.recover(signature))) {
       revert InvalidGuardianSignature();
@@ -105,7 +88,7 @@ abstract contract Guarded is Ownable {
 
   // internal functions (setters)
 
-  function _setGuardians(address[] calldata guardians) internal {
+  function _addGuardians(address[] calldata guardians) internal {
     uint256 len = guardians.length;
 
     for (uint256 index; index < len; ) {
@@ -113,6 +96,10 @@ abstract contract Guarded is Ownable {
 
       if (guardian == address(0)) {
         revert GuardianIsTheZeroAddress();
+      }
+
+      if (_guardians[guardian]) {
+        revert GuardianAlreadyExists();
       }
 
       _guardians[guardian] = true;

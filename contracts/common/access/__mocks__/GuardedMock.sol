@@ -10,9 +10,20 @@ contract GuardedMock is Guarded {
     //
   }
 
+  // external functions (getters)
+
+  function verifyGuardianSignature(
+    bytes32 hash,
+    bytes calldata signature
+  ) external view returns (bool) {
+    _verifyGuardianSignature(hash, signature);
+
+    return true;
+  }
+
   // external functions (setters)
 
-  function setGuardians(address[] calldata guardians) external {
-    _setGuardians(guardians);
+  function addGuardians(address[] calldata guardians) external {
+    _addGuardians(guardians);
   }
 }

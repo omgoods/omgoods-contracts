@@ -23,7 +23,7 @@ describe('gateway/Gateway', () => {
     });
 
     describe('initialize()', () => {
-      it('expect to revert when msg.sender is not the contract owner', async () => {
+      it('expect to revert when the msg.sender is not the owner', async () => {
         const { gateway } = fixture;
 
         await expect(
@@ -31,7 +31,7 @@ describe('gateway/Gateway', () => {
         ).revertedWithCustomError(gateway, 'MsgSenderIsNotTheContractOwner');
       });
 
-      it('expect to revert when account registry is the zero address', async () => {
+      it('expect to revert when the account registry is the zero address', async () => {
         const { gateway } = fixture;
 
         await expect(gateway.initialize(ZeroAddress)).revertedWithCustomError(

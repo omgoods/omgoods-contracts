@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.20;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Ownable} from "../common/access/Ownable.sol";
 import {ProxyHelper} from "../common/proxy/ProxyHelper.sol";
@@ -9,12 +8,7 @@ import {Initializable} from "../common/utils/Initializable.sol";
 import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
 import {TokenRegistry} from "./TokenRegistry.sol";
 
-abstract contract TokenFactory is
-  EIP712,
-  Ownable,
-  Initializable,
-  GatewayRecipient
-{
+abstract contract TokenFactory is Ownable, Initializable, GatewayRecipient {
   // storage
 
   address internal _tokenRegistry;
@@ -31,11 +25,7 @@ abstract contract TokenFactory is
 
   // deployment functions
 
-  constructor(
-    address owner,
-    string memory name,
-    string memory version
-  ) EIP712(name, version) Ownable(owner) {
+  constructor(address owner) Ownable(owner) {
     //
   }
 

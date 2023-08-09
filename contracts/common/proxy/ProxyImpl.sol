@@ -10,35 +10,35 @@ import {PROXY_IMPL_SLOT} from "./constants.sol";
 abstract contract ProxyImpl {
   // events
 
-  event ImplUpdated(address impl);
+  event ProxyImplUpdated(address proxyImpl);
 
   // errors
 
-  error ImplIsTheZeroAddress();
+  error ProxyImplIsTheZeroAddress();
 
   // external functions (getters)
 
-  function getImpl() external view returns (address impl) {
+  function getProxyImpl() external view returns (address proxyImpl) {
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      impl := sload(PROXY_IMPL_SLOT)
+      proxyImpl := sload(PROXY_IMPL_SLOT)
     }
 
-    return impl;
+    return proxyImpl;
   }
 
   // internal functions (setters)
 
-  function _setImpl(address impl) internal {
-    if (impl == address(0)) {
-      revert ImplIsTheZeroAddress();
+  function _setProxyImpl(address proxyImpl) internal {
+    if (proxyImpl == address(0)) {
+      revert ProxyImplIsTheZeroAddress();
     }
 
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      sstore(PROXY_IMPL_SLOT, impl)
+      sstore(PROXY_IMPL_SLOT, proxyImpl)
     }
 
-    emit ImplUpdated(impl);
+    emit ProxyImplUpdated(proxyImpl);
   }
 }

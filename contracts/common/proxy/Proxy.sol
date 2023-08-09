@@ -10,10 +10,10 @@ import {PROXY_IMPL_SLOT} from "./constants.sol";
 contract Proxy {
   // deployment functions
 
-  constructor(address impl) {
+  constructor(address proxyImpl) {
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      sstore(PROXY_IMPL_SLOT, impl)
+      sstore(PROXY_IMPL_SLOT, proxyImpl)
     }
   }
 
@@ -22,11 +22,11 @@ contract Proxy {
   fallback() external payable {
     // solhint-disable-next-line no-inline-assembly
     assembly {
-      let impl := sload(PROXY_IMPL_SLOT)
+      let proxyImpl := sload(PROXY_IMPL_SLOT)
 
       calldatacopy(0, 0, calldatasize())
 
-      let success := delegatecall(gas(), impl, 0, calldatasize(), 0, 0)
+      let success := delegatecall(gas(), proxyImpl, 0, calldatasize(), 0, 0)
 
       returndatacopy(0, 0, returndatasize())
 

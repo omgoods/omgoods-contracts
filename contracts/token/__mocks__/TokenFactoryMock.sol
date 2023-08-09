@@ -6,14 +6,13 @@ import {TokenFactory} from "../TokenFactory.sol";
 contract TokenFactoryMock is TokenFactory {
   // events
 
+  event Initialized(address gateway, address tokenRegistry, address tokenImpl);
+
   event TokenCreated(address token);
 
   // deployment functions
 
-  constructor(
-    string memory name,
-    string memory version
-  ) TokenFactory(address(0), name, version) {
+  constructor() TokenFactory(address(0)) {
     //
   }
 
@@ -23,6 +22,8 @@ contract TokenFactoryMock is TokenFactory {
     address tokenImpl
   ) external {
     _initialize(gateway, tokenRegistry, tokenImpl);
+
+    emit Initialized(gateway, tokenRegistry, tokenImpl);
   }
 
   // external functions (getters)

@@ -8,13 +8,13 @@ library ProxyHelper {
 
   function computeProxy(
     address deployer,
-    address impl,
+    address proxyImpl,
     bytes32 salt
   ) internal pure returns (address) {
     bytes memory creationCode = abi.encodePacked(
       type(Proxy).creationCode,
       bytes12(0),
-      impl
+      proxyImpl
     );
 
     bytes32 data = keccak256(

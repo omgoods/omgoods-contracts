@@ -23,7 +23,7 @@ describe('account/AccountRegistry', () => {
     });
 
     describe('initialize()', () => {
-      it('expect to revert when msg.sender is not the contract owner', async () => {
+      it('expect to revert when the msg.sender is not the owner', async () => {
         const { accountRegistry } = fixture;
 
         await expect(
@@ -36,7 +36,7 @@ describe('account/AccountRegistry', () => {
         );
       });
 
-      it('expect to revert when account implementation is the zero address', async () => {
+      it('expect to revert when the account implementation is the zero address', async () => {
         const { accountRegistry } = fixture;
 
         await expect(

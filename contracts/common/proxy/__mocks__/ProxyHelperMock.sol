@@ -8,9 +8,9 @@ contract ProxyHelperMock {
 
   function computeProxy(
     address deployer,
-    address impl,
+    address proxyImpl,
     bytes32 salt
   ) external pure returns (address) {
-    return ProxyHelper.computeProxy(deployer, impl, salt);
+    return ProxyHelper.computeProxy(deployer, proxyImpl, salt);
   }
 }

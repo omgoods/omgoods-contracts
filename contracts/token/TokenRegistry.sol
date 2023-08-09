@@ -69,7 +69,7 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
   function initialize(
     address[] calldata guardians
   ) external onlyOwner initializeOnce {
-    _setGuardians(guardians);
+    _addGuardians(guardians);
 
     emit Initialized(guardians);
   }

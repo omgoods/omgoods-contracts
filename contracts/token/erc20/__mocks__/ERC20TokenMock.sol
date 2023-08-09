@@ -4,6 +4,15 @@ pragma solidity 0.8.20;
 import {ERC20Token} from "../ERC20Token.sol";
 
 contract ERC20TokenMock is ERC20Token {
+  // events
+
+  event Initialized(
+    address gateway,
+    address tokenRegistry,
+    string name_,
+    string symbol_
+  );
+
   // deployment functions
 
   constructor() ERC20Token(address(0)) {
@@ -17,6 +26,8 @@ contract ERC20TokenMock is ERC20Token {
     string calldata symbol_
   ) external {
     _initialize(gateway, tokenRegistry, name_, symbol_);
+
+    emit Initialized(gateway, tokenRegistry, name_, symbol_);
   }
 
   // external functions (setters)

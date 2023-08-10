@@ -8,7 +8,7 @@ const { ZeroAddress } = ethers;
 
 const { randomAddress } = helpers;
 
-describe('common/proxy/ProxyImpl (using mock)', () => {
+describe('common/proxy/ProxyImpl // using mock', () => {
   let fixture: Awaited<ReturnType<typeof deployProxyImplMock>>;
 
   const createBeforeHook = (inner?: () => Promise<void>) => {

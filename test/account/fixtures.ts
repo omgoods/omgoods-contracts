@@ -1,15 +1,18 @@
-import { ethers } from 'hardhat';
+import { ethers, helpers } from 'hardhat';
 import { AddressLike } from 'ethers';
 import { createProxyAddressFactory } from '../common/proxy/helpers';
 
-const {
-  deployContract,
-  ZeroAddress,
-  getSigners,
-  resolveAddress,
-  getContractAt,
-  keccak256,
-} = ethers;
+const { deployContract, ZeroAddress, getSigners, keccak256 } = ethers;
+
+const { setBalance } = helpers;
+
+export async function deployAccountMock() {
+  const accountMock = await deployContract('AccountMock');
+
+  return {
+    accountMock,
+  };
+}
 
 export async function deployAccountImpl() {
   const accountImpl = await deployContract('AccountImpl');
@@ -26,6 +29,14 @@ export async function deployAccountRegistry() {
 
   return {
     accountRegistry,
+  };
+}
+
+export async function deployAccountRegistryMock() {
+  const accountRegistryMock = await deployContract('AccountRegistryMock');
+
+  return {
+    accountRegistryMock,
   };
 }
 
@@ -59,25 +70,21 @@ export async function setupAccountRegistry(
   };
 }
 
-export async function setupAccountImpl() {
-  const [saltOwner, gateway, entryPoint] = await getSigners();
+export async function setupAccountMock() {
+  const [owner, gateway, entryPoint] = await getSigners();
 
-  const { accountRegistry, computeAccountAddress } = await setupAccountRegistry(
-    {
-      gateway,
-      entryPoint,
-    },
-  );
+  const { accountRegistryMock } = await deployAccountRegistryMock();
 
-  const accountImpl = await getContractAt(
-    'AccountImpl',
-    computeAccountAddress(await resolveAddress(saltOwner)),
-  );
+  const { accountMock } = await deployAccountMock();
 
-  await accountRegistry.forceAccountCreation(saltOwner);
+  await accountMock.initialize(gateway, entryPoint, accountRegistryMock);
+
+  await accountRegistryMock.addAccountOwner(accountMock, owner);
+
+  await setBalance(accountMock);
 
   return {
-    accountImpl,
-    accountRegistry,
+    accountMock,
+    accountRegistryMock,
   };
 }

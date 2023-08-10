@@ -2,6 +2,26 @@
 pragma solidity 0.8.20;
 
 interface IAccountRegistry {
+  // events
+
+  event AccountOwnerAdded(address account, address owner);
+
+  event AccountOwnerRemoved(address account, address owner);
+
+  event AccountTransactionExecuted(
+    address account,
+    address to,
+    uint256 value,
+    bytes data
+  );
+
+  event AccountTransactionsExecuted(
+    address account,
+    address[] to,
+    uint256[] value,
+    bytes[] data
+  );
+
   // external functions (getters)
 
   function isAccountOwner(

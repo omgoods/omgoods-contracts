@@ -8,7 +8,7 @@ const { getSigners, ZeroAddress } = ethers;
 
 const { randomAddress } = helpers;
 
-describe('common/access/Ownable (using mock)', () => {
+describe('common/access/Ownable // using mock', () => {
   let owner: HardhatEthersSigner;
   let signers: HardhatEthersSigner[];
 

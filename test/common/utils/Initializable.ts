@@ -2,7 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { deployInitializableMock } from './fixtures';
 
-describe('common/utils/Initializable (using mock)', () => {
+describe('common/utils/Initializable // using mock', () => {
   let fixture: Awaited<ReturnType<typeof deployInitializableMock>>;
 
   const createBeforeHook = (initialize = false) => {

@@ -43,24 +43,6 @@ contract AccountRegistry is
 
   event AccountCreated(address account);
 
-  event AccountOwnerAdded(address account, address owner);
-
-  event AccountOwnerRemoved(address account, address owner);
-
-  event AccountTransactionExecuted(
-    address account,
-    address to,
-    uint256 value,
-    bytes data
-  );
-
-  event AccountTransactionsExecuted(
-    address account,
-    address[] to,
-    uint256[] value,
-    bytes[] data
-  );
-
   // errors
 
   error MsgSenderIsNotTheAccount();
@@ -122,10 +104,10 @@ contract AccountRegistry is
   // external functions (getters)
 
   function computeAccount(
-    address owner_
+    address saltOwner
   ) external view returns (address result) {
-    if (owner_ != address(0)) {
-      result = _computeAccount(owner_);
+    if (saltOwner != address(0)) {
+      result = _computeAccount(saltOwner);
     }
 
     return result;
@@ -205,6 +187,10 @@ contract AccountRegistry is
 
     address sender = _msgSender();
 
+    if (sender == owner) {
+      revert InvalidAccountOwner();
+    }
+
     if (sender != account) {
       if (_accountStates[account] == AccountStates.Unknown) {
         bytes32 salt = keccak256(abi.encodePacked(sender));
@@ -226,10 +212,6 @@ contract AccountRegistry is
           revert AccountOwnerAlreadyExists();
         }
       }
-    }
-
-    if (sender == owner) {
-      revert InvalidAccountOwner();
     }
 
     _addAccountOwner(account, owner);

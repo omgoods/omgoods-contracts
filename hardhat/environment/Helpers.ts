@@ -1,4 +1,6 @@
+import { setBalance } from '@nomicfoundation/hardhat-network-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { AddressLike, BigNumberish } from 'ethers';
 
 export class Helpers {
   constructor(private readonly hre: HardhatRuntimeEnvironment) {
@@ -25,5 +27,16 @@ export class Helpers {
     } = this.hre;
 
     return getAddress(this.randomHex(20));
+  }
+
+  async setBalance(address: AddressLike, balance?: BigNumberish) {
+    const {
+      ethers: { resolveAddress, parseEther },
+    } = this.hre;
+
+    await setBalance(
+      await resolveAddress(address),
+      typeof balance === 'undefined' ? parseEther('1') : balance,
+    );
   }
 }

@@ -8,7 +8,7 @@ const { ZeroAddress } = ethers;
 
 const { randomAddress, randomHex } = helpers;
 
-describe('common/proxy/ProxyFactory (using mock)', () => {
+describe('common/proxy/ProxyFactory // using mock', () => {
   let fixture: Awaited<ReturnType<typeof deployProxyFactoryMock>>;
 
   before(async () => {

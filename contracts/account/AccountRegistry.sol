@@ -61,8 +61,6 @@ contract AccountRegistry is
 
   error AccountOwnerDoesntExist();
 
-  error InvalidAccountOwner();
-
   error NotEnoughAccountOwners();
 
   error AccountOwnerIsTheZeroAddress();
@@ -77,7 +75,7 @@ contract AccountRegistry is
     _;
   }
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) Ownable(owner) {
     //
@@ -101,7 +99,7 @@ contract AccountRegistry is
     emit Initialized(gateway, entryPoint, accountImpl);
   }
 
-  // external functions (getters)
+  // external getters
 
   function computeAccount(
     address saltOwner
@@ -134,7 +132,7 @@ contract AccountRegistry is
     return _accountStates[account];
   }
 
-  // external functions (setters)
+  // external setters
 
   function createAccount(address account) external {
     if (account == address(0)) {
@@ -163,7 +161,7 @@ contract AccountRegistry is
       if (accountState == AccountStates.Defined) {
         delete _accountSalts[account];
       } else {
-        _addAccountOwner(account, saltOwner);
+        _addAccountOwnerWithoutVerification(account, saltOwner);
       }
 
       _createAccountProxy(salt);
@@ -181,37 +179,21 @@ contract AccountRegistry is
       revert AccountIsTheZeroAddress();
     }
 
-    if (owner == address(0)) {
-      revert AccountOwnerIsTheZeroAddress();
-    }
-
     address sender = _msgSender();
 
-    if (sender == owner) {
-      revert InvalidAccountOwner();
-    }
+    if (_accountStates[account] == AccountStates.Unknown) {
+      bytes32 salt = keccak256(abi.encodePacked(sender));
 
-    if (sender != account) {
-      if (_accountStates[account] == AccountStates.Unknown) {
-        bytes32 salt = keccak256(abi.encodePacked(sender));
-
-        if (_computeAccount(salt) != account) {
-          revert MsgSenderIsNotTheAccountOwner();
-        }
-
-        _accountSalts[account] = salt;
-        _accountStates[account] = AccountStates.Defined;
-
-        _addAccountOwner(account, sender);
-      } else {
-        if (!_accountOwners[account][sender]) {
-          revert MsgSenderIsNotTheAccountOwner();
-        }
-
-        if (_accountOwners[account][owner]) {
-          revert AccountOwnerAlreadyExists();
-        }
+      if (_computeAccount(salt) != account) {
+        revert MsgSenderIsNotTheAccountOwner();
       }
+
+      _accountSalts[account] = salt;
+      _accountStates[account] = AccountStates.Defined;
+
+      _addAccountOwnerWithoutVerification(account, sender);
+    } else if (!_accountOwners[account][sender]) {
+      revert MsgSenderIsNotTheAccountOwner();
     }
 
     _addAccountOwner(account, owner);
@@ -222,31 +204,19 @@ contract AccountRegistry is
       revert AccountIsTheZeroAddress();
     }
 
-    if (owner == address(0)) {
-      revert AccountOwnerIsTheZeroAddress();
-    }
-
-    address sender = _msgSender();
-
-    if (sender != account && !_accountOwners[account][sender]) {
+    if (!_accountOwners[account][_msgSender()]) {
       revert MsgSenderIsNotTheAccountOwner();
     }
 
-    if (!_accountOwners[account][owner]) {
-      revert AccountOwnerDoesntExist();
-    }
+    _removeAccountOwner(account, owner);
+  }
 
-    if (_accountOwnersCounters[account] <= 1) {
-      revert NotEnoughAccountOwners();
-    }
+  function directAddAccountOwner(address owner) external onlyCreatedAccount {
+    _addAccountOwner(msg.sender, owner);
+  }
 
-    delete _accountOwners[account][owner];
-
-    unchecked {
-      --_accountOwnersCounters[account];
-    }
-
-    emit AccountOwnerRemoved(account, owner);
+  function directRemoveAccountOwner(address owner) external onlyCreatedAccount {
+    _removeAccountOwner(msg.sender, owner);
   }
 
   function executeAccountTransaction(
@@ -299,7 +269,7 @@ contract AccountRegistry is
     emit AccountTransactionsExecuted(msg.sender, to, value, data);
   }
 
-  // internal functions (getters)
+  // internal getters
 
   function _msgSender()
     internal
@@ -310,7 +280,7 @@ contract AccountRegistry is
     return GatewayRecipient._msgSender();
   }
 
-  // private functions (getters)
+  // private getters
 
   function _computeAccount(address saltOwner) private view returns (address) {
     return _computeAccount(keccak256(abi.encodePacked(saltOwner)));
@@ -320,7 +290,7 @@ contract AccountRegistry is
     return ProxyHelper.computeProxy(address(this), _accountImpl, salt);
   }
 
-  // private functions (setters)
+  // private setters
 
   function _createAccountProxy(bytes32 salt) private {
     address payable proxy = payable(_createProxy(_accountImpl, salt));
@@ -354,7 +324,7 @@ contract AccountRegistry is
           revert MsgSenderIsNotTheAccountOwner();
         }
 
-        _addAccountOwner(account, sender);
+        _addAccountOwnerWithoutVerification(account, sender);
       }
 
       _createAccountProxy(salt);
@@ -369,7 +339,10 @@ contract AccountRegistry is
     return result;
   }
 
-  function _addAccountOwner(address account, address owner) private {
+  function _addAccountOwnerWithoutVerification(
+    address account,
+    address owner
+  ) private {
     _accountOwners[account][owner] = true;
 
     unchecked {
@@ -377,5 +350,39 @@ contract AccountRegistry is
     }
 
     emit AccountOwnerAdded(account, owner);
+  }
+
+  function _addAccountOwner(address account, address owner) private {
+    if (owner == address(0)) {
+      revert AccountOwnerIsTheZeroAddress();
+    }
+
+    if (_accountOwners[account][owner]) {
+      revert AccountOwnerAlreadyExists();
+    }
+
+    _addAccountOwnerWithoutVerification(account, owner);
+  }
+
+  function _removeAccountOwner(address account, address owner) private {
+    if (owner == address(0)) {
+      revert AccountOwnerIsTheZeroAddress();
+    }
+
+    if (!_accountOwners[account][owner]) {
+      revert AccountOwnerDoesntExist();
+    }
+
+    if (_accountOwnersCounters[account] == 1) {
+      revert NotEnoughAccountOwners();
+    }
+
+    _accountOwners[account][owner] = false;
+
+    unchecked {
+      --_accountOwnersCounters[account];
+    }
+
+    emit AccountOwnerRemoved(account, owner);
   }
 }

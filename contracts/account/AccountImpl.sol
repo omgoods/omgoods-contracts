@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {Account} from "./Account.sol";
 
 contract AccountImpl is Account {
-  // deployment functions
+  // deployment
 
   constructor() {
     _initialized = true; // singleton

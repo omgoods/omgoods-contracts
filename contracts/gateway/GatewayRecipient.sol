@@ -8,7 +8,7 @@ abstract contract GatewayRecipient is Context {
 
   address internal _gateway;
 
-  // internal functions (getters)
+  // internal getters
 
   function _msgSender()
     internal

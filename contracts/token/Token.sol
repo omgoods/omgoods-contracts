@@ -16,7 +16,7 @@ abstract contract Token is Ownable, Initializable, GatewayRecipient {
 
   error TokenRegistryIsTheZeroAddress();
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) Ownable(owner) {
     //
@@ -34,7 +34,7 @@ abstract contract Token is Ownable, Initializable, GatewayRecipient {
     _tokenRegistry = tokenRegistry;
   }
 
-  // internal functions (getters)
+  // internal getters
 
   function _msgSender()
     internal
@@ -46,7 +46,7 @@ abstract contract Token is Ownable, Initializable, GatewayRecipient {
     return GatewayRecipient._msgSender();
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _afterOwnerUpdated(address owner) internal override {
     super._afterOwnerUpdated(owner);

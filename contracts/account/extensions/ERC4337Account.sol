@@ -17,7 +17,7 @@ abstract contract ERC4337Account is IAccount, AccountExtension {
 
   error MsgSenderIsNotTheEntryPoint();
 
-  // external functions (setters)
+  // external setters
 
   function validateUserOp(
     UserOperation calldata userOp,

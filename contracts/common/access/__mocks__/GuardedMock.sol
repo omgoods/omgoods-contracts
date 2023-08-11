@@ -4,13 +4,13 @@ pragma solidity ^0.8.20;
 import {Guarded} from "../Guarded.sol";
 
 contract GuardedMock is Guarded {
-  // deployment functions
+  // deployment
 
-  constructor() Guarded(address(0)) {
-    //
+  constructor(address guardian) Guarded(address(0)) {
+    _guardians[guardian] = true;
   }
 
-  // external functions (getters)
+  // external getters
 
   function verifyGuardianSignature(
     bytes32 hash,
@@ -21,7 +21,7 @@ contract GuardedMock is Guarded {
     return true;
   }
 
-  // external functions (setters)
+  // external setters
 
   function addGuardians(address[] calldata guardians) external {
     _addGuardians(guardians);

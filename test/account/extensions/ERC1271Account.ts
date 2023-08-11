@@ -1,49 +1,44 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers } from 'hardhat';
 import { expect } from 'chai';
 import { deployERC1271AccountMock } from './fixtures';
 
-const { getSigners, hashMessage, randomBytes } = ethers;
+const { hashMessage, randomBytes } = ethers;
 
 describe('account/extensions/ERC1271Account // using mock', () => {
-  let owner: HardhatEthersSigner;
-  let signer: HardhatEthersSigner;
   let fixture: Awaited<ReturnType<typeof deployERC1271AccountMock>>;
 
   before(async () => {
-    [owner, signer] = await getSigners();
-
     fixture = await loadFixture(deployERC1271AccountMock);
   });
 
-  describe('# external functions (getters)', () => {
+  describe('# getters', () => {
     describe('isValidSignature()', () => {
       const message = randomBytes(32);
       const hash = hashMessage(message);
 
       it('expect to return the method selector on a valid signature', async () => {
-        const { erc1271AccountMock } = fixture;
+        const { erc1271AccountMock, signers } = fixture;
 
-        expect(
-          await erc1271AccountMock.isValidSignature(
-            hash,
-            await owner.signMessage(message),
-          ),
-        ).eq(
+        const res = await erc1271AccountMock.isValidSignature(
+          hash,
+          await signers.owner.signMessage(message),
+        );
+
+        expect(res).eq(
           erc1271AccountMock.interface.getFunction('isValidSignature').selector,
         );
       });
 
       it('expect to return 0xffffffff on an invalid signature', async () => {
-        const { erc1271AccountMock } = fixture;
+        const { erc1271AccountMock, signers } = fixture;
 
-        expect(
-          await erc1271AccountMock.isValidSignature(
-            hash,
-            await signer.signMessage(message),
-          ),
-        ).eq('0xffffffff');
+        const res = await erc1271AccountMock.isValidSignature(
+          hash,
+          await signers.unknown.at(0).signMessage(message),
+        );
+
+        expect(res).eq('0xffffffff');
       });
     });
   });

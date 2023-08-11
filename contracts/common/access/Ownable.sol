@@ -28,19 +28,19 @@ abstract contract Ownable is Context {
     _;
   }
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) {
     _owner = owner == address(0) ? msg.sender : owner;
   }
 
-  // external functions (getters)
+  // external getters
 
   function getOwner() external view returns (address) {
     return _owner;
   }
 
-  // external functions (setters)
+  // external setters
 
   function setOwner(address owner) external onlyOwner {
     if (owner == address(0)) {
@@ -50,7 +50,7 @@ abstract contract Ownable is Context {
     _afterOwnerUpdated(owner);
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _afterOwnerUpdated(address owner) internal virtual {
     emit OwnerUpdated(owner);

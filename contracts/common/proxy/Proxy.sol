@@ -8,7 +8,7 @@ import {PROXY_IMPL_SLOT} from "./constants.sol";
 // solhint-enable no-unused-import
 
 contract Proxy {
-  // deployment functions
+  // deployment
 
   constructor(address proxyImpl) {
     // solhint-disable-next-line no-inline-assembly
@@ -17,7 +17,7 @@ contract Proxy {
     }
   }
 
-  // wildcard functions
+  // wildcard
 
   fallback() external payable {
     // solhint-disable-next-line no-inline-assembly

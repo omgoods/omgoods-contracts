@@ -8,7 +8,7 @@ contract TokenMock is Token {
 
   event Initialized(address gateway, address tokenRegistry);
 
-  // deployment functions
+  // deployment
 
   constructor() Token(address(0)) {
     //

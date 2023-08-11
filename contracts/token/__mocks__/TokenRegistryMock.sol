@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {TokenRegistry} from "../TokenRegistry.sol";
 
 contract TokenRegistryMock is TokenRegistry {
-  // deployment functions
+  // deployment
 
   constructor() TokenRegistry(address(0)) {
     //

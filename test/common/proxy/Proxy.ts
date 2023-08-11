@@ -9,7 +9,7 @@ const { getContractAt } = ethers;
 const { randomAddress } = helpers;
 
 describe('common/proxy/Proxy', () => {
-  describe('# deployment functions', () => {
+  describe('# deployment', () => {
     describe('constructor()', () => {
       it('expect to deploy the contract', async () => {
         const proxyImpl = randomAddress();
@@ -23,7 +23,7 @@ describe('common/proxy/Proxy', () => {
     });
   });
 
-  describe('# wildcard functions', () => {
+  describe('# wildcard', () => {
     let fixture: Awaited<ReturnType<typeof deployProxy>>;
 
     before(async () => {
@@ -42,7 +42,7 @@ describe('common/proxy/Proxy', () => {
           await proxy.getAddress(),
         );
 
-        const tx = await proxyImplMock.setAmount(amount, {
+        const tx = proxyImplMock.setAmount(amount, {
           value,
         });
 

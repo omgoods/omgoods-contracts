@@ -17,19 +17,19 @@ abstract contract AccountExtensionMock is AccountExtension {
     bytes data
   );
 
-  // deployment functions
+  // deployment
 
   constructor() {
     _owner = msg.sender;
   }
 
-  // internal functions (getters)
+  // internal getters
 
   function _hasOwner(address owner) internal view override returns (bool) {
     return owner == _owner;
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _afterTransactionExecuted(
     address sender,

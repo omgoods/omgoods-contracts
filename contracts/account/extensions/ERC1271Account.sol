@@ -8,7 +8,7 @@ import {AccountExtension} from "./AccountExtension.sol";
 abstract contract ERC1271Account is IERC1271, AccountExtension {
   using ECDSA for bytes32;
 
-  // external functions (getters)
+  // external getters
 
   function isValidSignature(
     bytes32 hash,

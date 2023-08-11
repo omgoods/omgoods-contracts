@@ -5,13 +5,13 @@ import {AccountExtensionMock} from "./AccountExtensionMock.sol";
 import {ERC4337Account} from "../ERC4337Account.sol";
 
 contract ERC4337AccountMock is AccountExtensionMock, ERC4337Account {
-  // deployment functions
+  // deployment
 
   constructor(address entryPoint) AccountExtensionMock() {
     _entryPoint = entryPoint;
   }
 
-  // wildcard functions
+  // wildcard
 
   receive() external payable {
     //

@@ -13,8 +13,8 @@ describe('common/proxy/ProxyHelper // using mock', () => {
     fixture = await loadFixture(deployProxyHelperMock);
   });
 
-  describe('# external functions (getters)', () => {
-    describe('computeProxy() (mocked)', () => {
+  describe('# getters', () => {
+    describe('computeProxy()', () => {
       it('expect to compute a correct proxy address', async () => {
         const { proxyHelperMock } = fixture;
 
@@ -27,9 +27,13 @@ describe('common/proxy/ProxyHelper // using mock', () => {
           proxyImpl,
         );
 
-        expect(
-          await proxyHelperMock.computeProxy(proxyFactory, proxyImpl, salt),
-        ).eq(computeProxyAddress(salt));
+        const res = await proxyHelperMock.computeProxy(
+          proxyFactory,
+          proxyImpl,
+          salt,
+        );
+
+        expect(res).eq(computeProxyAddress(salt));
       });
     });
   });

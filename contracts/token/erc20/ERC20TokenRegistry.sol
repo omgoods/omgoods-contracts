@@ -15,13 +15,13 @@ contract ERC20TokenRegistry is TokenRegistry {
     uint256 value
   );
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) TokenRegistry(owner) {
     //
   }
 
-  // external functions (setters)
+  // external setters
 
   function emitTokenTransfer(
     address from,

@@ -49,7 +49,7 @@ contract Gateway is EIP712, Ownable, Initializable {
 
   error InvalidRequestsBatchSize();
 
-  // deployment functions
+  // deployment
 
   constructor(
     address owner,
@@ -71,7 +71,7 @@ contract Gateway is EIP712, Ownable, Initializable {
     emit Initialized(accountRegistry);
   }
 
-  // external functions (getters)
+  // external getters
 
   function getNonce(address account) external view returns (uint256) {
     return _nonce[account];
@@ -105,7 +105,7 @@ contract Gateway is EIP712, Ownable, Initializable {
     return _recoverTrustedSigner(account, hash, signature);
   }
 
-  // external functions (setters)
+  // external setters
 
   function sendRequest(
     address to,
@@ -181,7 +181,7 @@ contract Gateway is EIP712, Ownable, Initializable {
     _sendRequests(signer, from, to, value, data);
   }
 
-  // private functions (getters)
+  // private getters
 
   function _isTrustedSender(
     address account,
@@ -261,7 +261,7 @@ contract Gateway is EIP712, Ownable, Initializable {
     return signer;
   }
 
-  // private functions (setters)
+  // private setters
 
   function _verifyRequest(
     bytes32 hash,

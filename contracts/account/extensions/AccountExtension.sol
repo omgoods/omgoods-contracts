@@ -2,11 +2,11 @@
 pragma solidity 0.8.20;
 
 abstract contract AccountExtension {
-  // internal functions (getters)
+  // internal getters
 
   function _hasOwner(address owner) internal view virtual returns (bool);
 
-  // internal functions (setters)
+  // internal setters
 
   function _afterTransactionExecuted(
     address sender,

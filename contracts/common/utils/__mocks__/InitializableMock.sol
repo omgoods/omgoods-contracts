@@ -8,7 +8,7 @@ contract InitializableMock is Initializable {
 
   event Initialized();
 
-  // external functions (setters)
+  // external setters
 
   function initialize() external initializeOnce {
     emit Initialized();

@@ -47,13 +47,13 @@ abstract contract Account is
 
   // modifiers
 
-  modifier onlyWithOwnerAccess() {
-    _verifyOwnerAccess(_msgSender());
+  modifier onlyOwner() {
+    _verifyOwner(_msgSender());
 
     _;
   }
 
-  // deployment functions
+  // deployment
 
   function _initialize(
     address gateway,
@@ -67,28 +67,36 @@ abstract contract Account is
     _accountRegistry = accountRegistry;
   }
 
-  // wildcard functions
+  // wildcard
 
   receive() external payable {
     //
   }
 
-  // external functions (getters)
+  // external getters
+
+  function getExternalOwners()
+    external
+    view
+    returns (address accountRegistry, address entryPoint)
+  {
+    return (_accountRegistry, _entryPoint);
+  }
 
   function hasOwner(address owner) external view returns (bool) {
     return _hasOwner(owner);
   }
 
-  // external functions (setters)
+  // external setters
 
-  function addOwner(address owner) external onlyWithOwnerAccess {
-    IAccountRegistry(_accountRegistry).addAccountOwner(address(this), owner);
+  function addOwner(address owner) external onlyOwner {
+    IAccountRegistry(_accountRegistry).directAddAccountOwner(owner);
 
     emit OwnerAdded(owner);
   }
 
-  function removeOwner(address owner) external onlyWithOwnerAccess {
-    IAccountRegistry(_accountRegistry).removeAccountOwner(address(this), owner);
+  function removeOwner(address owner) external onlyOwner {
+    IAccountRegistry(_accountRegistry).directRemoveAccountOwner(owner);
 
     emit OwnerRemoved(owner);
   }
@@ -100,7 +108,7 @@ abstract contract Account is
   ) external {
     address sender = _msgSender();
 
-    _verifyOwnerAccess(sender);
+    _verifyOwner(sender);
 
     _executeTransaction(to, value, data);
 
@@ -114,7 +122,7 @@ abstract contract Account is
   ) external {
     address sender = _msgSender();
 
-    _verifyOwnerAccess(sender);
+    _verifyOwner(sender);
 
     if (to.length == 0) {
       revert EmptyTransactionBatch();
@@ -143,7 +151,7 @@ abstract contract Account is
     emit TransactionsExecuted(to, value, data);
   }
 
-  // internal functions (getters)
+  // internal getters
 
   function _hasOwner(
     address owner
@@ -152,7 +160,7 @@ abstract contract Account is
       IAccountRegistry(_accountRegistry).isAccountOwner(address(this), owner);
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _afterTransactionExecuted(
     address sender,
@@ -171,9 +179,9 @@ abstract contract Account is
     emit TransactionExecuted(to, value, data);
   }
 
-  // private functions (getters)
+  // private getters
 
-  function _verifyOwnerAccess(address sender) private view {
+  function _verifyOwner(address sender) private view {
     if (
       sender != address(this) &&
       sender != _accountRegistry &&
@@ -184,7 +192,7 @@ abstract contract Account is
     }
   }
 
-  // private functions (setters)
+  // private setters
 
   function _executeTransaction(
     address to,

@@ -1,22 +1,15 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
 import { deployAccountRegistry, setupAccountRegistry } from './fixtures';
 import { AccountStates } from './constants';
 
-const { getSigners, ZeroAddress } = ethers;
+const { ZeroAddress } = ethers;
 
 const { randomAddress } = helpers;
 
 describe('account/AccountRegistry', () => {
-  let signers: HardhatEthersSigner[];
-
-  before(async () => {
-    [, ...signers] = await getSigners();
-  });
-
-  describe('# deployment functions', () => {
+  describe('# deployment', () => {
     let fixture: Awaited<ReturnType<typeof deployAccountRegistry>>;
 
     before(async () => {
@@ -25,13 +18,13 @@ describe('account/AccountRegistry', () => {
 
     describe('initialize()', () => {
       it('expect to revert when the msg.sender is not the owner', async () => {
-        const { accountRegistry } = fixture;
+        const { accountRegistry, signers } = fixture;
 
-        await expect(
-          accountRegistry
-            .connect(signers[0])
-            .initialize(ZeroAddress, ZeroAddress, ZeroAddress),
-        ).revertedWithCustomError(
+        const tx = accountRegistry
+          .connect(signers.unknown.at(0))
+          .initialize(ZeroAddress, ZeroAddress, ZeroAddress);
+
+        await expect(tx).revertedWithCustomError(
           accountRegistry,
           'MsgSenderIsNotTheContractOwner',
         );
@@ -40,9 +33,13 @@ describe('account/AccountRegistry', () => {
       it('expect to revert when the account implementation is the zero address', async () => {
         const { accountRegistry } = fixture;
 
-        await expect(
-          accountRegistry.initialize(ZeroAddress, ZeroAddress, ZeroAddress),
-        ).revertedWithCustomError(
+        const tx = accountRegistry.initialize(
+          ZeroAddress,
+          ZeroAddress,
+          ZeroAddress,
+        );
+
+        await expect(tx).revertedWithCustomError(
           accountRegistry,
           'AccountImplIsTheZeroAddress',
         );
@@ -55,11 +52,7 @@ describe('account/AccountRegistry', () => {
         const entryPoint = randomAddress();
         const accountImpl = randomAddress();
 
-        const tx = await accountRegistry.initialize(
-          gateway,
-          entryPoint,
-          accountImpl,
-        );
+        const tx = accountRegistry.initialize(gateway, entryPoint, accountImpl);
 
         await expect(tx)
           .emit(accountRegistry, 'Initialized')
@@ -82,9 +75,16 @@ describe('account/AccountRegistry', () => {
         it('expect to revert', async () => {
           const { accountRegistry } = fixture;
 
-          await expect(
-            accountRegistry.initialize(ZeroAddress, ZeroAddress, ZeroAddress),
-          ).revertedWithCustomError(accountRegistry, 'AlreadyInitialized');
+          const tx = accountRegistry.initialize(
+            ZeroAddress,
+            ZeroAddress,
+            ZeroAddress,
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'AlreadyInitialized',
+          );
         });
       });
     });
@@ -103,42 +103,8 @@ describe('account/AccountRegistry', () => {
       });
     };
 
-    describe('# external functions (getters)', () => {
-      let createdAccount: {
-        address: string;
-        owner: string;
-      };
-
-      let definedAccount: typeof createdAccount;
-
-      createBeforeHook(async () => {
-        const { accountRegistry, computeAccountAddress } = fixture;
-
-        {
-          const owner = signers[0].address;
-          await accountRegistry.forceAccountCreation(owner);
-
-          createdAccount = {
-            address: computeAccountAddress(owner),
-            owner,
-          };
-        }
-
-        {
-          const sender = signers[1];
-          const owner = sender.address;
-          const address = computeAccountAddress(owner);
-
-          await accountRegistry
-            .connect(sender)
-            .addAccountOwner(address, randomAddress());
-
-          definedAccount = {
-            address,
-            owner,
-          };
-        }
-      });
+    describe('# getters', () => {
+      createBeforeHook();
 
       describe('computeAccount()', () => {
         it('expect to compute a correct account address', async () => {
@@ -146,17 +112,17 @@ describe('account/AccountRegistry', () => {
 
           const saltOwner = randomAddress();
 
-          expect(await accountRegistry.computeAccount(saltOwner)).eq(
-            computeAccountAddress(saltOwner),
-          );
+          const res = await accountRegistry.computeAccount(saltOwner);
+
+          expect(res).eq(computeAccountAddress(saltOwner));
         });
 
         it('expect to return the zero address for a zero address salt owner', async () => {
           const { accountRegistry } = fixture;
 
-          expect(await accountRegistry.computeAccount(ZeroAddress)).eq(
-            ZeroAddress,
-          );
+          const res = await accountRegistry.computeAccount(ZeroAddress);
+
+          expect(res).eq(ZeroAddress);
         });
       });
 
@@ -164,28 +130,34 @@ describe('account/AccountRegistry', () => {
         it('expect to return false for the zero address account', async () => {
           const { accountRegistry } = fixture;
 
-          expect(
-            await accountRegistry.isAccountOwner(ZeroAddress, randomAddress()),
-          ).false;
+          const res = await accountRegistry.isAccountOwner(
+            ZeroAddress,
+            randomAddress(),
+          );
+
+          expect(res).false;
         });
 
         it('expect to return false for the zero address owner', async () => {
           const { accountRegistry } = fixture;
 
-          expect(
-            await accountRegistry.isAccountOwner(randomAddress(), ZeroAddress),
-          ).false;
+          const res = await accountRegistry.isAccountOwner(
+            randomAddress(),
+            ZeroAddress,
+          );
+
+          expect(res).false;
         });
 
         it('expect to return false for a not existing account owner', async () => {
           const { accountRegistry } = fixture;
 
-          expect(
-            await accountRegistry.isAccountOwner(
-              randomAddress(),
-              randomAddress(),
-            ),
-          ).false;
+          const res = await accountRegistry.isAccountOwner(
+            randomAddress(),
+            randomAddress(),
+          );
+
+          expect(res).false;
         });
 
         it('expect to return true for the account with an unknown state and an existing owner', async () => {
@@ -194,83 +166,89 @@ describe('account/AccountRegistry', () => {
           const owner = randomAddress();
           const account = computeAccountAddress(owner);
 
-          expect(await accountRegistry.isAccountOwner(account, owner)).true;
+          const res = await accountRegistry.isAccountOwner(account, owner);
+
+          expect(res).true;
         });
 
         it('expect to return true for the account with a known state and an existing owner', async () => {
-          const { accountRegistry } = fixture;
+          const { accountRegistry, definedAccount, definedAccountOwner } =
+            fixture;
 
-          expect(
-            await accountRegistry.isAccountOwner(
-              definedAccount.address,
-              definedAccount.owner,
-            ),
-          ).true;
+          const res = await accountRegistry.isAccountOwner(
+            definedAccount,
+            definedAccountOwner,
+          );
+
+          expect(res).true;
         });
       });
 
       describe('getAccountState()', () => {
         it('expect to return the correct account state', async () => {
-          const { accountRegistry } = fixture;
+          const { accountRegistry, createdAccount, definedAccount } = fixture;
 
-          expect(await accountRegistry.getAccountState(randomAddress())).eq(
-            AccountStates.Unknown,
-          );
+          let res = await accountRegistry.getAccountState(randomAddress());
 
-          expect(
-            await accountRegistry.getAccountState(createdAccount.address),
-          ).eq(AccountStates.Created);
+          expect(res).eq(AccountStates.Unknown);
 
-          expect(
-            await accountRegistry.getAccountState(definedAccount.address),
-          ).eq(AccountStates.Defined);
+          res = await accountRegistry.getAccountState(createdAccount);
+
+          expect(res).eq(AccountStates.Created);
+
+          res = await accountRegistry.getAccountState(definedAccount);
+
+          expect(res).eq(AccountStates.Defined);
         });
       });
     });
 
-    describe('# external functions (setters)', () => {
+    describe('# setters', () => {
       describe('createAccount()', () => {
-        createBeforeHook(async () => {
-          const { accountRegistry } = fixture;
-
-          await accountRegistry.forceAccountCreation(signers[0]);
-        });
+        createBeforeHook();
 
         it('expect to revert when the account is the zero address', async () => {
           const { accountRegistry } = fixture;
 
-          await expect(
-            accountRegistry.createAccount(ZeroAddress),
-          ).revertedWithCustomError(accountRegistry, 'AccountIsTheZeroAddress');
+          const tx = accountRegistry.createAccount(ZeroAddress);
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'AccountIsTheZeroAddress',
+          );
         });
 
         it('expect to revert when the msg.sender is not the account owner', async () => {
-          const { accountRegistry, computeAccountAddress } = fixture;
+          const { accountRegistry, computeAccountAddress, signers } = fixture;
 
-          await expect(
-            accountRegistry.createAccount(
-              computeAccountAddress(signers[0].address),
-            ),
-          ).revertedWithCustomError(
+          const tx = accountRegistry.createAccount(
+            computeAccountAddress(signers.unknown.at(0).address),
+          );
+
+          await expect(tx).revertedWithCustomError(
             accountRegistry,
             'MsgSenderIsNotTheAccountOwner',
           );
         });
 
         it('expect to revert when the account has already been created', async () => {
-          const { accountRegistry, computeAccountAddress } = fixture;
+          const { accountRegistry, createdAccount, createdAccountOwner } =
+            fixture;
 
-          await expect(
-            accountRegistry
-              .connect(signers[0])
-              .createAccount(computeAccountAddress(signers[0].address)),
-          ).revertedWithCustomError(accountRegistry, 'AccountAlreadyCreated');
+          const tx = accountRegistry
+            .connect(createdAccountOwner)
+            .createAccount(createdAccount);
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'AccountAlreadyCreated',
+          );
         });
 
         it('expect to create an account', async () => {
-          const { accountRegistry, computeAccountAddress } = fixture;
+          const { accountRegistry, computeAccountAddress, signers } = fixture;
 
-          const owner = signers[1];
+          const owner = signers.unknown.at(1);
           const account = computeAccountAddress(owner.address);
 
           const tx = accountRegistry.connect(owner).createAccount(account);
@@ -278,6 +256,21 @@ describe('account/AccountRegistry', () => {
           await expect(tx)
             .emit(accountRegistry, 'AccountCreated')
             .withArgs(account);
+        });
+      });
+
+      describe('forceAccountCreation()', () => {
+        createBeforeHook();
+
+        it('expect to revert when the salt owner is the zero address', async () => {
+          const { accountRegistry } = fixture;
+
+          const tx = accountRegistry.forceAccountCreation(ZeroAddress);
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'SaltOwnerIsTheZeroAddress',
+          );
         });
       });
     });

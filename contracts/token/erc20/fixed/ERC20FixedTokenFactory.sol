@@ -27,7 +27,7 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
 
   error InsufficientTotalSupply();
 
-  // deployment functions
+  // deployment
 
   constructor(
     address owner,
@@ -47,7 +47,7 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
     emit Initialized(gateway, tokenRegistry, tokenImpl);
   }
 
-  // external functions (getters)
+  // external getters
 
   function computeToken(
     string calldata symbol
@@ -64,7 +64,7 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
     return _hashToken(owner, name, symbol, totalSupply);
   }
 
-  // external functions (setters)
+  // external setters
 
   function createToken(
     address owner,
@@ -99,7 +99,7 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
     emit TokenCreated(token, owner, name, symbol, totalSupply);
   }
 
-  // private functions (getters)
+  // private getters
 
   function _hashToken(
     address owner,

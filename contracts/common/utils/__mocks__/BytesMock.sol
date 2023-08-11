@@ -6,7 +6,7 @@ import {Bytes} from "../Bytes.sol";
 contract BytesMock {
   using Bytes for bytes[];
 
-  // external functions (getters)
+  // external getters
 
   function toKeccak256(bytes[] calldata data) external pure returns (bytes32) {
     return data.toKeccak256();

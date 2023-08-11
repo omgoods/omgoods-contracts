@@ -9,7 +9,7 @@ abstract contract Guarded is Ownable {
 
   // storage
 
-  mapping(address => bool) private _guardians;
+  mapping(address => bool) internal _guardians;
 
   // events
 
@@ -29,19 +29,19 @@ abstract contract Guarded is Ownable {
 
   error InvalidGuardianSignature();
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) Ownable(owner) {
     //
   }
 
-  // external functions (getters)
+  // external getters
 
   function hasGuardian(address guardian) external view returns (bool) {
     return _hasGuardian(guardian);
   }
 
-  // external functions (setters)
+  // external setters
 
   function addGuardian(address guardian) external onlyOwner {
     if (guardian == address(0)) {
@@ -71,7 +71,7 @@ abstract contract Guarded is Ownable {
     emit GuardianRemoved(guardian);
   }
 
-  // internal functions (getters)
+  // internal getters
 
   function _verifyGuardianSignature(
     bytes32 hash,
@@ -86,7 +86,7 @@ abstract contract Guarded is Ownable {
     return guardian == _owner || _guardians[guardian];
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _addGuardians(address[] calldata guardians) internal {
     uint256 len = guardians.length;

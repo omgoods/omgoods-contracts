@@ -2,9 +2,9 @@ import { ethers, helpers } from 'hardhat';
 import { AddressLike } from 'ethers';
 import { createProxyAddressFactory } from '../common/proxy/helpers';
 
-const { deployContract, ZeroAddress, getSigners, keccak256 } = ethers;
+const { deployContract, ZeroAddress, keccak256, getContractAt } = ethers;
 
-const { setBalance } = helpers;
+const { setBalance, buildSigners, randomAddress } = helpers;
 
 export async function deployAccountMock() {
   const accountMock = await deployContract('AccountMock');
@@ -23,12 +23,15 @@ export async function deployAccountImpl() {
 }
 
 export async function deployAccountRegistry() {
+  const signers = await buildSigners('owner', 'gateway', 'entryPoint');
+
   const accountRegistry = await deployContract('AccountRegistry', [
     ZeroAddress,
   ]);
 
   return {
     accountRegistry,
+    signers,
   };
 }
 
@@ -46,13 +49,14 @@ export async function setupAccountRegistry(
     entryPoint?: AddressLike;
   } = {},
 ) {
+  const { accountRegistry, signers } = await deployAccountRegistry();
+
   const { gateway, entryPoint } = {
-    gateway: ZeroAddress,
-    entryPoint: ZeroAddress,
+    gateway: signers.gateway,
+    entryPoint: signers.entryPoint,
     ...options,
   };
 
-  const { accountRegistry } = await deployAccountRegistry();
   const { accountImpl } = await deployAccountImpl();
 
   await accountRegistry.initialize(gateway, entryPoint, accountImpl);
@@ -63,28 +67,69 @@ export async function setupAccountRegistry(
     (owner) => keccak256(owner),
   );
 
+  const [createdAccountOwner, definedAccountOwner, unknownAccountOwner] =
+    signers.unknown;
+
+  const createdAccount = computeAccountAddress(createdAccountOwner.address);
+  const definedAccount = computeAccountAddress(definedAccountOwner.address);
+  const unknownAccount = computeAccountAddress(unknownAccountOwner.address);
+
+  await accountRegistry.forceAccountCreation(createdAccountOwner);
+
+  await accountRegistry
+    .connect(definedAccountOwner)
+    .addAccountOwner(definedAccount, randomAddress());
+
   return {
     accountRegistry,
     accountImpl,
     computeAccountAddress,
+    signers,
+    createdAccountOwner,
+    definedAccountOwner,
+    unknownAccountOwner,
+    createdAccount,
+    definedAccount,
+    unknownAccount,
+  };
+}
+
+export async function setupAccount() {
+  const { accountRegistry, signers, createdAccount, createdAccountOwner } =
+    await setupAccountRegistry();
+
+  const account = await getContractAt('AccountImpl', createdAccount);
+
+  return {
+    account,
+    accountRegistry,
+    signers: {
+      ...signers,
+      owner: createdAccountOwner,
+    },
   };
 }
 
 export async function setupAccountMock() {
-  const [owner, gateway, entryPoint] = await getSigners();
+  const signers = await buildSigners('owner', 'gateway', 'entryPoint');
 
   const { accountRegistryMock } = await deployAccountRegistryMock();
 
   const { accountMock } = await deployAccountMock();
 
-  await accountMock.initialize(gateway, entryPoint, accountRegistryMock);
+  await accountMock.initialize(
+    signers.gateway,
+    signers.entryPoint,
+    accountRegistryMock,
+  );
 
-  await accountRegistryMock.addAccountOwner(accountMock, owner);
+  await accountRegistryMock.addAccountOwner(accountMock, signers.owner);
 
   await setBalance(accountMock);
 
   return {
     accountMock,
     accountRegistryMock,
+    signers,
   };
 }

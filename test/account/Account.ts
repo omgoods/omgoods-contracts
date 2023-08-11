@@ -1,30 +1,21 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
 import { deployAccountMock, setupAccountMock } from './fixtures';
 
-const { getSigners, ZeroAddress, concat } = ethers;
+const { ZeroAddress, concat } = ethers;
 
 const { randomAddress } = helpers;
 
 describe('account/Account // using mock', () => {
-  let owner: HardhatEthersSigner;
-  let gateway: HardhatEthersSigner;
-  let signers: HardhatEthersSigner[];
-
-  before(async () => {
-    [owner, gateway, , ...signers] = await getSigners();
-  });
-
-  describe('# deployment functions', () => {
+  describe('# deployment', () => {
     let fixture: Awaited<ReturnType<typeof deployAccountMock>>;
 
     before(async () => {
       fixture = await loadFixture(deployAccountMock);
     });
 
-    describe('initialize() // mocked', () => {
+    describe('_initialize()', () => {
       it('expect to initialize the contract', async () => {
         const { accountMock } = fixture;
 
@@ -32,11 +23,7 @@ describe('account/Account // using mock', () => {
         const entryPoint = randomAddress();
         const accountRegistry = randomAddress();
 
-        const tx = await accountMock.initialize(
-          gateway,
-          entryPoint,
-          accountRegistry,
-        );
+        const tx = accountMock.initialize(gateway, entryPoint, accountRegistry);
 
         await expect(tx)
           .emit(accountMock, 'Initialized')
@@ -55,9 +42,16 @@ describe('account/Account // using mock', () => {
         it('expect to revert', async () => {
           const { accountMock } = fixture;
 
-          await expect(
-            accountMock.initialize(ZeroAddress, ZeroAddress, ZeroAddress),
-          ).revertedWithCustomError(accountMock, 'AlreadyInitialized');
+          const tx = accountMock.initialize(
+            ZeroAddress,
+            ZeroAddress,
+            ZeroAddress,
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountMock,
+            'AlreadyInitialized',
+          );
         });
       });
     });
@@ -76,53 +70,76 @@ describe('account/Account // using mock', () => {
       });
     };
 
-    describe('# wildcard functions', () => {
+    describe('# wildcard', () => {
       createBeforeHook();
 
       describe('receive()', () => {
         it('expect to receive the funds', async () => {
-          const { accountMock } = fixture;
+          const { accountMock, signers } = fixture;
 
-          const sender = signers[0];
+          const sender = signers.unknown.at(0);
           const value = 5;
 
-          await expect(
-            accountMock.connect(sender).fallback({
-              value,
-            }),
-          ).changeEtherBalances([sender, accountMock], [-value, value]);
+          const tx = accountMock.connect(sender).fallback({
+            value,
+          });
+
+          await expect(tx).changeEtherBalances(
+            [sender, accountMock],
+            [-value, value],
+          );
         });
       });
     });
 
-    describe('# external functions (getters)', () => {
+    describe('# getters', () => {
       createBeforeHook();
+
+      describe('getExternalOwners()', () => {
+        it('expect to return external owners', async () => {
+          const { accountMock, accountRegistryMock, signers } = fixture;
+
+          const res = await accountMock.getExternalOwners();
+
+          expect(res.accountRegistry).eq(
+            await accountRegistryMock.getAddress(),
+          );
+
+          expect(res.entryPoint).eq(signers.entryPoint.address);
+        });
+      });
 
       describe('hasOwner()', () => {
         it('expect to return true when an owner exists', async () => {
-          const { accountMock } = fixture;
+          const { accountMock, signers } = fixture;
 
-          expect(await accountMock.hasOwner(owner)).true;
+          const res = await accountMock.hasOwner(signers.owner);
+
+          expect(res).true;
         });
 
         it("expect to return false when an owner doesn't exist", async () => {
           const { accountMock } = fixture;
 
-          expect(await accountMock.hasOwner(randomAddress())).false;
+          const res = await accountMock.hasOwner(randomAddress());
+
+          expect(res).false;
         });
       });
     });
 
-    describe('# external functions (setters)', () => {
+    describe('# setters', () => {
       describe('addOwner()', () => {
         createBeforeHook();
 
         it('expect to revert when msg.sender is not the owner', async () => {
-          const { accountMock } = fixture;
+          const { accountMock, signers } = fixture;
 
-          await expect(
-            accountMock.connect(signers[0]).addOwner(ZeroAddress),
-          ).revertedWithCustomError(
+          const tx = accountMock
+            .connect(signers.unknown.at(0))
+            .addOwner(ZeroAddress);
+
+          await expect(tx).revertedWithCustomError(
             accountMock,
             'MsgSenderIsNotTheAccountOwner',
           );
@@ -153,11 +170,13 @@ describe('account/Account // using mock', () => {
         });
 
         it('expect to revert when msg.sender is not the owner', async () => {
-          const { accountMock } = fixture;
+          const { accountMock, signers } = fixture;
 
-          await expect(
-            accountMock.connect(signers[0]).removeOwner(ZeroAddress),
-          ).revertedWithCustomError(
+          const tx = accountMock
+            .connect(signers.unknown.at(0))
+            .removeOwner(ZeroAddress);
+
+          await expect(tx).revertedWithCustomError(
             accountMock,
             'MsgSenderIsNotTheAccountOwner',
           );
@@ -180,13 +199,13 @@ describe('account/Account // using mock', () => {
         createBeforeHook();
 
         it('expect to revert when the msg.sender is not the owner', async () => {
-          const { accountMock } = fixture;
+          const { accountMock, signers } = fixture;
 
-          await expect(
-            accountMock
-              .connect(signers[0])
-              .executeTransaction(ZeroAddress, 0, '0x'),
-          ).revertedWithCustomError(
+          const tx = accountMock
+            .connect(signers.unknown.at(0))
+            .executeTransaction(ZeroAddress, 0, '0x');
+
+          await expect(tx).revertedWithCustomError(
             accountMock,
             'MsgSenderIsNotTheAccountOwner',
           );
@@ -195,33 +214,46 @@ describe('account/Account // using mock', () => {
         it('expect to revert when transferred to the zero address', async () => {
           const { accountMock } = fixture;
 
-          await expect(
-            accountMock.executeTransaction(ZeroAddress, 0, '0x'),
-          ).revertedWithCustomError(accountMock, 'TransactionToTheZeroAddress');
+          const tx = accountMock.executeTransaction(ZeroAddress, 0, '0x');
+
+          await expect(tx).revertedWithCustomError(
+            accountMock,
+            'TransactionToTheZeroAddress',
+          );
         });
 
         it('expect to revert when transferred to an invalid address', async () => {
           const { accountMock, accountRegistryMock } = fixture;
 
-          await expect(
-            accountMock.executeTransaction(accountRegistryMock, 0, '0x'),
-          ).revertedWithCustomError(accountMock, 'TransactionToInvalidAddress');
+          const tx = accountMock.executeTransaction(
+            accountRegistryMock,
+            0,
+            '0x',
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountMock,
+            'TransactionToInvalidAddress',
+          );
         });
 
         it('expect to revert when the transaction fails', async () => {
           const { accountMock } = fixture;
 
-          await expect(
-            accountMock.executeTransaction(
-              accountMock,
-              0,
-              accountMock.interface.encodeFunctionData('initialize', [
-                ZeroAddress,
-                ZeroAddress,
-                ZeroAddress,
-              ]),
-            ),
-          ).revertedWithCustomError(accountMock, 'AlreadyInitialized');
+          const tx = accountMock.executeTransaction(
+            accountMock,
+            0,
+            accountMock.interface.encodeFunctionData('initialize', [
+              ZeroAddress,
+              ZeroAddress,
+              ZeroAddress,
+            ]),
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountMock,
+            'AlreadyInitialized',
+          );
         });
 
         it('expect the transaction to be executed', async () => {
@@ -243,13 +275,13 @@ describe('account/Account // using mock', () => {
         });
 
         it('expect to execute the transaction by the account registry', async () => {
-          const { accountMock, accountRegistryMock } = fixture;
+          const { accountMock, accountRegistryMock, signers } = fixture;
 
           const to = randomAddress();
           const value = 1000;
           const data = '0x';
 
-          const tx = gateway.sendTransaction({
+          const tx = signers.gateway.sendTransaction({
             to: accountMock,
             data: concat([
               accountMock.interface.encodeFunctionData('executeTransaction', [
@@ -276,11 +308,13 @@ describe('account/Account // using mock', () => {
         createBeforeHook();
 
         it('expect to revert when the msg.sender is not the owner', async () => {
-          const { accountMock } = fixture;
+          const { accountMock, signers } = fixture;
 
-          await expect(
-            accountMock.connect(signers[0]).executeTransactions([], [], []),
-          ).revertedWithCustomError(
+          const tx = accountMock
+            .connect(signers.unknown.at(0))
+            .executeTransactions([], [], []);
+
+          await expect(tx).revertedWithCustomError(
             accountMock,
             'MsgSenderIsNotTheAccountOwner',
           );
@@ -289,21 +323,34 @@ describe('account/Account // using mock', () => {
         it('expect to revert when the transaction batch is empty', async () => {
           const { accountMock } = fixture;
 
-          await expect(
-            accountMock.executeTransactions([], [], []),
-          ).revertedWithCustomError(accountMock, 'EmptyTransactionBatch');
+          const tx = accountMock.executeTransactions([], [], []);
+
+          await expect(tx).revertedWithCustomError(
+            accountMock,
+            'EmptyTransactionBatch',
+          );
         });
 
         it('expect to revert when the transaction batch size is invalid', async () => {
           const { accountMock } = fixture;
 
-          await expect(
-            accountMock.executeTransactions([ZeroAddress], [], []),
-          ).revertedWithCustomError(accountMock, 'InvalidTransactionBatchSize');
+          let tx = accountMock.executeTransactions([ZeroAddress], [], []);
 
-          await expect(
-            accountMock.executeTransactions([ZeroAddress], [ZeroAddress], []),
-          ).revertedWithCustomError(accountMock, 'InvalidTransactionBatchSize');
+          await expect(tx).revertedWithCustomError(
+            accountMock,
+            'InvalidTransactionBatchSize',
+          );
+
+          tx = accountMock.executeTransactions(
+            [ZeroAddress],
+            [ZeroAddress],
+            [],
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountMock,
+            'InvalidTransactionBatchSize',
+          );
         });
 
         it('expect the transactions to be executed', async () => {
@@ -325,13 +372,13 @@ describe('account/Account // using mock', () => {
         });
 
         it('expect to execute the transactions by the account registry', async () => {
-          const { accountMock, accountRegistryMock } = fixture;
+          const { accountMock, accountRegistryMock, signers } = fixture;
 
           const to = [randomAddress()];
           const value = [1000];
           const data = ['0x'];
 
-          const tx = gateway.sendTransaction({
+          const tx = signers.gateway.sendTransaction({
             to: accountMock,
             data: concat([
               accountMock.interface.encodeFunctionData('executeTransactions', [

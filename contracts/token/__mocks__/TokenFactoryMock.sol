@@ -10,7 +10,7 @@ contract TokenFactoryMock is TokenFactory {
 
   event TokenCreated(address token);
 
-  // deployment functions
+  // deployment
 
   constructor() TokenFactory(address(0)) {
     //
@@ -26,13 +26,13 @@ contract TokenFactoryMock is TokenFactory {
     emit Initialized(gateway, tokenRegistry, tokenImpl);
   }
 
-  // external functions (getters)
+  // external getters
 
   function computeToken(bytes32 tokenSalt) external view returns (address) {
     return _computeToken(tokenSalt);
   }
 
-  // external functions (setters)
+  // external setters
 
   function createToken(
     bytes32 salt,

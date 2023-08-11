@@ -16,7 +16,7 @@ abstract contract ProxyImpl {
 
   error ProxyImplIsTheZeroAddress();
 
-  // external functions (getters)
+  // external getters
 
   function getProxyImpl() external view returns (address proxyImpl) {
     // solhint-disable-next-line no-inline-assembly
@@ -27,7 +27,7 @@ abstract contract ProxyImpl {
     return proxyImpl;
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _setProxyImpl(address proxyImpl) internal {
     if (proxyImpl == address(0)) {

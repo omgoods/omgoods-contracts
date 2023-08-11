@@ -2,7 +2,7 @@
 pragma solidity 0.8.20;
 
 library Bytes {
-  // internal functions (getters)
+  // internal getters
 
   function toKeccak256(bytes[] calldata self) internal pure returns (bytes32) {
     uint256 len = self.length;

@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {ProxyHelper} from "../ProxyHelper.sol";
 
 contract ProxyHelperMock {
-  // external functions (getters)
+  // external getters
 
   function computeProxy(
     address deployer,

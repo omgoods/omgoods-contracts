@@ -12,7 +12,7 @@ contract AccountMock is Account {
     address accountRegistry
   );
 
-  // deployment functions
+  // deployment
 
   function initialize(
     address gateway,

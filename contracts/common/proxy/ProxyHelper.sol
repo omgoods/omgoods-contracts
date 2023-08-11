@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {Proxy} from "./Proxy.sol";
 
 library ProxyHelper {
-  // internal functions (getters)
+  // internal getters
 
   function computeProxy(
     address deployer,

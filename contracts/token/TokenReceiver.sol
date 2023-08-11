@@ -11,7 +11,7 @@ abstract contract TokenReceiver is
   IERC777Recipient,
   IERC1155Receiver
 {
-  // external functions (getters)
+  // external getters
 
   // ERC165
 
@@ -25,7 +25,7 @@ abstract contract TokenReceiver is
       interfaceId == type(IERC777Recipient).interfaceId;
   }
 
-  // external functions (setters)
+  // external setters
 
   // ERC721
 

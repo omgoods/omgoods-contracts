@@ -23,7 +23,7 @@ abstract contract TokenFactory is Ownable, Initializable, GatewayRecipient {
 
   error TokenOwnerIsTheZeroAddress();
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) Ownable(owner) {
     //
@@ -47,7 +47,7 @@ abstract contract TokenFactory is Ownable, Initializable, GatewayRecipient {
     _tokenImpl = tokenImpl;
   }
 
-  // internal functions (getters)
+  // internal getters
 
   function _msgSender()
     internal
@@ -63,7 +63,7 @@ abstract contract TokenFactory is Ownable, Initializable, GatewayRecipient {
     return ProxyHelper.computeProxy(_tokenRegistry, _tokenImpl, tokenSalt);
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _createToken(
     bytes32 salt,

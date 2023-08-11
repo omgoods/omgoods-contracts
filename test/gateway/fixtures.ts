@@ -1,7 +1,9 @@
-import { ethers } from 'hardhat';
+import { ethers, helpers } from 'hardhat';
 import { setupAccountRegistry } from '../account/fixtures';
 
 const { deployContract, ZeroAddress } = ethers;
+
+const { buildSigners } = helpers;
 
 const TYPED_DATA_DOMAIN = {
   name: 'Test Gateway',
@@ -9,6 +11,8 @@ const TYPED_DATA_DOMAIN = {
 } as const;
 
 export async function deployGateway() {
+  const signers = await buildSigners('owner');
+
   const gateway = await deployContract('Gateway', [
     ZeroAddress,
     TYPED_DATA_DOMAIN.name,
@@ -17,11 +21,12 @@ export async function deployGateway() {
 
   return {
     gateway,
+    signers,
   };
 }
 
 export async function setupGateway() {
-  const { gateway } = await deployGateway();
+  const { gateway, signers } = await deployGateway();
 
   const { accountRegistry } = await setupAccountRegistry({
     gateway,
@@ -32,5 +37,6 @@ export async function setupGateway() {
   return {
     gateway,
     accountRegistry,
+    signers,
   };
 }

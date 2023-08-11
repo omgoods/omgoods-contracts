@@ -8,7 +8,7 @@ contract ProxyFactoryMock is ProxyFactory {
 
   event ProxyCreated(address proxy);
 
-  // external functions (setters)
+  // external setters
 
   function createProxy(
     address proxyImpl,

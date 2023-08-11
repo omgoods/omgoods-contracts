@@ -21,7 +21,7 @@ describe('common/proxy/ProxyImpl // using mock', () => {
     });
   };
 
-  describe('# external functions (getters)', () => {
+  describe('# getters', () => {
     const proxyImpl = randomAddress();
 
     createBeforeHook(async () => {
@@ -39,10 +39,10 @@ describe('common/proxy/ProxyImpl // using mock', () => {
     });
   });
 
-  describe('# external functions (setters)', () => {
+  describe('# setters', () => {
     createBeforeHook();
 
-    describe('setImpl() // mocked', () => {
+    describe('_setProxyImpl()', () => {
       it('expect to revert when the proxy impl is the zero address', async () => {
         const { proxyImplMock } = fixture;
 

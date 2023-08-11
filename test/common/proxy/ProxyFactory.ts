@@ -15,8 +15,8 @@ describe('common/proxy/ProxyFactory // using mock', () => {
     fixture = await loadFixture(deployProxyFactoryMock);
   });
 
-  describe('# external functions (setters)', () => {
-    describe('createProxy() // mocked', () => {
+  describe('# setters', () => {
+    describe('_createProxy()', () => {
       const createdProxy = {
         proxyImp: randomAddress(),
         salt: randomHex(),
@@ -52,12 +52,12 @@ describe('common/proxy/ProxyFactory // using mock', () => {
       it('expect to return the zero address when a proxy has already been created', async () => {
         const { proxyFactoryMock } = fixture;
 
-        expect(
-          await proxyFactoryMock.createProxy.staticCall(
-            createdProxy.proxyImp,
-            createdProxy.salt,
-          ),
-        ).eq(ZeroAddress);
+        const res = await proxyFactoryMock.createProxy.staticCall(
+          createdProxy.proxyImp,
+          createdProxy.salt,
+        );
+
+        expect(res).eq(ZeroAddress);
       });
     });
   });

@@ -22,18 +22,18 @@ interface IAccountRegistry {
     bytes[] data
   );
 
-  // external functions (getters)
+  // external getters
 
   function isAccountOwner(
     address account,
     address owner
   ) external view returns (bool);
 
-  // external functions (setters)
+  // external setters
 
-  function addAccountOwner(address account, address owner) external;
+  function directAddAccountOwner(address owner) external;
 
-  function removeAccountOwner(address account, address owner) external;
+  function directRemoveAccountOwner(address owner) external;
 
   function emitAccountTransactionExecuted(
     address to,

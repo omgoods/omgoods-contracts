@@ -12,7 +12,7 @@ contract ProxyImplMock is ProxyImpl {
 
   event AmountUpdated(uint256 amount, uint256 value);
 
-  // external functions (setters)
+  // external setters
 
   function setAmount(uint256 amount) external payable {
     _amount = amount;

@@ -1,6 +1,7 @@
 import { setBalance } from '@nomicfoundation/hardhat-network-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { AddressLike, BigNumberish } from 'ethers';
+import { Signers } from './interfaces';
 
 export class Helpers {
   constructor(private readonly hre: HardhatRuntimeEnvironment) {
@@ -38,5 +39,25 @@ export class Helpers {
       await resolveAddress(address),
       typeof balance === 'undefined' ? parseEther('1') : balance,
     );
+  }
+
+  async buildSigners<K extends string>(...names: K[]): Promise<Signers<K>> {
+    const {
+      ethers: { getSigners },
+    } = this.hre;
+
+    const signers = await getSigners();
+
+    const named = names.reduce((result, name, index) => {
+      return {
+        ...result,
+        [name]: signers.at(index),
+      };
+    }, {});
+
+    return {
+      ...named,
+      unknown: signers.slice(names.length),
+    } as Signers<K>;
   }
 }

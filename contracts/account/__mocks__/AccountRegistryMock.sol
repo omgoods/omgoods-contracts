@@ -1,14 +1,14 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.20;
 
-import "../IAccountRegistry.sol";
+import {IAccountRegistry} from "../IAccountRegistry.sol";
 
 contract AccountRegistryMock is IAccountRegistry {
   // storage
 
   mapping(address => mapping(address => bool)) private _accountOwners;
 
-  // external functions (getters)
+  // external getters
 
   function isAccountOwner(
     address account,
@@ -17,18 +17,22 @@ contract AccountRegistryMock is IAccountRegistry {
     return _accountOwners[account][owner];
   }
 
-  // external functions (setters)
+  // external setters
 
   function addAccountOwner(address account, address owner) external {
     _accountOwners[account][owner] = true;
-
-    emit AccountOwnerAdded(account, owner);
   }
 
-  function removeAccountOwner(address account, address owner) external {
-    _accountOwners[account][owner] = false;
+  function directAddAccountOwner(address owner) external {
+    _accountOwners[msg.sender][owner] = true;
 
-    emit AccountOwnerRemoved(account, owner);
+    emit AccountOwnerAdded(msg.sender, owner);
+  }
+
+  function directRemoveAccountOwner(address owner) external {
+    _accountOwners[msg.sender][owner] = false;
+
+    emit AccountOwnerRemoved(msg.sender, owner);
   }
 
   function emitAccountTransactionExecuted(

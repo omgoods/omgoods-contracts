@@ -13,7 +13,7 @@ contract ERC20TokenMock is ERC20Token {
     string symbol_
   );
 
-  // deployment functions
+  // deployment
 
   constructor() ERC20Token(address(0)) {
     //
@@ -30,7 +30,7 @@ contract ERC20TokenMock is ERC20Token {
     emit Initialized(gateway, tokenRegistry, name_, symbol_);
   }
 
-  // external functions (setters)
+  // external setters
 
   function mint(address to, uint256 amount) external {
     _mint(to, amount);

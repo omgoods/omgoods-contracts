@@ -22,7 +22,7 @@ abstract contract Initializable {
     _;
   }
 
-  // external functions (getters)
+  // external getters
 
   function initialized() external view returns (bool) {
     return _initialized;

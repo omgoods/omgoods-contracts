@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {Proxy} from "./Proxy.sol";
 
 abstract contract ProxyFactory {
-  // internal functions (setters)
+  // internal setters
 
   function _createProxy(
     address proxyImpl,

@@ -60,7 +60,7 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
     _;
   }
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) Guarded(owner) {
     //
@@ -74,7 +74,7 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
     emit Initialized(guardians);
   }
 
-  // external functions (getters)
+  // external getters
 
   function hasToken(address token) external view returns (bool) {
     return _tokens[token];
@@ -84,7 +84,7 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
     return _tokenFactories[tokenFactory];
   }
 
-  // external functions (setters)
+  // external setters
 
   function addToken(address token) external onlyOwner {
     if (token == address(0)) {

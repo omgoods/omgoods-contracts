@@ -38,7 +38,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
 
   error InsufficientAllowance();
 
-  // deployment functions
+  // deployment
 
   constructor(address owner) Token(owner) {
     //
@@ -57,7 +57,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
     _initialize(gateway, tokenRegistry);
   }
 
-  // external functions (getters)
+  // external getters
 
   function name() external view returns (string memory) {
     return _name;
@@ -86,7 +86,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
     return _allowances[owner][spender];
   }
 
-  // external functions (setters)
+  // external setters
 
   function transfer(address to, uint256 amount) external returns (bool) {
     _transfer(_msgSender(), to, amount);
@@ -111,7 +111,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
     return true;
   }
 
-  // internal functions (setters)
+  // internal setters
 
   function _mint(address to, uint256 amount) internal {
     if (to == address(0)) {
@@ -146,7 +146,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
     _afterTransfer(from, address(0), amount);
   }
 
-  // private functions (setters)
+  // private setters
 
   function _transfer(address from, address to, uint256 amount) private {
     if (from == address(0)) {

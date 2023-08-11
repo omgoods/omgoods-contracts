@@ -4,7 +4,7 @@ pragma solidity 0.8.20;
 import {ERC20Token} from "../ERC20Token.sol";
 
 contract ERC20FixedTokenImpl is ERC20Token {
-  // deployment functions
+  // deployment
 
   constructor() ERC20Token(address(0)) {
     _initialized = true; // singleton

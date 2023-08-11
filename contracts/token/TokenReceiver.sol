@@ -34,13 +34,11 @@ abstract contract TokenReceiver is
     address,
     uint256,
     bytes calldata
-  ) external pure returns (bytes4) {
+  ) external virtual returns (bytes4) {
     return this.onERC721Received.selector;
   }
 
   // ERC777
-
-  // solhint-disable no-empty-blocks
 
   function tokensReceived(
     address,
@@ -49,11 +47,12 @@ abstract contract TokenReceiver is
     uint256,
     bytes calldata,
     bytes calldata
-  ) external pure {
-    //
-  }
+  ) external virtual {
+    // solhint-disable-next-line no-empty-blocks
+    {
 
-  // solhint-enable no-empty-blocks
+    }
+  }
 
   // ERC1155
 
@@ -63,7 +62,7 @@ abstract contract TokenReceiver is
     uint256,
     uint256,
     bytes calldata
-  ) external pure returns (bytes4) {
+  ) external virtual returns (bytes4) {
     return this.onERC1155Received.selector;
   }
 
@@ -73,7 +72,7 @@ abstract contract TokenReceiver is
     uint256[] calldata,
     uint256[] calldata,
     bytes calldata
-  ) external pure returns (bytes4) {
+  ) external virtual returns (bytes4) {
     return this.onERC1155BatchReceived.selector;
   }
 }

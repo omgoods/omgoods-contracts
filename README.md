@@ -1,6 +1,7 @@
 # OM!goods contracts
 
-![License NONE](https://img.shields.io/badge/License-NONE-red.svg)
+![License NONE][license-image]
+[![Coverage workflow][coverage-image]][coverage-url]
 
 ## Installation
 
@@ -24,3 +25,8 @@ npm run deploy       # deploys contracts
 ## License
 
 NONE
+
+[license-image]: https://img.shields.io/badge/License-NONE-red.svg
+
+[coverage-image]: https://github.com/omgoods/omgoods-contracts/actions/workflows/coverage.yml/badge.svg
+[coverage-url]: https://github.com/omgoods/omgoods-contracts/actions/workflows/coverage.yml

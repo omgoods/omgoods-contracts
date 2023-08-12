@@ -7,7 +7,7 @@ const { ZeroAddress } = ethers;
 
 const { randomAddress } = helpers;
 
-describe('common/access/Ownable // using mock', () => {
+describe('common/access/Ownable // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployOwnableMock>>;
 
   const createBeforeHook = () => {

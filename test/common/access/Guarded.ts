@@ -7,7 +7,7 @@ const { hashMessage, ZeroAddress, randomBytes } = ethers;
 
 const { randomAddress } = helpers;
 
-describe('common/access/Guarded // using mock', () => {
+describe('common/access/Guarded // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployGuardedMock>>;
 
   const createBeforeHook = () => {

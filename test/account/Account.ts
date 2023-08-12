@@ -7,7 +7,7 @@ const { ZeroAddress, concat } = ethers;
 
 const { randomAddress } = helpers;
 
-describe('account/Account // using mock', () => {
+describe('account/Account // mocked', () => {
   describe('# deployment', () => {
     let fixture: Awaited<ReturnType<typeof deployAccountMock>>;
 

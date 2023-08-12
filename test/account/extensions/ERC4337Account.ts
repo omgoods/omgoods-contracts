@@ -6,7 +6,7 @@ import { EMPTY_USER_OP } from './constants';
 
 const { randomBytes } = ethers;
 
-describe('account/extensions/ERC4337Account // using mock', () => {
+describe('account/extensions/ERC4337Account // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployERC4337AccountMock>>;
 
   before(async () => {

@@ -7,7 +7,7 @@ const { keccak256, concat } = ethers;
 
 const { randomHex } = helpers;
 
-describe('common/utils/Bytes // using mock', () => {
+describe('common/utils/Bytes // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployBytesMock>>;
 
   before(async () => {

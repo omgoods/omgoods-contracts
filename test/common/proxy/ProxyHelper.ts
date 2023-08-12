@@ -6,7 +6,7 @@ import { createProxyAddressFactory } from './helpers';
 
 const { randomAddress, randomHex } = helpers;
 
-describe('common/proxy/ProxyHelper // using mock', () => {
+describe('common/proxy/ProxyHelper // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployProxyHelperMock>>;
 
   before(async () => {

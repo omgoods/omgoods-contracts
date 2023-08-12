@@ -19,10 +19,10 @@ abstract contract TokenReceiver is
     bytes4 interfaceId
   ) external view virtual returns (bool) {
     return
-      interfaceId == type(IERC1155Receiver).interfaceId ||
       interfaceId == type(IERC165).interfaceId ||
       interfaceId == type(IERC721Receiver).interfaceId ||
-      interfaceId == type(IERC777Recipient).interfaceId;
+      interfaceId == type(IERC777Recipient).interfaceId ||
+      interfaceId == type(IERC1155Receiver).interfaceId;
   }
 
   // external setters

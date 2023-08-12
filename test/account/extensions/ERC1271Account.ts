@@ -5,7 +5,7 @@ import { deployERC1271AccountMock } from './fixtures';
 
 const { hashMessage, randomBytes } = ethers;
 
-describe('account/extensions/ERC1271Account // using mock', () => {
+describe('account/extensions/ERC1271Account // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployERC1271AccountMock>>;
 
   before(async () => {

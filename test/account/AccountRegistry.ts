@@ -106,6 +106,16 @@ describe('account/AccountRegistry', () => {
     describe('# getters', () => {
       createBeforeHook();
 
+      describe('getAccountImpl()', () => {
+        it('expect to return account impl address', async () => {
+          const { accountRegistry, accountImpl } = fixture;
+
+          const res = await accountRegistry.getAccountImpl();
+
+          expect(res).eq(await accountImpl.getAddress());
+        });
+      });
+
       describe('computeAccount()', () => {
         it('expect to compute a correct account address', async () => {
           const { accountRegistry, computeAccountAddress } = fixture;
@@ -596,6 +606,344 @@ describe('account/AccountRegistry', () => {
           await expect(tx)
             .emit(accountRegistry, 'AccountOwnerRemoved')
             .withArgs(createdAccount, owner);
+        });
+      });
+
+      describe('executeAccountTransaction()', () => {
+        createBeforeHook();
+
+        it('expect to revert when the account is the zero address', async () => {
+          const { accountRegistry } = fixture;
+
+          const tx = accountRegistry.executeAccountTransaction(
+            ZeroAddress,
+            ZeroAddress,
+            0,
+            '0x',
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'AccountIsTheZeroAddress',
+          );
+        });
+
+        it('expect to revert when the sender is not the account owner', async () => {
+          const { accountRegistry } = fixture;
+
+          const tx = accountRegistry.executeAccountTransaction(
+            randomAddress(),
+            ZeroAddress,
+            0,
+            '0x',
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'MsgSenderIsNotTheAccountOwner',
+          );
+        });
+
+        it("expect to execute a transaction from the account with an 'unknown' state", async () => {
+          const {
+            accountRegistry,
+            accountImpl,
+            unknownAccount,
+            unknownAccountOwner,
+          } = fixture;
+
+          const to = randomAddress();
+          const value = 0;
+          const data = '0x';
+
+          const tx = accountRegistry
+            .connect(unknownAccountOwner)
+            .executeAccountTransaction(unknownAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountOwnerAdded')
+            .withArgs(unknownAccount, unknownAccountOwner.address);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountCreated')
+            .withArgs(unknownAccount);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionExecuted')
+            .withArgs(unknownAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountImpl.attach(unknownAccount), 'TransactionExecuted')
+            .withArgs(to, value, data);
+        });
+
+        it("expect to execute a transaction from the account with a 'defined' state", async () => {
+          const {
+            accountRegistry,
+            accountImpl,
+            definedAccount,
+            definedAccountOwner,
+          } = fixture;
+
+          const to = randomAddress();
+          const value = 0;
+          const data = '0x';
+
+          const tx = accountRegistry
+            .connect(definedAccountOwner)
+            .executeAccountTransaction(definedAccount, to, value, data);
+
+          await expect(tx).not.emit(accountRegistry, 'AccountOwnerAdded');
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountCreated')
+            .withArgs(definedAccount);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionExecuted')
+            .withArgs(definedAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountImpl.attach(definedAccount), 'TransactionExecuted')
+            .withArgs(to, value, data);
+        });
+
+        it("expect to execute a transaction from the account with a 'created' state", async () => {
+          const {
+            accountRegistry,
+            accountImpl,
+            createdAccount,
+            createdAccountOwner,
+          } = fixture;
+
+          const to = randomAddress();
+          const value = 0;
+          const data = '0x';
+
+          const tx = accountRegistry
+            .connect(createdAccountOwner)
+            .executeAccountTransaction(createdAccount, to, value, data);
+
+          await expect(tx).not.emit(accountRegistry, 'AccountOwnerAdded');
+
+          await expect(tx).not.emit(accountRegistry, 'AccountCreated');
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionExecuted')
+            .withArgs(createdAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountImpl.attach(createdAccount), 'TransactionExecuted')
+            .withArgs(to, value, data);
+        });
+      });
+
+      describe('executeAccountTransactions()', () => {
+        createBeforeHook();
+
+        it('expect to revert when the account is the zero address', async () => {
+          const { accountRegistry } = fixture;
+
+          const tx = accountRegistry.executeAccountTransactions(
+            ZeroAddress,
+            [],
+            [],
+            [],
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'AccountIsTheZeroAddress',
+          );
+        });
+
+        it('expect to revert when the sender is not the account owner', async () => {
+          const { accountRegistry } = fixture;
+
+          const tx = accountRegistry.executeAccountTransactions(
+            randomAddress(),
+            [],
+            [],
+            [],
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'MsgSenderIsNotTheAccountOwner',
+          );
+        });
+
+        it("expect to execute transactions from the account with an 'unknown' state", async () => {
+          const {
+            accountRegistry,
+            accountImpl,
+            unknownAccount,
+            unknownAccountOwner,
+          } = fixture;
+
+          const to = [randomAddress()];
+          const value = [0];
+          const data = ['0x'];
+
+          const tx = accountRegistry
+            .connect(unknownAccountOwner)
+            .executeAccountTransactions(unknownAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountOwnerAdded')
+            .withArgs(unknownAccount, unknownAccountOwner.address);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountCreated')
+            .withArgs(unknownAccount);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionsExecuted')
+            .withArgs(unknownAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountImpl.attach(unknownAccount), 'TransactionsExecuted')
+            .withArgs(to, value, data);
+        });
+
+        it("expect to execute transactions from the account with a 'defined' state", async () => {
+          const {
+            accountRegistry,
+            accountImpl,
+            definedAccount,
+            definedAccountOwner,
+          } = fixture;
+
+          const to = [randomAddress()];
+          const value = [0];
+          const data = ['0x'];
+
+          const tx = accountRegistry
+            .connect(definedAccountOwner)
+            .executeAccountTransactions(definedAccount, to, value, data);
+
+          await expect(tx).not.emit(accountRegistry, 'AccountOwnerAdded');
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountCreated')
+            .withArgs(definedAccount);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionsExecuted')
+            .withArgs(definedAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountImpl.attach(definedAccount), 'TransactionsExecuted')
+            .withArgs(to, value, data);
+        });
+
+        it("expect to execute transactions from the account with a 'created' state", async () => {
+          const {
+            accountRegistry,
+            accountImpl,
+            createdAccount,
+            createdAccountOwner,
+          } = fixture;
+
+          const to = [randomAddress()];
+          const value = [0];
+          const data = ['0x'];
+
+          const tx = accountRegistry
+            .connect(createdAccountOwner)
+            .executeAccountTransactions(createdAccount, to, value, data);
+
+          await expect(tx).not.emit(accountRegistry, 'AccountOwnerAdded');
+
+          await expect(tx).not.emit(accountRegistry, 'AccountCreated');
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionsExecuted')
+            .withArgs(createdAccount, to, value, data);
+
+          await expect(tx)
+            .emit(accountImpl.attach(createdAccount), 'TransactionsExecuted')
+            .withArgs(to, value, data);
+        });
+      });
+
+      describe('emitAccountTransactionExecuted()', () => {
+        createBeforeHook();
+
+        it('expect to revert when the sender is not the account', async () => {
+          const { accountRegistry } = fixture;
+
+          const tx = accountRegistry.emitAccountTransactionExecuted(
+            randomAddress(),
+            0,
+            '0x',
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'MsgSenderIsNotTheAccount',
+          );
+        });
+
+        it('expect to emit event when the sender is the account', async () => {
+          const { accountRegistry, createdAccount, createdAccountOwner } =
+            fixture;
+
+          const account = await getContractAt(
+            'AccountImpl',
+            createdAccount,
+            createdAccountOwner,
+          );
+
+          const to = randomAddress();
+          const value = 0;
+          const data = '0x';
+
+          const tx = account.executeTransaction(to, value, data);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionExecuted')
+            .withArgs(createdAccount, to, value, data);
+        });
+      });
+
+      describe('emitAccountTransactionsExecuted()', () => {
+        createBeforeHook();
+
+        it('expect to revert when the sender is not the account', async () => {
+          const { accountRegistry } = fixture;
+
+          const tx = accountRegistry.emitAccountTransactionsExecuted(
+            [],
+            [],
+            [],
+          );
+
+          await expect(tx).revertedWithCustomError(
+            accountRegistry,
+            'MsgSenderIsNotTheAccount',
+          );
+        });
+
+        it('expect to emit event when the sender is the account', async () => {
+          const { accountRegistry, createdAccount, createdAccountOwner } =
+            fixture;
+
+          const account = await getContractAt(
+            'AccountImpl',
+            createdAccount,
+            createdAccountOwner,
+          );
+
+          const to = [randomAddress()];
+          const value = [0];
+          const data = ['0x'];
+
+          const tx = account.executeTransactions(to, value, data);
+
+          await expect(tx)
+            .emit(accountRegistry, 'AccountTransactionsExecuted')
+            .withArgs(createdAccount, to, value, data);
         });
       });
     });

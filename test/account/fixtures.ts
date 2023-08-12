@@ -43,6 +43,46 @@ export async function deployAccountRegistryMock() {
   };
 }
 
+export async function setupAccount() {
+  const { accountRegistry, signers, createdAccount, createdAccountOwner } =
+    await setupAccountRegistry();
+
+  const account = await getContractAt('AccountImpl', createdAccount);
+
+  return {
+    account,
+    accountRegistry,
+    signers: {
+      ...signers,
+      owner: createdAccountOwner,
+    },
+  };
+}
+
+export async function setupAccountMock() {
+  const signers = await buildSigners('owner', 'gateway', 'entryPoint');
+
+  const { accountRegistryMock } = await deployAccountRegistryMock();
+
+  const { accountMock } = await deployAccountMock();
+
+  await accountMock.initialize(
+    signers.gateway,
+    signers.entryPoint,
+    accountRegistryMock,
+  );
+
+  await accountRegistryMock.addAccountOwner(accountMock, signers.owner);
+
+  await setBalance(accountMock);
+
+  return {
+    accountMock,
+    accountRegistryMock,
+    signers,
+  };
+}
+
 export async function setupAccountRegistry(
   options: {
     gateway?: AddressLike;
@@ -91,45 +131,5 @@ export async function setupAccountRegistry(
     createdAccount,
     definedAccount,
     unknownAccount,
-  };
-}
-
-export async function setupAccount() {
-  const { accountRegistry, signers, createdAccount, createdAccountOwner } =
-    await setupAccountRegistry();
-
-  const account = await getContractAt('AccountImpl', createdAccount);
-
-  return {
-    account,
-    accountRegistry,
-    signers: {
-      ...signers,
-      owner: createdAccountOwner,
-    },
-  };
-}
-
-export async function setupAccountMock() {
-  const signers = await buildSigners('owner', 'gateway', 'entryPoint');
-
-  const { accountRegistryMock } = await deployAccountRegistryMock();
-
-  const { accountMock } = await deployAccountMock();
-
-  await accountMock.initialize(
-    signers.gateway,
-    signers.entryPoint,
-    accountRegistryMock,
-  );
-
-  await accountRegistryMock.addAccountOwner(accountMock, signers.owner);
-
-  await setBalance(accountMock);
-
-  return {
-    accountMock,
-    accountRegistryMock,
-    signers,
   };
 }

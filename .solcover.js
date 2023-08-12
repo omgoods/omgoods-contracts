@@ -8,10 +8,11 @@ const CONTRACTS_ROOT = join(__dirname, 'contracts');
 
 /**
  * @param fileName {string}
+ * @param filePath {string}
  * @returns {boolean}
  */
-function isMock(fileName) {
-  return fileName.endsWith('Mock.sol');
+function isMock(fileName, filePath) {
+  return fileName.endsWith('Mock.sol') || filePath.includes('__mocks__');
 }
 
 /**
@@ -60,7 +61,7 @@ function readSkippedPaths(rootPath) {
       } else if (
         itemStats.isFile() &&
         (startWithLowerCase(itemName) ||
-          isMock(itemName) ||
+          isMock(itemName, itemPath) ||
           isInterface(itemName))
       ) {
         results.push(itemPath);

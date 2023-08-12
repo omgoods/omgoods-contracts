@@ -67,7 +67,7 @@ contract AccountRegistry is
 
   // modifiers
 
-  modifier onlyCreatedAccount() {
+  modifier onlyAccount() {
     if (_accountStates[msg.sender] != AccountStates.Created) {
       revert MsgSenderIsNotTheAccount();
     }
@@ -100,6 +100,10 @@ contract AccountRegistry is
   }
 
   // external getters
+
+  function getAccountImpl() external view returns (address) {
+    return _accountImpl;
+  }
 
   function computeAccount(
     address saltOwner
@@ -211,11 +215,11 @@ contract AccountRegistry is
     _removeAccountOwner(account, owner);
   }
 
-  function directAddAccountOwner(address owner) external onlyCreatedAccount {
+  function directAddAccountOwner(address owner) external onlyAccount {
     _addAccountOwner(msg.sender, owner);
   }
 
-  function directRemoveAccountOwner(address owner) external onlyCreatedAccount {
+  function directRemoveAccountOwner(address owner) external onlyAccount {
     _removeAccountOwner(msg.sender, owner);
   }
 
@@ -257,7 +261,7 @@ contract AccountRegistry is
     address to,
     uint256 value,
     bytes calldata data
-  ) external onlyCreatedAccount {
+  ) external onlyAccount {
     emit AccountTransactionExecuted(msg.sender, to, value, data);
   }
 
@@ -265,7 +269,7 @@ contract AccountRegistry is
     address[] calldata to,
     uint256[] calldata value,
     bytes[] calldata data
-  ) external onlyCreatedAccount {
+  ) external onlyAccount {
     emit AccountTransactionsExecuted(msg.sender, to, value, data);
   }
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: NONE
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Ownable} from "../common/access/Ownable.sol";

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: NONE
-pragma solidity 0.8.20;
+pragma solidity 0.8.21;
 
 import {IAccount} from "@account-abstraction/contracts/interfaces/IAccount.sol";
 import {UserOperation} from "@account-abstraction/contracts/interfaces/UserOperation.sol";

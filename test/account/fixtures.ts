@@ -1,10 +1,10 @@
 import { ethers, helpers } from 'hardhat';
 import { AddressLike } from 'ethers';
-import { createProxyAddressFactory } from '../common/proxy/helpers';
 
 const { deployContract, ZeroAddress, keccak256, getContractAt } = ethers;
 
-const { setBalance, buildSigners, randomAddress } = helpers;
+const { setBalance, buildSigners, randomAddress, createProxyAddressFactory } =
+  helpers;
 
 export async function deployAccountMock() {
   const accountMock = await deployContract('AccountMock');

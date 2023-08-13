@@ -2,11 +2,11 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
 import { deployProxyFactoryMock } from './fixtures';
-import { getProxyImplAddress, createProxyAddressFactory } from './helpers';
+import { getProxyImplAddress } from './helpers';
 
 const { ZeroAddress } = ethers;
 
-const { randomAddress, randomHex } = helpers;
+const { randomAddress, randomHex, createProxyAddressFactory } = helpers;
 
 describe('common/proxy/ProxyFactory // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployProxyFactoryMock>>;

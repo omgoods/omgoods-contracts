@@ -35,6 +35,8 @@ contract Gateway is EIP712, Ownable, Initializable {
 
   event Initialized(address accountRegistry);
 
+  event NonceUpdated(address account, uint256 nonce);
+
   // errors
 
   error AccountRegistryIsTheZeroAddress();
@@ -44,6 +46,8 @@ contract Gateway is EIP712, Ownable, Initializable {
   error RequestFromTheZeroAddress();
 
   error RequestToTheZeroAddress();
+
+  error RequestToTheInvalidAddress();
 
   error RequestForbidden();
 
@@ -279,6 +283,8 @@ contract Gateway is EIP712, Ownable, Initializable {
       }
     }
 
+    emit NonceUpdated(from, nonce);
+
     signer = _recoverTrustedSigner(from, hash, signature);
 
     if (signer == address(0)) {
@@ -297,6 +303,10 @@ contract Gateway is EIP712, Ownable, Initializable {
   ) private {
     if (to == address(0)) {
       revert RequestToTheZeroAddress();
+    }
+
+    if (to == address(this)) {
+      revert RequestToTheInvalidAddress();
     }
 
     address contextMsgSender = to == _accountRegistry ? sender : from;

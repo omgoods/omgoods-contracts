@@ -12,14 +12,15 @@ npm i
 ## Scripts
 
 ```bash
-npm start            # starts hardhat node
+npm start         # starts hardhat node
 
-npm run linter       # runs solidity linter
-npm run format       # runs prettier
-npm run compile      # compiles contracts
-npm run test         # runs unit tests
-npm run coverage     # runs coverage tests
-npm run deploy       # deploys contracts
+npm run linter    # runs solidity linter
+npm run format    # runs prettier
+npm run compile   # compiles contracts
+npm run test      # runs unit tests
+npm run coverage  # runs coverage tests
+npm run deploy    # deploys contracts
+npm run hardhat   # hardhat wrapper
 ```
 
 ## License

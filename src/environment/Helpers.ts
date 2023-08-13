@@ -14,6 +14,54 @@ export class Helpers {
     }
   }
 
+  async getDeployedContractAddress(name: string): Promise<string> {
+    const {
+      deployments: { get },
+    } = this.hre;
+
+    let result: string;
+
+    try {
+      ({ address: result } = await get(name));
+    } catch (err) {
+      throw new Error(`${name} contract has not been deployed yet.`);
+    }
+
+    return result;
+  }
+
+  async createProxyAddressFactory<T = string>(
+    proxyFactory: AddressLike,
+    proxyImpl: AddressLike,
+    prepareSalt: (salt: T) => string = null,
+  ): Promise<(salt: T) => string> {
+    const {
+      ethers: {
+        resolveAddress,
+        getContractFactory,
+        zeroPadValue,
+        concat,
+        keccak256,
+        getCreate2Address,
+      },
+    } = this.hre;
+
+    const Proxy = await getContractFactory('Proxy');
+    const deployer = await resolveAddress(proxyFactory);
+    const initCodeHash = keccak256(
+      concat([
+        Proxy.bytecode,
+        zeroPadValue((await resolveAddress(proxyImpl)).toLowerCase(), 32),
+      ]),
+    );
+
+    return (salt) => {
+      const preparedSalt = prepareSalt ? prepareSalt(salt) : (salt as string);
+
+      return getCreate2Address(deployer, preparedSalt, initCodeHash);
+    };
+  }
+
   randomHex(bytesSize = 32): string {
     const {
       ethers: { hexlify, randomBytes },

@@ -1,4 +1,5 @@
 import { setBalance } from '@nomicfoundation/hardhat-network-helpers';
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import {
   AddressLike,
@@ -18,6 +19,29 @@ export class Helpers {
         this[method] = this[method].bind(this);
       }
     }
+  }
+
+  async getNamedSigner(name: string): Promise<HardhatEthersSigner> {
+    const {
+      getNamedAccounts,
+      ethers: { getSigner },
+    } = this.hre;
+
+    const accounts = await getNamedAccounts();
+
+    let result: HardhatEthersSigner;
+
+    try {
+      result = await getSigner(accounts[name]);
+    } catch (err) {
+      result = null;
+    }
+
+    if (!result) {
+      throw new Error(`Named signer "${name}" not found.`);
+    }
+
+    return result;
   }
 
   async getDeployedContractAddress(name: string): Promise<string> {

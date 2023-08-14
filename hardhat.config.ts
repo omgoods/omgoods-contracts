@@ -11,6 +11,13 @@ const config: HardhatUserConfig = {
       optimizer: { enabled: true, runs: 100 },
     },
   },
+  networks: {
+    hardhat: {
+      accounts: {
+        count: 10,
+      },
+    },
+  },
   namedAccounts: {
     owner: 0,
     deployer: 1,

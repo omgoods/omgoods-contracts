@@ -2,11 +2,10 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
 import { deployProxy } from './fixtures';
-import { getProxyImplAddress } from './helpers';
 
 const { getContractAt } = ethers;
 
-const { randomAddress } = helpers;
+const { randomAddress, getProxyImplAddress } = helpers;
 
 describe('common/proxy/Proxy', () => {
   describe('# deployment', () => {

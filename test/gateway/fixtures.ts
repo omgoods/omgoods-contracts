@@ -1,12 +1,13 @@
 import { ethers, helpers } from 'hardhat';
+import { deployERC1271AccountMock } from '../account/extensions/fixtures';
 import { setupAccountRegistry } from '../account/fixtures';
-import { AddressLike } from 'ethers';
+import { AddressLike, BigNumberish, BytesLike, TypedDataDomain } from 'ethers';
 
 const { deployContract, ZeroAddress } = ethers;
 
-const { buildSigners } = helpers;
+const { buildSigners, createTypedDataEncoder } = helpers;
 
-const TYPED_DATA_DOMAIN = {
+const TYPED_DATA_DOMAIN: TypedDataDomain = {
   name: 'Test Gateway',
   version: '0.0.0',
 } as const;
@@ -49,13 +50,12 @@ export async function deployGateway() {
 }
 
 export async function setupGateway() {
+  const { erc1271AccountMock } = await deployERC1271AccountMock();
   const { gateway, signers } = await deployGateway();
 
-  const { accountRegistry, computeAccountAddress } = await setupAccountRegistry(
-    {
-      gateway,
-    },
-  );
+  const { accountRegistry, accounts } = await setupAccountRegistry({
+    gateway,
+  });
 
   const { gatewayRecipientMock } = await deployGatewayRecipientMock({
     gateway,
@@ -63,11 +63,76 @@ export async function setupGateway() {
 
   await gateway.initialize(accountRegistry);
 
+  const requestTypeEncoder = await createTypedDataEncoder<{
+    from: string;
+    nonce: BigNumberish;
+    to: string;
+    value: BigNumberish;
+    data: BytesLike;
+  }>(gateway, TYPED_DATA_DOMAIN, {
+    Request: [
+      {
+        name: 'from',
+        type: 'address',
+      },
+      {
+        name: 'nonce',
+        type: 'uint256',
+      },
+      {
+        name: 'to',
+        type: 'address',
+      },
+      {
+        name: 'value',
+        type: 'uint256',
+      },
+      {
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+  });
+
+  const requestsTypeEncoder = await createTypedDataEncoder<{
+    from: string;
+    nonce: BigNumberish;
+    to: Array<string>;
+    value: Array<BigNumberish>;
+    data: Array<BytesLike>;
+  }>(gateway, TYPED_DATA_DOMAIN, {
+    Requests: [
+      {
+        name: 'from',
+        type: 'address',
+      },
+      {
+        name: 'nonce',
+        type: 'uint256',
+      },
+      {
+        name: 'to',
+        type: 'address[]',
+      },
+      {
+        name: 'value',
+        type: 'uint256[]',
+      },
+      {
+        name: 'data',
+        type: 'bytes[]',
+      },
+    ],
+  });
+
   return {
     gateway,
     gatewayRecipientMock,
     accountRegistry,
-    computeAccountAddress,
+    accounts,
     signers,
+    erc1271AccountMock,
+    requestTypeEncoder,
+    requestsTypeEncoder,
   };
 }

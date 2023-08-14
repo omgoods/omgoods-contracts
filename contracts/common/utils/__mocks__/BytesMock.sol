@@ -8,7 +8,9 @@ contract BytesMock {
 
   // external getters
 
-  function toKeccak256(bytes[] calldata data) external pure returns (bytes32) {
-    return data.toKeccak256();
+  function deepKeccak256(
+    bytes[] calldata data
+  ) external pure returns (bytes32) {
+    return data.deepKeccak256();
   }
 }

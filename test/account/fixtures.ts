@@ -44,17 +44,18 @@ export async function deployAccountRegistryMock() {
 }
 
 export async function setupAccount() {
-  const { accountRegistry, signers, createdAccount, createdAccountOwner } =
+  const { accountRegistry, accountImpl, signers, accounts } =
     await setupAccountRegistry();
 
-  const account = await getContractAt('AccountImpl', createdAccount);
+  const account = await getContractAt('AccountImpl', accounts.created.address);
 
   return {
     account,
+    accountImpl,
     accountRegistry,
     signers: {
       ...signers,
-      owner: createdAccountOwner,
+      owner: accounts.created.owner,
     },
   };
 }
@@ -107,29 +108,38 @@ export async function setupAccountRegistry(
     (owner) => keccak256(owner),
   );
 
-  const [createdAccountOwner, definedAccountOwner, unknownAccountOwner] =
-    signers.unknown;
+  const accounts: Record<
+    'created' | 'defined' | 'unknown',
+    {
+      address: string;
+      owner: typeof signers.owner;
+    }
+  > = {
+    created: {
+      address: computeAccountAddress(signers.unknown.at(0).address),
+      owner: signers.unknown.at(0),
+    },
+    defined: {
+      address: computeAccountAddress(signers.unknown.at(1).address),
+      owner: signers.unknown.at(1),
+    },
+    unknown: {
+      address: computeAccountAddress(signers.unknown.at(2).address),
+      owner: signers.unknown.at(2),
+    },
+  };
 
-  const createdAccount = computeAccountAddress(createdAccountOwner.address);
-  const definedAccount = computeAccountAddress(definedAccountOwner.address);
-  const unknownAccount = computeAccountAddress(unknownAccountOwner.address);
-
-  await accountRegistry.forceAccountCreation(createdAccountOwner);
+  await accountRegistry.forceAccountCreation(accounts.created.owner);
 
   await accountRegistry
-    .connect(definedAccountOwner)
-    .addAccountOwner(definedAccount, randomAddress());
+    .connect(accounts.defined.owner)
+    .addAccountOwner(accounts.defined.address, randomAddress());
 
   return {
     accountRegistry,
     accountImpl,
     computeAccountAddress,
     signers,
-    createdAccountOwner,
-    definedAccountOwner,
-    unknownAccountOwner,
-    createdAccount,
-    definedAccount,
-    unknownAccount,
+    accounts,
   };
 }

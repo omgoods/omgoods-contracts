@@ -1,7 +1,13 @@
 import { setBalance } from '@nomicfoundation/hardhat-network-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { AddressLike, BigNumberish } from 'ethers';
+import {
+  AddressLike,
+  BigNumberish,
+  TypedDataDomain,
+  TypedDataField,
+} from 'ethers';
 import { Signers } from './interfaces';
+import { PROXY_IMPL_SLOT } from './constants';
 
 export class Helpers {
   constructor(private readonly hre: HardhatRuntimeEnvironment) {
@@ -28,6 +34,47 @@ export class Helpers {
     }
 
     return result;
+  }
+
+  async createTypedDataEncoder<D = Record<string, any>>(
+    verifyingContract: AddressLike,
+    domain: TypedDataDomain,
+    types: Record<string, Array<TypedDataField>>,
+  ): Promise<{
+    encode: (data: D) => string;
+    hash: (data: D) => string;
+    domain: TypedDataDomain;
+    types: Record<string, Array<TypedDataField>>;
+  }> {
+    const {
+      network: {
+        config: { chainId },
+      },
+      ethers: { resolveAddress, TypedDataEncoder },
+    } = this.hre;
+
+    domain = {
+      ...domain,
+      chainId,
+      verifyingContract: await resolveAddress(verifyingContract),
+    };
+
+    return {
+      encode: (data) => TypedDataEncoder.encode(domain, types, data),
+      hash: (data) => TypedDataEncoder.hash(domain, types, data),
+      domain,
+      types,
+    };
+  }
+
+  async getProxyImplAddress(contract: AddressLike): Promise<string> {
+    const {
+      ethers: { provider, AbiCoder },
+    } = this.hre;
+
+    const storage = await provider.getStorage(contract, PROXY_IMPL_SLOT);
+
+    return AbiCoder.defaultAbiCoder().decode(['address'], storage).at(0);
   }
 
   async createProxyAddressFactory<T = string>(
@@ -89,7 +136,9 @@ export class Helpers {
     );
   }
 
-  async buildSigners<K extends string>(...names: K[]): Promise<Signers<K>> {
+  async buildSigners<K extends string>(
+    ...names: Array<K>
+  ): Promise<Signers<K>> {
     const {
       ethers: { getSigners },
     } = this.hre;

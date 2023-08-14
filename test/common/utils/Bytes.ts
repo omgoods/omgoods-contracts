@@ -15,13 +15,13 @@ describe('common/utils/Bytes // mocked', () => {
   });
 
   describe('# getters', () => {
-    describe('toKeccak256()', () => {
+    describe('deepKeccak256()', () => {
       it('expect to return the correct hash', async () => {
         const { bytesMock } = fixture;
 
         const data = [randomHex(10), randomHex(20), randomHex(30)];
 
-        const res = await bytesMock.toKeccak256(data);
+        const res = await bytesMock.deepKeccak256(data);
 
         expect(res).eq(keccak256(concat(data.map((item) => keccak256(item)))));
       });
@@ -29,7 +29,7 @@ describe('common/utils/Bytes // mocked', () => {
       it('expect to return the correct hash for empty data', async () => {
         const { bytesMock } = fixture;
 
-        const res = await bytesMock.toKeccak256([]);
+        const res = await bytesMock.deepKeccak256([]);
 
         expect(res).eq(keccak256('0x'));
       });

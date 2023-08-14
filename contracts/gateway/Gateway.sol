@@ -15,6 +15,22 @@ contract Gateway is EIP712, Ownable, Initializable {
   using Address for address;
   using Bytes for bytes[];
 
+  struct RequestType {
+    address from;
+    uint256 nonce;
+    address to;
+    uint256 value;
+    bytes data;
+  }
+
+  struct RequestsType {
+    address from;
+    uint256 nonce;
+    address[] to;
+    uint256[] value;
+    bytes[] data;
+  }
+
   bytes32 private constant REQUEST_TYPE_HASH =
     keccak256(
       "Request(address from,uint256 nonce,address to,uint256 value,bytes data)"
@@ -37,6 +53,22 @@ contract Gateway is EIP712, Ownable, Initializable {
 
   event NonceUpdated(address account, uint256 nonce);
 
+  event RequestSent(
+    address sender,
+    address from,
+    address to,
+    uint256 value,
+    bytes data
+  );
+
+  event RequestsSent(
+    address sender,
+    address from,
+    address[] to,
+    uint256[] value,
+    bytes[] data
+  );
+
   // errors
 
   error AccountRegistryIsTheZeroAddress();
@@ -52,6 +84,8 @@ contract Gateway is EIP712, Ownable, Initializable {
   error RequestForbidden();
 
   error InvalidRequestsBatchSize();
+
+  error EmptyRequestsBatch();
 
   // deployment
 
@@ -82,23 +116,29 @@ contract Gateway is EIP712, Ownable, Initializable {
   }
 
   function hashRequest(
-    address from,
-    uint256 nonce,
-    address to,
-    uint256 value,
-    bytes calldata data
+    RequestType calldata request
   ) external view returns (bytes32) {
-    return _hashRequest(from, nonce, to, value, data);
+    return
+      _hashRequest(
+        request.from,
+        request.nonce,
+        request.to,
+        request.value,
+        request.data
+      );
   }
 
   function hashRequests(
-    address from,
-    uint256 nonce,
-    address[] calldata to,
-    uint256[] calldata value,
-    bytes[] calldata data
+    RequestsType calldata requests
   ) external view returns (bytes32) {
-    return _hashRequests(from, nonce, to, value, data);
+    return
+      _hashRequests(
+        requests.from,
+        requests.nonce,
+        requests.to,
+        requests.value,
+        requests.data
+      );
   }
 
   function recoverTrustedSigner(
@@ -116,7 +156,7 @@ contract Gateway is EIP712, Ownable, Initializable {
     uint256 value,
     bytes calldata data
   ) external {
-    _sendRequest(msg.sender, msg.sender, to, value, data);
+    _sendRequest(msg.sender, msg.sender, to, value, data, true);
   }
 
   function sendRequests(
@@ -135,7 +175,7 @@ contract Gateway is EIP712, Ownable, Initializable {
   ) external {
     _verifyRequest(msg.sender, from);
 
-    _sendRequest(msg.sender, from, to, value, data);
+    _sendRequest(msg.sender, from, to, value, data, true);
   }
 
   function sendRequestsFrom(
@@ -164,7 +204,7 @@ contract Gateway is EIP712, Ownable, Initializable {
       nonce
     );
 
-    _sendRequest(signer, from, to, value, data);
+    _sendRequest(signer, from, to, value, data, true);
   }
 
   function forwardRequests(
@@ -186,15 +226,6 @@ contract Gateway is EIP712, Ownable, Initializable {
   }
 
   // private getters
-
-  function _isTrustedSender(
-    address account,
-    address sender
-  ) private view returns (bool) {
-    return
-      account == sender ||
-      IAccountRegistry(_accountRegistry).isAccountOwner(account, sender);
-  }
 
   function _hashRequest(
     address from,
@@ -225,22 +256,21 @@ contract Gateway is EIP712, Ownable, Initializable {
             REQUESTS_TYPE_HASH,
             from,
             nonce,
-            to,
-            value,
-            data.toKeccak256()
+            keccak256(abi.encodePacked(to)),
+            keccak256(abi.encodePacked(value)),
+            data.deepKeccak256()
           )
         )
       );
   }
 
-  function _verifyRequest(address sender, address from) private view {
-    if (from == address(0)) {
-      revert RequestFromTheZeroAddress();
-    }
-
-    if (!_isTrustedSender(from, sender)) {
-      revert RequestForbidden();
-    }
+  function _isTrustedSender(
+    address account,
+    address sender
+  ) private view returns (bool) {
+    return
+      account == sender ||
+      IAccountRegistry(_accountRegistry).isAccountOwner(account, sender);
   }
 
   function _recoverTrustedSigner(
@@ -265,6 +295,20 @@ contract Gateway is EIP712, Ownable, Initializable {
     return signer;
   }
 
+  function _verifyRequest(address from) private pure {
+    if (from == address(0)) {
+      revert RequestFromTheZeroAddress();
+    }
+  }
+
+  function _verifyRequest(address sender, address from) private view {
+    _verifyRequest(from);
+
+    if (!_isTrustedSender(from, sender)) {
+      revert RequestForbidden();
+    }
+  }
+
   // private setters
 
   function _verifyRequest(
@@ -273,17 +317,23 @@ contract Gateway is EIP712, Ownable, Initializable {
     address from,
     uint256 nonce
   ) private returns (address signer) {
-    if (from == address(0)) {
-      revert RequestFromTheZeroAddress();
-    }
+    _verifyRequest(from);
 
     unchecked {
-      if (_nonce[from]++ != nonce) {
+      if (_nonce[from] != nonce) {
         revert InvalidRequestNonce();
       }
     }
 
-    emit NonceUpdated(from, nonce);
+    uint256 newNonce;
+
+    unchecked {
+      newNonce = nonce + 1;
+    }
+
+    _nonce[from] = newNonce;
+
+    emit NonceUpdated(from, newNonce);
 
     signer = _recoverTrustedSigner(from, hash, signature);
 
@@ -299,7 +349,8 @@ contract Gateway is EIP712, Ownable, Initializable {
     address from,
     address to,
     uint256 value,
-    bytes calldata data
+    bytes calldata data,
+    bool triggerEvent
   ) private {
     if (to == address(0)) {
       revert RequestToTheZeroAddress();
@@ -321,6 +372,10 @@ contract Gateway is EIP712, Ownable, Initializable {
         revert(add(response, 32), mload(response))
       }
     }
+
+    if (triggerEvent) {
+      emit RequestSent(sender, from, to, value, data);
+    }
   }
 
   function _sendRequests(
@@ -332,16 +387,22 @@ contract Gateway is EIP712, Ownable, Initializable {
   ) private {
     uint256 len = to.length;
 
+    if (len == 0) {
+      revert EmptyRequestsBatch();
+    }
+
     if (len != value.length || len != data.length) {
       revert InvalidRequestsBatchSize();
     }
 
     for (uint256 index; index < len; ) {
-      _sendRequest(sender, from, to[index], value[index], data[index]);
+      _sendRequest(sender, from, to[index], value[index], data[index], false);
 
       unchecked {
         ++index;
       }
     }
+
+    emit RequestsSent(sender, from, to, value, data);
   }
 }

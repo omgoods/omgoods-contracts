@@ -20,7 +20,7 @@ npm run compile   # compiles contracts
 npm run test      # runs unit tests
 npm run coverage  # runs coverage tests
 npm run deploy    # deploys contracts
-npm run hardhat   # hardhat wrapper
+npm run hardhat   # hardhat cli wrapper
 ```
 
 ## License

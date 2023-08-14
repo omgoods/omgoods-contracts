@@ -8,6 +8,12 @@ abstract contract GatewayRecipient is Context {
 
   address internal _gateway;
 
+  // external getters
+
+  function getGateway() external view returns (address) {
+    return _gateway;
+  }
+
   // internal getters
 
   function _msgSender()

@@ -1,6 +1,7 @@
 import { DeployFunction } from 'hardhat-deploy/types';
+import { TypedDataDomain } from 'ethers';
 
-const TYPED_DATA_DOMAIN = {
+const TYPED_DATA_DOMAIN: TypedDataDomain = {
   name: 'Gateway',
   version: '1.0.0',
 } as const;

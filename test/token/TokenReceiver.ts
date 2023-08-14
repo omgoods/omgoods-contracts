@@ -54,7 +54,7 @@ describe('token/TokenReceiver // mocked', () => {
     });
 
     describe('tokensReceived()', () => {
-      it('expect to not to revert', async () => {
+      it('expect not to revert', async () => {
         const { tokenReceiverMock } = fixture;
 
         const tx = tokenReceiverMock.tokensReceived(

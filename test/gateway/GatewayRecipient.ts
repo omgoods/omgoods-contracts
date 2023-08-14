@@ -15,6 +15,16 @@ describe('gateway/GatewayRecipient // mocked', () => {
   });
 
   describe('# getters', () => {
+    describe('getGateway()', () => {
+      it('expect to return the gateway', async () => {
+        const { gatewayRecipientMock, signers } = fixture;
+
+        const res = await gatewayRecipientMock.getGateway();
+
+        expect(res).eq(signers.gateway.address);
+      });
+    });
+
     describe('_msgSender()', () => {
       it('expect it to return the correct address for calls from the gateway', async () => {
         const { gatewayRecipientMock, signers } = fixture;

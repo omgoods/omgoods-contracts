@@ -34,6 +34,26 @@ describe('account/AccountImpl', () => {
       fixture = await loadFixture(setupAccount);
     });
 
+    describe('getProxyImpl()', () => {
+      it('expect to return the current proxy impl', async () => {
+        const { account, accountImpl } = fixture;
+
+        const res = await account.getProxyImpl();
+
+        expect(res).eq(await accountImpl.getAddress());
+      });
+    });
+
+    describe('getGateway()', () => {
+      it('expect to return the gateway', async () => {
+        const { account, signers } = fixture;
+
+        const res = await account.getGateway();
+
+        expect(res).eq(signers.gateway.address);
+      });
+    });
+
     describe('getExternalOwners()', () => {
       it('expect to return external owners', async () => {
         const { account, accountRegistry, signers } = fixture;

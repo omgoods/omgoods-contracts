@@ -8,8 +8,6 @@ contract TokenFactoryMock is TokenFactory {
 
   event Initialized(address gateway, address tokenRegistry, address tokenImpl);
 
-  event TokenCreated(address token);
-
   // deployment
 
   constructor() TokenFactory(address(0)) {
@@ -38,9 +36,7 @@ contract TokenFactoryMock is TokenFactory {
     bytes32 salt,
     bytes32 initHash,
     bytes calldata guardianSignature
-  ) external {
-    address token = _createToken(salt, initHash, guardianSignature);
-
-    emit TokenCreated(token);
+  ) external returns (address) {
+    return _createToken(salt, initHash, guardianSignature);
   }
 }

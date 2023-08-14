@@ -100,6 +100,27 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
     emit TokenAdded(token);
   }
 
+  function createToken(
+    address tokenImpl,
+    bytes32 salt,
+    bytes32 initHash,
+    bytes calldata guardianSignature
+  ) external onlyTokenFactory returns (address token) {
+    _verifyGuardianSignature(initHash, guardianSignature);
+
+    token = _createProxy(tokenImpl, salt);
+
+    if (token == address(0)) {
+      revert TokenAlreadyExists();
+    }
+
+    _tokens[token] = true;
+
+    emit TokenCreated(token, msg.sender);
+
+    return token;
+  }
+
   function addTokenFactory(address tokenFactory) external onlyOwner {
     if (tokenFactory == address(0)) {
       revert TokenFactoryIsTheZeroAddress();
@@ -126,27 +147,6 @@ abstract contract TokenRegistry is Guarded, ProxyFactory, Initializable {
     _tokenFactories[tokenFactory] = false;
 
     emit TokenFactoryRemoved(tokenFactory);
-  }
-
-  function createToken(
-    address tokenImpl,
-    bytes32 salt,
-    bytes32 initHash,
-    bytes calldata guardianSignature
-  ) external onlyTokenFactory returns (address token) {
-    _verifyGuardianSignature(initHash, guardianSignature);
-
-    token = _createProxy(tokenImpl, salt);
-
-    if (token == address(0)) {
-      revert TokenAlreadyExists();
-    }
-
-    _tokens[token] = true;
-
-    emit TokenCreated(token, msg.sender);
-
-    return token;
   }
 
   function emitTokenOwnerUpdated(address owner) external onlyToken {

@@ -13,10 +13,7 @@ abstract contract ProxyFactory {
     try new Proxy{salt: salt}(proxyImpl) returns (Proxy proxy) {
       result = address(proxy);
     } catch {
-      // solhint-disable-next-line no-empty-blocks
-      {
-
-      }
+      result = address(0);
     }
 
     return result;

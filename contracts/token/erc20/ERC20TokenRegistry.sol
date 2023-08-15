@@ -6,13 +6,13 @@ import {TokenRegistry} from "../TokenRegistry.sol";
 contract ERC20TokenRegistry is TokenRegistry {
   // events
 
-  event TokenTransfer(address token, address from, address to, uint256 value);
+  event TokenTransfer(address token, address from, address to, uint256 amount);
 
   event TokenApproval(
     address token,
     address owner,
     address spender,
-    uint256 value
+    uint256 amount
   );
 
   // deployment
@@ -26,16 +26,16 @@ contract ERC20TokenRegistry is TokenRegistry {
   function emitTokenTransfer(
     address from,
     address to,
-    uint256 value
+    uint256 amount
   ) external onlyToken {
-    emit TokenTransfer(msg.sender, from, to, value);
+    emit TokenTransfer(msg.sender, from, to, amount);
   }
 
   function emitTokenApproval(
     address owner,
     address spender,
-    uint256 value
+    uint256 amount
   ) external onlyToken {
-    emit TokenApproval(msg.sender, owner, spender, value);
+    emit TokenApproval(msg.sender, owner, spender, amount);
   }
 }

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.21;
 
-import {ProxyImpl} from "../common/proxy/ProxyImpl.sol";
 import {Initializable} from "../common/utils/Initializable.sol";
 import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
 import {TokenReceiver} from "../token/TokenReceiver.sol";
@@ -10,7 +9,6 @@ import {ERC4337Account} from "./extensions/ERC4337Account.sol";
 import {IAccountRegistry} from "./IAccountRegistry.sol";
 
 abstract contract Account is
-  ProxyImpl,
   Initializable,
   GatewayRecipient,
   TokenReceiver,

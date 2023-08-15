@@ -353,6 +353,20 @@ describe('token/TokenRegistry // mocked', () => {
           'MsgSenderIsNotTheToken',
         );
       });
+
+      it('expect to emit an event', async () => {
+        const { tokenRegistryMock, signers } = fixture;
+
+        const owner = randomAddress();
+
+        const tx = tokenRegistryMock
+          .connect(signers.token)
+          .emitTokenOwnerUpdated(owner);
+
+        await expect(tx)
+          .emit(tokenRegistryMock, 'TokenOwnerUpdated')
+          .withArgs(signers.token.address, owner);
+      });
     });
   });
 });

@@ -1,16 +1,12 @@
 import { ethers, helpers } from 'hardhat';
+import { AddressLike, BigNumberish, BytesLike } from 'ethers';
 import { deployERC1271AccountMock } from '../account/extensions/fixtures';
 import { setupAccountRegistry } from '../account/fixtures';
-import { AddressLike, BigNumberish, BytesLike, TypedDataDomain } from 'ethers';
+import { GATEWAY_TYPED_DATA_DOMAIN } from './constants';
 
 const { deployContract, ZeroAddress } = ethers;
 
 const { buildSigners, createTypedDataEncoder } = helpers;
-
-const TYPED_DATA_DOMAIN: TypedDataDomain = {
-  name: 'Test Gateway',
-  version: '0.0.0',
-} as const;
 
 export async function deployGatewayRecipientMock(
   options: {
@@ -39,8 +35,8 @@ export async function deployGateway() {
 
   const gateway = await deployContract('Gateway', [
     ZeroAddress,
-    TYPED_DATA_DOMAIN.name,
-    TYPED_DATA_DOMAIN.version,
+    GATEWAY_TYPED_DATA_DOMAIN.name,
+    GATEWAY_TYPED_DATA_DOMAIN.version,
   ]);
 
   return {
@@ -69,7 +65,7 @@ export async function setupGateway() {
     to: string;
     value: BigNumberish;
     data: BytesLike;
-  }>(gateway, TYPED_DATA_DOMAIN, {
+  }>(gateway, GATEWAY_TYPED_DATA_DOMAIN, {
     Request: [
       {
         name: 'from',
@@ -100,7 +96,7 @@ export async function setupGateway() {
     to: Array<string>;
     value: Array<BigNumberish>;
     data: Array<BytesLike>;
-  }>(gateway, TYPED_DATA_DOMAIN, {
+  }>(gateway, GATEWAY_TYPED_DATA_DOMAIN, {
     Requests: [
       {
         name: 'from',

@@ -34,6 +34,12 @@ abstract contract Token is Ownable, Initializable, GatewayRecipient {
     _tokenRegistry = tokenRegistry;
   }
 
+  // external getters
+
+  function getTokenRegistry() external view returns (address) {
+    return _tokenRegistry;
+  }
+
   // internal getters
 
   function _msgSender()

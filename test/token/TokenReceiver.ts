@@ -66,7 +66,7 @@ describe('token/TokenReceiver // mocked', () => {
           '0x',
         );
 
-        await expect(tx).not.revertedWithoutReason();
+        await expect(tx).not.reverted;
       });
     });
 

@@ -63,18 +63,32 @@ describe('token/Token // mocked', () => {
     });
   });
 
-  describe('# setters', () => {
-    let fixture: Awaited<ReturnType<typeof setupTokenMock>>;
+  let fixture: Awaited<ReturnType<typeof setupTokenMock>>;
 
-    const createBeforeHook = () => {
-      before(async () => {
-        fixture = await loadFixture(setupTokenMock);
+  const createBeforeHook = () => {
+    before(async () => {
+      fixture = await loadFixture(setupTokenMock);
+    });
+  };
+
+  describe('# getters', () => {
+    createBeforeHook();
+
+    describe('getTokenRegistry()', () => {
+      it('expect to return the token registry', async () => {
+        const { tokenRegistryMock, tokenMock } = fixture;
+
+        const res = await tokenMock.getTokenRegistry();
+
+        expect(res).eq(await tokenRegistryMock.getAddress());
       });
-    };
+    });
+  });
+
+  describe('# setters', () => {
+    createBeforeHook();
 
     describe('_afterOwnerUpdated()', () => {
-      createBeforeHook();
-
       it("expect to trigger a token's registry event after the owner update", async () => {
         const { tokenRegistryMock, tokenMock } = fixture;
 

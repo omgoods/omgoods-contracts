@@ -3,6 +3,8 @@ import '@nomicfoundation/hardhat-toolbox';
 import { HardhatUserConfig } from 'hardhat/config';
 import './src';
 
+const { ENABLED_GAS_REPORTER } = process.env;
+
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.8.21',
@@ -30,6 +32,9 @@ const config: HardhatUserConfig = {
   },
   typechain: {
     outDir: 'typechain',
+  },
+  gasReporter: {
+    enabled: !!parseInt(ENABLED_GAS_REPORTER, 10),
   },
 };
 

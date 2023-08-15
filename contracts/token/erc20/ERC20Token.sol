@@ -32,8 +32,6 @@ abstract contract ERC20Token is IERC20Metadata, Token {
 
   error BurnAmountExceedsBalance();
 
-  error ApproveFromTheZeroAddress();
-
   error ApproveToTheZeroAddress();
 
   error InsufficientAllowance();
@@ -90,6 +88,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
 
   function transfer(address to, uint256 amount) external returns (bool) {
     _transfer(_msgSender(), to, amount);
+
     return true;
   }
 
@@ -98,6 +97,10 @@ abstract contract ERC20Token is IERC20Metadata, Token {
     address to,
     uint256 amount
   ) external returns (bool) {
+    if (from == address(0)) {
+      revert TransferFromTheZeroAddress();
+    }
+
     _spendAllowance(from, _msgSender(), amount);
 
     _transfer(from, to, amount);
@@ -106,6 +109,10 @@ abstract contract ERC20Token is IERC20Metadata, Token {
   }
 
   function approve(address spender, uint256 amount) external returns (bool) {
+    if (spender == address(0)) {
+      revert ApproveToTheZeroAddress();
+    }
+
     _approve(_msgSender(), spender, amount);
 
     return true;
@@ -149,10 +156,6 @@ abstract contract ERC20Token is IERC20Metadata, Token {
   // private setters
 
   function _transfer(address from, address to, uint256 amount) private {
-    if (from == address(0)) {
-      revert TransferFromTheZeroAddress();
-    }
-
     if (to == address(0)) {
       revert TransferToTheZeroAddress();
     }
@@ -172,14 +175,6 @@ abstract contract ERC20Token is IERC20Metadata, Token {
   }
 
   function _approve(address owner, address spender, uint256 amount) private {
-    if (owner == address(0)) {
-      revert ApproveFromTheZeroAddress();
-    }
-
-    if (spender == address(0)) {
-      revert ApproveToTheZeroAddress();
-    }
-
     _allowances[owner][spender] = amount;
 
     _afterApproval(owner, spender, amount);

@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: NONE
 pragma solidity 0.8.21;
 
+import {ProxyImpl} from "../../../common/proxy/ProxyImpl.sol";
 import {ERC20Token} from "../ERC20Token.sol";
 
-contract ERC20FixedTokenImpl is ERC20Token {
+contract ERC20FixedTokenImpl is ProxyImpl, ERC20Token {
   // deployment
 
   constructor() ERC20Token(address(0)) {

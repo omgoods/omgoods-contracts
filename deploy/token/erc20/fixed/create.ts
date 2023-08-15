@@ -3,7 +3,7 @@ import { TypedDataDomain } from 'ethers';
 
 const TYPED_DATA_DOMAIN: TypedDataDomain = {
   name: 'ERC20FixedTokenFactory',
-  version: '1.0.0',
+  version: '0.0.1',
 } as const;
 
 const func: DeployFunction = async (hre) => {

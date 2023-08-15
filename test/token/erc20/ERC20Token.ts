@@ -161,6 +161,17 @@ describe('token/ERC20Token // mocked', () => {
         );
       });
 
+      it('expect to revert when the amount is zero', async () => {
+        const { erc20TokenMock } = fixture;
+
+        const tx = erc20TokenMock.transfer(randomAddress(), 0);
+
+        await expect(tx).revertedWithCustomError(
+          erc20TokenMock,
+          'TransferAmountIsZero',
+        );
+      });
+
       it('expect to revert when the transfer amount exceeds the account balance', async () => {
         const { erc20TokenMock, signers } = fixture;
 
@@ -336,6 +347,17 @@ describe('token/ERC20Token // mocked', () => {
         );
       });
 
+      it('expect to revert when the amount is zero', async () => {
+        const { erc20TokenMock } = fixture;
+
+        const tx = erc20TokenMock.mint(randomAddress(), 0);
+
+        await expect(tx).revertedWithCustomError(
+          erc20TokenMock,
+          'MintAmountIsZero',
+        );
+      });
+
       it('expect to revert when minting the overflowed amount', async () => {
         const { erc20TokenMock } = fixture;
 
@@ -378,6 +400,17 @@ describe('token/ERC20Token // mocked', () => {
         await expect(tx).revertedWithCustomError(
           erc20TokenMock,
           'BurnFromTheZeroAddress',
+        );
+      });
+
+      it('expect to revert when the amount is zero', async () => {
+        const { erc20TokenMock } = fixture;
+
+        const tx = erc20TokenMock.burn(randomAddress(), 0);
+
+        await expect(tx).revertedWithCustomError(
+          erc20TokenMock,
+          'BurnAmountIsZero',
         );
       });
 

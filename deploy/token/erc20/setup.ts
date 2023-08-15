@@ -3,7 +3,9 @@ import { DeployFunction } from 'hardhat-deploy/types';
 const TOKENS = [] as const;
 
 const TOKEN_FACTORIES = [
-  'ERC20FixedTokenFactory', //
+  'ERC20ControlledTokenFactory',
+  'ERC20FixedTokenFactory',
+  'ERC20WrappedTokenFactory',
 ] as const;
 
 const func: DeployFunction = async (hre) => {

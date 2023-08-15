@@ -24,11 +24,17 @@ abstract contract ERC20Token is IERC20Metadata, Token {
 
   error TransferToTheZeroAddress();
 
+  error TransferAmountIsZero();
+
   error TransferAmountExceedsBalance();
 
   error MintToTheZeroAddress();
 
+  error MintAmountIsZero();
+
   error BurnFromTheZeroAddress();
+
+  error BurnAmountIsZero();
 
   error BurnAmountExceedsBalance();
 
@@ -57,15 +63,15 @@ abstract contract ERC20Token is IERC20Metadata, Token {
 
   // external getters
 
-  function name() external view returns (string memory) {
+  function name() external view virtual returns (string memory) {
     return _name;
   }
 
-  function symbol() external view returns (string memory) {
+  function symbol() external view virtual returns (string memory) {
     return _symbol;
   }
 
-  function decimals() external pure returns (uint8) {
+  function decimals() external view virtual returns (uint8) {
     return 18;
   }
 
@@ -125,6 +131,10 @@ abstract contract ERC20Token is IERC20Metadata, Token {
       revert MintToTheZeroAddress();
     }
 
+    if (amount == 0) {
+      revert MintAmountIsZero();
+    }
+
     _totalSupply += amount;
 
     unchecked {
@@ -137,6 +147,10 @@ abstract contract ERC20Token is IERC20Metadata, Token {
   function _burn(address from, uint256 amount) internal {
     if (from == address(0)) {
       revert BurnFromTheZeroAddress();
+    }
+
+    if (amount == 0) {
+      revert BurnAmountIsZero();
     }
 
     uint256 fromBalance = _balances[from];
@@ -158,6 +172,10 @@ abstract contract ERC20Token is IERC20Metadata, Token {
   function _transfer(address from, address to, uint256 amount) private {
     if (to == address(0)) {
       revert TransferToTheZeroAddress();
+    }
+
+    if (amount == 0) {
+      revert TransferAmountIsZero();
     }
 
     uint256 fromBalance = _balances[from];

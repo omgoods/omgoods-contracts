@@ -3,19 +3,21 @@ pragma solidity 0.8.21;
 
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {TokenFactory} from "../../TokenFactory.sol";
-import {ERC20FixedTokenImpl} from "./ERC20FixedTokenImpl.sol";
+import {ERC20ControlledTokenImpl} from "./ERC20ControlledTokenImpl.sol";
 
-contract ERC20FixedTokenFactory is EIP712, TokenFactory {
+contract ERC20ControlledTokenFactory is EIP712, TokenFactory {
   struct TokenData {
     address owner;
-    uint256 totalSupply;
+    address minter;
+    address burner;
+    uint256 initialSupply;
     string name;
     string symbol;
   }
 
   bytes32 private constant TOKEN_TYPE_HASH =
     keccak256(
-      "Token(string name,string symbol,address owner,uint256 totalSupply)"
+      "Token(string name,string symbol,address owner,address minter,address burner,uint256 initialSupply)"
     );
 
   // events
@@ -27,12 +29,14 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
     string name,
     string symbol,
     address owner,
-    uint256 totalSupply
+    address minter,
+    address burner,
+    uint256 initialSupply
   );
 
   // errors
 
-  error InsufficientTotalSupply();
+  error MinterIsTheZeroAddress();
 
   // deployment
 
@@ -78,8 +82,8 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
       revert TokenOwnerIsTheZeroAddress();
     }
 
-    if (tokenData.totalSupply == 0) {
-      revert InsufficientTotalSupply();
+    if (tokenData.minter == address(0)) {
+      revert MinterIsTheZeroAddress();
     }
 
     address token = _createToken(
@@ -88,13 +92,15 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
       guardianSignature
     );
 
-    ERC20FixedTokenImpl(token).initialize(
+    ERC20ControlledTokenImpl(token).initialize(
       _gateway,
       _tokenRegistry,
       tokenData.name,
       tokenData.symbol,
       tokenData.owner,
-      tokenData.totalSupply
+      tokenData.minter,
+      tokenData.burner,
+      tokenData.initialSupply
     );
 
     emit TokenCreated(
@@ -102,7 +108,9 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
       tokenData.name,
       tokenData.symbol,
       tokenData.owner,
-      tokenData.totalSupply
+      tokenData.minter,
+      tokenData.burner,
+      tokenData.initialSupply
     );
   }
 
@@ -119,7 +127,9 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
             keccak256(abi.encodePacked(tokenData.name)),
             keccak256(abi.encodePacked(tokenData.symbol)),
             tokenData.owner,
-            tokenData.totalSupply
+            tokenData.minter,
+            tokenData.burner,
+            tokenData.initialSupply
           )
         )
       );

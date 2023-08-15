@@ -15,7 +15,7 @@ contract Gateway is EIP712, Ownable, Initializable {
   using Address for address;
   using Bytes for bytes[];
 
-  struct RequestType {
+  struct RequestData {
     address from;
     uint256 nonce;
     address to;
@@ -23,7 +23,7 @@ contract Gateway is EIP712, Ownable, Initializable {
     bytes data;
   }
 
-  struct RequestsType {
+  struct RequestsData {
     address from;
     uint256 nonce;
     address[] to;
@@ -116,29 +116,15 @@ contract Gateway is EIP712, Ownable, Initializable {
   }
 
   function hashRequest(
-    RequestType calldata request
+    RequestData calldata requestData
   ) external view returns (bytes32) {
-    return
-      _hashRequest(
-        request.from,
-        request.nonce,
-        request.to,
-        request.value,
-        request.data
-      );
+    return _hashRequest(requestData);
   }
 
   function hashRequests(
-    RequestsType calldata requests
+    RequestsData calldata requestsData
   ) external view returns (bytes32) {
-    return
-      _hashRequests(
-        requests.from,
-        requests.nonce,
-        requests.to,
-        requests.value,
-        requests.data
-      );
+    return _hashRequests(requestsData);
   }
 
   function recoverTrustedSigner(
@@ -190,75 +176,79 @@ contract Gateway is EIP712, Ownable, Initializable {
   }
 
   function forwardRequest(
-    address from,
-    uint256 nonce,
-    address to,
-    uint256 value,
-    bytes calldata data,
-    bytes calldata signature
+    RequestData calldata requestData,
+    bytes calldata senderSignature
   ) external {
-    address signer = _verifyRequest(
-      _hashRequest(from, nonce, to, value, data),
-      signature,
-      from,
-      nonce
+    address sender = _verifyRequest(
+      _hashRequest(requestData),
+      senderSignature,
+      requestData.from,
+      requestData.nonce
     );
 
-    _sendRequest(signer, from, to, value, data, true);
+    _sendRequest(
+      sender,
+      requestData.from,
+      requestData.to,
+      requestData.value,
+      requestData.data,
+      true
+    );
   }
 
   function forwardRequests(
-    address from,
-    uint256 nonce,
-    address[] calldata to,
-    uint256[] calldata value,
-    bytes[] calldata data,
-    bytes calldata signature
+    RequestsData calldata requestsData,
+    bytes calldata senderSignature
   ) external {
-    address signer = _verifyRequest(
-      _hashRequests(from, nonce, to, value, data),
-      signature,
-      from,
-      nonce
+    address sender = _verifyRequest(
+      _hashRequests(requestsData),
+      senderSignature,
+      requestsData.from,
+      requestsData.nonce
     );
 
-    _sendRequests(signer, from, to, value, data);
+    _sendRequests(
+      sender,
+      requestsData.from,
+      requestsData.to,
+      requestsData.value,
+      requestsData.data
+    );
   }
 
   // private getters
 
   function _hashRequest(
-    address from,
-    uint256 nonce,
-    address to,
-    uint256 value,
-    bytes calldata data
+    RequestData calldata requestData
   ) private view returns (bytes32) {
     return
       _hashTypedDataV4(
         keccak256(
-          abi.encode(REQUEST_TYPE_HASH, from, nonce, to, value, keccak256(data))
+          abi.encode(
+            REQUEST_TYPE_HASH,
+            requestData.from,
+            requestData.nonce,
+            requestData.to,
+            requestData.value,
+            keccak256(requestData.data)
+          )
         )
       );
   }
 
   function _hashRequests(
-    address from,
-    uint256 nonce,
-    address[] calldata to,
-    uint256[] calldata value,
-    bytes[] calldata data
+    RequestsData calldata requestsData
   ) private view returns (bytes32) {
     return
       _hashTypedDataV4(
         keccak256(
           abi.encode(
             REQUESTS_TYPE_HASH,
-            from,
-            nonce,
-            keccak256(abi.encodePacked(to)),
-            keccak256(abi.encodePacked(value)),
-            data.deepKeccak256()
+            requestsData.from,
+            requestsData.nonce,
+            keccak256(abi.encodePacked(requestsData.to)),
+            keccak256(abi.encodePacked(requestsData.value)),
+            requestsData.data.deepKeccak256()
           )
         )
       );

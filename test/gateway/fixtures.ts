@@ -59,7 +59,7 @@ export async function setupGateway() {
 
   await gateway.initialize(accountRegistry);
 
-  const requestTypeEncoder = await createTypedDataEncoder<{
+  const requestEncoder = await createTypedDataEncoder<{
     from: string;
     nonce: BigNumberish;
     to: string;
@@ -90,7 +90,7 @@ export async function setupGateway() {
     ],
   });
 
-  const requestsTypeEncoder = await createTypedDataEncoder<{
+  const requestsEncoder = await createTypedDataEncoder<{
     from: string;
     nonce: BigNumberish;
     to: Array<string>;
@@ -128,7 +128,7 @@ export async function setupGateway() {
     accounts,
     signers,
     erc1271AccountMock,
-    requestTypeEncoder,
-    requestsTypeEncoder,
+    requestEncoder,
+    requestsEncoder,
   };
 }

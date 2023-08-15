@@ -205,12 +205,12 @@ abstract contract Account is
       revert TransactionToInvalidAddress();
     }
 
-    (bool success, bytes memory result) = to.call{value: value}(data);
+    (bool success, bytes memory response) = to.call{value: value}(data);
 
     if (!success) {
       // solhint-disable-next-line no-inline-assembly
       assembly {
-        revert(add(result, 32), mload(result))
+        revert(add(response, 32), mload(response))
       }
     }
   }

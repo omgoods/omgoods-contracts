@@ -2,7 +2,7 @@ import { DeployFunction } from 'hardhat-deploy/types';
 import { TypedDataDomain } from 'ethers';
 
 const TYPED_DATA_DOMAIN: TypedDataDomain = {
-  name: 'Gateway',
+  name: 'ERC20WrappedTokenFactory',
   version: '0.0.1',
 } as const;
 
@@ -13,11 +13,16 @@ const func: DeployFunction = async (hre) => {
   } = hre;
 
   log();
-  log('# gateway/create');
+  log('# token/erc20/wrapped/create');
 
   const { deployer: from, owner } = await getNamedAccounts();
 
-  await deploy('Gateway', {
+  await deploy('ERC20WrappedTokenImpl', {
+    from,
+    log: true,
+  });
+
+  await deploy('ERC20WrappedTokenFactory', {
     from,
     log: true,
     args: [

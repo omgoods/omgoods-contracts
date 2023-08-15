@@ -1,6 +1,9 @@
 import { ethers, helpers } from 'hardhat';
 import { AddressLike } from 'ethers';
-import { ERC20_TOKEN_MOCK_DATA } from './constants';
+import {
+  ERC20_TOKEN_MOCK_DATA,
+  ERC20_EXTERNAL_TOKEN_MOCK_DATA,
+} from './constants';
 
 const { deployContract, ZeroAddress, MaxUint256 } = ethers;
 
@@ -13,6 +16,25 @@ export async function deployERC20TokenMock() {
 
   return {
     erc20TokenMock,
+    signers,
+  };
+}
+
+export async function deployERC20ExternalTokenMock() {
+  const signers = await buildSigners('owner');
+
+  const erc20ExternalTokenMock = await deployContract(
+    'ERC20ExternalTokenMock',
+    [
+      ERC20_EXTERNAL_TOKEN_MOCK_DATA.name,
+      ERC20_EXTERNAL_TOKEN_MOCK_DATA.symbol,
+      ERC20_EXTERNAL_TOKEN_MOCK_DATA.decimals,
+      ERC20_EXTERNAL_TOKEN_MOCK_DATA.initialSupply,
+    ],
+  );
+
+  return {
+    erc20ExternalTokenMock,
     signers,
   };
 }

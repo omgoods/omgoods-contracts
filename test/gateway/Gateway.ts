@@ -2,6 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
 import { deployGateway, setupGateway } from './fixtures';
+import { GATEWAY_REQUEST_DATA, GATEWAY_REQUESTS_DATA } from './constants';
 
 const { ZeroAddress, randomBytes, hashMessage } = ethers;
 
@@ -96,37 +97,21 @@ describe('gateway/Gateway', () => {
 
     describe('hashRequest()', () => {
       it('expect to return the correct hash', async () => {
-        const { gateway, requestTypeEncoder } = fixture;
+        const { gateway, requestEncoder } = fixture;
 
-        const request = {
-          from: randomAddress(),
-          nonce: 10,
-          to: randomAddress(),
-          value: 5,
-          data: randomHex(20),
-        };
+        const res = await gateway.hashRequest(GATEWAY_REQUEST_DATA);
 
-        const res = await gateway.hashRequest(request);
-
-        expect(res).eq(requestTypeEncoder.hash(request));
+        expect(res).eq(requestEncoder.hash(GATEWAY_REQUEST_DATA));
       });
     });
 
     describe('hashRequests()', () => {
       it('expect to return the correct hash', async () => {
-        const { gateway, requestsTypeEncoder } = fixture;
+        const { gateway, requestsEncoder } = fixture;
 
-        const requests = {
-          from: randomAddress(),
-          nonce: 10,
-          to: [randomAddress(), randomAddress()],
-          value: [5, 2],
-          data: [randomHex(20), randomHex(10)],
-        };
+        const res = await gateway.hashRequests(GATEWAY_REQUESTS_DATA);
 
-        const res = await gateway.hashRequests(requests);
-
-        expect(res).eq(requestsTypeEncoder.hash(requests));
+        expect(res).eq(requestsEncoder.hash(GATEWAY_REQUESTS_DATA));
       });
     });
 
@@ -387,12 +372,12 @@ describe('gateway/Gateway', () => {
       it('expect to revert when the request nonce is invalid', async () => {
         const { gateway, signers } = fixture;
 
+        randomAddress(), 1, ZeroAddress, 0, '0x';
         const tx = gateway.forwardRequest(
-          randomAddress(),
-          1,
-          ZeroAddress,
-          0,
-          '0x',
+          {
+            ...GATEWAY_REQUEST_DATA,
+            nonce: 1,
+          },
           await signers.owner.signMessage('aaa'),
         );
 
@@ -406,11 +391,7 @@ describe('gateway/Gateway', () => {
         const { gateway, signers } = fixture;
 
         const tx = gateway.forwardRequest(
-          randomAddress(),
-          0,
-          ZeroAddress,
-          0,
-          '0x',
+          GATEWAY_REQUEST_DATA,
           await signers.owner.signMessage('aaa'),
         );
 
@@ -418,42 +399,44 @@ describe('gateway/Gateway', () => {
       });
 
       it('expect request to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, accounts, requestTypeEncoder } =
+        const { gateway, gatewayRecipientMock, accounts, requestEncoder } =
           fixture;
 
         const account = accounts.created;
-        const to = await gatewayRecipientMock.getAddress();
-        const nonce = 0;
-        const value = 0;
-        const data =
-          gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender');
 
-        const tx = gateway.connect(account.owner).forwardRequest(
-          account.address,
-          nonce,
-          to,
-          value,
-          data,
-          await account.owner.signTypedData(
-            requestTypeEncoder.domain,
-            requestTypeEncoder.types,
-            {
-              from: account.address,
-              nonce,
-              to,
-              value,
-              data,
-            },
+        const requestData = {
+          ...GATEWAY_REQUEST_DATA,
+          from: account.address,
+          to: await gatewayRecipientMock.getAddress(),
+          data: gatewayRecipientMock.interface.encodeFunctionData(
+            'emitMsgSender',
           ),
-        );
+        };
+
+        const tx = gateway
+          .connect(account.owner)
+          .forwardRequest(
+            requestData,
+            await account.owner.signTypedData(
+              requestEncoder.domain,
+              requestEncoder.types,
+              requestData,
+            ),
+          );
 
         await expect(tx)
           .emit(gateway, 'NonceUpdated')
-          .withArgs(account.address, nonce + 1);
+          .withArgs(account.address, requestData.nonce + 1);
 
         await expect(tx)
           .emit(gateway, 'RequestSent')
-          .withArgs(account.owner.address, account.address, to, value, data);
+          .withArgs(
+            account.owner.address,
+            account.address,
+            requestData.to,
+            requestData.value,
+            requestData.data,
+          );
 
         await expect(tx)
           .emit(gatewayRecipientMock, 'MsgSender')
@@ -461,45 +444,47 @@ describe('gateway/Gateway', () => {
       });
     });
 
-    describe('forwardRequest()', () => {
+    describe('forwardRequests()', () => {
       it('expect requests to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, accounts, requestsTypeEncoder } =
+        const { gateway, gatewayRecipientMock, accounts, requestsEncoder } =
           fixture;
 
         const account = accounts.unknown;
-        const nonce = 0;
-        const to = [await gatewayRecipientMock.getAddress()];
-        const value = [0];
-        const data = [
-          gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender'),
-        ];
 
-        const tx = gateway.connect(account.owner).forwardRequests(
-          account.address,
-          nonce,
-          to,
-          value,
-          data,
-          await account.owner.signTypedData(
-            requestsTypeEncoder.domain,
-            requestsTypeEncoder.types,
-            {
-              from: account.address,
-              nonce,
-              to,
-              value,
-              data,
-            },
-          ),
-        );
+        const requestsData = {
+          ...GATEWAY_REQUESTS_DATA,
+          from: account.address,
+          to: [await gatewayRecipientMock.getAddress()],
+          value: [0],
+          data: [
+            gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender'),
+          ],
+        };
+
+        const tx = gateway
+          .connect(account.owner)
+          .forwardRequests(
+            requestsData,
+            await account.owner.signTypedData(
+              requestsEncoder.domain,
+              requestsEncoder.types,
+              requestsData,
+            ),
+          );
 
         await expect(tx)
           .emit(gateway, 'NonceUpdated')
-          .withArgs(account.address, nonce + 1);
+          .withArgs(account.address, requestsData.nonce + 1);
 
         await expect(tx)
           .emit(gateway, 'RequestsSent')
-          .withArgs(account.owner.address, account.address, to, value, data);
+          .withArgs(
+            account.owner.address,
+            account.address,
+            requestsData.to,
+            requestsData.value,
+            requestsData.data,
+          );
 
         await expect(tx)
           .emit(gatewayRecipientMock, 'MsgSender')

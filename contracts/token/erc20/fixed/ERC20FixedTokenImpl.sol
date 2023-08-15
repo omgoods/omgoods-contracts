@@ -12,16 +12,16 @@ contract ERC20FixedTokenImpl is ProxyImpl, ERC20Token {
   }
 
   function initialize(
-    address owner,
     address gateway,
     address tokenRegistry,
     string calldata name_,
     string calldata symbol_,
+    address owner,
     uint256 totalSupply_
   ) external {
-    _owner = owner;
-
     _initialize(gateway, tokenRegistry, name_, symbol_);
+
+    _owner = owner;
 
     _mint(owner, totalSupply_);
   }

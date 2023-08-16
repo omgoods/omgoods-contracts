@@ -1,9 +1,10 @@
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils, proxyUtils } from 'hardhat';
 
 const { deployContract, ZeroAddress, hashMessage } = ethers;
 
-const { buildSigners, createProxyAddressFactory, randomHex, randomAddress } =
-  helpers;
+const { createAddressFactory } = proxyUtils;
+
+const { buildSigners, randomHex, randomAddress } = testsUtils;
 
 export async function deployTokenMock() {
   const signers = await buildSigners('owner');
@@ -74,7 +75,7 @@ export async function setupTokenFactoryMock() {
 
   await tokenRegistryMock.addTokenFactory(tokenFactoryMock);
 
-  const computeTokenAddress = await createProxyAddressFactory(
+  const computeTokenAddress = await createAddressFactory(
     tokenRegistryMock,
     tokenMock,
   );

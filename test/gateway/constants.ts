@@ -1,7 +1,7 @@
-import { helpers } from 'hardhat';
+import { testsUtils } from 'hardhat';
 import { TypedDataDomain } from 'ethers';
 
-const { randomAddress, randomHex } = helpers;
+const { randomAddress, randomHex } = testsUtils;
 
 export const GATEWAY_TYPED_DATA_DOMAIN: TypedDataDomain = {
   name: 'Test Gateway',

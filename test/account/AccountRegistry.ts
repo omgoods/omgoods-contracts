@@ -1,12 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 import { expect } from 'chai';
 import { deployAccountRegistry, setupAccountRegistry } from './fixtures';
 import { AccountStates } from './constants';
 
 const { ZeroAddress, getContractAt } = ethers;
 
-const { randomAddress } = helpers;
+const { randomAddress } = testsUtils;
 
 describe('account/AccountRegistry', () => {
   describe('# deployment', () => {

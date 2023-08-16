@@ -1,7 +1,7 @@
-import { helpers } from 'hardhat';
+import { testsUtils } from 'hardhat';
 import { TypedDataDomain } from 'ethers';
 
-const { randomAddress } = helpers;
+const { randomAddress } = testsUtils;
 
 export const ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN: TypedDataDomain =
   {

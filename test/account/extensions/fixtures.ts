@@ -1,8 +1,8 @@
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 
 const { deployContract } = ethers;
 
-const { setBalance, buildSigners } = helpers;
+const { setBalance, buildSigners } = testsUtils;
 
 export async function deployERC1271AccountMock() {
   const signers = await buildSigners('owner');

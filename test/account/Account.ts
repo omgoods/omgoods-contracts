@@ -1,11 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 import { expect } from 'chai';
 import { deployAccountMock, setupAccountMock } from './fixtures';
 
 const { ZeroAddress, concat } = ethers;
 
-const { randomAddress } = helpers;
+const { randomAddress } = testsUtils;
 
 describe('account/Account // mocked', () => {
   describe('# deployment', () => {

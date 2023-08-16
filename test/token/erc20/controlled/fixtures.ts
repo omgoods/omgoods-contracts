@@ -1,4 +1,4 @@
-import { ethers, helpers } from 'hardhat';
+import { ethers, proxyUtils, testsUtils, typeDataUtils } from 'hardhat';
 import { BigNumberish } from 'ethers';
 import { setupERC20TokenRegistry } from '../fixtures';
 import {
@@ -8,8 +8,11 @@ import {
 
 const { deployContract, ZeroAddress, id, getContractAt } = ethers;
 
-const { buildSigners, createProxyAddressFactory, createTypedDataEncoder } =
-  helpers;
+const { createAddressFactory } = proxyUtils;
+
+const { buildSigners } = testsUtils;
+
+const { createEncoder } = typeDataUtils;
 
 export async function deployERC20ControlledTokenImpl() {
   const tokenImpl = await deployContract('ERC20ControlledTokenImpl');
@@ -55,11 +58,7 @@ export async function setupERC20ControlledToken() {
 
   await tokenFactory.createToken(
     tokenData,
-    await signers.guardian.signTypedData(
-      tokenTypeEncoder.domain,
-      tokenTypeEncoder.types,
-      tokenData,
-    ),
+    await tokenTypeEncoder.sign(signers.guardian, tokenData),
   );
 
   return {
@@ -81,13 +80,13 @@ export async function setupERC20ControlledTokenFactory() {
 
   await tokenFactory.initialize(ZeroAddress, tokenRegistry, tokenImpl);
 
-  const computeTokenAddress = await createProxyAddressFactory(
+  const computeTokenAddress = await createAddressFactory(
     tokenRegistry,
     tokenImpl,
     (symbol) => id(symbol),
   );
 
-  const tokenTypeEncoder = await createTypedDataEncoder<{
+  const tokenTypeEncoder = await createEncoder<{
     name: string;
     symbol: string;
     owner: string;

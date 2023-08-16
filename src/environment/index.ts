@@ -1,7 +1,19 @@
 import { extendEnvironment } from 'hardhat/config';
 import './typings';
-import { Helpers } from './Helpers';
+import {
+  commonUtils,
+  envsUtils,
+  ProxyUtils,
+  TasksUtils,
+  TestsUtils,
+  TypeDataUtils,
+} from '../utils';
 
 extendEnvironment((hre) => {
-  hre.helpers = new Helpers(hre);
+  hre.commonUtils = commonUtils;
+  hre.envsUtils = envsUtils;
+  hre.proxyUtils = new ProxyUtils(hre);
+  hre.tasksUtils = new TasksUtils(hre);
+  hre.testsUtils = new TestsUtils(hre);
+  hre.typeDataUtils = new TypeDataUtils(hre);
 });

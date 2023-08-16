@@ -1,10 +1,11 @@
-import { ethers, helpers } from 'hardhat';
+import { ethers, proxyUtils, testsUtils } from 'hardhat';
 import { AddressLike } from 'ethers';
 
 const { deployContract, ZeroAddress, keccak256, getContractAt } = ethers;
 
-const { setBalance, buildSigners, randomAddress, createProxyAddressFactory } =
-  helpers;
+const { createAddressFactory } = proxyUtils;
+
+const { setBalance, buildSigners, randomAddress } = testsUtils;
 
 export async function deployAccountMock() {
   const accountMock = await deployContract('AccountMock');
@@ -102,7 +103,7 @@ export async function setupAccountRegistry(
 
   await accountRegistry.initialize(gateway, entryPoint, accountImpl);
 
-  const computeAccountAddress = await createProxyAddressFactory(
+  const computeAccountAddress = await createAddressFactory(
     accountRegistry,
     accountImpl,
     (owner) => keccak256(owner),

@@ -1,5 +1,5 @@
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 import { AddressLike } from 'ethers';
 import {
   ERC20_TOKEN_MOCK_DATA,
@@ -8,7 +8,7 @@ import {
 
 const { deployContract, ZeroAddress, MaxUint256 } = ethers;
 
-const { buildSigners } = helpers;
+const { buildSigners } = testsUtils;
 
 export async function deployERC20TokenMock() {
   const signers = await buildSigners('owner', 'account', 'operator');

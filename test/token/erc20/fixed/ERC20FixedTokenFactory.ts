@@ -1,5 +1,5 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 import { expect } from 'chai';
 import {
   deployERC20FixedTokenFactory,
@@ -9,7 +9,7 @@ import { ERC20_FIXED_TOKEN_DATA } from './constants';
 
 const { ZeroAddress } = ethers;
 
-const { randomAddress } = helpers;
+const { randomAddress } = testsUtils;
 
 describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
   describe('# deployment', () => {
@@ -177,11 +177,7 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           ERC20_FIXED_TOKEN_DATA,
-          await signers.owner.signTypedData(
-            tokenTypeEncoder.domain,
-            tokenTypeEncoder.types,
-            ERC20_FIXED_TOKEN_DATA,
-          ),
+          await tokenTypeEncoder.sign(signers.owner, ERC20_FIXED_TOKEN_DATA),
         );
 
         await expect(tx)

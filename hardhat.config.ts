@@ -2,7 +2,11 @@ import '@nomicfoundation/hardhat-ledger';
 import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
 import { HardhatUserConfig } from 'hardhat/config';
-import { buildNetworksConfig, getEnvAsBool } from './src';
+import { configUtils, envsUtils } from './src';
+
+const { buildNetworks } = configUtils;
+
+const { getAsBool } = envsUtils;
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -22,10 +26,8 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     owner: 0,
     deployer: 1,
-    accountOwner: 2,
-    gatewaySender: 3,
   },
-  networks: buildNetworksConfig({
+  networks: buildNetworks({
     ethereum: {
       type: 'mainnet',
       chainId: 1,
@@ -52,7 +54,7 @@ const config: HardhatUserConfig = {
     },
   }),
   gasReporter: {
-    enabled: getEnvAsBool('ENABLED_GAS_REPORTER'),
+    enabled: getAsBool('ENABLED_GAS_REPORTER'),
   },
 };
 

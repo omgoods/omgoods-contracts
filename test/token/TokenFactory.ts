@@ -1,11 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 import { expect } from 'chai';
 import { deployTokenFactoryMock, setupTokenFactoryMock } from './fixtures';
 
 const { ZeroAddress, hashMessage } = ethers;
 
-const { randomAddress, randomHex } = helpers;
+const { randomAddress, randomHex } = testsUtils;
 
 describe('token/TokenFactory // mocked', () => {
   describe('# deployment', () => {

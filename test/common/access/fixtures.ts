@@ -1,9 +1,9 @@
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 import { AddressLike } from 'ethers';
 
 const { deployContract, ZeroAddress } = ethers;
 
-const { buildSigners } = helpers;
+const { buildSigners } = testsUtils;
 
 export async function deployGuardedMock() {
   const signers = await buildSigners('owner', 'guardian');

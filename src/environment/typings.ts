@@ -1,8 +1,20 @@
 import 'hardhat/types/runtime';
-import type { Helpers } from './Helpers';
+import type {
+  commonUtils,
+  envsUtils,
+  ProxyUtils,
+  TasksUtils,
+  TestsUtils,
+  TypeDataUtils,
+} from '../utils';
 
 declare module 'hardhat/types/runtime' {
   export interface HardhatRuntimeEnvironment {
-    helpers: Helpers;
+    commonUtils: typeof commonUtils;
+    envsUtils: typeof envsUtils;
+    proxyUtils: ProxyUtils;
+    tasksUtils: TasksUtils;
+    testsUtils: TestsUtils;
+    typeDataUtils: TypeDataUtils;
   }
 }

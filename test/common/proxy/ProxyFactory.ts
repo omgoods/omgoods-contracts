@@ -1,16 +1,13 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, helpers } from 'hardhat';
+import { ethers, proxyUtils, testsUtils } from 'hardhat';
 import { expect } from 'chai';
 import { deployProxyFactoryMock } from './fixtures';
 
 const { ZeroAddress } = ethers;
 
-const {
-  randomAddress,
-  randomHex,
-  createProxyAddressFactory,
-  getProxyImplAddress,
-} = helpers;
+const { createAddressFactory, getImplAddress } = proxyUtils;
+
+const { randomAddress, randomHex } = testsUtils;
 
 describe('common/proxy/ProxyFactory // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployProxyFactoryMock>>;
@@ -41,7 +38,7 @@ describe('common/proxy/ProxyFactory // mocked', () => {
         const proxyImp = randomAddress();
         const salt = randomHex();
 
-        const computeProxyAddress = await createProxyAddressFactory(
+        const computeProxyAddress = await createAddressFactory(
           proxyFactoryMock,
           proxyImp,
         );
@@ -50,7 +47,7 @@ describe('common/proxy/ProxyFactory // mocked', () => {
 
         await proxyFactoryMock.createProxy(proxyImp, salt);
 
-        expect(await getProxyImplAddress(proxy)).eq(proxyImp);
+        expect(await getImplAddress(proxy)).eq(proxyImp);
       });
 
       it('expect to return the zero address when a proxy has already been created', async () => {

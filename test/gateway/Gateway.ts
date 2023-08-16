@@ -1,12 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, helpers } from 'hardhat';
+import { ethers, testsUtils } from 'hardhat';
 import { expect } from 'chai';
 import { deployGateway, setupGateway } from './fixtures';
 import { GATEWAY_REQUEST_DATA, GATEWAY_REQUESTS_DATA } from './constants';
 
 const { ZeroAddress, randomBytes, hashMessage } = ethers;
 
-const { randomAddress, randomHex } = helpers;
+const { randomAddress, randomHex } = testsUtils;
 
 describe('gateway/Gateway', () => {
   describe('# deployment', () => {
@@ -417,11 +417,7 @@ describe('gateway/Gateway', () => {
           .connect(account.owner)
           .forwardRequest(
             requestData,
-            await account.owner.signTypedData(
-              requestEncoder.domain,
-              requestEncoder.types,
-              requestData,
-            ),
+            await requestEncoder.sign(account.owner, requestData),
           );
 
         await expect(tx)
@@ -465,11 +461,7 @@ describe('gateway/Gateway', () => {
           .connect(account.owner)
           .forwardRequests(
             requestsData,
-            await account.owner.signTypedData(
-              requestsEncoder.domain,
-              requestsEncoder.types,
-              requestsData,
-            ),
+            await requestsEncoder.sign(account.owner, requestsData),
           );
 
         await expect(tx)

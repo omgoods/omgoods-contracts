@@ -19,31 +19,26 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('_initialize()', () => {
       it('expect to initialize the contract', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
         const gateway = randomAddress();
         const tokenRegistry = randomAddress();
         const name = 'Test';
         const symbol = 'TEST';
 
-        const tx = erc20TokenMock.initialize(
-          gateway,
-          tokenRegistry,
-          name,
-          symbol,
-        );
+        const tx = tokenMock.initialize(gateway, tokenRegistry, name, symbol);
 
         await expect(tx)
-          .emit(erc20TokenMock, 'Initialized')
+          .emit(tokenMock, 'Initialized')
           .withArgs(gateway, tokenRegistry, name, symbol);
       });
 
       describe('# after initialization', () => {
         before(async () => {
-          const { erc20TokenMock } = fixture;
+          const { tokenMock } = fixture;
 
-          if (!(await erc20TokenMock.initialized())) {
-            await erc20TokenMock.initialize(
+          if (!(await tokenMock.initialized())) {
+            await tokenMock.initialize(
               randomAddress(),
               randomAddress(),
               '',
@@ -53,17 +48,12 @@ describe('token/ERC20Token // mocked', () => {
         });
 
         it('expect to revert', async () => {
-          const { erc20TokenMock } = fixture;
+          const { tokenMock } = fixture;
 
-          const tx = erc20TokenMock.initialize(
-            ZeroAddress,
-            ZeroAddress,
-            '',
-            '',
-          );
+          const tx = tokenMock.initialize(ZeroAddress, ZeroAddress, '', '');
 
           await expect(tx).revertedWithCustomError(
-            erc20TokenMock,
+            tokenMock,
             'AlreadyInitialized',
           );
         });
@@ -84,9 +74,9 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('name()', () => {
       it('expect to return the name', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const res = await erc20TokenMock.name();
+        const res = await tokenMock.name();
 
         expect(res).eq(ERC20_TOKEN_MOCK_DATA.name);
       });
@@ -94,9 +84,9 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('symbol()', () => {
       it('expect to return the symbol', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const res = await erc20TokenMock.symbol();
+        const res = await tokenMock.symbol();
 
         expect(res).eq(ERC20_TOKEN_MOCK_DATA.symbol);
       });
@@ -104,9 +94,9 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('decimals()', () => {
       it('expect to return the decimal precision', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const res = await erc20TokenMock.decimals();
+        const res = await tokenMock.decimals();
 
         expect(res).eq(ERC20_TOKEN_MOCK_DATA.decimals);
       });
@@ -114,9 +104,9 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('totalSupply()', () => {
       it('expect to return the total supply', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const res = await erc20TokenMock.totalSupply();
+        const res = await tokenMock.totalSupply();
 
         expect(res).eq(ERC20_TOKEN_MOCK_DATA.initialSupply);
       });
@@ -124,9 +114,9 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('balanceOf()', () => {
       it('expect to return the correct balance of the account', async () => {
-        const { erc20TokenMock, signers } = fixture;
+        const { tokenMock, signers } = fixture;
 
-        const res = await erc20TokenMock.balanceOf(signers.owner);
+        const res = await tokenMock.balanceOf(signers.owner);
 
         expect(res).eq(ERC20_TOKEN_MOCK_DATA.initialSupply);
       });
@@ -134,12 +124,9 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('allowance()', () => {
       it('expect to return the correct allowance of the account', async () => {
-        const { erc20TokenMock, signers } = fixture;
+        const { tokenMock, signers } = fixture;
 
-        const res = await erc20TokenMock.allowance(
-          signers.owner,
-          signers.account,
-        );
+        const res = await tokenMock.allowance(signers.owner, signers.account);
 
         expect(res).eq(ERC20_TOKEN_MOCK_DATA.initialSupply);
       });
@@ -151,59 +138,57 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('transfer()', () => {
       it('expect to revert when transferring to the zero address', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.transfer(ZeroAddress, 0);
+        const tx = tokenMock.transfer(ZeroAddress, 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'TransferToTheZeroAddress',
         );
       });
 
       it('expect to revert when the amount is zero', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.transfer(randomAddress(), 0);
+        const tx = tokenMock.transfer(randomAddress(), 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'TransferAmountIsZero',
         );
       });
 
       it('expect to revert when the transfer amount exceeds the account balance', async () => {
-        const { erc20TokenMock, signers } = fixture;
+        const { tokenMock, signers } = fixture;
 
-        const tx = erc20TokenMock
+        const tx = tokenMock
           .connect(signers.unknown.at(0))
           .transfer(randomAddress(), 10);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'TransferAmountExceedsBalance',
         );
       });
 
       it('expect to transfer the tokens', async () => {
-        const { erc20TokenMock, erc20TokenRegistry, signers } = fixture;
+        const { tokenMock, tokenRegistry, signers } = fixture;
 
         const from = signers.owner.address;
         const to = randomAddress();
         const amount = 100;
 
-        const tx = erc20TokenMock.transfer(to, amount);
+        const tx = tokenMock.transfer(to, amount);
+
+        await expect(tx).emit(tokenMock, 'Transfer').withArgs(from, to, amount);
 
         await expect(tx)
-          .emit(erc20TokenMock, 'Transfer')
-          .withArgs(from, to, amount);
-
-        await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenTransfer')
-          .withArgs(await erc20TokenMock.getAddress(), from, to, amount);
+          .emit(tokenRegistry, 'TokenTransfer')
+          .withArgs(await tokenMock.getAddress(), from, to, amount);
 
         await expect(tx).changeTokenBalances(
-          erc20TokenMock,
+          tokenMock,
           [from, to],
           [-amount, amount],
         );
@@ -212,87 +197,83 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('transferFrom()', () => {
       it('expect to revert when transferring from the zero address', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.transferFrom(ZeroAddress, ZeroAddress, 0);
+        const tx = tokenMock.transferFrom(ZeroAddress, ZeroAddress, 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'TransferFromTheZeroAddress',
         );
       });
 
       it('expect to revert when the allowance is insufficient', async () => {
-        const { erc20TokenMock, signers } = fixture;
+        const { tokenMock, signers } = fixture;
 
-        const tx = erc20TokenMock
+        const tx = tokenMock
           .connect(signers.unknown.at(0))
           .transferFrom(randomAddress(), randomAddress(), 10);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'InsufficientAllowance',
         );
       });
 
       it('expect to transfer the tokens from the account', async () => {
-        const { erc20TokenMock, erc20TokenRegistry, signers } = fixture;
+        const { tokenMock, tokenRegistry, signers } = fixture;
 
         const from = signers.owner.address;
         const to = randomAddress();
         const amount = BigInt(100);
 
-        const tx = erc20TokenMock
+        const tx = tokenMock
           .connect(signers.account)
           .transferFrom(from, to, amount);
 
-        const allowance = await erc20TokenMock.allowance(
+        const allowance = await tokenMock.allowance(
           from,
           signers.account.address,
         );
 
         await expect(tx)
-          .emit(erc20TokenMock, 'Approval')
+          .emit(tokenMock, 'Approval')
           .withArgs(from, signers.account.address, allowance - amount);
 
-        await expect(tx)
-          .emit(erc20TokenMock, 'Transfer')
-          .withArgs(from, to, amount);
+        await expect(tx).emit(tokenMock, 'Transfer').withArgs(from, to, amount);
 
         await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenTransfer')
-          .withArgs(await erc20TokenMock.getAddress(), from, to, amount);
+          .emit(tokenRegistry, 'TokenTransfer')
+          .withArgs(await tokenMock.getAddress(), from, to, amount);
 
         await expect(tx).changeTokenBalances(
-          erc20TokenMock,
+          tokenMock,
           [from, to],
           [-amount, amount],
         );
       });
 
       it('expect to transfer the tokens from the account by the operator', async () => {
-        const { erc20TokenMock, erc20TokenRegistry, signers } = fixture;
+        const { tokenMock, tokenRegistry, signers } = fixture;
 
         const from = signers.owner.address;
         const to = randomAddress();
         const amount = 200;
 
-        const tx = erc20TokenMock
+        const tx = tokenMock
           .connect(signers.operator)
           .transferFrom(from, to, amount);
 
-        await expect(tx).not.emit(erc20TokenMock, 'Approval');
+        await expect(tx).not.emit(tokenMock, 'Approval');
+
+        await expect(tx).emit(tokenMock, 'Transfer').withArgs(from, to, amount);
 
         await expect(tx)
-          .emit(erc20TokenMock, 'Transfer')
-          .withArgs(from, to, amount);
-
-        await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenTransfer')
-          .withArgs(await erc20TokenMock.getAddress(), from, to, amount);
+          .emit(tokenRegistry, 'TokenTransfer')
+          .withArgs(await tokenMock.getAddress(), from, to, amount);
 
         await expect(tx).changeTokenBalances(
-          erc20TokenMock,
+          tokenMock,
           [from, to],
           [-amount, amount],
         );
@@ -301,33 +282,33 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('approve()', () => {
       it('expect to revert when approving the zero address', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.approve(ZeroAddress, 0);
+        const tx = tokenMock.approve(ZeroAddress, 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'ApproveToTheZeroAddress',
         );
       });
 
       it('expect to approve the account', async () => {
-        const { erc20TokenMock, erc20TokenRegistry, signers } = fixture;
+        const { tokenMock, tokenRegistry, signers } = fixture;
 
         const owner = signers.unknown.at(0);
         const spender = randomAddress();
         const amount = 200;
 
-        const tx = erc20TokenMock.connect(owner).approve(spender, amount);
+        const tx = tokenMock.connect(owner).approve(spender, amount);
 
         await expect(tx)
-          .emit(erc20TokenMock, 'Approval')
+          .emit(tokenMock, 'Approval')
           .withArgs(owner.address, spender, amount);
 
         await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenApproval')
+          .emit(tokenRegistry, 'TokenApproval')
           .withArgs(
-            await erc20TokenMock.getAddress(),
+            await tokenMock.getAddress(),
             owner.address,
             spender,
             amount,
@@ -337,31 +318,28 @@ describe('token/ERC20Token // mocked', () => {
 
     describe('_mint()', () => {
       it('expect to revert when minting to the zero address', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.mint(ZeroAddress, 0);
+        const tx = tokenMock.mint(ZeroAddress, 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'MintToTheZeroAddress',
         );
       });
 
       it('expect to revert when the amount is zero', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.mint(randomAddress(), 0);
+        const tx = tokenMock.mint(randomAddress(), 0);
 
-        await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
-          'MintAmountIsZero',
-        );
+        await expect(tx).revertedWithCustomError(tokenMock, 'MintAmountIsZero');
       });
 
       it('expect to revert when minting the overflowed amount', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.mint(randomAddress(), MaxUint256);
+        const tx = tokenMock.mint(randomAddress(), MaxUint256);
 
         await expect(tx).revertedWithPanic(
           PANIC_CODES.ARITHMETIC_UNDER_OR_OVERFLOW,
@@ -369,87 +347,79 @@ describe('token/ERC20Token // mocked', () => {
       });
 
       it('expect to mint the tokens', async () => {
-        const { erc20TokenMock, erc20TokenRegistry } = fixture;
+        const { tokenMock, tokenRegistry } = fixture;
 
         const to = randomAddress();
         const amount = BigInt(100);
-        const totalSupply = await erc20TokenMock.totalSupply();
+        const totalSupply = await tokenMock.totalSupply();
 
-        const tx = erc20TokenMock.mint(to, amount);
+        const tx = tokenMock.mint(to, amount);
 
         await expect(tx)
-          .emit(erc20TokenMock, 'Transfer')
+          .emit(tokenMock, 'Transfer')
           .withArgs(ZeroAddress, to, amount);
 
         await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenTransfer')
-          .withArgs(await erc20TokenMock.getAddress(), ZeroAddress, to, amount);
+          .emit(tokenRegistry, 'TokenTransfer')
+          .withArgs(await tokenMock.getAddress(), ZeroAddress, to, amount);
 
-        await expect(tx).changeTokenBalance(erc20TokenMock, to, amount);
+        await expect(tx).changeTokenBalance(tokenMock, to, amount);
 
-        expect(await erc20TokenMock.totalSupply()).eq(totalSupply + amount);
+        expect(await tokenMock.totalSupply()).eq(totalSupply + amount);
       });
     });
 
     describe('_burn()', () => {
       it('expect to revert when burning from the zero address', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.burn(ZeroAddress, 0);
+        const tx = tokenMock.burn(ZeroAddress, 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'BurnFromTheZeroAddress',
         );
       });
 
       it('expect to revert when the amount is zero', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.burn(randomAddress(), 0);
+        const tx = tokenMock.burn(randomAddress(), 0);
 
-        await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
-          'BurnAmountIsZero',
-        );
+        await expect(tx).revertedWithCustomError(tokenMock, 'BurnAmountIsZero');
       });
 
       it('expect to revert when the burning amount exceeds the account balance', async () => {
-        const { erc20TokenMock } = fixture;
+        const { tokenMock } = fixture;
 
-        const tx = erc20TokenMock.burn(randomAddress(), 10);
+        const tx = tokenMock.burn(randomAddress(), 10);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenMock,
+          tokenMock,
           'BurnAmountExceedsBalance',
         );
       });
 
       it('expect to burn the tokens', async () => {
-        const { erc20TokenMock, erc20TokenRegistry, signers } = fixture;
+        const { tokenMock, tokenRegistry, signers } = fixture;
 
         const from = signers.owner.address;
         const amount = BigInt(200);
-        const totalSupply = await erc20TokenMock.totalSupply();
+        const totalSupply = await tokenMock.totalSupply();
 
-        const tx = erc20TokenMock.burn(from, amount);
+        const tx = tokenMock.burn(from, amount);
 
         await expect(tx)
-          .emit(erc20TokenMock, 'Transfer')
+          .emit(tokenMock, 'Transfer')
           .withArgs(from, ZeroAddress, amount);
 
         await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenTransfer')
-          .withArgs(
-            await erc20TokenMock.getAddress(),
-            from,
-            ZeroAddress,
-            amount,
-          );
+          .emit(tokenRegistry, 'TokenTransfer')
+          .withArgs(await tokenMock.getAddress(), from, ZeroAddress, amount);
 
-        await expect(tx).changeTokenBalance(erc20TokenMock, from, -amount);
+        await expect(tx).changeTokenBalance(tokenMock, from, -amount);
 
-        expect(await erc20TokenMock.totalSupply()).eq(totalSupply - amount);
+        expect(await tokenMock.totalSupply()).eq(totalSupply - amount);
       });
     });
   });

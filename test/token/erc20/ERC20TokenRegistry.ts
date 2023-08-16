@@ -15,62 +15,62 @@ describe('token/erc20/ERC20TokenRegistry', () => {
   describe('# setters', () => {
     describe('emitTokenTransfer()', () => {
       it('expect to revert when the sender is not a token', async () => {
-        const { erc20TokenRegistry, signers } = fixture;
+        const { tokenRegistry, signers } = fixture;
 
-        const tx = erc20TokenRegistry
+        const tx = tokenRegistry
           .connect(signers.unknown.at(0))
           .emitTokenTransfer(randomAddress(), randomAddress(), 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenRegistry,
+          tokenRegistry,
           'MsgSenderIsNotTheToken',
         );
       });
 
       it('expect to emit an event', async () => {
-        const { erc20TokenRegistry, signers } = fixture;
+        const { tokenRegistry, signers } = fixture;
 
         const from = randomAddress();
         const to = randomAddress();
         const amount = 10;
 
-        const tx = erc20TokenRegistry
+        const tx = tokenRegistry
           .connect(signers.token)
           .emitTokenTransfer(from, to, amount);
 
         await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenTransfer')
+          .emit(tokenRegistry, 'TokenTransfer')
           .withArgs(signers.token.address, from, to, amount);
       });
     });
 
     describe('emitTokenApproval()', () => {
       it('expect to revert when the sender is not a token', async () => {
-        const { erc20TokenRegistry, signers } = fixture;
+        const { tokenRegistry, signers } = fixture;
 
-        const tx = erc20TokenRegistry
+        const tx = tokenRegistry
           .connect(signers.unknown.at(0))
           .emitTokenApproval(randomAddress(), randomAddress(), 0);
 
         await expect(tx).revertedWithCustomError(
-          erc20TokenRegistry,
+          tokenRegistry,
           'MsgSenderIsNotTheToken',
         );
       });
 
       it('expect to emit an event', async () => {
-        const { erc20TokenRegistry, signers } = fixture;
+        const { tokenRegistry, signers } = fixture;
 
         const owner = randomAddress();
         const spender = randomAddress();
         const amount = 5;
 
-        const tx = erc20TokenRegistry
+        const tx = tokenRegistry
           .connect(signers.token)
           .emitTokenApproval(owner, spender, amount);
 
         await expect(tx)
-          .emit(erc20TokenRegistry, 'TokenApproval')
+          .emit(tokenRegistry, 'TokenApproval')
           .withArgs(signers.token.address, owner, spender, amount);
       });
     });

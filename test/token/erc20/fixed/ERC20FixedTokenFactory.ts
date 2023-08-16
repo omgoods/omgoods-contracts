@@ -2,21 +2,21 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ethers, helpers } from 'hardhat';
 import { expect } from 'chai';
 import {
-  deployERC20ControlledTokenFactory,
-  setupERC20ControlledTokenFactory,
+  deployERC20FixedTokenFactory,
+  setupERC20FixedTokenFactory,
 } from './fixtures';
-import { ERC20_CONTROLLED_TOKEN_DATA } from './constants';
+import { ERC20_FIXED_TOKEN_DATA } from './constants';
 
 const { ZeroAddress } = ethers;
 
 const { randomAddress } = helpers;
 
-describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
+describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
   describe('# deployment', () => {
-    let fixture: Awaited<ReturnType<typeof deployERC20ControlledTokenFactory>>;
+    let fixture: Awaited<ReturnType<typeof deployERC20FixedTokenFactory>>;
 
     before(async () => {
-      fixture = await loadFixture(deployERC20ControlledTokenFactory);
+      fixture = await loadFixture(deployERC20FixedTokenFactory);
     });
 
     describe('initialize()', () => {
@@ -78,11 +78,11 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
     });
   });
 
-  let fixture: Awaited<ReturnType<typeof setupERC20ControlledTokenFactory>>;
+  let fixture: Awaited<ReturnType<typeof setupERC20FixedTokenFactory>>;
 
   const createBeforeHook = () => {
     before(async () => {
-      fixture = await loadFixture(setupERC20ControlledTokenFactory);
+      fixture = await loadFixture(setupERC20FixedTokenFactory);
     });
   };
 
@@ -105,9 +105,9 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
       it('expect to return the correct hash', async () => {
         const { tokenFactory, tokenTypeEncoder } = fixture;
 
-        const res = await tokenFactory.hashToken(ERC20_CONTROLLED_TOKEN_DATA);
+        const res = await tokenFactory.hashToken(ERC20_FIXED_TOKEN_DATA);
 
-        expect(res).eq(tokenTypeEncoder.hash(ERC20_CONTROLLED_TOKEN_DATA));
+        expect(res).eq(tokenTypeEncoder.hash(ERC20_FIXED_TOKEN_DATA));
       });
     });
   });
@@ -121,7 +121,7 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           {
-            ...ERC20_CONTROLLED_TOKEN_DATA,
+            ...ERC20_FIXED_TOKEN_DATA,
             owner: ZeroAddress,
           },
           '0x',
@@ -133,20 +133,20 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
         );
       });
 
-      it('expect to revert when the minter is the zero address', async () => {
+      it('expect to revert when the total supply is zero', async () => {
         const { tokenFactory } = fixture;
 
         const tx = tokenFactory.createToken(
           {
-            ...ERC20_CONTROLLED_TOKEN_DATA,
-            minter: ZeroAddress,
+            ...ERC20_FIXED_TOKEN_DATA,
+            totalSupply: 0,
           },
           '0x',
         );
 
         await expect(tx).revertedWithCustomError(
           tokenFactory,
-          'MinterIsTheZeroAddress',
+          'InsufficientTotalSupply',
         );
       });
 
@@ -154,7 +154,7 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
         const { tokenFactory, tokenRegistry, signers } = fixture;
 
         const tx = tokenFactory.createToken(
-          ERC20_CONTROLLED_TOKEN_DATA,
+          ERC20_FIXED_TOKEN_DATA,
           await signers.unknown.at(0).signMessage('invalid'),
         );
 
@@ -173,14 +173,14 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
           computeTokenAddress,
         } = fixture;
 
-        const token = computeTokenAddress(ERC20_CONTROLLED_TOKEN_DATA.symbol);
+        const token = computeTokenAddress(ERC20_FIXED_TOKEN_DATA.symbol);
 
         const tx = tokenFactory.createToken(
-          ERC20_CONTROLLED_TOKEN_DATA,
+          ERC20_FIXED_TOKEN_DATA,
           await signers.owner.signTypedData(
             tokenTypeEncoder.domain,
             tokenTypeEncoder.types,
-            ERC20_CONTROLLED_TOKEN_DATA,
+            ERC20_FIXED_TOKEN_DATA,
           ),
         );
 
@@ -188,12 +188,10 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
           .emit(tokenFactory, 'TokenCreated')
           .withArgs(
             token,
-            ERC20_CONTROLLED_TOKEN_DATA.name,
-            ERC20_CONTROLLED_TOKEN_DATA.symbol,
-            ERC20_CONTROLLED_TOKEN_DATA.owner,
-            ERC20_CONTROLLED_TOKEN_DATA.minter,
-            ERC20_CONTROLLED_TOKEN_DATA.burner,
-            ERC20_CONTROLLED_TOKEN_DATA.initialSupply,
+            ERC20_FIXED_TOKEN_DATA.name,
+            ERC20_FIXED_TOKEN_DATA.symbol,
+            ERC20_FIXED_TOKEN_DATA.owner,
+            ERC20_FIXED_TOKEN_DATA.totalSupply,
           );
 
         await expect(tx)

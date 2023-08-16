@@ -6,7 +6,7 @@ const { randomAddress, randomHex } = helpers;
 export const GATEWAY_TYPED_DATA_DOMAIN: TypedDataDomain = {
   name: 'Test Gateway',
   version: '0.0.0',
-} as const;
+};
 
 export const GATEWAY_REQUEST_DATA = {
   from: randomAddress(),

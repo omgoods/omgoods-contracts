@@ -1,3 +1,4 @@
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers, helpers } from 'hardhat';
 import { AddressLike } from 'ethers';
 import {
@@ -12,72 +13,63 @@ const { buildSigners } = helpers;
 export async function deployERC20TokenMock() {
   const signers = await buildSigners('owner', 'account', 'operator');
 
-  const erc20TokenMock = await deployContract('ERC20TokenMock');
+  const tokenMock = await deployContract('ERC20TokenMock');
 
   return {
-    erc20TokenMock,
+    tokenMock,
     signers,
   };
 }
 
-export async function deployERC20ExternalTokenMock() {
+export async function deployERC20ExternalTokenMock(
+  options: typeof ERC20_EXTERNAL_TOKEN_MOCK_DATA = ERC20_EXTERNAL_TOKEN_MOCK_DATA,
+  owner?: HardhatEthersSigner,
+) {
   const signers = await buildSigners('owner');
 
-  const erc20ExternalTokenMock = await deployContract(
+  return deployContract(
     'ERC20ExternalTokenMock',
-    [
-      ERC20_EXTERNAL_TOKEN_MOCK_DATA.name,
-      ERC20_EXTERNAL_TOKEN_MOCK_DATA.symbol,
-      ERC20_EXTERNAL_TOKEN_MOCK_DATA.decimals,
-      ERC20_EXTERNAL_TOKEN_MOCK_DATA.initialSupply,
-    ],
+    [options.name, options.symbol, options.decimals, options.initialSupply],
+    owner || signers.owner,
   );
-
-  return {
-    erc20ExternalTokenMock,
-    signers,
-  };
 }
 
 export async function deployERC20TokenRegistry() {
   const signers = await buildSigners('owner', 'token');
 
-  const erc20TokenRegistry = await deployContract('ERC20TokenRegistry', [
+  const tokenRegistry = await deployContract('ERC20TokenRegistry', [
     ZeroAddress,
   ]);
 
   return {
-    erc20TokenRegistry,
+    tokenRegistry,
     signers,
   };
 }
 
 export async function setupERC20TokenMock() {
-  const { erc20TokenMock, signers } = await deployERC20TokenMock();
+  const { tokenMock, signers } = await deployERC20TokenMock();
 
-  const { erc20TokenRegistry } = await setupERC20TokenRegistry({
-    token: erc20TokenMock,
+  const { tokenRegistry } = await setupERC20TokenRegistry({
+    token: tokenMock,
   });
 
-  await erc20TokenMock.initialize(
+  await tokenMock.initialize(
     ZeroAddress,
-    erc20TokenRegistry,
+    tokenRegistry,
     ERC20_TOKEN_MOCK_DATA.name,
     ERC20_TOKEN_MOCK_DATA.symbol,
   );
 
-  await erc20TokenMock.mint(signers.owner, ERC20_TOKEN_MOCK_DATA.initialSupply);
+  await tokenMock.mint(signers.owner, ERC20_TOKEN_MOCK_DATA.initialSupply);
 
-  await erc20TokenMock.approve(
-    signers.account,
-    ERC20_TOKEN_MOCK_DATA.initialSupply,
-  );
+  await tokenMock.approve(signers.account, ERC20_TOKEN_MOCK_DATA.initialSupply);
 
-  await erc20TokenMock.approve(signers.operator, MaxUint256);
+  await tokenMock.approve(signers.operator, MaxUint256);
 
   return {
-    erc20TokenMock,
-    erc20TokenRegistry,
+    tokenMock,
+    tokenRegistry,
     signers,
   };
 }
@@ -85,24 +77,24 @@ export async function setupERC20TokenMock() {
 export async function setupERC20TokenRegistry(
   options: { token?: AddressLike; tokenFactory?: AddressLike } = {},
 ) {
-  const { erc20TokenRegistry, signers } = await deployERC20TokenRegistry();
+  const { tokenRegistry, signers } = await deployERC20TokenRegistry();
 
-  await erc20TokenRegistry.initialize([]);
+  await tokenRegistry.initialize([]);
 
-  await erc20TokenRegistry.addToken(signers.token);
+  await tokenRegistry.addToken(signers.token);
 
   const { token, tokenFactory } = options;
 
   if (token) {
-    await erc20TokenRegistry.addToken(token);
+    await tokenRegistry.addToken(token);
   }
 
   if (tokenFactory) {
-    await erc20TokenRegistry.addTokenFactory(tokenFactory);
+    await tokenRegistry.addTokenFactory(tokenFactory);
   }
 
   return {
-    erc20TokenRegistry,
+    tokenRegistry,
     signers,
   };
 }

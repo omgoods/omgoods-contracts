@@ -2,8 +2,8 @@ import { ethers, helpers } from 'hardhat';
 import { BigNumberish } from 'ethers';
 import { setupERC20TokenRegistry } from '../fixtures';
 import {
-  ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN,
-  ERC20_CONTROLLED_TOKEN_DATA,
+  ERC20_FIXED_TOKEN_FACTORY_TYPED_DATA_DOMAIN,
+  ERC20_FIXED_TOKEN_DATA,
 } from './constants';
 
 const { deployContract, ZeroAddress, id, getContractAt } = ethers;
@@ -11,21 +11,21 @@ const { deployContract, ZeroAddress, id, getContractAt } = ethers;
 const { buildSigners, createProxyAddressFactory, createTypedDataEncoder } =
   helpers;
 
-export async function deployERC20ControlledTokenImpl() {
-  const tokenImpl = await deployContract('ERC20ControlledTokenImpl');
+export async function deployERC20FixedTokenImpl() {
+  const tokenImpl = await deployContract('ERC20FixedTokenImpl');
 
   return {
     tokenImpl,
   };
 }
 
-export async function deployERC20ControlledTokenFactory() {
+export async function deployERC20FixedTokenFactory() {
   const signers = await buildSigners('owner');
 
-  const tokenFactory = await deployContract('ERC20ControlledTokenFactory', [
+  const tokenFactory = await deployContract('ERC20FixedTokenFactory', [
     ZeroAddress,
-    ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.name,
-    ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.version,
+    ERC20_FIXED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.name,
+    ERC20_FIXED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.version,
   ]);
 
   return {
@@ -34,23 +34,21 @@ export async function deployERC20ControlledTokenFactory() {
   };
 }
 
-export async function setupERC20ControlledToken() {
-  const signers = await buildSigners('guardian', 'owner', 'minter', 'burner');
+export async function setupERC20FixedToken() {
+  const signers = await buildSigners('guardian', 'owner');
 
   const { tokenFactory, computeTokenAddress, tokenTypeEncoder } =
-    await setupERC20ControlledTokenFactory();
+    await setupERC20FixedTokenFactory();
 
   const token = await getContractAt(
-    'ERC20ControlledTokenImpl',
-    computeTokenAddress(ERC20_CONTROLLED_TOKEN_DATA.symbol),
+    'ERC20FixedTokenImpl',
+    computeTokenAddress(ERC20_FIXED_TOKEN_DATA.symbol),
     signers.owner,
   );
 
   const tokenData = {
-    ...ERC20_CONTROLLED_TOKEN_DATA,
+    ...ERC20_FIXED_TOKEN_DATA,
     owner: signers.owner.address,
-    minter: signers.minter.address,
-    burner: signers.burner.address,
   };
 
   await tokenFactory.createToken(
@@ -70,13 +68,13 @@ export async function setupERC20ControlledToken() {
   };
 }
 
-export async function setupERC20ControlledTokenFactory() {
-  const { tokenImpl } = await deployERC20ControlledTokenImpl();
+export async function setupERC20FixedTokenFactory() {
+  const { tokenImpl } = await deployERC20FixedTokenImpl();
 
-  const { signers, tokenFactory } = await deployERC20ControlledTokenFactory();
+  const { signers, tokenFactory } = await deployERC20FixedTokenFactory();
 
   const { tokenRegistry } = await setupERC20TokenRegistry({
-    tokenFactory: tokenFactory,
+    tokenFactory,
   });
 
   await tokenFactory.initialize(ZeroAddress, tokenRegistry, tokenImpl);
@@ -91,10 +89,8 @@ export async function setupERC20ControlledTokenFactory() {
     name: string;
     symbol: string;
     owner: string;
-    minter: string;
-    burner: string;
-    initialSupply: BigNumberish;
-  }>(tokenFactory, ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN, {
+    totalSupply: BigNumberish;
+  }>(tokenFactory, ERC20_FIXED_TOKEN_FACTORY_TYPED_DATA_DOMAIN, {
     Token: [
       {
         name: 'name',
@@ -109,15 +105,7 @@ export async function setupERC20ControlledTokenFactory() {
         type: 'address',
       },
       {
-        name: 'minter',
-        type: 'address',
-      },
-      {
-        name: 'burner',
-        type: 'address',
-      },
-      {
-        name: 'initialSupply',
+        name: 'totalSupply',
         type: 'uint256',
       },
     ],

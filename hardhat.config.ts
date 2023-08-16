@@ -9,7 +9,7 @@ const config: HardhatUserConfig = {
     version: '0.8.21',
     settings: {
       metadata: { bytecodeHash: 'none' },
-      optimizer: { enabled: true, runs: 100 },
+      optimizer: { enabled: true, runs: 2 ** 32 - 1 },
     },
   },
   paths: {

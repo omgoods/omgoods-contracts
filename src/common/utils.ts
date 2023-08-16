@@ -9,7 +9,8 @@ export function getEnvKey(...path: string[]): string {
 }
 
 export function getEnv(...path: string[]): string {
-  return process.env[getEnvKey(...path)] || null;
+  const key = getEnvKey(...path);
+  return process.env[key] || null;
 }
 
 export function getEnvAsUrl(...path: string[]): string {
@@ -43,7 +44,7 @@ export function getEnvAsBool(...path: string[]): boolean {
       case '1':
       case 'y':
       case 't':
-        result = this;
+        result = true;
         break;
     }
   } catch (err) {

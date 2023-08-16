@@ -15,6 +15,8 @@ abstract contract ERC4337Account is IAccount, AccountExtension {
 
   // errors
 
+  error ERC4337AccountUnsupported();
+
   error MsgSenderIsNotTheEntryPoint();
 
   // external setters
@@ -24,6 +26,10 @@ abstract contract ERC4337Account is IAccount, AccountExtension {
     bytes32 userOpHash,
     uint256 missingAccountFunds
   ) external returns (uint256 result) {
+    if (_entryPoint == address(0)) {
+      revert ERC4337AccountUnsupported();
+    }
+
     if (msg.sender != _entryPoint) {
       revert MsgSenderIsNotTheEntryPoint();
     }

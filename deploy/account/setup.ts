@@ -25,7 +25,7 @@ const func: DeployFunction = async (hre) => {
       },
       'initialize',
       gateway,
-      ZeroAddress, // TODO: add entry point address
+      ZeroAddress, // unsupported yet
       accountImpl,
     );
   }

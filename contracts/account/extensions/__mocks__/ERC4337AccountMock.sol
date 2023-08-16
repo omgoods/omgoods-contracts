@@ -16,4 +16,10 @@ contract ERC4337AccountMock is AccountExtensionMock, ERC4337Account {
   receive() external payable {
     //
   }
+
+  // external setters
+
+  function setEntryPoint(address entryPoint) external {
+    _entryPoint = entryPoint;
+  }
 }

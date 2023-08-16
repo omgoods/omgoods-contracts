@@ -4,17 +4,25 @@ import { expect } from 'chai';
 import { deployERC4337AccountMock } from './fixtures';
 import { EMPTY_USER_OP } from './constants';
 
-const { randomBytes } = ethers;
+const { randomBytes, ZeroAddress } = ethers;
 
 describe('account/extensions/ERC4337Account // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployERC4337AccountMock>>;
 
-  before(async () => {
-    fixture = await loadFixture(deployERC4337AccountMock);
-  });
+  const createBeforeHook = (inner?: () => Promise<void>) => {
+    before(async () => {
+      fixture = await loadFixture(deployERC4337AccountMock);
+
+      if (inner) {
+        await inner();
+      }
+    });
+  };
 
   describe('# setters', () => {
     describe('validateUserOp()', () => {
+      createBeforeHook();
+
       const userOpHash = randomBytes(32);
 
       it('expect to revert when msg.sender is not the entry point', async () => {
@@ -95,6 +103,31 @@ describe('account/extensions/ERC4337Account // mocked', () => {
             missingFunds,
             '0x',
           );
+      });
+
+      describe('# when not supported', () => {
+        createBeforeHook(async () => {
+          const { erc4337AccountMock } = fixture;
+
+          await erc4337AccountMock.setEntryPoint(ZeroAddress);
+        });
+
+        const userOpHash = randomBytes(32);
+
+        it('expect to revert', async () => {
+          const { erc4337AccountMock } = fixture;
+
+          const tx = erc4337AccountMock.validateUserOp(
+            EMPTY_USER_OP,
+            userOpHash,
+            0,
+          );
+
+          await expect(tx).revertedWithCustomError(
+            erc4337AccountMock,
+            'ERC4337AccountUnsupported',
+          );
+        });
       });
     });
   });

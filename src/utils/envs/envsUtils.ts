@@ -52,3 +52,19 @@ export function getAsBool(...path: string[]): boolean {
 
   return result;
 }
+
+export function getAsInt(...path: string[]): number {
+  let result = 0;
+
+  try {
+    const value = parseInt(getRaw(...path), 10);
+
+    if (value) {
+      result = value;
+    }
+  } catch (err) {
+    //
+  }
+
+  return result;
+}

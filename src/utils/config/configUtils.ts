@@ -10,7 +10,7 @@ import {
 
 const { getAddress } = commonUtils;
 
-const { getRaw, getAsUrl } = envsUtils;
+const { getRaw, getAsUrl, getAsInt } = envsUtils;
 
 function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
@@ -32,6 +32,21 @@ function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
           ledgerAccounts: [owner, deployer],
         };
       }
+    }
+  }
+
+  if (!result) {
+    const mnemonic = getRaw(type, 'ACCOUNTS_MNEMONIC');
+
+    if (mnemonic) {
+      result = {
+        accounts: {
+          mnemonic,
+          path: getRaw(type, 'ACCOUNTS_PATH') || "m/44'/60'/0'/0",
+          initialIndex: getAsInt(type, 'ACCOUNTS_INITIAL_INDEX'),
+          count: getAsInt(type, 'ACCOUNTS_COUNT') || 10,
+        },
+      };
     }
   }
 

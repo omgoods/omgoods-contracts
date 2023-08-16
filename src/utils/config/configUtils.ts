@@ -3,10 +3,7 @@ import { isHexString } from 'ethers';
 import { commonUtils } from '../common';
 import { envsUtils } from '../envs';
 import { NetworkConfig, NetworkType } from './interfaces';
-import {
-  HARDHAT_NETWORK_ACCOUNTS_MNEMONIC,
-  HARDHAT_NETWORK_CHAIN_ID,
-} from './constants';
+import { HARDHAT_NETWORK } from './constants';
 
 const { getAddress } = commonUtils;
 
@@ -42,9 +39,9 @@ function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
       result = {
         accounts: {
           mnemonic,
-          path: getRaw(type, 'ACCOUNTS_PATH') || "m/44'/60'/0'/0",
+          path: getRaw(type, 'ACCOUNTS_PATH'),
           initialIndex: getAsInt(type, 'ACCOUNTS_INITIAL_INDEX'),
-          count: getAsInt(type, 'ACCOUNTS_COUNT') || 10,
+          count: getAsInt(type, 'ACCOUNTS_COUNT'),
         },
       };
     }
@@ -57,20 +54,10 @@ export function buildNetworks(
   config: Record<string, NetworkConfig>,
 ): NetworksUserConfig {
   const result: NetworksUserConfig = {
-    hardhat: {
-      chainId: HARDHAT_NETWORK_CHAIN_ID,
-      accounts: {
-        mnemonic: HARDHAT_NETWORK_ACCOUNTS_MNEMONIC,
-        count: 10,
-      },
-    },
+    hardhat: HARDHAT_NETWORK,
     localhost: {
-      chainId: HARDHAT_NETWORK_CHAIN_ID,
-      url: getAsUrl('RPC_URLS_LOCALHOST') || 'http://localhost:8545',
-      accounts: {
-        mnemonic: HARDHAT_NETWORK_ACCOUNTS_MNEMONIC,
-        count: 10,
-      },
+      ...HARDHAT_NETWORK,
+      url: getAsUrl('RPC_URLS_LOCALHOST'),
       live: false,
     },
   };

@@ -1,9 +1,8 @@
-import 'hardhat-deploy';
+import '@nomicfoundation/hardhat-ledger';
 import '@nomicfoundation/hardhat-toolbox';
+import 'hardhat-deploy';
 import { HardhatUserConfig } from 'hardhat/config';
-import './src';
-
-const { ENABLED_GAS_REPORTER } = process.env;
+import { buildNetworksConfig, getEnvAsBool } from './src';
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -13,28 +12,47 @@ const config: HardhatUserConfig = {
       optimizer: { enabled: true, runs: 100 },
     },
   },
-  networks: {
-    hardhat: {
-      accounts: {
-        count: 10,
-      },
-    },
+  paths: {
+    artifacts: '.hardhat/artifacts',
+    cache: '.hardhat/cache',
+  },
+  typechain: {
+    outDir: 'typechain',
   },
   namedAccounts: {
     owner: 0,
     deployer: 1,
     accountOwner: 2,
+    gatewaySender: 3,
   },
-  paths: {
-    artifacts: '.hardhat/artifacts',
-    cache: '.hardhat/cache',
-    sources: 'contracts',
-  },
-  typechain: {
-    outDir: 'typechain',
-  },
+  networks: buildNetworksConfig({
+    ethereum: {
+      type: 'mainnet',
+      chainId: 1,
+    },
+    ethereumGoerli: {
+      type: 'testnet',
+      chainId: 5,
+    },
+    optimism: {
+      type: 'mainnet',
+      chainId: 10,
+    },
+    optimismGoerli: {
+      type: 'testnet',
+      chainId: 420,
+    },
+    base: {
+      type: 'mainnet',
+      chainId: 8453,
+    },
+    baseGoerli: {
+      type: 'testnet',
+      chainId: 84531,
+    },
+  }),
   gasReporter: {
-    enabled: !!parseInt(ENABLED_GAS_REPORTER, 10),
+    enabled: getEnvAsBool('ENABLED_GAS_REPORTER'),
   },
 };
 

@@ -1,7 +1,7 @@
-# OS
+# os
 .DS_Store
 
-# IDEs
+# ide
 /.idea
 .project
 .classpath
@@ -23,3 +23,7 @@ node_modules
 coverage
 coverage.json
 typechain
+
+# envs
+.env.local
+.env

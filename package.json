@@ -17,6 +17,7 @@
     "@openzeppelin/contracts": "4.9.3"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-ledger": "1.0.1",
     "@nomicfoundation/hardhat-toolbox": "3.0.0",
     "@types/prompts": "2.4.4",
     "@typescript-eslint/eslint-plugin": "6.2.1",

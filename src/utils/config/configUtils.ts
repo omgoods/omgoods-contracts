@@ -14,19 +14,25 @@ function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
 
   let owner = getRaw(type, 'ACCOUNTS_OWNER');
   let deployer = getRaw(type, 'ACCOUNTS_DEPLOYER');
+  let forwarder = getRaw(type, 'ACCOUNTS_FORWARDER');
 
   if (owner && deployer) {
-    if (isHexString(owner, 32) && isHexString(deployer, 32)) {
+    if (
+      isHexString(owner, 32) &&
+      isHexString(deployer, 32) &&
+      isHexString(forwarder, 32)
+    ) {
       result = {
-        accounts: [owner, deployer],
+        accounts: [owner, deployer, forwarder],
       };
     } else {
       owner = getAddress(owner);
       deployer = getAddress(deployer);
+      forwarder = getAddress(forwarder);
 
-      if (owner && deployer) {
+      if (owner && deployer && forwarder) {
         result = {
-          ledgerAccounts: [owner, deployer],
+          ledgerAccounts: [owner, deployer, forwarder],
         };
       }
     }
@@ -36,12 +42,14 @@ function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
     const mnemonic = getRaw(type, 'ACCOUNTS_MNEMONIC');
 
     if (mnemonic) {
+      const count = getAsInt(type, 'ACCOUNTS_COUNT');
+
       result = {
         accounts: {
           mnemonic,
           path: getRaw(type, 'ACCOUNTS_PATH'),
           initialIndex: getAsInt(type, 'ACCOUNTS_INITIAL_INDEX'),
-          count: getAsInt(type, 'ACCOUNTS_COUNT'),
+          count: count >= 3 ? count : HARDHAT_NETWORK.accounts.count,
         },
       };
     }

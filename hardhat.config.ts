@@ -26,31 +26,32 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     owner: 0,
     deployer: 1,
+    forwarder: 2,
   },
   networks: buildNetworks({
     ethereum: {
-      type: 'mainnet',
       chainId: 1,
+      type: 'mainnet',
     },
     ethereumGoerli: {
-      type: 'testnet',
       chainId: 5,
+      type: 'testnet',
     },
     optimism: {
-      type: 'mainnet',
       chainId: 10,
+      type: 'mainnet',
     },
     optimismGoerli: {
-      type: 'testnet',
       chainId: 420,
+      type: 'testnet',
     },
     base: {
-      type: 'mainnet',
       chainId: 8453,
+      type: 'mainnet',
     },
     baseGoerli: {
-      type: 'testnet',
       chainId: 84531,
+      type: 'testnet',
     },
   }),
   gasReporter: {

@@ -1,5 +1,10 @@
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import {
+  ContractTransactionResponse,
+  ContractTransactionReceipt,
+} from 'ethers';
+import prompts from 'prompts';
 import { commonUtils } from '../common';
 
 const { bindAll } = commonUtils;
@@ -9,30 +14,114 @@ export class TasksUtils {
     bindAll(TasksUtils.prototype, this);
   }
 
-  async getNamedSigner(name: string): Promise<HardhatEthersSigner> {
-    const {
-      getNamedAccounts,
-      ethers: { getSigner },
-    } = this.hre;
+  printExit(): void {
+    console.log('... bye!');
+  }
 
-    const accounts = await getNamedAccounts();
+  printMessage(message: string, data?: any): void {
+    console.log(`› ${message}`);
 
-    let result: HardhatEthersSigner;
-
-    try {
-      result = await getSigner(accounts[name]);
-    } catch (err) {
-      result = null;
+    if (data) {
+      console.log(data);
     }
+  }
 
-    if (!result) {
-      throw new Error(`Named signer "${name}" not found.`);
+  printError(message: string, data?: any): void {
+    console.log(`! ${message}`);
+
+    if (data) {
+      console.log(data);
     }
+  }
+
+  async promptText(options: {
+    message: string;
+    initial?: string;
+  }): Promise<string> {
+    const { message, initial } = options;
+
+    const { value: result } = await prompts({
+      type: 'text',
+      name: 'value',
+      message,
+      initial,
+    });
+
+    return result || null;
+  }
+
+  async promptConfirm(options: {
+    message: string;
+    initial?: boolean;
+  }): Promise<boolean> {
+    const { message, initial } = options;
+
+    const { value: result } = await prompts({
+      type: 'confirm',
+      name: 'value',
+      message,
+      initial,
+    });
 
     return result;
   }
 
-  async getDeployedContractAddress(name: string): Promise<string> {
+  async promptSelect<T>(options: {
+    message: string;
+    initial?: number;
+    choices: Array<{
+      title: string;
+      value: T;
+    }>;
+  }): Promise<T> {
+    let result: T = null;
+
+    const { message, choices, initial } = options;
+
+    switch (choices.length) {
+      case 0:
+        break;
+      case 1:
+        ({ value: result } = choices.at(0));
+        break;
+      default:
+        if (!result) {
+          ({ value: result } = await prompts({
+            type: 'select',
+            name: 'value',
+            message,
+            choices,
+            initial,
+          }));
+        }
+    }
+
+    return result || null;
+  }
+
+  async processTransaction(tx: Promise<ContractTransactionResponse>): Promise<{
+    response: ContractTransactionResponse;
+    receipt: ContractTransactionReceipt;
+  }> {
+    let response: ContractTransactionResponse;
+    let receipt: ContractTransactionReceipt;
+
+    try {
+      response = await tx;
+      receipt = await response.wait();
+    } catch (err) {
+      const { message } = err as Error;
+
+      this.printError(message || 'Transaction reverted');
+    }
+
+    return {
+      response,
+      receipt,
+    };
+  }
+
+  async getDeployedAddress(name: string): Promise<string> {
     const {
       deployments: { get },
     } = this.hre;
@@ -46,5 +135,25 @@ export class TasksUtils {
     }
 
     return result;
+  }
+
+  async getAccountAt(address: string, sender?: HardhatEthersSigner) {
+    const {
+      ethers: { getContractAt },
+    } = this.hre;
+
+    return getContractAt('AccountImpl', address, sender);
+  }
+
+  async getAccountRegistry(sender?: HardhatEthersSigner) {
+    const {
+      ethers: { getContractAt },
+    } = this.hre;
+
+    return getContractAt(
+      'AccountRegistry',
+      await this.getDeployedAddress('AccountRegistry'),
+      sender,
+    );
   }
 }

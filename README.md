@@ -23,6 +23,10 @@ npm run deploy    # deploys contracts
 npm run hardhat   # hardhat cli wrapper
 ```
 
+## Custom Hardhat tasks
+
+(TODO)
+
 ## License
 
 NONE

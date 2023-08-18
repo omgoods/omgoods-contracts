@@ -25,5 +25,4 @@ coverage.json
 typechain
 
 # envs
-.env.local
 .env

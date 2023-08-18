@@ -1,0 +1,750 @@
+{
+  "address": "0x9091Bf8a40Ad29093B2B19634be70Bca5aa9f3A5",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "AccountAlreadyCreated",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AccountImplIsTheZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AccountIsTheZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AccountOwnerAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AccountOwnerDoesntExist",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AccountOwnerIsTheZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "AlreadyInitialized",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MsgSenderIsNotTheAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MsgSenderIsNotTheAccountOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MsgSenderIsNotTheContractOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotEnoughAccountOwners",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "OwnerIsTheZeroAddress",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "SaltOwnerIsTheZeroAddress",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "AccountCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "AccountOwnerAdded",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "AccountOwnerRemoved",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "AccountTransactionExecuted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address[]",
+          "name": "to",
+          "type": "address[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256[]",
+          "name": "value",
+          "type": "uint256[]"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes[]",
+          "name": "data",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "AccountTransactionsExecuted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "gateway",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "entryPoint",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "accountImpl",
+          "type": "address"
+        }
+      ],
+      "name": "Initialized",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnerUpdated",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "addAccountOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "saltOwner",
+          "type": "address"
+        }
+      ],
+      "name": "computeAccount",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "result",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "createAccount",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "directAddAccountOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "directRemoveAccountOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "emitAccountTransactionExecuted",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "to",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "value",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "data",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "emitAccountTransactionsExecuted",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "value",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "data",
+          "type": "bytes"
+        }
+      ],
+      "name": "executeAccountTransaction",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "to",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "value",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "data",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "executeAccountTransactions",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "saltOwner",
+          "type": "address"
+        }
+      ],
+      "name": "forceAccountCreation",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAccountImpl",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "getAccountState",
+      "outputs": [
+        {
+          "internalType": "enum AccountRegistry.AccountStates",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getGateway",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getOwner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "gateway",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "entryPoint",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "accountImpl",
+          "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "initialized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "isAccountOwner",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "result",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "removeAccountOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "setOwner",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x7dcb868f0f00f944868ea1937af2cbba0fb743c7f30c74554a9aed363d0df069",
+  "receipt": {
+    "to": null,
+    "from": "0xf8ba0485b6246A48A942e24d6DEB8EB7cF25B627",
+    "contractAddress": "0x9091Bf8a40Ad29093B2B19634be70Bca5aa9f3A5",
+    "transactionIndex": 37,
+    "gasUsed": "1952273",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x3f58a67da15382c653652eaab91d588611f07c9bf0bc9b065a8871c6c120a2b9",
+    "transactionHash": "0x7dcb868f0f00f944868ea1937af2cbba0fb743c7f30c74554a9aed363d0df069",
+    "logs": [],
+    "blockNumber": 9537350,
+    "cumulativeGasUsed": "6554019",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xF2a1699320517FA9C5c749EA9DfB5594Bb9862e5"
+  ],
+  "numDeployments": 1,
+  "solcInputHash": "6192676cc397315b66316256ae4c7243",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.21+commit.d9974bed\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"AccountAlreadyCreated\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AccountImplIsTheZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AccountIsTheZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AccountOwnerAlreadyExists\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AccountOwnerDoesntExist\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AccountOwnerIsTheZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"AlreadyInitialized\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MsgSenderIsNotTheAccount\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MsgSenderIsNotTheAccountOwner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"MsgSenderIsNotTheContractOwner\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"NotEnoughAccountOwners\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"OwnerIsTheZeroAddress\",\"type\":\"error\"},{\"inputs\":[],\"name\":\"SaltOwnerIsTheZeroAddress\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"AccountCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AccountOwnerAdded\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"AccountOwnerRemoved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"AccountTransactionExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address[]\",\"name\":\"to\",\"type\":\"address[]\"},{\"indexed\":false,\"internalType\":\"uint256[]\",\"name\":\"value\",\"type\":\"uint256[]\"},{\"indexed\":false,\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"AccountTransactionsExecuted\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"gateway\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"entryPoint\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"accountImpl\",\"type\":\"address\"}],\"name\":\"Initialized\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnerUpdated\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"addAccountOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"saltOwner\",\"type\":\"address\"}],\"name\":\"computeAccount\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"result\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"createAccount\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"directAddAccountOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"directRemoveAccountOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"emitAccountTransactionExecuted\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"to\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"value\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"emitAccountTransactionsExecuted\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"name\":\"executeAccountTransaction\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address[]\",\"name\":\"to\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"value\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes[]\",\"name\":\"data\",\"type\":\"bytes[]\"}],\"name\":\"executeAccountTransactions\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"saltOwner\",\"type\":\"address\"}],\"name\":\"forceAccountCreation\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAccountImpl\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"getAccountState\",\"outputs\":[{\"internalType\":\"enum AccountRegistry.AccountStates\",\"name\":\"\",\"type\":\"uint8\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getGateway\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getOwner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"gateway\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"entryPoint\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"accountImpl\",\"type\":\"address\"}],\"name\":\"initialize\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"initialized\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"isAccountOwner\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"result\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"removeAccountOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"setOwner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/account/AccountRegistry.sol\":\"AccountRegistry\"},\"evmVersion\":\"shanghai\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"none\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":4294967295},\"remappings\":[]},\"sources\":{\"@account-abstraction/contracts/core/Helpers.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\npragma solidity ^0.8.12;\\n\\n/* solhint-disable no-inline-assembly */\\n\\n/**\\n * returned data from validateUserOp.\\n * validateUserOp returns a uint256, with is created by `_packedValidationData` and parsed by `_parseValidationData`\\n * @param aggregator - address(0) - the account validated the signature by itself.\\n *              address(1) - the account failed to validate the signature.\\n *              otherwise - this is an address of a signature aggregator that must be used to validate the signature.\\n * @param validAfter - this UserOp is valid only after this timestamp.\\n * @param validaUntil - this UserOp is valid only up to this timestamp.\\n */\\n    struct ValidationData {\\n        address aggregator;\\n        uint48 validAfter;\\n        uint48 validUntil;\\n    }\\n\\n//extract sigFailed, validAfter, validUntil.\\n// also convert zero validUntil to type(uint48).max\\n    function _parseValidationData(uint validationData) pure returns (ValidationData memory data) {\\n        address aggregator = address(uint160(validationData));\\n        uint48 validUntil = uint48(validationData >> 160);\\n        if (validUntil == 0) {\\n            validUntil = type(uint48).max;\\n        }\\n        uint48 validAfter = uint48(validationData >> (48 + 160));\\n        return ValidationData(aggregator, validAfter, validUntil);\\n    }\\n\\n// intersect account and paymaster ranges.\\n    function _intersectTimeRange(uint256 validationData, uint256 paymasterValidationData) pure returns (ValidationData memory) {\\n        ValidationData memory accountValidationData = _parseValidationData(validationData);\\n        ValidationData memory pmValidationData = _parseValidationData(paymasterValidationData);\\n        address aggregator = accountValidationData.aggregator;\\n        if (aggregator == address(0)) {\\n            aggregator = pmValidationData.aggregator;\\n        }\\n        uint48 validAfter = accountValidationData.validAfter;\\n        uint48 validUntil = accountValidationData.validUntil;\\n        uint48 pmValidAfter = pmValidationData.validAfter;\\n        uint48 pmValidUntil = pmValidationData.validUntil;\\n\\n        if (validAfter < pmValidAfter) validAfter = pmValidAfter;\\n        if (validUntil > pmValidUntil) validUntil = pmValidUntil;\\n        return ValidationData(aggregator, validAfter, validUntil);\\n    }\\n\\n/**\\n * helper to pack the return value for validateUserOp\\n * @param data - the ValidationData to pack\\n */\\n    function _packValidationData(ValidationData memory data) pure returns (uint256) {\\n        return uint160(data.aggregator) | (uint256(data.validUntil) << 160) | (uint256(data.validAfter) << (160 + 48));\\n    }\\n\\n/**\\n * helper to pack the return value for validateUserOp, when not using an aggregator\\n * @param sigFailed - true for signature failure, false for success\\n * @param validUntil last timestamp this UserOperation is valid (or zero for infinite)\\n * @param validAfter first timestamp this UserOperation is valid\\n */\\n    function _packValidationData(bool sigFailed, uint48 validUntil, uint48 validAfter) pure returns (uint256) {\\n        return (sigFailed ? 1 : 0) | (uint256(validUntil) << 160) | (uint256(validAfter) << (160 + 48));\\n    }\\n\\n/**\\n * keccak function over calldata.\\n * @dev copy calldata into memory, do keccak and drop allocated memory. Strangely, this is more efficient than letting solidity do it.\\n */\\n    function calldataKeccak(bytes calldata data) pure returns (bytes32 ret) {\\n        assembly {\\n            let mem := mload(0x40)\\n            let len := data.length\\n            calldatacopy(mem, data.offset, len)\\n            ret := keccak256(mem, len)\\n        }\\n    }\\n\\n\",\"keccak256\":\"0x591c87519f7155d1909210276b77925ab2722a99b7b5d5649aecc36ebbdb045a\",\"license\":\"GPL-3.0\"},\"@account-abstraction/contracts/interfaces/IAccount.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\npragma solidity ^0.8.12;\\n\\nimport \\\"./UserOperation.sol\\\";\\n\\ninterface IAccount {\\n\\n    /**\\n     * Validate user's signature and nonce\\n     * the entryPoint will make the call to the recipient only if this validation call returns successfully.\\n     * signature failure should be reported by returning SIG_VALIDATION_FAILED (1).\\n     * This allows making a \\\"simulation call\\\" without a valid signature\\n     * Other failures (e.g. nonce mismatch, or invalid signature format) should still revert to signal failure.\\n     *\\n     * @dev Must validate caller is the entryPoint.\\n     *      Must validate the signature and nonce\\n     * @param userOp the operation that is about to be executed.\\n     * @param userOpHash hash of the user's request data. can be used as the basis for signature.\\n     * @param missingAccountFunds missing funds on the account's deposit in the entrypoint.\\n     *      This is the minimum amount to transfer to the sender(entryPoint) to be able to make the call.\\n     *      The excess is left as a deposit in the entrypoint, for future calls.\\n     *      can be withdrawn anytime using \\\"entryPoint.withdrawTo()\\\"\\n     *      In case there is a paymaster in the request (or the current deposit is high enough), this value will be zero.\\n     * @return validationData packaged ValidationData structure. use `_packValidationData` and `_unpackValidationData` to encode and decode\\n     *      <20-byte> sigAuthorizer - 0 for valid signature, 1 to mark signature failure,\\n     *         otherwise, an address of an \\\"authorizer\\\" contract.\\n     *      <6-byte> validUntil - last timestamp this operation is valid. 0 for \\\"indefinite\\\"\\n     *      <6-byte> validAfter - first timestamp this operation is valid\\n     *      If an account doesn't use time-range, it is enough to return SIG_VALIDATION_FAILED value (1) for signature failure.\\n     *      Note that the validation code cannot use block.timestamp (or block.number) directly.\\n     */\\n    function validateUserOp(UserOperation calldata userOp, bytes32 userOpHash, uint256 missingAccountFunds)\\n    external returns (uint256 validationData);\\n}\\n\",\"keccak256\":\"0x556a0e5980de18e90b115553ed502408155ba35f58642823010d9288047bc418\",\"license\":\"GPL-3.0\"},\"@account-abstraction/contracts/interfaces/UserOperation.sol\":{\"content\":\"// SPDX-License-Identifier: GPL-3.0\\npragma solidity ^0.8.12;\\n\\n/* solhint-disable no-inline-assembly */\\n\\nimport {calldataKeccak} from \\\"../core/Helpers.sol\\\";\\n\\n/**\\n * User Operation struct\\n * @param sender the sender account of this request.\\n     * @param nonce unique value the sender uses to verify it is not a replay.\\n     * @param initCode if set, the account contract will be created by this constructor/\\n     * @param callData the method call to execute on this account.\\n     * @param callGasLimit the gas limit passed to the callData method call.\\n     * @param verificationGasLimit gas used for validateUserOp and validatePaymasterUserOp.\\n     * @param preVerificationGas gas not calculated by the handleOps method, but added to the gas paid. Covers batch overhead.\\n     * @param maxFeePerGas same as EIP-1559 gas parameter.\\n     * @param maxPriorityFeePerGas same as EIP-1559 gas parameter.\\n     * @param paymasterAndData if set, this field holds the paymaster address and paymaster-specific data. the paymaster will pay for the transaction instead of the sender.\\n     * @param signature sender-verified signature over the entire request, the EntryPoint address and the chain ID.\\n     */\\n    struct UserOperation {\\n\\n        address sender;\\n        uint256 nonce;\\n        bytes initCode;\\n        bytes callData;\\n        uint256 callGasLimit;\\n        uint256 verificationGasLimit;\\n        uint256 preVerificationGas;\\n        uint256 maxFeePerGas;\\n        uint256 maxPriorityFeePerGas;\\n        bytes paymasterAndData;\\n        bytes signature;\\n    }\\n\\n/**\\n * Utility functions helpful when working with UserOperation structs.\\n */\\nlibrary UserOperationLib {\\n\\n    function getSender(UserOperation calldata userOp) internal pure returns (address) {\\n        address data;\\n        //read sender from userOp, which is first userOp member (saves 800 gas...)\\n        assembly {data := calldataload(userOp)}\\n        return address(uint160(data));\\n    }\\n\\n    //relayer/block builder might submit the TX with higher priorityFee, but the user should not\\n    // pay above what he signed for.\\n    function gasPrice(UserOperation calldata userOp) internal view returns (uint256) {\\n    unchecked {\\n        uint256 maxFeePerGas = userOp.maxFeePerGas;\\n        uint256 maxPriorityFeePerGas = userOp.maxPriorityFeePerGas;\\n        if (maxFeePerGas == maxPriorityFeePerGas) {\\n            //legacy mode (for networks that don't support basefee opcode)\\n            return maxFeePerGas;\\n        }\\n        return min(maxFeePerGas, maxPriorityFeePerGas + block.basefee);\\n    }\\n    }\\n\\n    function pack(UserOperation calldata userOp) internal pure returns (bytes memory ret) {\\n        address sender = getSender(userOp);\\n        uint256 nonce = userOp.nonce;\\n        bytes32 hashInitCode = calldataKeccak(userOp.initCode);\\n        bytes32 hashCallData = calldataKeccak(userOp.callData);\\n        uint256 callGasLimit = userOp.callGasLimit;\\n        uint256 verificationGasLimit = userOp.verificationGasLimit;\\n        uint256 preVerificationGas = userOp.preVerificationGas;\\n        uint256 maxFeePerGas = userOp.maxFeePerGas;\\n        uint256 maxPriorityFeePerGas = userOp.maxPriorityFeePerGas;\\n        bytes32 hashPaymasterAndData = calldataKeccak(userOp.paymasterAndData);\\n\\n        return abi.encode(\\n            sender, nonce,\\n            hashInitCode, hashCallData,\\n            callGasLimit, verificationGasLimit, preVerificationGas,\\n            maxFeePerGas, maxPriorityFeePerGas,\\n            hashPaymasterAndData\\n        );\\n    }\\n\\n    function hash(UserOperation calldata userOp) internal pure returns (bytes32) {\\n        return keccak256(pack(userOp));\\n    }\\n\\n    function min(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a < b ? a : b;\\n    }\\n}\\n\",\"keccak256\":\"0x61374003361059087fdcf17967a7bba052badeaf5c7f0ae689166f8aafd3a45c\",\"license\":\"GPL-3.0\"},\"@openzeppelin/contracts/interfaces/IERC1271.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (interfaces/IERC1271.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC1271 standard signature validation method for\\n * contracts as defined in https://eips.ethereum.org/EIPS/eip-1271[ERC-1271].\\n *\\n * _Available since v4.1._\\n */\\ninterface IERC1271 {\\n    /**\\n     * @dev Should return whether the signature provided is valid for the provided data\\n     * @param hash      Hash of the data to be signed\\n     * @param signature Signature byte array associated with _data\\n     */\\n    function isValidSignature(bytes32 hash, bytes memory signature) external view returns (bytes4 magicValue);\\n}\\n\",\"keccak256\":\"0x0705a4b1b86d7b0bd8432118f226ba139c44b9dcaba0a6eafba2dd7d0639c544\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.5.0) (token/ERC1155/IERC1155Receiver.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../../utils/introspection/IERC165.sol\\\";\\n\\n/**\\n * @dev _Available since v3.1._\\n */\\ninterface IERC1155Receiver is IERC165 {\\n    /**\\n     * @dev Handles the receipt of a single ERC1155 token type. This function is\\n     * called at the end of a `safeTransferFrom` after the balance has been updated.\\n     *\\n     * NOTE: To accept the transfer, this must return\\n     * `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))`\\n     * (i.e. 0xf23a6e61, or its own function selector).\\n     *\\n     * @param operator The address which initiated the transfer (i.e. msg.sender)\\n     * @param from The address which previously owned the token\\n     * @param id The ID of the token being transferred\\n     * @param value The amount of tokens being transferred\\n     * @param data Additional data with no specified format\\n     * @return `bytes4(keccak256(\\\"onERC1155Received(address,address,uint256,uint256,bytes)\\\"))` if transfer is allowed\\n     */\\n    function onERC1155Received(\\n        address operator,\\n        address from,\\n        uint256 id,\\n        uint256 value,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n\\n    /**\\n     * @dev Handles the receipt of a multiple ERC1155 token types. This function\\n     * is called at the end of a `safeBatchTransferFrom` after the balances have\\n     * been updated.\\n     *\\n     * NOTE: To accept the transfer(s), this must return\\n     * `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))`\\n     * (i.e. 0xbc197c81, or its own function selector).\\n     *\\n     * @param operator The address which initiated the batch transfer (i.e. msg.sender)\\n     * @param from The address which previously owned the token\\n     * @param ids An array containing ids of each token being transferred (order and length must match values array)\\n     * @param values An array containing amounts of each token being transferred (order and length must match ids array)\\n     * @param data Additional data with no specified format\\n     * @return `bytes4(keccak256(\\\"onERC1155BatchReceived(address,address,uint256[],uint256[],bytes)\\\"))` if transfer is allowed\\n     */\\n    function onERC1155BatchReceived(\\n        address operator,\\n        address from,\\n        uint256[] calldata ids,\\n        uint256[] calldata values,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n}\\n\",\"keccak256\":\"0xeb373f1fdc7b755c6a750123a9b9e3a8a02c1470042fd6505d875000a80bde0b\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.6.0) (token/ERC721/IERC721Receiver.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @title ERC721 token receiver interface\\n * @dev Interface for any contract that wants to support safeTransfers\\n * from ERC721 asset contracts.\\n */\\ninterface IERC721Receiver {\\n    /**\\n     * @dev Whenever an {IERC721} `tokenId` token is transferred to this contract via {IERC721-safeTransferFrom}\\n     * by `operator` from `from`, this function is called.\\n     *\\n     * It must return its Solidity selector to confirm the token transfer.\\n     * If any other value is returned or the interface is not implemented by the recipient, the transfer will be reverted.\\n     *\\n     * The selector can be obtained in Solidity with `IERC721Receiver.onERC721Received.selector`.\\n     */\\n    function onERC721Received(\\n        address operator,\\n        address from,\\n        uint256 tokenId,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n}\\n\",\"keccak256\":\"0xa82b58eca1ee256be466e536706850163d2ec7821945abd6b4778cfb3bee37da\",\"license\":\"MIT\"},\"@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (token/ERC777/IERC777Recipient.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC777TokensRecipient standard as defined in the EIP.\\n *\\n * Accounts can be notified of {IERC777} tokens being sent to them by having a\\n * contract implement this interface (contract holders can be their own\\n * implementer) and registering it on the\\n * https://eips.ethereum.org/EIPS/eip-1820[ERC1820 global registry].\\n *\\n * See {IERC1820Registry} and {ERC1820Implementer}.\\n */\\ninterface IERC777Recipient {\\n    /**\\n     * @dev Called by an {IERC777} token contract whenever tokens are being\\n     * moved or created into a registered account (`to`). The type of operation\\n     * is conveyed by `from` being the zero address or not.\\n     *\\n     * This call occurs _after_ the token contract's state is updated, so\\n     * {IERC777-balanceOf}, etc., can be used to query the post-operation state.\\n     *\\n     * This function may revert to prevent the operation from being executed.\\n     */\\n    function tokensReceived(\\n        address operator,\\n        address from,\\n        address to,\\n        uint256 amount,\\n        bytes calldata userData,\\n        bytes calldata operatorData\\n    ) external;\\n}\\n\",\"keccak256\":\"0x1a5d61db2733202ba361e6d6741cd2e662380e22b80e987eacfc91973f2267dc\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/Context.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xe2e337e6dde9ef6b680e07338c493ebea1b5fd09b43424112868e9cc1706bca7\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/Strings.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (utils/Strings.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"./math/Math.sol\\\";\\nimport \\\"./math/SignedMath.sol\\\";\\n\\n/**\\n * @dev String operations.\\n */\\nlibrary Strings {\\n    bytes16 private constant _SYMBOLS = \\\"0123456789abcdef\\\";\\n    uint8 private constant _ADDRESS_LENGTH = 20;\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` decimal representation.\\n     */\\n    function toString(uint256 value) internal pure returns (string memory) {\\n        unchecked {\\n            uint256 length = Math.log10(value) + 1;\\n            string memory buffer = new string(length);\\n            uint256 ptr;\\n            /// @solidity memory-safe-assembly\\n            assembly {\\n                ptr := add(buffer, add(32, length))\\n            }\\n            while (true) {\\n                ptr--;\\n                /// @solidity memory-safe-assembly\\n                assembly {\\n                    mstore8(ptr, byte(mod(value, 10), _SYMBOLS))\\n                }\\n                value /= 10;\\n                if (value == 0) break;\\n            }\\n            return buffer;\\n        }\\n    }\\n\\n    /**\\n     * @dev Converts a `int256` to its ASCII `string` decimal representation.\\n     */\\n    function toString(int256 value) internal pure returns (string memory) {\\n        return string(abi.encodePacked(value < 0 ? \\\"-\\\" : \\\"\\\", toString(SignedMath.abs(value))));\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation.\\n     */\\n    function toHexString(uint256 value) internal pure returns (string memory) {\\n        unchecked {\\n            return toHexString(value, Math.log256(value) + 1);\\n        }\\n    }\\n\\n    /**\\n     * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.\\n     */\\n    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {\\n        bytes memory buffer = new bytes(2 * length + 2);\\n        buffer[0] = \\\"0\\\";\\n        buffer[1] = \\\"x\\\";\\n        for (uint256 i = 2 * length + 1; i > 1; --i) {\\n            buffer[i] = _SYMBOLS[value & 0xf];\\n            value >>= 4;\\n        }\\n        require(value == 0, \\\"Strings: hex length insufficient\\\");\\n        return string(buffer);\\n    }\\n\\n    /**\\n     * @dev Converts an `address` with fixed length of 20 bytes to its not checksummed ASCII `string` hexadecimal representation.\\n     */\\n    function toHexString(address addr) internal pure returns (string memory) {\\n        return toHexString(uint256(uint160(addr)), _ADDRESS_LENGTH);\\n    }\\n\\n    /**\\n     * @dev Returns true if the two strings are equal.\\n     */\\n    function equal(string memory a, string memory b) internal pure returns (bool) {\\n        return keccak256(bytes(a)) == keccak256(bytes(b));\\n    }\\n}\\n\",\"keccak256\":\"0x3088eb2868e8d13d89d16670b5f8612c4ab9ff8956272837d8e90106c59c14a0\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/cryptography/ECDSA.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (utils/cryptography/ECDSA.sol)\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../Strings.sol\\\";\\n\\n/**\\n * @dev Elliptic Curve Digital Signature Algorithm (ECDSA) operations.\\n *\\n * These functions can be used to verify that a message was signed by the holder\\n * of the private keys of a given address.\\n */\\nlibrary ECDSA {\\n    enum RecoverError {\\n        NoError,\\n        InvalidSignature,\\n        InvalidSignatureLength,\\n        InvalidSignatureS,\\n        InvalidSignatureV // Deprecated in v4.8\\n    }\\n\\n    function _throwError(RecoverError error) private pure {\\n        if (error == RecoverError.NoError) {\\n            return; // no error: do nothing\\n        } else if (error == RecoverError.InvalidSignature) {\\n            revert(\\\"ECDSA: invalid signature\\\");\\n        } else if (error == RecoverError.InvalidSignatureLength) {\\n            revert(\\\"ECDSA: invalid signature length\\\");\\n        } else if (error == RecoverError.InvalidSignatureS) {\\n            revert(\\\"ECDSA: invalid signature 's' value\\\");\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the address that signed a hashed message (`hash`) with\\n     * `signature` or error string. This address can then be used for verification purposes.\\n     *\\n     * The `ecrecover` EVM opcode allows for malleable (non-unique) signatures:\\n     * this function rejects them by requiring the `s` value to be in the lower\\n     * half order, and the `v` value to be either 27 or 28.\\n     *\\n     * IMPORTANT: `hash` _must_ be the result of a hash operation for the\\n     * verification to be secure: it is possible to craft signatures that\\n     * recover to arbitrary addresses for non-hashed data. A safe way to ensure\\n     * this is by receiving a hash of the original message (which may otherwise\\n     * be too long), and then calling {toEthSignedMessageHash} on it.\\n     *\\n     * Documentation for signature generation:\\n     * - with https://web3js.readthedocs.io/en/v1.3.4/web3-eth-accounts.html#sign[Web3.js]\\n     * - with https://docs.ethers.io/v5/api/signer/#Signer-signMessage[ethers]\\n     *\\n     * _Available since v4.3._\\n     */\\n    function tryRecover(bytes32 hash, bytes memory signature) internal pure returns (address, RecoverError) {\\n        if (signature.length == 65) {\\n            bytes32 r;\\n            bytes32 s;\\n            uint8 v;\\n            // ecrecover takes the signature parameters, and the only way to get them\\n            // currently is to use assembly.\\n            /// @solidity memory-safe-assembly\\n            assembly {\\n                r := mload(add(signature, 0x20))\\n                s := mload(add(signature, 0x40))\\n                v := byte(0, mload(add(signature, 0x60)))\\n            }\\n            return tryRecover(hash, v, r, s);\\n        } else {\\n            return (address(0), RecoverError.InvalidSignatureLength);\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns the address that signed a hashed message (`hash`) with\\n     * `signature`. This address can then be used for verification purposes.\\n     *\\n     * The `ecrecover` EVM opcode allows for malleable (non-unique) signatures:\\n     * this function rejects them by requiring the `s` value to be in the lower\\n     * half order, and the `v` value to be either 27 or 28.\\n     *\\n     * IMPORTANT: `hash` _must_ be the result of a hash operation for the\\n     * verification to be secure: it is possible to craft signatures that\\n     * recover to arbitrary addresses for non-hashed data. A safe way to ensure\\n     * this is by receiving a hash of the original message (which may otherwise\\n     * be too long), and then calling {toEthSignedMessageHash} on it.\\n     */\\n    function recover(bytes32 hash, bytes memory signature) internal pure returns (address) {\\n        (address recovered, RecoverError error) = tryRecover(hash, signature);\\n        _throwError(error);\\n        return recovered;\\n    }\\n\\n    /**\\n     * @dev Overload of {ECDSA-tryRecover} that receives the `r` and `vs` short-signature fields separately.\\n     *\\n     * See https://eips.ethereum.org/EIPS/eip-2098[EIP-2098 short signatures]\\n     *\\n     * _Available since v4.3._\\n     */\\n    function tryRecover(bytes32 hash, bytes32 r, bytes32 vs) internal pure returns (address, RecoverError) {\\n        bytes32 s = vs & bytes32(0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);\\n        uint8 v = uint8((uint256(vs) >> 255) + 27);\\n        return tryRecover(hash, v, r, s);\\n    }\\n\\n    /**\\n     * @dev Overload of {ECDSA-recover} that receives the `r and `vs` short-signature fields separately.\\n     *\\n     * _Available since v4.2._\\n     */\\n    function recover(bytes32 hash, bytes32 r, bytes32 vs) internal pure returns (address) {\\n        (address recovered, RecoverError error) = tryRecover(hash, r, vs);\\n        _throwError(error);\\n        return recovered;\\n    }\\n\\n    /**\\n     * @dev Overload of {ECDSA-tryRecover} that receives the `v`,\\n     * `r` and `s` signature fields separately.\\n     *\\n     * _Available since v4.3._\\n     */\\n    function tryRecover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) internal pure returns (address, RecoverError) {\\n        // EIP-2 still allows signature malleability for ecrecover(). Remove this possibility and make the signature\\n        // unique. Appendix F in the Ethereum Yellow paper (https://ethereum.github.io/yellowpaper/paper.pdf), defines\\n        // the valid range for s in (301): 0 < s < secp256k1n \\u00f7 2 + 1, and for v in (302): v \\u2208 {27, 28}. Most\\n        // signatures from current libraries generate a unique signature with an s-value in the lower half order.\\n        //\\n        // If your library generates malleable signatures, such as s-values in the upper range, calculate a new s-value\\n        // with 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - s1 and flip v from 27 to 28 or\\n        // vice versa. If your library also generates signatures with 0/1 for v instead 27/28, add 27 to v to accept\\n        // these malleable signatures as well.\\n        if (uint256(s) > 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0) {\\n            return (address(0), RecoverError.InvalidSignatureS);\\n        }\\n\\n        // If the signature is valid (and not malleable), return the signer address\\n        address signer = ecrecover(hash, v, r, s);\\n        if (signer == address(0)) {\\n            return (address(0), RecoverError.InvalidSignature);\\n        }\\n\\n        return (signer, RecoverError.NoError);\\n    }\\n\\n    /**\\n     * @dev Overload of {ECDSA-recover} that receives the `v`,\\n     * `r` and `s` signature fields separately.\\n     */\\n    function recover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {\\n        (address recovered, RecoverError error) = tryRecover(hash, v, r, s);\\n        _throwError(error);\\n        return recovered;\\n    }\\n\\n    /**\\n     * @dev Returns an Ethereum Signed Message, created from a `hash`. This\\n     * produces hash corresponding to the one signed with the\\n     * https://eth.wiki/json-rpc/API#eth_sign[`eth_sign`]\\n     * JSON-RPC method as part of EIP-191.\\n     *\\n     * See {recover}.\\n     */\\n    function toEthSignedMessageHash(bytes32 hash) internal pure returns (bytes32 message) {\\n        // 32 is the length in bytes of hash,\\n        // enforced by the type signature above\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            mstore(0x00, \\\"\\\\x19Ethereum Signed Message:\\\\n32\\\")\\n            mstore(0x1c, hash)\\n            message := keccak256(0x00, 0x3c)\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns an Ethereum Signed Message, created from `s`. This\\n     * produces hash corresponding to the one signed with the\\n     * https://eth.wiki/json-rpc/API#eth_sign[`eth_sign`]\\n     * JSON-RPC method as part of EIP-191.\\n     *\\n     * See {recover}.\\n     */\\n    function toEthSignedMessageHash(bytes memory s) internal pure returns (bytes32) {\\n        return keccak256(abi.encodePacked(\\\"\\\\x19Ethereum Signed Message:\\\\n\\\", Strings.toString(s.length), s));\\n    }\\n\\n    /**\\n     * @dev Returns an Ethereum Signed Typed Data, created from a\\n     * `domainSeparator` and a `structHash`. This produces hash corresponding\\n     * to the one signed with the\\n     * https://eips.ethereum.org/EIPS/eip-712[`eth_signTypedData`]\\n     * JSON-RPC method as part of EIP-712.\\n     *\\n     * See {recover}.\\n     */\\n    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash) internal pure returns (bytes32 data) {\\n        /// @solidity memory-safe-assembly\\n        assembly {\\n            let ptr := mload(0x40)\\n            mstore(ptr, \\\"\\\\x19\\\\x01\\\")\\n            mstore(add(ptr, 0x02), domainSeparator)\\n            mstore(add(ptr, 0x22), structHash)\\n            data := keccak256(ptr, 0x42)\\n        }\\n    }\\n\\n    /**\\n     * @dev Returns an Ethereum Signed Data with intended validator, created from a\\n     * `validator` and `data` according to the version 0 of EIP-191.\\n     *\\n     * See {recover}.\\n     */\\n    function toDataWithIntendedValidatorHash(address validator, bytes memory data) internal pure returns (bytes32) {\\n        return keccak256(abi.encodePacked(\\\"\\\\x19\\\\x00\\\", validator, data));\\n    }\\n}\\n\",\"keccak256\":\"0x809bc3edb4bcbef8263fa616c1b60ee0004b50a8a1bfa164d8f57fd31f520c58\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/introspection/IERC165.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Interface of the ERC165 standard, as defined in the\\n * https://eips.ethereum.org/EIPS/eip-165[EIP].\\n *\\n * Implementers can declare support of contract interfaces, which can then be\\n * queried by others ({ERC165Checker}).\\n *\\n * For an implementation, see {ERC165}.\\n */\\ninterface IERC165 {\\n    /**\\n     * @dev Returns true if this contract implements the interface defined by\\n     * `interfaceId`. See the corresponding\\n     * https://eips.ethereum.org/EIPS/eip-165#how-interfaces-are-identified[EIP section]\\n     * to learn more about how these ids are created.\\n     *\\n     * This function call must use less than 30 000 gas.\\n     */\\n    function supportsInterface(bytes4 interfaceId) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x447a5f3ddc18419d41ff92b3773fb86471b1db25773e07f877f548918a185bf1\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/math/Math.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.9.0) (utils/math/Math.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Standard math utilities missing in the Solidity language.\\n */\\nlibrary Math {\\n    enum Rounding {\\n        Down, // Toward negative infinity\\n        Up, // Toward infinity\\n        Zero // Toward zero\\n    }\\n\\n    /**\\n     * @dev Returns the largest of two numbers.\\n     */\\n    function max(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a > b ? a : b;\\n    }\\n\\n    /**\\n     * @dev Returns the smallest of two numbers.\\n     */\\n    function min(uint256 a, uint256 b) internal pure returns (uint256) {\\n        return a < b ? a : b;\\n    }\\n\\n    /**\\n     * @dev Returns the average of two numbers. The result is rounded towards\\n     * zero.\\n     */\\n    function average(uint256 a, uint256 b) internal pure returns (uint256) {\\n        // (a + b) / 2 can overflow.\\n        return (a & b) + (a ^ b) / 2;\\n    }\\n\\n    /**\\n     * @dev Returns the ceiling of the division of two numbers.\\n     *\\n     * This differs from standard division with `/` in that it rounds up instead\\n     * of rounding down.\\n     */\\n    function ceilDiv(uint256 a, uint256 b) internal pure returns (uint256) {\\n        // (a + b - 1) / b can overflow on addition, so we distribute.\\n        return a == 0 ? 0 : (a - 1) / b + 1;\\n    }\\n\\n    /**\\n     * @notice Calculates floor(x * y / denominator) with full precision. Throws if result overflows a uint256 or denominator == 0\\n     * @dev Original credit to Remco Bloemen under MIT license (https://xn--2-umb.com/21/muldiv)\\n     * with further edits by Uniswap Labs also under MIT license.\\n     */\\n    function mulDiv(uint256 x, uint256 y, uint256 denominator) internal pure returns (uint256 result) {\\n        unchecked {\\n            // 512-bit multiply [prod1 prod0] = x * y. Compute the product mod 2^256 and mod 2^256 - 1, then use\\n            // use the Chinese Remainder Theorem to reconstruct the 512 bit result. The result is stored in two 256\\n            // variables such that product = prod1 * 2^256 + prod0.\\n            uint256 prod0; // Least significant 256 bits of the product\\n            uint256 prod1; // Most significant 256 bits of the product\\n            assembly {\\n                let mm := mulmod(x, y, not(0))\\n                prod0 := mul(x, y)\\n                prod1 := sub(sub(mm, prod0), lt(mm, prod0))\\n            }\\n\\n            // Handle non-overflow cases, 256 by 256 division.\\n            if (prod1 == 0) {\\n                // Solidity will revert if denominator == 0, unlike the div opcode on its own.\\n                // The surrounding unchecked block does not change this fact.\\n                // See https://docs.soliditylang.org/en/latest/control-structures.html#checked-or-unchecked-arithmetic.\\n                return prod0 / denominator;\\n            }\\n\\n            // Make sure the result is less than 2^256. Also prevents denominator == 0.\\n            require(denominator > prod1, \\\"Math: mulDiv overflow\\\");\\n\\n            ///////////////////////////////////////////////\\n            // 512 by 256 division.\\n            ///////////////////////////////////////////////\\n\\n            // Make division exact by subtracting the remainder from [prod1 prod0].\\n            uint256 remainder;\\n            assembly {\\n                // Compute remainder using mulmod.\\n                remainder := mulmod(x, y, denominator)\\n\\n                // Subtract 256 bit number from 512 bit number.\\n                prod1 := sub(prod1, gt(remainder, prod0))\\n                prod0 := sub(prod0, remainder)\\n            }\\n\\n            // Factor powers of two out of denominator and compute largest power of two divisor of denominator. Always >= 1.\\n            // See https://cs.stackexchange.com/q/138556/92363.\\n\\n            // Does not overflow because the denominator cannot be zero at this stage in the function.\\n            uint256 twos = denominator & (~denominator + 1);\\n            assembly {\\n                // Divide denominator by twos.\\n                denominator := div(denominator, twos)\\n\\n                // Divide [prod1 prod0] by twos.\\n                prod0 := div(prod0, twos)\\n\\n                // Flip twos such that it is 2^256 / twos. If twos is zero, then it becomes one.\\n                twos := add(div(sub(0, twos), twos), 1)\\n            }\\n\\n            // Shift in bits from prod1 into prod0.\\n            prod0 |= prod1 * twos;\\n\\n            // Invert denominator mod 2^256. Now that denominator is an odd number, it has an inverse modulo 2^256 such\\n            // that denominator * inv = 1 mod 2^256. Compute the inverse by starting with a seed that is correct for\\n            // four bits. That is, denominator * inv = 1 mod 2^4.\\n            uint256 inverse = (3 * denominator) ^ 2;\\n\\n            // Use the Newton-Raphson iteration to improve the precision. Thanks to Hensel's lifting lemma, this also works\\n            // in modular arithmetic, doubling the correct bits in each step.\\n            inverse *= 2 - denominator * inverse; // inverse mod 2^8\\n            inverse *= 2 - denominator * inverse; // inverse mod 2^16\\n            inverse *= 2 - denominator * inverse; // inverse mod 2^32\\n            inverse *= 2 - denominator * inverse; // inverse mod 2^64\\n            inverse *= 2 - denominator * inverse; // inverse mod 2^128\\n            inverse *= 2 - denominator * inverse; // inverse mod 2^256\\n\\n            // Because the division is now exact we can divide by multiplying with the modular inverse of denominator.\\n            // This will give us the correct result modulo 2^256. Since the preconditions guarantee that the outcome is\\n            // less than 2^256, this is the final result. We don't need to compute the high bits of the result and prod1\\n            // is no longer required.\\n            result = prod0 * inverse;\\n            return result;\\n        }\\n    }\\n\\n    /**\\n     * @notice Calculates x * y / denominator with full precision, following the selected rounding direction.\\n     */\\n    function mulDiv(uint256 x, uint256 y, uint256 denominator, Rounding rounding) internal pure returns (uint256) {\\n        uint256 result = mulDiv(x, y, denominator);\\n        if (rounding == Rounding.Up && mulmod(x, y, denominator) > 0) {\\n            result += 1;\\n        }\\n        return result;\\n    }\\n\\n    /**\\n     * @dev Returns the square root of a number. If the number is not a perfect square, the value is rounded down.\\n     *\\n     * Inspired by Henry S. Warren, Jr.'s \\\"Hacker's Delight\\\" (Chapter 11).\\n     */\\n    function sqrt(uint256 a) internal pure returns (uint256) {\\n        if (a == 0) {\\n            return 0;\\n        }\\n\\n        // For our first guess, we get the biggest power of 2 which is smaller than the square root of the target.\\n        //\\n        // We know that the \\\"msb\\\" (most significant bit) of our target number `a` is a power of 2 such that we have\\n        // `msb(a) <= a < 2*msb(a)`. This value can be written `msb(a)=2**k` with `k=log2(a)`.\\n        //\\n        // This can be rewritten `2**log2(a) <= a < 2**(log2(a) + 1)`\\n        // \\u2192 `sqrt(2**k) <= sqrt(a) < sqrt(2**(k+1))`\\n        // \\u2192 `2**(k/2) <= sqrt(a) < 2**((k+1)/2) <= 2**(k/2 + 1)`\\n        //\\n        // Consequently, `2**(log2(a) / 2)` is a good first approximation of `sqrt(a)` with at least 1 correct bit.\\n        uint256 result = 1 << (log2(a) >> 1);\\n\\n        // At this point `result` is an estimation with one bit of precision. We know the true value is a uint128,\\n        // since it is the square root of a uint256. Newton's method converges quadratically (precision doubles at\\n        // every iteration). We thus need at most 7 iteration to turn our partial result with one bit of precision\\n        // into the expected uint128 result.\\n        unchecked {\\n            result = (result + a / result) >> 1;\\n            result = (result + a / result) >> 1;\\n            result = (result + a / result) >> 1;\\n            result = (result + a / result) >> 1;\\n            result = (result + a / result) >> 1;\\n            result = (result + a / result) >> 1;\\n            result = (result + a / result) >> 1;\\n            return min(result, a / result);\\n        }\\n    }\\n\\n    /**\\n     * @notice Calculates sqrt(a), following the selected rounding direction.\\n     */\\n    function sqrt(uint256 a, Rounding rounding) internal pure returns (uint256) {\\n        unchecked {\\n            uint256 result = sqrt(a);\\n            return result + (rounding == Rounding.Up && result * result < a ? 1 : 0);\\n        }\\n    }\\n\\n    /**\\n     * @dev Return the log in base 2, rounded down, of a positive value.\\n     * Returns 0 if given 0.\\n     */\\n    function log2(uint256 value) internal pure returns (uint256) {\\n        uint256 result = 0;\\n        unchecked {\\n            if (value >> 128 > 0) {\\n                value >>= 128;\\n                result += 128;\\n            }\\n            if (value >> 64 > 0) {\\n                value >>= 64;\\n                result += 64;\\n            }\\n            if (value >> 32 > 0) {\\n                value >>= 32;\\n                result += 32;\\n            }\\n            if (value >> 16 > 0) {\\n                value >>= 16;\\n                result += 16;\\n            }\\n            if (value >> 8 > 0) {\\n                value >>= 8;\\n                result += 8;\\n            }\\n            if (value >> 4 > 0) {\\n                value >>= 4;\\n                result += 4;\\n            }\\n            if (value >> 2 > 0) {\\n                value >>= 2;\\n                result += 2;\\n            }\\n            if (value >> 1 > 0) {\\n                result += 1;\\n            }\\n        }\\n        return result;\\n    }\\n\\n    /**\\n     * @dev Return the log in base 2, following the selected rounding direction, of a positive value.\\n     * Returns 0 if given 0.\\n     */\\n    function log2(uint256 value, Rounding rounding) internal pure returns (uint256) {\\n        unchecked {\\n            uint256 result = log2(value);\\n            return result + (rounding == Rounding.Up && 1 << result < value ? 1 : 0);\\n        }\\n    }\\n\\n    /**\\n     * @dev Return the log in base 10, rounded down, of a positive value.\\n     * Returns 0 if given 0.\\n     */\\n    function log10(uint256 value) internal pure returns (uint256) {\\n        uint256 result = 0;\\n        unchecked {\\n            if (value >= 10 ** 64) {\\n                value /= 10 ** 64;\\n                result += 64;\\n            }\\n            if (value >= 10 ** 32) {\\n                value /= 10 ** 32;\\n                result += 32;\\n            }\\n            if (value >= 10 ** 16) {\\n                value /= 10 ** 16;\\n                result += 16;\\n            }\\n            if (value >= 10 ** 8) {\\n                value /= 10 ** 8;\\n                result += 8;\\n            }\\n            if (value >= 10 ** 4) {\\n                value /= 10 ** 4;\\n                result += 4;\\n            }\\n            if (value >= 10 ** 2) {\\n                value /= 10 ** 2;\\n                result += 2;\\n            }\\n            if (value >= 10 ** 1) {\\n                result += 1;\\n            }\\n        }\\n        return result;\\n    }\\n\\n    /**\\n     * @dev Return the log in base 10, following the selected rounding direction, of a positive value.\\n     * Returns 0 if given 0.\\n     */\\n    function log10(uint256 value, Rounding rounding) internal pure returns (uint256) {\\n        unchecked {\\n            uint256 result = log10(value);\\n            return result + (rounding == Rounding.Up && 10 ** result < value ? 1 : 0);\\n        }\\n    }\\n\\n    /**\\n     * @dev Return the log in base 256, rounded down, of a positive value.\\n     * Returns 0 if given 0.\\n     *\\n     * Adding one to the result gives the number of pairs of hex symbols needed to represent `value` as a hex string.\\n     */\\n    function log256(uint256 value) internal pure returns (uint256) {\\n        uint256 result = 0;\\n        unchecked {\\n            if (value >> 128 > 0) {\\n                value >>= 128;\\n                result += 16;\\n            }\\n            if (value >> 64 > 0) {\\n                value >>= 64;\\n                result += 8;\\n            }\\n            if (value >> 32 > 0) {\\n                value >>= 32;\\n                result += 4;\\n            }\\n            if (value >> 16 > 0) {\\n                value >>= 16;\\n                result += 2;\\n            }\\n            if (value >> 8 > 0) {\\n                result += 1;\\n            }\\n        }\\n        return result;\\n    }\\n\\n    /**\\n     * @dev Return the log in base 256, following the selected rounding direction, of a positive value.\\n     * Returns 0 if given 0.\\n     */\\n    function log256(uint256 value, Rounding rounding) internal pure returns (uint256) {\\n        unchecked {\\n            uint256 result = log256(value);\\n            return result + (rounding == Rounding.Up && 1 << (result << 3) < value ? 1 : 0);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xe4455ac1eb7fc497bb7402579e7b4d64d928b846fce7d2b6fde06d366f21c2b3\",\"license\":\"MIT\"},\"@openzeppelin/contracts/utils/math/SignedMath.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// OpenZeppelin Contracts (last updated v4.8.0) (utils/math/SignedMath.sol)\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Standard signed math utilities missing in the Solidity language.\\n */\\nlibrary SignedMath {\\n    /**\\n     * @dev Returns the largest of two signed numbers.\\n     */\\n    function max(int256 a, int256 b) internal pure returns (int256) {\\n        return a > b ? a : b;\\n    }\\n\\n    /**\\n     * @dev Returns the smallest of two signed numbers.\\n     */\\n    function min(int256 a, int256 b) internal pure returns (int256) {\\n        return a < b ? a : b;\\n    }\\n\\n    /**\\n     * @dev Returns the average of two signed numbers without overflow.\\n     * The result is rounded towards zero.\\n     */\\n    function average(int256 a, int256 b) internal pure returns (int256) {\\n        // Formula from the book \\\"Hacker's Delight\\\"\\n        int256 x = (a & b) + ((a ^ b) >> 1);\\n        return x + (int256(uint256(x) >> 255) & (a ^ b));\\n    }\\n\\n    /**\\n     * @dev Returns the absolute unsigned value of a signed value.\\n     */\\n    function abs(int256 n) internal pure returns (uint256) {\\n        unchecked {\\n            // must be unchecked in order to support `n = type(int256).min`\\n            return uint256(n >= 0 ? n : -n);\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xf92515413956f529d95977adc9b0567d583c6203fc31ab1c23824c35187e3ddc\",\"license\":\"MIT\"},\"contracts/account/Account.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {Initializable} from \\\"../common/utils/Initializable.sol\\\";\\nimport {GatewayRecipient} from \\\"../gateway/GatewayRecipient.sol\\\";\\nimport {TokenReceiver} from \\\"../token/TokenReceiver.sol\\\";\\nimport {ERC1271Account} from \\\"./extensions/ERC1271Account.sol\\\";\\nimport {ERC4337Account} from \\\"./extensions/ERC4337Account.sol\\\";\\nimport {IAccountRegistry} from \\\"./IAccountRegistry.sol\\\";\\n\\nabstract contract Account is\\n  Initializable,\\n  GatewayRecipient,\\n  TokenReceiver,\\n  ERC1271Account,\\n  ERC4337Account\\n{\\n  // storage\\n\\n  address private _accountRegistry;\\n\\n  // events\\n\\n  event OwnerAdded(address owner);\\n\\n  event OwnerRemoved(address owner);\\n\\n  event TransactionExecuted(address to, uint256 value, bytes data);\\n\\n  event TransactionsExecuted(address[] to, uint256[] value, bytes[] data);\\n\\n  // errors\\n\\n  error MsgSenderIsNotTheAccountOwner();\\n\\n  error EmptyTransactionBatch();\\n\\n  error InvalidTransactionBatchSize();\\n\\n  error TransactionToTheZeroAddress();\\n\\n  error TransactionToInvalidAddress();\\n\\n  error OwnerIsTheZeroAddress();\\n\\n  // modifiers\\n\\n  modifier onlyOwner() {\\n    _verifyOwner(_msgSender());\\n\\n    _;\\n  }\\n\\n  // deployment\\n\\n  function _initialize(\\n    address gateway,\\n    address entryPoint,\\n    address accountRegistry\\n  ) internal initializeOnce {\\n    _gateway = gateway;\\n\\n    _entryPoint = entryPoint;\\n\\n    _accountRegistry = accountRegistry;\\n  }\\n\\n  // wildcard\\n\\n  receive() external payable {\\n    //\\n  }\\n\\n  // external getters\\n\\n  function getExternalOwners()\\n    external\\n    view\\n    returns (address accountRegistry, address entryPoint)\\n  {\\n    return (_accountRegistry, _entryPoint);\\n  }\\n\\n  function hasOwner(address owner) external view returns (bool) {\\n    return _hasOwner(owner);\\n  }\\n\\n  // external setters\\n\\n  function addOwner(address owner) external onlyOwner {\\n    IAccountRegistry(_accountRegistry).directAddAccountOwner(owner);\\n\\n    emit OwnerAdded(owner);\\n  }\\n\\n  function removeOwner(address owner) external onlyOwner {\\n    IAccountRegistry(_accountRegistry).directRemoveAccountOwner(owner);\\n\\n    emit OwnerRemoved(owner);\\n  }\\n\\n  function executeTransaction(\\n    address to,\\n    uint256 value,\\n    bytes calldata data\\n  ) external {\\n    address sender = _msgSender();\\n\\n    _verifyOwner(sender);\\n\\n    _executeTransaction(to, value, data);\\n\\n    _afterTransactionExecuted(sender, to, value, data);\\n  }\\n\\n  function executeTransactions(\\n    address[] calldata to,\\n    uint256[] calldata value,\\n    bytes[] calldata data\\n  ) external {\\n    address sender = _msgSender();\\n\\n    _verifyOwner(sender);\\n\\n    if (to.length == 0) {\\n      revert EmptyTransactionBatch();\\n    }\\n\\n    if (to.length != value.length || value.length != data.length) {\\n      revert InvalidTransactionBatchSize();\\n    }\\n\\n    for (uint256 index; index < to.length; ) {\\n      _executeTransaction(to[index], value[index], data[index]);\\n\\n      unchecked {\\n        ++index;\\n      }\\n    }\\n\\n    if (sender != _accountRegistry) {\\n      IAccountRegistry(_accountRegistry).emitAccountTransactionsExecuted(\\n        to,\\n        value,\\n        data\\n      );\\n    }\\n\\n    emit TransactionsExecuted(to, value, data);\\n  }\\n\\n  // internal getters\\n\\n  function _hasOwner(\\n    address owner\\n  ) internal view override returns (bool result) {\\n    return\\n      IAccountRegistry(_accountRegistry).isAccountOwner(address(this), owner);\\n  }\\n\\n  // internal setters\\n\\n  function _afterTransactionExecuted(\\n    address sender,\\n    address to,\\n    uint256 value,\\n    bytes memory data\\n  ) internal override {\\n    if (sender != _accountRegistry) {\\n      IAccountRegistry(_accountRegistry).emitAccountTransactionExecuted(\\n        to,\\n        value,\\n        data\\n      );\\n    }\\n\\n    emit TransactionExecuted(to, value, data);\\n  }\\n\\n  // private getters\\n\\n  function _verifyOwner(address sender) private view {\\n    if (\\n      sender != address(this) &&\\n      sender != _accountRegistry &&\\n      sender != _entryPoint &&\\n      !_hasOwner(sender)\\n    ) {\\n      revert MsgSenderIsNotTheAccountOwner();\\n    }\\n  }\\n\\n  // private setters\\n\\n  function _executeTransaction(\\n    address to,\\n    uint256 value,\\n    bytes memory data\\n  ) private {\\n    if (to == address(0)) {\\n      revert TransactionToTheZeroAddress();\\n    }\\n\\n    if (to == _accountRegistry) {\\n      revert TransactionToInvalidAddress();\\n    }\\n\\n    (bool success, bytes memory response) = to.call{value: value}(data);\\n\\n    if (!success) {\\n      // solhint-disable-next-line no-inline-assembly\\n      assembly {\\n        revert(add(response, 32), mload(response))\\n      }\\n    }\\n  }\\n}\\n\",\"keccak256\":\"0x797fafacdfdbf5228e3bb8dd7f4a752671fbed58db15637afcc561aa345cd47a\",\"license\":\"NONE\"},\"contracts/account/AccountImpl.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {ProxyImpl} from \\\"../common/proxy/ProxyImpl.sol\\\";\\nimport {Account} from \\\"./Account.sol\\\";\\n\\ncontract AccountImpl is ProxyImpl, Account {\\n  // deployment\\n\\n  constructor() {\\n    _initialized = true; // singleton\\n  }\\n\\n  function initialize(address gateway, address entryPoint) external {\\n    _initialize(gateway, entryPoint, msg.sender);\\n  }\\n}\\n\",\"keccak256\":\"0xf32f90d1824879396103438556c172d0a5b4bb2a4d65a1b008739074e86df3ff\",\"license\":\"NONE\"},\"contracts/account/AccountRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {Context} from \\\"@openzeppelin/contracts/utils/Context.sol\\\";\\nimport {Ownable} from \\\"../common/access/Ownable.sol\\\";\\nimport {ProxyFactory} from \\\"../common/proxy/ProxyFactory.sol\\\";\\nimport {ProxyHelper} from \\\"../common/proxy/ProxyHelper.sol\\\";\\nimport {Initializable} from \\\"../common/utils/Initializable.sol\\\";\\nimport {GatewayRecipient} from \\\"../gateway/GatewayRecipient.sol\\\";\\nimport {IAccountRegistry} from \\\"./IAccountRegistry.sol\\\";\\nimport {AccountImpl} from \\\"./AccountImpl.sol\\\";\\n\\ncontract AccountRegistry is\\n  Ownable,\\n  ProxyFactory,\\n  Initializable,\\n  GatewayRecipient,\\n  IAccountRegistry\\n{\\n  enum AccountStates {\\n    Unknown,\\n    Defined,\\n    Created\\n  }\\n\\n  // storage\\n\\n  address private _entryPoint;\\n\\n  address private _accountImpl;\\n\\n  mapping(address => bytes32) private _accountSalts;\\n\\n  mapping(address => AccountStates) private _accountStates;\\n\\n  mapping(address => mapping(address => bool)) private _accountOwners;\\n\\n  mapping(address => uint256) private _accountOwnersCounters;\\n\\n  // events\\n\\n  event Initialized(address gateway, address entryPoint, address accountImpl);\\n\\n  event AccountCreated(address account);\\n\\n  // errors\\n\\n  error MsgSenderIsNotTheAccount();\\n\\n  error MsgSenderIsNotTheAccountOwner();\\n\\n  error SaltOwnerIsTheZeroAddress();\\n\\n  error AccountAlreadyCreated();\\n\\n  error AccountIsTheZeroAddress();\\n\\n  error AccountImplIsTheZeroAddress();\\n\\n  error AccountOwnerAlreadyExists();\\n\\n  error AccountOwnerDoesntExist();\\n\\n  error NotEnoughAccountOwners();\\n\\n  error AccountOwnerIsTheZeroAddress();\\n\\n  // modifiers\\n\\n  modifier onlyAccount() {\\n    if (_accountStates[msg.sender] != AccountStates.Created) {\\n      revert MsgSenderIsNotTheAccount();\\n    }\\n\\n    _;\\n  }\\n\\n  // deployment\\n\\n  constructor(address owner) Ownable(owner) {\\n    //\\n  }\\n\\n  function initialize(\\n    address gateway,\\n    address entryPoint,\\n    address accountImpl\\n  ) external onlyOwner initializeOnce {\\n    if (accountImpl == address(0)) {\\n      revert AccountImplIsTheZeroAddress();\\n    }\\n\\n    _gateway = gateway;\\n\\n    _entryPoint = entryPoint;\\n\\n    _accountImpl = accountImpl;\\n\\n    emit Initialized(gateway, entryPoint, accountImpl);\\n  }\\n\\n  // external getters\\n\\n  function getAccountImpl() external view returns (address) {\\n    return _accountImpl;\\n  }\\n\\n  function computeAccount(\\n    address saltOwner\\n  ) external view returns (address result) {\\n    if (saltOwner != address(0)) {\\n      result = _computeAccount(saltOwner);\\n    }\\n\\n    return result;\\n  }\\n\\n  function isAccountOwner(\\n    address account,\\n    address owner\\n  ) external view override returns (bool result) {\\n    if (account != address(0) && owner != address(0)) {\\n      if (_accountStates[account] == AccountStates.Unknown) {\\n        result = account == _computeAccount(keccak256(abi.encodePacked(owner)));\\n      } else {\\n        result = _accountOwners[account][owner];\\n      }\\n    }\\n\\n    return result;\\n  }\\n\\n  function getAccountState(\\n    address account\\n  ) external view returns (AccountStates) {\\n    return _accountStates[account];\\n  }\\n\\n  // external setters\\n\\n  function createAccount(address account) external {\\n    if (account == address(0)) {\\n      revert AccountIsTheZeroAddress();\\n    }\\n\\n    if (!_createAccount(account, _msgSender())) {\\n      revert AccountAlreadyCreated();\\n    }\\n  }\\n\\n  function forceAccountCreation(\\n    address saltOwner\\n  ) external returns (address account) {\\n    if (saltOwner == address(0)) {\\n      revert SaltOwnerIsTheZeroAddress();\\n    }\\n\\n    bytes32 salt = keccak256(abi.encodePacked(saltOwner));\\n\\n    account = _computeAccount(salt);\\n\\n    AccountStates accountState = _accountStates[account];\\n\\n    if (accountState != AccountStates.Created) {\\n      if (accountState == AccountStates.Defined) {\\n        delete _accountSalts[account];\\n      } else {\\n        _addAccountOwnerWithoutVerification(account, saltOwner);\\n      }\\n\\n      _createAccountProxy(salt);\\n\\n      _accountStates[account] = AccountStates.Created;\\n\\n      emit AccountCreated(account);\\n    }\\n\\n    return account;\\n  }\\n\\n  function addAccountOwner(address account, address owner) external {\\n    if (account == address(0)) {\\n      revert AccountIsTheZeroAddress();\\n    }\\n\\n    address sender = _msgSender();\\n\\n    if (_accountStates[account] == AccountStates.Unknown) {\\n      bytes32 salt = keccak256(abi.encodePacked(sender));\\n\\n      if (_computeAccount(salt) != account) {\\n        revert MsgSenderIsNotTheAccountOwner();\\n      }\\n\\n      _accountSalts[account] = salt;\\n      _accountStates[account] = AccountStates.Defined;\\n\\n      _addAccountOwnerWithoutVerification(account, sender);\\n    } else if (!_accountOwners[account][sender]) {\\n      revert MsgSenderIsNotTheAccountOwner();\\n    }\\n\\n    _addAccountOwner(account, owner);\\n  }\\n\\n  function removeAccountOwner(address account, address owner) external {\\n    if (account == address(0)) {\\n      revert AccountIsTheZeroAddress();\\n    }\\n\\n    if (!_accountOwners[account][_msgSender()]) {\\n      revert MsgSenderIsNotTheAccountOwner();\\n    }\\n\\n    _removeAccountOwner(account, owner);\\n  }\\n\\n  function directAddAccountOwner(address owner) external onlyAccount {\\n    _addAccountOwner(msg.sender, owner);\\n  }\\n\\n  function directRemoveAccountOwner(address owner) external onlyAccount {\\n    _removeAccountOwner(msg.sender, owner);\\n  }\\n\\n  function executeAccountTransaction(\\n    address payable account,\\n    address to,\\n    uint256 value,\\n    bytes calldata data\\n  ) external {\\n    if (account == address(0)) {\\n      revert AccountIsTheZeroAddress();\\n    }\\n\\n    _createAccount(account, _msgSender());\\n\\n    AccountImpl(account).executeTransaction(to, value, data);\\n\\n    emit AccountTransactionExecuted(account, to, value, data);\\n  }\\n\\n  function executeAccountTransactions(\\n    address payable account,\\n    address[] calldata to,\\n    uint256[] calldata value,\\n    bytes[] calldata data\\n  ) external {\\n    if (account == address(0)) {\\n      revert AccountIsTheZeroAddress();\\n    }\\n\\n    _createAccount(account, _msgSender());\\n\\n    AccountImpl(account).executeTransactions(to, value, data);\\n\\n    emit AccountTransactionsExecuted(account, to, value, data);\\n  }\\n\\n  function emitAccountTransactionExecuted(\\n    address to,\\n    uint256 value,\\n    bytes calldata data\\n  ) external onlyAccount {\\n    emit AccountTransactionExecuted(msg.sender, to, value, data);\\n  }\\n\\n  function emitAccountTransactionsExecuted(\\n    address[] calldata to,\\n    uint256[] calldata value,\\n    bytes[] calldata data\\n  ) external onlyAccount {\\n    emit AccountTransactionsExecuted(msg.sender, to, value, data);\\n  }\\n\\n  // internal getters\\n\\n  function _msgSender()\\n    internal\\n    view\\n    override(Context, GatewayRecipient)\\n    returns (address)\\n  {\\n    return GatewayRecipient._msgSender();\\n  }\\n\\n  // private getters\\n\\n  function _computeAccount(address saltOwner) private view returns (address) {\\n    return _computeAccount(keccak256(abi.encodePacked(saltOwner)));\\n  }\\n\\n  function _computeAccount(bytes32 salt) private view returns (address) {\\n    return ProxyHelper.computeProxy(address(this), _accountImpl, salt);\\n  }\\n\\n  // private setters\\n\\n  function _createAccountProxy(bytes32 salt) private {\\n    address payable proxy = payable(_createProxy(_accountImpl, salt));\\n\\n    AccountImpl(proxy).initialize(_gateway, _entryPoint);\\n  }\\n\\n  function _createAccount(\\n    address account,\\n    address sender\\n  ) private returns (bool result) {\\n    AccountStates accountState = _accountStates[account];\\n\\n    if (\\n      accountState != AccountStates.Unknown && !_accountOwners[account][sender]\\n    ) {\\n      revert MsgSenderIsNotTheAccountOwner();\\n    }\\n\\n    if (accountState != AccountStates.Created) {\\n      bytes32 salt;\\n\\n      if (accountState == AccountStates.Defined) {\\n        salt = _accountSalts[account];\\n\\n        delete _accountSalts[account];\\n      } else {\\n        salt = keccak256(abi.encodePacked(sender));\\n\\n        if (_computeAccount(salt) != account) {\\n          revert MsgSenderIsNotTheAccountOwner();\\n        }\\n\\n        _addAccountOwnerWithoutVerification(account, sender);\\n      }\\n\\n      _createAccountProxy(salt);\\n\\n      _accountStates[account] = AccountStates.Created;\\n\\n      emit AccountCreated(account);\\n\\n      result = true;\\n    }\\n\\n    return result;\\n  }\\n\\n  function _addAccountOwnerWithoutVerification(\\n    address account,\\n    address owner\\n  ) private {\\n    _accountOwners[account][owner] = true;\\n\\n    unchecked {\\n      ++_accountOwnersCounters[account];\\n    }\\n\\n    emit AccountOwnerAdded(account, owner);\\n  }\\n\\n  function _addAccountOwner(address account, address owner) private {\\n    if (owner == address(0)) {\\n      revert AccountOwnerIsTheZeroAddress();\\n    }\\n\\n    if (_accountOwners[account][owner]) {\\n      revert AccountOwnerAlreadyExists();\\n    }\\n\\n    _addAccountOwnerWithoutVerification(account, owner);\\n  }\\n\\n  function _removeAccountOwner(address account, address owner) private {\\n    if (owner == address(0)) {\\n      revert AccountOwnerIsTheZeroAddress();\\n    }\\n\\n    if (!_accountOwners[account][owner]) {\\n      revert AccountOwnerDoesntExist();\\n    }\\n\\n    if (_accountOwnersCounters[account] == 1) {\\n      revert NotEnoughAccountOwners();\\n    }\\n\\n    _accountOwners[account][owner] = false;\\n\\n    unchecked {\\n      --_accountOwnersCounters[account];\\n    }\\n\\n    emit AccountOwnerRemoved(account, owner);\\n  }\\n}\\n\",\"keccak256\":\"0x10dc55d7112afbb39ac36e489fb85f3051ac077276a5e371aa1ab392ce5de19f\",\"license\":\"NONE\"},\"contracts/account/IAccountRegistry.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\ninterface IAccountRegistry {\\n  // events\\n\\n  event AccountOwnerAdded(address account, address owner);\\n\\n  event AccountOwnerRemoved(address account, address owner);\\n\\n  event AccountTransactionExecuted(\\n    address account,\\n    address to,\\n    uint256 value,\\n    bytes data\\n  );\\n\\n  event AccountTransactionsExecuted(\\n    address account,\\n    address[] to,\\n    uint256[] value,\\n    bytes[] data\\n  );\\n\\n  // external getters\\n\\n  function isAccountOwner(\\n    address account,\\n    address owner\\n  ) external view returns (bool);\\n\\n  // external setters\\n\\n  function directAddAccountOwner(address owner) external;\\n\\n  function directRemoveAccountOwner(address owner) external;\\n\\n  function emitAccountTransactionExecuted(\\n    address to,\\n    uint256 value,\\n    bytes calldata data\\n  ) external;\\n\\n  function emitAccountTransactionsExecuted(\\n    address[] calldata to,\\n    uint256[] calldata value,\\n    bytes[] calldata data\\n  ) external;\\n}\\n\",\"keccak256\":\"0x2c8e0220f7587cc707ec5bc4f1434aade22775eaca0d283e197d608cf04e5714\",\"license\":\"NONE\"},\"contracts/account/extensions/AccountExtension.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nabstract contract AccountExtension {\\n  // internal getters\\n\\n  function _hasOwner(address owner) internal view virtual returns (bool);\\n\\n  // internal setters\\n\\n  function _afterTransactionExecuted(\\n    address sender,\\n    address to,\\n    uint256 value,\\n    bytes memory data\\n  ) internal virtual;\\n}\\n\",\"keccak256\":\"0xecd5765e7467b6cd5a2271c70f2286055d97ab0febc103c7e7478a0946748fe5\",\"license\":\"NONE\"},\"contracts/account/extensions/ERC1271Account.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {IERC1271} from \\\"@openzeppelin/contracts/interfaces/IERC1271.sol\\\";\\nimport {ECDSA} from \\\"@openzeppelin/contracts/utils/cryptography/ECDSA.sol\\\";\\nimport {AccountExtension} from \\\"./AccountExtension.sol\\\";\\n\\nabstract contract ERC1271Account is IERC1271, AccountExtension {\\n  using ECDSA for bytes32;\\n\\n  // external getters\\n\\n  function isValidSignature(\\n    bytes32 hash,\\n    bytes calldata signature\\n  ) external view returns (bytes4) {\\n    address signer = hash.recover(signature);\\n\\n    return\\n      _hasOwner(signer) ? this.isValidSignature.selector : bytes4(0xffffffff);\\n  }\\n}\\n\",\"keccak256\":\"0xa4dcb86d27276f2007a840e68fe81cfe962b47772db0f9bc3ae935b8d1b27499\",\"license\":\"NONE\"},\"contracts/account/extensions/ERC4337Account.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {IAccount} from \\\"@account-abstraction/contracts/interfaces/IAccount.sol\\\";\\nimport {UserOperation} from \\\"@account-abstraction/contracts/interfaces/UserOperation.sol\\\";\\nimport {ECDSA} from \\\"@openzeppelin/contracts/utils/cryptography/ECDSA.sol\\\";\\nimport {AccountExtension} from \\\"./AccountExtension.sol\\\";\\n\\nabstract contract ERC4337Account is IAccount, AccountExtension {\\n  using ECDSA for bytes32;\\n\\n  // storage\\n\\n  address internal _entryPoint;\\n\\n  // errors\\n\\n  error ERC4337AccountUnsupported();\\n\\n  error MsgSenderIsNotTheEntryPoint();\\n\\n  // external setters\\n\\n  function validateUserOp(\\n    UserOperation calldata userOp,\\n    bytes32 userOpHash,\\n    uint256 missingAccountFunds\\n  ) external returns (uint256 result) {\\n    if (_entryPoint == address(0)) {\\n      revert ERC4337AccountUnsupported();\\n    }\\n\\n    if (msg.sender != _entryPoint) {\\n      revert MsgSenderIsNotTheEntryPoint();\\n    }\\n\\n    bytes32 hash = userOpHash.toEthSignedMessageHash();\\n\\n    if (!_hasOwner(hash.recover(userOp.signature))) {\\n      result = 1;\\n    }\\n\\n    if (missingAccountFunds != 0) {\\n      bytes memory data = new bytes(0);\\n\\n      (bool success, ) = _entryPoint.call{\\n        value: missingAccountFunds,\\n        gas: type(uint256).max\\n      }(data);\\n\\n      (success); // always success\\n\\n      _afterTransactionExecuted(\\n        _entryPoint,\\n        _entryPoint,\\n        missingAccountFunds,\\n        data\\n      );\\n    }\\n\\n    return result;\\n  }\\n}\\n\",\"keccak256\":\"0xa67c115f1e8c8189716b9bc2b2e73ff5ce60053a2a6abd65c85894651b85b77a\",\"license\":\"NONE\"},\"contracts/common/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {Context} from \\\"@openzeppelin/contracts/utils/Context.sol\\\";\\n\\nabstract contract Ownable is Context {\\n  // storage\\n\\n  address internal _owner;\\n\\n  // events\\n\\n  event OwnerUpdated(address owner);\\n\\n  // errors\\n\\n  error MsgSenderIsNotTheContractOwner();\\n\\n  error OwnerIsTheZeroAddress();\\n\\n  // modifiers\\n\\n  modifier onlyOwner() {\\n    if (_msgSender() != _owner) {\\n      revert MsgSenderIsNotTheContractOwner();\\n    }\\n\\n    _;\\n  }\\n\\n  // deployment\\n\\n  constructor(address owner) {\\n    _owner = owner == address(0) ? msg.sender : owner;\\n  }\\n\\n  // external getters\\n\\n  function getOwner() external view returns (address) {\\n    return _owner;\\n  }\\n\\n  // external setters\\n\\n  function setOwner(address owner) external onlyOwner {\\n    if (owner == address(0)) {\\n      revert OwnerIsTheZeroAddress();\\n    }\\n\\n    _afterOwnerUpdated(owner);\\n  }\\n\\n  // internal setters\\n\\n  function _afterOwnerUpdated(address owner) internal virtual {\\n    emit OwnerUpdated(owner);\\n  }\\n}\\n\",\"keccak256\":\"0x6c8594bdd15f9813cbd88d232bb353bcbf8110b4d03ec3d4f34e7e3241ce13a0\",\"license\":\"NONE\"},\"contracts/common/proxy/Proxy.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\n// solhint-disable no-unused-import\\n\\nimport {PROXY_IMPL_SLOT} from \\\"./constants.sol\\\";\\n\\n// solhint-enable no-unused-import\\n\\ncontract Proxy {\\n  // deployment\\n\\n  constructor(address proxyImpl) {\\n    // solhint-disable-next-line no-inline-assembly\\n    assembly {\\n      sstore(PROXY_IMPL_SLOT, proxyImpl)\\n    }\\n  }\\n\\n  // wildcard\\n\\n  fallback() external payable {\\n    // solhint-disable-next-line no-inline-assembly\\n    assembly {\\n      let proxyImpl := sload(PROXY_IMPL_SLOT)\\n\\n      calldatacopy(0, 0, calldatasize())\\n\\n      let success := delegatecall(gas(), proxyImpl, 0, calldatasize(), 0, 0)\\n\\n      returndatacopy(0, 0, returndatasize())\\n\\n      if eq(success, 0) {\\n        revert(0, returndatasize())\\n      }\\n\\n      return(0, returndatasize())\\n    }\\n  }\\n}\\n\",\"keccak256\":\"0x7812510002afafa6dd012fae48fd8f110f9aee7d86f9f4db37841b7dd6772376\",\"license\":\"NONE\"},\"contracts/common/proxy/ProxyFactory.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {Proxy} from \\\"./Proxy.sol\\\";\\n\\nabstract contract ProxyFactory {\\n  // internal setters\\n\\n  function _createProxy(\\n    address proxyImpl,\\n    bytes32 salt\\n  ) internal returns (address result) {\\n    try new Proxy{salt: salt}(proxyImpl) returns (Proxy proxy) {\\n      result = address(proxy);\\n    } catch {\\n      result = address(0);\\n    }\\n\\n    return result;\\n  }\\n}\\n\",\"keccak256\":\"0x2a9948cef56c2661e895eba7b24e2cb09fb5c5962c2cefee281e106c5de64c8c\",\"license\":\"NONE\"},\"contracts/common/proxy/ProxyHelper.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {Proxy} from \\\"./Proxy.sol\\\";\\n\\nlibrary ProxyHelper {\\n  // internal getters\\n\\n  function computeProxy(\\n    address deployer,\\n    address proxyImpl,\\n    bytes32 salt\\n  ) internal pure returns (address) {\\n    bytes memory creationCode = abi.encodePacked(\\n      type(Proxy).creationCode,\\n      bytes12(0),\\n      proxyImpl\\n    );\\n\\n    bytes32 data = keccak256(\\n      abi.encodePacked(bytes1(0xff), deployer, salt, keccak256(creationCode))\\n    );\\n\\n    return address(uint160(uint256(data)));\\n  }\\n}\\n\",\"keccak256\":\"0x036ba7948839a47876bd9fb7d68a0ee3f61ff6357f21504cb802129204d81ff2\",\"license\":\"NONE\"},\"contracts/common/proxy/ProxyImpl.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\n// solhint-disable no-unused-import\\n\\nimport {PROXY_IMPL_SLOT} from \\\"./constants.sol\\\";\\n\\n// solhint-enable no-unused-import\\n\\nabstract contract ProxyImpl {\\n  // events\\n\\n  event ProxyImplUpdated(address proxyImpl);\\n\\n  // errors\\n\\n  error ProxyImplIsTheZeroAddress();\\n\\n  // external getters\\n\\n  function getProxyImpl() external view returns (address proxyImpl) {\\n    // solhint-disable-next-line no-inline-assembly\\n    assembly {\\n      proxyImpl := sload(PROXY_IMPL_SLOT)\\n    }\\n\\n    return proxyImpl;\\n  }\\n\\n  // internal setters\\n\\n  function _setProxyImpl(address proxyImpl) internal {\\n    if (proxyImpl == address(0)) {\\n      revert ProxyImplIsTheZeroAddress();\\n    }\\n\\n    // solhint-disable-next-line no-inline-assembly\\n    assembly {\\n      sstore(PROXY_IMPL_SLOT, proxyImpl)\\n    }\\n\\n    emit ProxyImplUpdated(proxyImpl);\\n  }\\n}\\n\",\"keccak256\":\"0x52719e336d33f4930a7578dbfb8090fd086379f52aa530ca787f382cd345ef42\",\"license\":\"NONE\"},\"contracts/common/proxy/constants.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nbytes32 constant PROXY_IMPL_SLOT = 0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc; // bytes32(uint256(keccak256('eip1967.proxy.implementation')) - 1))\\n\",\"keccak256\":\"0x485b883ddea4ece9fdf96d797ccd9e1e56a8097b9e0e98f76ac9159b09db2f46\",\"license\":\"NONE\"},\"contracts/common/utils/Initializable.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nabstract contract Initializable {\\n  // storage\\n\\n  bool internal _initialized;\\n\\n  // errors\\n\\n  error AlreadyInitialized();\\n\\n  // modifiers\\n\\n  modifier initializeOnce() {\\n    if (_initialized) {\\n      revert AlreadyInitialized();\\n    }\\n\\n    _initialized = true;\\n\\n    _;\\n  }\\n\\n  // external getters\\n\\n  function initialized() external view returns (bool) {\\n    return _initialized;\\n  }\\n}\\n\",\"keccak256\":\"0x72403a059550b07ac6de0e180fc1aa877671d596cf30d9677cc9373c45afe54c\",\"license\":\"NONE\"},\"contracts/gateway/GatewayRecipient.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {Context} from \\\"@openzeppelin/contracts/utils/Context.sol\\\";\\n\\nabstract contract GatewayRecipient is Context {\\n  // storage\\n\\n  address internal _gateway;\\n\\n  // external getters\\n\\n  function getGateway() external view returns (address) {\\n    return _gateway;\\n  }\\n\\n  // internal getters\\n\\n  function _msgSender()\\n    internal\\n    view\\n    virtual\\n    override\\n    returns (address sender)\\n  {\\n    if (msg.sender == _gateway) {\\n      // solhint-disable-next-line no-inline-assembly\\n      assembly {\\n        sender := shr(96, calldataload(sub(calldatasize(), 20)))\\n      }\\n    } else {\\n      sender = super._msgSender();\\n    }\\n\\n    return sender;\\n  }\\n}\\n\",\"keccak256\":\"0x4529969ee37060633de3b383bb7ede1b9d6a19afcd64d075e9b33065e79f47a8\",\"license\":\"NONE\"},\"contracts/token/TokenReceiver.sol\":{\"content\":\"// SPDX-License-Identifier: NONE\\npragma solidity 0.8.21;\\n\\nimport {IERC1155Receiver} from \\\"@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol\\\";\\nimport {IERC721Receiver} from \\\"@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol\\\";\\nimport {IERC777Recipient} from \\\"@openzeppelin/contracts/token/ERC777/IERC777Recipient.sol\\\";\\nimport {IERC165} from \\\"@openzeppelin/contracts/utils/introspection/IERC165.sol\\\";\\n\\nabstract contract TokenReceiver is\\n  IERC721Receiver,\\n  IERC777Recipient,\\n  IERC1155Receiver\\n{\\n  // external getters\\n\\n  // ERC165\\n\\n  function supportsInterface(\\n    bytes4 interfaceId\\n  ) external view virtual returns (bool) {\\n    return\\n      interfaceId == type(IERC165).interfaceId ||\\n      interfaceId == type(IERC721Receiver).interfaceId ||\\n      interfaceId == type(IERC777Recipient).interfaceId ||\\n      interfaceId == type(IERC1155Receiver).interfaceId;\\n  }\\n\\n  // external setters\\n\\n  // ERC721\\n\\n  function onERC721Received(\\n    address,\\n    address,\\n    uint256,\\n    bytes calldata\\n  ) external virtual returns (bytes4) {\\n    return this.onERC721Received.selector;\\n  }\\n\\n  // ERC777\\n\\n  function tokensReceived(\\n    address,\\n    address,\\n    address,\\n    uint256,\\n    bytes calldata,\\n    bytes calldata\\n  ) external virtual {\\n    // solhint-disable-next-line no-empty-blocks\\n    {\\n\\n    }\\n  }\\n\\n  // ERC1155\\n\\n  function onERC1155Received(\\n    address,\\n    address,\\n    uint256,\\n    uint256,\\n    bytes calldata\\n  ) external virtual returns (bytes4) {\\n    return this.onERC1155Received.selector;\\n  }\\n\\n  function onERC1155BatchReceived(\\n    address,\\n    address,\\n    uint256[] calldata,\\n    uint256[] calldata,\\n    bytes calldata\\n  ) external virtual returns (bytes4) {\\n    return this.onERC1155BatchReceived.selector;\\n  }\\n}\\n\",\"keccak256\":\"0x2389685a5c42e3cd7b52808e878499f30b02dc538e22c44123a0c4c4bee3b9e0\",\"license\":\"NONE\"}},\"version\":1}",
+  "bytecode": "0x608060405234801562000010575f80fd5b50604051620022c8380380620022c8833981016040819052620000339162000075565b806001600160a01b038116156200004b57806200004d565b335b5f80546001600160a01b0319166001600160a01b039290921691909117905550620000a49050565b5f6020828403121562000086575f80fd5b81516001600160a01b03811681146200009d575f80fd5b9392505050565b61221680620000b25f395ff3fe608060405234801561000f575f80fd5b5060043610610149575f3560e01c80639859387b116100c7578063c0c53b8b1161007d578063e5c7278f11610063578063e5c7278f14610312578063f088bf5d14610325578063f4876c7414610338575f80fd5b8063c0c53b8b146102ec578063db63f582146102ff575f80fd5b80639f31c901116100ad5780639f31c901146102a8578063b74bfc24146102c6578063baff0901146102d9575f80fd5b80639859387b146102505780639ee2735b14610263575f80fd5b8063583768a81161011c578063770e909011610102578063770e90901461020d578063893d20e8146102205780639252aa7d1461023d575f80fd5b8063583768a8146101e7578063625a5a2d146101fa575f80fd5b806313af40351461014d578063158ef93e146101625780631da307521461019557806342bf3cc1146101a8575b5f80fd5b61016061015b366004611a59565b61034b565b005b5f5474010000000000000000000000000000000000000000900460ff165b60405190151581526020015b60405180910390f35b6101606101a3366004611ab9565b610411565b60015473ffffffffffffffffffffffffffffffffffffffff165b60405173ffffffffffffffffffffffffffffffffffffffff909116815260200161018c565b6101606101f5366004611b52565b6104b2565b610160610208366004611a59565b6105e6565b6101c261021b366004611a59565b61064c565b5f5473ffffffffffffffffffffffffffffffffffffffff166101c2565b6101c261024b366004611a59565b61067a565b61016061025e366004611a59565b610840565b61029b610271366004611a59565b73ffffffffffffffffffffffffffffffffffffffff165f9081526005602052604090205460ff1690565b60405161018c9190611c24565b60035473ffffffffffffffffffffffffffffffffffffffff166101c2565b6101606102d4366004611a59565b6108cf565b6101606102e7366004611c63565b610935565b6101606102fa366004611cf6565b6109dc565b61016061030d366004611d3e565b610bd1565b610160610320366004611d75565b610cb8565b610180610333366004611d3e565b610ddd565b610160610346366004611d3e565b610f1f565b5f5473ffffffffffffffffffffffffffffffffffffffff1661036b611153565b73ffffffffffffffffffffffffffffffffffffffff16146103b8576040517fcd52968d00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8116610405576040517f465f799000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61040e81611161565b50565b6002335f9081526005602052604090205460ff16600281111561043657610436611bf7565b1461046d576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b7f340fb2e74c21912483542bb22fd95fd068acf0035639e3f638364cfc5db86b3233858585856040516104a4959493929190611e2a565b60405180910390a150505050565b73ffffffffffffffffffffffffffffffffffffffff87166104ff576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6105108761050b611153565b6111ad565b506040517f12e8eaef00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8816906312e8eaef9061056d90899089908990899089908990600401611fbc565b5f604051808303815f87803b158015610584575f80fd5b505af1158015610596573d5f803e3d5ffd5b505050507f509c90fe5dc4eb004af0213503cbb8b5a04cbbd24662c8fc1c20eb99078213bc878787878787876040516105d59796959493929190612004565b60405180910390a150505050505050565b6002335f9081526005602052604090205460ff16600281111561060b5761060b611bf7565b14610642576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61040e3382611419565b5f73ffffffffffffffffffffffffffffffffffffffff82161561067557610672826115f5565b90505b919050565b5f73ffffffffffffffffffffffffffffffffffffffff82166106c8576040517f968afff600000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606084901b1660208201525f9060340160405160208183030381529060405280519060200120905061071d81611632565b73ffffffffffffffffffffffffffffffffffffffff81165f9081526005602052604090205490925060ff16600281600281111561075c5761075c611bf7565b1461083957600181600281111561077557610775611bf7565b036107a45773ffffffffffffffffffffffffffffffffffffffff83165f908152600460205260408120556107ae565b6107ae8385611659565b6107b7826116ff565b73ffffffffffffffffffffffffffffffffffffffff83165f8181526005602090815260409182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0016600217905590519182527f805996f252884581e2f74cf3d2b03564d5ec26ccc90850ae12653dc1b72d1fa2910160405180910390a15b5050919050565b73ffffffffffffffffffffffffffffffffffffffff811661088d576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6108998161050b611153565b61040e576040517fe242fbdf00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6002335f9081526005602052604090205460ff1660028111156108f4576108f4611bf7565b1461092b576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61040e33826117b5565b6002335f9081526005602052604090205460ff16600281111561095a5761095a611bf7565b14610991576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b7f509c90fe5dc4eb004af0213503cbb8b5a04cbbd24662c8fc1c20eb99078213bc338787878787876040516109cc9796959493929190612004565b60405180910390a1505050505050565b5f5473ffffffffffffffffffffffffffffffffffffffff166109fc611153565b73ffffffffffffffffffffffffffffffffffffffff1614610a49576040517fcd52968d00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f5474010000000000000000000000000000000000000000900460ff1615610a9d576040517f0dc149f000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f80547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff167401000000000000000000000000000000000000000017905573ffffffffffffffffffffffffffffffffffffffff8116610b28576040517f650ee24200000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6001805473ffffffffffffffffffffffffffffffffffffffff8581167fffffffffffffffffffffffff0000000000000000000000000000000000000000928316811790935560028054868316908416811790915560038054928616929093168217909255604080519384526020840192909252908201527fad307780531f6353137c35adc50ad58d71b76e76aa891e729387f2e720f2de209060600160405180910390a1505050565b73ffffffffffffffffffffffffffffffffffffffff8216610c1e576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff82165f90815260066020526040812090610c4b611153565b73ffffffffffffffffffffffffffffffffffffffff16815260208101919091526040015f205460ff16610caa576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b610cb48282611419565b5050565b73ffffffffffffffffffffffffffffffffffffffff8516610d05576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b610d118561050b611153565b506040517f3f579f4200000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff861690633f579f4290610d6a908790879087908790600401612069565b5f604051808303815f87803b158015610d81575f80fd5b505af1158015610d93573d5f803e3d5ffd5b505050507f340fb2e74c21912483542bb22fd95fd068acf0035639e3f638364cfc5db86b328585858585604051610dce959493929190611e2a565b60405180910390a15050505050565b5f73ffffffffffffffffffffffffffffffffffffffff831615801590610e18575073ffffffffffffffffffffffffffffffffffffffff821615155b15610f195773ffffffffffffffffffffffffffffffffffffffff83165f9081526005602052604081205460ff166002811115610e5657610e56611bf7565b03610ee2576040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606084901b166020820152610ead906034015b60405160208183030381529060405280519060200120611632565b73ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff16149050610f19565b5073ffffffffffffffffffffffffffffffffffffffff8083165f9081526006602090815260408083209385168352929052205460ff165b92915050565b73ffffffffffffffffffffffffffffffffffffffff8216610f6c576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f610f75611153565b90505f73ffffffffffffffffffffffffffffffffffffffff84165f9081526005602052604090205460ff166002811115610fb157610fb1611bf7565b036110d9576040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606083901b1660208201525f906034016040516020818303038152906040528051906020012090508373ffffffffffffffffffffffffffffffffffffffff1661102282611632565b73ffffffffffffffffffffffffffffffffffffffff161461106f576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff84165f9081526004602090815260408083208490556005909152902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660011790556110d38483611659565b50611144565b73ffffffffffffffffffffffffffffffffffffffff8084165f9081526006602090815260408083209385168352929052205460ff16611144576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61114e83836117b5565b505050565b5f61115c611878565b905090565b60405173ffffffffffffffffffffffffffffffffffffffff821681527f4ffd725fc4a22075e9ec71c59edf9c38cdeb588a91b24fc5b61388c5be41282b9060200160405180910390a150565b73ffffffffffffffffffffffffffffffffffffffff82165f9081526005602052604081205460ff16818160028111156111e8576111e8611bf7565b14158015611228575073ffffffffffffffffffffffffffffffffffffffff8085165f9081526006602090815260408083209387168352929052205460ff16155b1561125f576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b600281600281111561127357611273611bf7565b14611412575f600182600281111561128d5761128d611bf7565b036112c1575073ffffffffffffffffffffffffffffffffffffffff84165f9081526004602052604081208054919055611382565b6040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606086901b1660208201526034016040516020818303038152906040528051906020012090508473ffffffffffffffffffffffffffffffffffffffff1661132b82611632565b73ffffffffffffffffffffffffffffffffffffffff1614611378576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6113828585611659565b61138b816116ff565b73ffffffffffffffffffffffffffffffffffffffff85165f8181526005602090815260409182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0016600217905590519182527f805996f252884581e2f74cf3d2b03564d5ec26ccc90850ae12653dc1b72d1fa2910160405180910390a160019250505b5092915050565b73ffffffffffffffffffffffffffffffffffffffff8116611466576040517f07b9f29b00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8083165f9081526006602090815260408083209385168352929052205460ff166114d1576040517f17086f1c00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff82165f9081526007602052604090205460010361152f576040517f174a4ce300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8281165f81815260066020908152604080832094861680845294825280832080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00169055838352600782529182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff01905581519283528201929092527f1ce3cbbc43ee231e5b950332f2b0b9dd7d349291a3ee411ce5c5c7ed745661bb91015b60405180910390a15050565b6040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606083901b1660208201525f9061067290603401610e92565b6003545f9061067290309073ffffffffffffffffffffffffffffffffffffffff16846118c9565b73ffffffffffffffffffffffffffffffffffffffff8281165f81815260066020908152604080832094861680845294825280832080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660019081179091558484526007835292819020805490930190925581519283528201929092527f27e282f7712c5b4617277759c834b86d163dfc1aad25c8c3c5926a1c9e56446891016115e9565b6003545f906117249073ffffffffffffffffffffffffffffffffffffffff16836119d8565b6001546002546040517f485cc95500000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff9283166004820152908216602482015291925082169063485cc955906044015f604051808303815f87803b15801561179b575f80fd5b505af11580156117ad573d5f803e3d5ffd5b505050505050565b73ffffffffffffffffffffffffffffffffffffffff8116611802576040517f07b9f29b00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8083165f9081526006602090815260408083209385168352929052205460ff161561186e576040517fb4f8403100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b610cb48282611659565b6001545f9073ffffffffffffffffffffffffffffffffffffffff1633036118c457507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec36013560601c90565b503390565b5f80604051806020016118db90611a2c565b7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe082820381018352601f90910116604081905261191f91905f9087906020016120a8565b604080518083037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe001815282825280516020918201207fff000000000000000000000000000000000000000000000000000000000000008285015260609890981b7fffffffffffffffffffffffffffffffffffffffff0000000000000000000000001660218401526035830195909552605580830197909752805180830390970187526075909101905250508251920191909120919050565b5f81836040516119e790611a2c565b73ffffffffffffffffffffffffffffffffffffffff90911681526020018190604051809103905ff590508015611a1a5760015b611a2557505f610f19565b9392505050565b60df8061212b83390190565b73ffffffffffffffffffffffffffffffffffffffff8116811461040e575f80fd5b5f60208284031215611a69575f80fd5b8135611a2581611a38565b5f8083601f840112611a84575f80fd5b50813567ffffffffffffffff811115611a9b575f80fd5b602083019150836020828501011115611ab2575f80fd5b9250929050565b5f805f8060608587031215611acc575f80fd5b8435611ad781611a38565b935060208501359250604085013567ffffffffffffffff811115611af9575f80fd5b611b0587828801611a74565b95989497509550505050565b5f8083601f840112611b21575f80fd5b50813567ffffffffffffffff811115611b38575f80fd5b6020830191508360208260051b8501011115611ab2575f80fd5b5f805f805f805f6080888a031215611b68575f80fd5b8735611b7381611a38565b9650602088013567ffffffffffffffff80821115611b8f575f80fd5b611b9b8b838c01611b11565b909850965060408a0135915080821115611bb3575f80fd5b611bbf8b838c01611b11565b909650945060608a0135915080821115611bd7575f80fd5b50611be48a828b01611b11565b989b979a50959850939692959293505050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602160045260245ffd5b6020810160038310611c5d577f4e487b71000000000000000000000000000000000000000000000000000000005f52602160045260245ffd5b91905290565b5f805f805f8060608789031215611c78575f80fd5b863567ffffffffffffffff80821115611c8f575f80fd5b611c9b8a838b01611b11565b90985096506020890135915080821115611cb3575f80fd5b611cbf8a838b01611b11565b90965094506040890135915080821115611cd7575f80fd5b50611ce489828a01611b11565b979a9699509497509295939492505050565b5f805f60608486031215611d08575f80fd5b8335611d1381611a38565b92506020840135611d2381611a38565b91506040840135611d3381611a38565b809150509250925092565b5f8060408385031215611d4f575f80fd5b8235611d5a81611a38565b91506020830135611d6a81611a38565b809150509250929050565b5f805f805f60808688031215611d89575f80fd5b8535611d9481611a38565b94506020860135611da481611a38565b935060408601359250606086013567ffffffffffffffff811115611dc6575f80fd5b611dd288828901611a74565b969995985093965092949392505050565b81835281816020850137505f602082840101525f60207fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f840116840101905092915050565b5f73ffffffffffffffffffffffffffffffffffffffff808816835280871660208401525084604083015260806060830152611e69608083018486611de3565b979650505050505050565b8183525f60208085019450825f5b85811015611ebd578135611e9581611a38565b73ffffffffffffffffffffffffffffffffffffffff1687529582019590820190600101611e82565b509495945050505050565b8183525f7f07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff831115611ef8575f80fd5b8260051b80836020870137939093016020019392505050565b8183525f6020808501808196508560051b81019150845f5b87811015611faf57828403895281357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1883603018112611f67575f80fd5b8701858101903567ffffffffffffffff811115611f82575f80fd5b803603821315611f90575f80fd5b611f9b868284611de3565b9a87019a9550505090840190600101611f29565b5091979650505050505050565b606081525f611fcf60608301888a611e74565b8281036020840152611fe2818789611ec8565b90508281036040840152611ff7818587611f11565b9998505050505050505050565b73ffffffffffffffffffffffffffffffffffffffff88168152608060208201525f61203360808301888a611e74565b8281036040840152612046818789611ec8565b9050828103606084015261205b818587611f11565b9a9950505050505050505050565b73ffffffffffffffffffffffffffffffffffffffff85168152836020820152606060408201525f61209e606083018486611de3565b9695505050505050565b5f84515f5b818110156120c757602081880181015185830152016120ad565b507fffffffffffffffffffffffff0000000000000000000000000000000000000000949094169190930190815260609190911b7fffffffffffffffffffffffffffffffffffffffff00000000000000000000000016600c8201526020019291505056fe608060405234801561000f575f80fd5b506040516100df3803806100df83398101604081905261002e91610055565b7f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc55610082565b5f60208284031215610065575f80fd5b81516001600160a01b038116811461007b575f80fd5b9392505050565b60518061008e5f395ff3fe60806040527f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc54365f80375f80365f845af490503d5f803e80603f573d5ffd5b503d5ff3fea164736f6c6343000815000aa164736f6c6343000815000a",
+  "deployedBytecode": "0x608060405234801561000f575f80fd5b5060043610610149575f3560e01c80639859387b116100c7578063c0c53b8b1161007d578063e5c7278f11610063578063e5c7278f14610312578063f088bf5d14610325578063f4876c7414610338575f80fd5b8063c0c53b8b146102ec578063db63f582146102ff575f80fd5b80639f31c901116100ad5780639f31c901146102a8578063b74bfc24146102c6578063baff0901146102d9575f80fd5b80639859387b146102505780639ee2735b14610263575f80fd5b8063583768a81161011c578063770e909011610102578063770e90901461020d578063893d20e8146102205780639252aa7d1461023d575f80fd5b8063583768a8146101e7578063625a5a2d146101fa575f80fd5b806313af40351461014d578063158ef93e146101625780631da307521461019557806342bf3cc1146101a8575b5f80fd5b61016061015b366004611a59565b61034b565b005b5f5474010000000000000000000000000000000000000000900460ff165b60405190151581526020015b60405180910390f35b6101606101a3366004611ab9565b610411565b60015473ffffffffffffffffffffffffffffffffffffffff165b60405173ffffffffffffffffffffffffffffffffffffffff909116815260200161018c565b6101606101f5366004611b52565b6104b2565b610160610208366004611a59565b6105e6565b6101c261021b366004611a59565b61064c565b5f5473ffffffffffffffffffffffffffffffffffffffff166101c2565b6101c261024b366004611a59565b61067a565b61016061025e366004611a59565b610840565b61029b610271366004611a59565b73ffffffffffffffffffffffffffffffffffffffff165f9081526005602052604090205460ff1690565b60405161018c9190611c24565b60035473ffffffffffffffffffffffffffffffffffffffff166101c2565b6101606102d4366004611a59565b6108cf565b6101606102e7366004611c63565b610935565b6101606102fa366004611cf6565b6109dc565b61016061030d366004611d3e565b610bd1565b610160610320366004611d75565b610cb8565b610180610333366004611d3e565b610ddd565b610160610346366004611d3e565b610f1f565b5f5473ffffffffffffffffffffffffffffffffffffffff1661036b611153565b73ffffffffffffffffffffffffffffffffffffffff16146103b8576040517fcd52968d00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8116610405576040517f465f799000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61040e81611161565b50565b6002335f9081526005602052604090205460ff16600281111561043657610436611bf7565b1461046d576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b7f340fb2e74c21912483542bb22fd95fd068acf0035639e3f638364cfc5db86b3233858585856040516104a4959493929190611e2a565b60405180910390a150505050565b73ffffffffffffffffffffffffffffffffffffffff87166104ff576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6105108761050b611153565b6111ad565b506040517f12e8eaef00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8816906312e8eaef9061056d90899089908990899089908990600401611fbc565b5f604051808303815f87803b158015610584575f80fd5b505af1158015610596573d5f803e3d5ffd5b505050507f509c90fe5dc4eb004af0213503cbb8b5a04cbbd24662c8fc1c20eb99078213bc878787878787876040516105d59796959493929190612004565b60405180910390a150505050505050565b6002335f9081526005602052604090205460ff16600281111561060b5761060b611bf7565b14610642576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61040e3382611419565b5f73ffffffffffffffffffffffffffffffffffffffff82161561067557610672826115f5565b90505b919050565b5f73ffffffffffffffffffffffffffffffffffffffff82166106c8576040517f968afff600000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606084901b1660208201525f9060340160405160208183030381529060405280519060200120905061071d81611632565b73ffffffffffffffffffffffffffffffffffffffff81165f9081526005602052604090205490925060ff16600281600281111561075c5761075c611bf7565b1461083957600181600281111561077557610775611bf7565b036107a45773ffffffffffffffffffffffffffffffffffffffff83165f908152600460205260408120556107ae565b6107ae8385611659565b6107b7826116ff565b73ffffffffffffffffffffffffffffffffffffffff83165f8181526005602090815260409182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0016600217905590519182527f805996f252884581e2f74cf3d2b03564d5ec26ccc90850ae12653dc1b72d1fa2910160405180910390a15b5050919050565b73ffffffffffffffffffffffffffffffffffffffff811661088d576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6108998161050b611153565b61040e576040517fe242fbdf00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6002335f9081526005602052604090205460ff1660028111156108f4576108f4611bf7565b1461092b576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61040e33826117b5565b6002335f9081526005602052604090205460ff16600281111561095a5761095a611bf7565b14610991576040517fdb182e8300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b7f509c90fe5dc4eb004af0213503cbb8b5a04cbbd24662c8fc1c20eb99078213bc338787878787876040516109cc9796959493929190612004565b60405180910390a1505050505050565b5f5473ffffffffffffffffffffffffffffffffffffffff166109fc611153565b73ffffffffffffffffffffffffffffffffffffffff1614610a49576040517fcd52968d00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f5474010000000000000000000000000000000000000000900460ff1615610a9d576040517f0dc149f000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f80547fffffffffffffffffffffff00ffffffffffffffffffffffffffffffffffffffff167401000000000000000000000000000000000000000017905573ffffffffffffffffffffffffffffffffffffffff8116610b28576040517f650ee24200000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6001805473ffffffffffffffffffffffffffffffffffffffff8581167fffffffffffffffffffffffff0000000000000000000000000000000000000000928316811790935560028054868316908416811790915560038054928616929093168217909255604080519384526020840192909252908201527fad307780531f6353137c35adc50ad58d71b76e76aa891e729387f2e720f2de209060600160405180910390a1505050565b73ffffffffffffffffffffffffffffffffffffffff8216610c1e576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff82165f90815260066020526040812090610c4b611153565b73ffffffffffffffffffffffffffffffffffffffff16815260208101919091526040015f205460ff16610caa576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b610cb48282611419565b5050565b73ffffffffffffffffffffffffffffffffffffffff8516610d05576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b610d118561050b611153565b506040517f3f579f4200000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff861690633f579f4290610d6a908790879087908790600401612069565b5f604051808303815f87803b158015610d81575f80fd5b505af1158015610d93573d5f803e3d5ffd5b505050507f340fb2e74c21912483542bb22fd95fd068acf0035639e3f638364cfc5db86b328585858585604051610dce959493929190611e2a565b60405180910390a15050505050565b5f73ffffffffffffffffffffffffffffffffffffffff831615801590610e18575073ffffffffffffffffffffffffffffffffffffffff821615155b15610f195773ffffffffffffffffffffffffffffffffffffffff83165f9081526005602052604081205460ff166002811115610e5657610e56611bf7565b03610ee2576040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606084901b166020820152610ead906034015b60405160208183030381529060405280519060200120611632565b73ffffffffffffffffffffffffffffffffffffffff168373ffffffffffffffffffffffffffffffffffffffff16149050610f19565b5073ffffffffffffffffffffffffffffffffffffffff8083165f9081526006602090815260408083209385168352929052205460ff165b92915050565b73ffffffffffffffffffffffffffffffffffffffff8216610f6c576040517f744fa2d000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b5f610f75611153565b90505f73ffffffffffffffffffffffffffffffffffffffff84165f9081526005602052604090205460ff166002811115610fb157610fb1611bf7565b036110d9576040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606083901b1660208201525f906034016040516020818303038152906040528051906020012090508373ffffffffffffffffffffffffffffffffffffffff1661102282611632565b73ffffffffffffffffffffffffffffffffffffffff161461106f576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff84165f9081526004602090815260408083208490556005909152902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660011790556110d38483611659565b50611144565b73ffffffffffffffffffffffffffffffffffffffff8084165f9081526006602090815260408083209385168352929052205460ff16611144576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b61114e83836117b5565b505050565b5f61115c611878565b905090565b60405173ffffffffffffffffffffffffffffffffffffffff821681527f4ffd725fc4a22075e9ec71c59edf9c38cdeb588a91b24fc5b61388c5be41282b9060200160405180910390a150565b73ffffffffffffffffffffffffffffffffffffffff82165f9081526005602052604081205460ff16818160028111156111e8576111e8611bf7565b14158015611228575073ffffffffffffffffffffffffffffffffffffffff8085165f9081526006602090815260408083209387168352929052205460ff16155b1561125f576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b600281600281111561127357611273611bf7565b14611412575f600182600281111561128d5761128d611bf7565b036112c1575073ffffffffffffffffffffffffffffffffffffffff84165f9081526004602052604081208054919055611382565b6040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606086901b1660208201526034016040516020818303038152906040528051906020012090508473ffffffffffffffffffffffffffffffffffffffff1661132b82611632565b73ffffffffffffffffffffffffffffffffffffffff1614611378576040517ffb4f8f7000000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b6113828585611659565b61138b816116ff565b73ffffffffffffffffffffffffffffffffffffffff85165f8181526005602090815260409182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff0016600217905590519182527f805996f252884581e2f74cf3d2b03564d5ec26ccc90850ae12653dc1b72d1fa2910160405180910390a160019250505b5092915050565b73ffffffffffffffffffffffffffffffffffffffff8116611466576040517f07b9f29b00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8083165f9081526006602090815260408083209385168352929052205460ff166114d1576040517f17086f1c00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff82165f9081526007602052604090205460010361152f576040517f174a4ce300000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8281165f81815260066020908152604080832094861680845294825280832080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00169055838352600782529182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff01905581519283528201929092527f1ce3cbbc43ee231e5b950332f2b0b9dd7d349291a3ee411ce5c5c7ed745661bb91015b60405180910390a15050565b6040517fffffffffffffffffffffffffffffffffffffffff000000000000000000000000606083901b1660208201525f9061067290603401610e92565b6003545f9061067290309073ffffffffffffffffffffffffffffffffffffffff16846118c9565b73ffffffffffffffffffffffffffffffffffffffff8281165f81815260066020908152604080832094861680845294825280832080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001660019081179091558484526007835292819020805490930190925581519283528201929092527f27e282f7712c5b4617277759c834b86d163dfc1aad25c8c3c5926a1c9e56446891016115e9565b6003545f906117249073ffffffffffffffffffffffffffffffffffffffff16836119d8565b6001546002546040517f485cc95500000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff9283166004820152908216602482015291925082169063485cc955906044015f604051808303815f87803b15801561179b575f80fd5b505af11580156117ad573d5f803e3d5ffd5b505050505050565b73ffffffffffffffffffffffffffffffffffffffff8116611802576040517f07b9f29b00000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b73ffffffffffffffffffffffffffffffffffffffff8083165f9081526006602090815260408083209385168352929052205460ff161561186e576040517fb4f8403100000000000000000000000000000000000000000000000000000000815260040160405180910390fd5b610cb48282611659565b6001545f9073ffffffffffffffffffffffffffffffffffffffff1633036118c457507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec36013560601c90565b503390565b5f80604051806020016118db90611a2c565b7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe082820381018352601f90910116604081905261191f91905f9087906020016120a8565b604080518083037fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe001815282825280516020918201207fff000000000000000000000000000000000000000000000000000000000000008285015260609890981b7fffffffffffffffffffffffffffffffffffffffff0000000000000000000000001660218401526035830195909552605580830197909752805180830390970187526075909101905250508251920191909120919050565b5f81836040516119e790611a2c565b73ffffffffffffffffffffffffffffffffffffffff90911681526020018190604051809103905ff590508015611a1a5760015b611a2557505f610f19565b9392505050565b60df8061212b83390190565b73ffffffffffffffffffffffffffffffffffffffff8116811461040e575f80fd5b5f60208284031215611a69575f80fd5b8135611a2581611a38565b5f8083601f840112611a84575f80fd5b50813567ffffffffffffffff811115611a9b575f80fd5b602083019150836020828501011115611ab2575f80fd5b9250929050565b5f805f8060608587031215611acc575f80fd5b8435611ad781611a38565b935060208501359250604085013567ffffffffffffffff811115611af9575f80fd5b611b0587828801611a74565b95989497509550505050565b5f8083601f840112611b21575f80fd5b50813567ffffffffffffffff811115611b38575f80fd5b6020830191508360208260051b8501011115611ab2575f80fd5b5f805f805f805f6080888a031215611b68575f80fd5b8735611b7381611a38565b9650602088013567ffffffffffffffff80821115611b8f575f80fd5b611b9b8b838c01611b11565b909850965060408a0135915080821115611bb3575f80fd5b611bbf8b838c01611b11565b909650945060608a0135915080821115611bd7575f80fd5b50611be48a828b01611b11565b989b979a50959850939692959293505050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602160045260245ffd5b6020810160038310611c5d577f4e487b71000000000000000000000000000000000000000000000000000000005f52602160045260245ffd5b91905290565b5f805f805f8060608789031215611c78575f80fd5b863567ffffffffffffffff80821115611c8f575f80fd5b611c9b8a838b01611b11565b90985096506020890135915080821115611cb3575f80fd5b611cbf8a838b01611b11565b90965094506040890135915080821115611cd7575f80fd5b50611ce489828a01611b11565b979a9699509497509295939492505050565b5f805f60608486031215611d08575f80fd5b8335611d1381611a38565b92506020840135611d2381611a38565b91506040840135611d3381611a38565b809150509250925092565b5f8060408385031215611d4f575f80fd5b8235611d5a81611a38565b91506020830135611d6a81611a38565b809150509250929050565b5f805f805f60808688031215611d89575f80fd5b8535611d9481611a38565b94506020860135611da481611a38565b935060408601359250606086013567ffffffffffffffff811115611dc6575f80fd5b611dd288828901611a74565b969995985093965092949392505050565b81835281816020850137505f602082840101525f60207fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe0601f840116840101905092915050565b5f73ffffffffffffffffffffffffffffffffffffffff808816835280871660208401525084604083015260806060830152611e69608083018486611de3565b979650505050505050565b8183525f60208085019450825f5b85811015611ebd578135611e9581611a38565b73ffffffffffffffffffffffffffffffffffffffff1687529582019590820190600101611e82565b509495945050505050565b8183525f7f07ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff831115611ef8575f80fd5b8260051b80836020870137939093016020019392505050565b8183525f6020808501808196508560051b81019150845f5b87811015611faf57828403895281357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1883603018112611f67575f80fd5b8701858101903567ffffffffffffffff811115611f82575f80fd5b803603821315611f90575f80fd5b611f9b868284611de3565b9a87019a9550505090840190600101611f29565b5091979650505050505050565b606081525f611fcf60608301888a611e74565b8281036020840152611fe2818789611ec8565b90508281036040840152611ff7818587611f11565b9998505050505050505050565b73ffffffffffffffffffffffffffffffffffffffff88168152608060208201525f61203360808301888a611e74565b8281036040840152612046818789611ec8565b9050828103606084015261205b818587611f11565b9a9950505050505050505050565b73ffffffffffffffffffffffffffffffffffffffff85168152836020820152606060408201525f61209e606083018486611de3565b9695505050505050565b5f84515f5b818110156120c757602081880181015185830152016120ad565b507fffffffffffffffffffffffff0000000000000000000000000000000000000000949094169190930190815260609190911b7fffffffffffffffffffffffffffffffffffffffff00000000000000000000000016600c8201526020019291505056fe608060405234801561000f575f80fd5b506040516100df3803806100df83398101604081905261002e91610055565b7f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc55610082565b5f60208284031215610065575f80fd5b81516001600160a01b038116811461007b575f80fd5b9392505050565b60518061008e5f395ff3fe60806040527f360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc54365f80375f80365f845af490503d5f803e80603f573d5ffd5b503d5ff3fea164736f6c6343000815000aa164736f6c6343000815000a",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 6300,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 6769,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_initialized",
+        "offset": 20,
+        "slot": "0",
+        "type": "t_bool"
+      },
+      {
+        "astId": 7665,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_gateway",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_address"
+      },
+      {
+        "astId": 4618,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_entryPoint",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      },
+      {
+        "astId": 4620,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_accountImpl",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_address"
+      },
+      {
+        "astId": 4624,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_accountSalts",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_address,t_bytes32)"
+      },
+      {
+        "astId": 4629,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_accountStates",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_mapping(t_address,t_enum(AccountStates)4616)"
+      },
+      {
+        "astId": 4635,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_accountOwners",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_mapping(t_address,t_mapping(t_address,t_bool))"
+      },
+      {
+        "astId": 4639,
+        "contract": "contracts/account/AccountRegistry.sol:AccountRegistry",
+        "label": "_accountOwnersCounters",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_enum(AccountStates)4616": {
+        "encoding": "inplace",
+        "label": "enum AccountRegistry.AccountStates",
+        "numberOfBytes": "1"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_address,t_bytes32)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bytes32)",
+        "numberOfBytes": "32",
+        "value": "t_bytes32"
+      },
+      "t_mapping(t_address,t_enum(AccountStates)4616)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => enum AccountRegistry.AccountStates)",
+        "numberOfBytes": "32",
+        "value": "t_enum(AccountStates)4616"
+      },
+      "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => mapping(address => bool))",
+        "numberOfBytes": "32",
+        "value": "t_mapping(t_address,t_bool)"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

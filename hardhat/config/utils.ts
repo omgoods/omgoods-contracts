@@ -52,22 +52,22 @@ export function buildNetworks(
     hardhat: HARDHAT_NETWORK,
     localhost: {
       ...HARDHAT_NETWORK,
-      url: getEnvAsUrl('RPC_URLS_LOCALHOST'),
+      url: getEnvAsUrl('LOCALHOST_URL'),
       live: false,
     },
   };
 
-  const entries = Object.entries(config);
+  const configEntries = Object.entries(config);
 
   const commonConfigs: Record<NetworkType, NetworkUserConfig> = {
     mainnet: buildCommonNetwork('mainnet'),
     testnet: buildCommonNetwork('testnet'),
   };
 
-  for (const [name, config] of entries) {
+  for (const [name, config] of configEntries) {
     const { type, ...custom } = config;
 
-    const url = getEnvAsUrl('RPC_URLS_', name);
+    const url = getEnvAsUrl(name, 'URL');
     const common = commonConfigs[type];
 
     if (url && common) {
@@ -76,6 +76,11 @@ export function buildNetworks(
         ...common,
         ...custom,
         live: true,
+        verify: {
+          etherscan: {
+            apiKey: getEnv(name, 'ETHERSCAN_API_KEY'),
+          },
+        },
       };
     }
   }

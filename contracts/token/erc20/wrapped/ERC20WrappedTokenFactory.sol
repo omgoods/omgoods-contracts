@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: NONE
+// SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";

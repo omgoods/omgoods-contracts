@@ -2,7 +2,7 @@ import { DeployFunction } from 'hardhat-deploy/types';
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, read, execute, get },
+    deployments: { log, read, execute, getAddress },
     getNamedAccounts,
   } = hre;
 
@@ -13,7 +13,7 @@ const func: DeployFunction = async (hre) => {
     log('Gateway already initialized');
   } else {
     const { owner: from } = await getNamedAccounts();
-    const { address: accountRegistry } = await get('AccountRegistry');
+    const accountRegistry = await getAddress('AccountRegistry');
 
     await execute(
       'Gateway',

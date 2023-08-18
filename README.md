@@ -12,20 +12,19 @@ npm i
 ## Scripts
 
 ```bash
-npm start         # starts hardhat node
-
-npm run linter    # runs solidity linter
-npm run format    # runs prettier
-npm run compile   # compiles contracts
-npm run test      # runs unit tests
-npm run coverage  # runs coverage tests
-npm run deploy    # deploys contracts
-npm run hardhat   # hardhat cli wrapper
+npm start                 # starts hardhat node
+npm run linter            # runs solidity linter
+npm run format            # runs prettier
+npm run compile           # compiles contracts
+npm run test              # runs unit tests
+npm run coverage          # runs coverage tests
+npm run deploy            # deploys contracts
+npm run verify:etherscan  # verifies deployed contracts on etherscan
+npm run events:generate   # generates events for the localhost network
+npm run hardhat           # hardhat cli wrapper
 ```
 
-## License
-
-NONE
+## No license
 
 [license-image]: https://img.shields.io/badge/License-NONE-red.svg
 

@@ -9,7 +9,7 @@ const config: HardhatUserConfig = {
     version: '0.8.21',
     settings: {
       metadata: { bytecodeHash: 'none' },
-      optimizer: { enabled: true, runs: 2 ** 32 - 1 },
+      optimizer: { enabled: true, runs: 10_000 },
     },
   },
   paths: {
@@ -38,14 +38,6 @@ const config: HardhatUserConfig = {
     },
     optimismGoerli: {
       chainId: 420,
-      type: 'testnet',
-    },
-    base: {
-      chainId: 8453,
-      type: 'mainnet',
-    },
-    baseGoerli: {
-      chainId: 84531,
       type: 'testnet',
     },
   }),

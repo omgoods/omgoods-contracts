@@ -13,11 +13,10 @@ for (const fileName of DOT_FILE_NAMES) {
 
   try {
     const fileContent = readFileSync(filePath, { encoding: 'utf8' });
-
     const parsed = parse(fileContent);
-    const entries = Object.entries(parsed);
+    const parsedEntries = Object.entries(parsed);
 
-    for (const [key, value] of entries) {
+    for (const [key, value] of parsedEntries) {
       if (!envs[key]) {
         envs[key] = value;
       }

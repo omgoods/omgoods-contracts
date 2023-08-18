@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: NONE
+// SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";

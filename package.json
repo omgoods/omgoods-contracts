@@ -1,15 +1,16 @@
 {
   "name": "@omgoods/contracts",
   "private": true,
-  "license": "NONE",
   "scripts": {
     "start": "hardhat node",
     "linter": "solhint \"contracts/**/*.sol\"",
-    "format": "prettier --write \"{contracts,deploy,hardhat,test}/**/*.{ts,sol}\"",
+    "format": "prettier --write \"{contracts,deploy,hardhat,scripts,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
+    "verify:etherscan": "hardhat etherscan-verify",
+    "events:generate": "hardhat --network localhost run ./scripts/events/generate.ts",
     "hardhat": "hardhat"
   },
   "dependencies": {

@@ -10,7 +10,7 @@ const TOKEN_FACTORIES = [
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, read, execute, get },
+    deployments: { log, read, execute, getAddress },
     getNamedAccounts,
     getUnnamedAccounts,
   } = hre;
@@ -37,7 +37,7 @@ const func: DeployFunction = async (hre) => {
   }
 
   for (const tokenName of TOKENS) {
-    const { address: token } = await get(tokenName);
+    const token = await getAddress(tokenName);
 
     if (await read('ERC20TokenRegistry', 'hasToken', token)) {
       log(`${tokenName} already in ERC20TokenRegistry`);
@@ -55,7 +55,7 @@ const func: DeployFunction = async (hre) => {
   }
 
   for (const tokenFactoryName of TOKEN_FACTORIES) {
-    const { address: tokenFactory } = await get(tokenFactoryName);
+    const tokenFactory = await getAddress(tokenFactoryName);
 
     if (await read('ERC20TokenRegistry', 'hasTokenFactory', tokenFactory)) {
       log(`${tokenFactoryName} already in ERC20TokenRegistry`);

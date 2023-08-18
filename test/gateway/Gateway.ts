@@ -1,12 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployGateway, setupGateway } from './fixtures';
 import { GATEWAY_REQUEST_DATA, GATEWAY_REQUESTS_DATA } from './constants';
 
 const { ZeroAddress, randomBytes, hashMessage } = ethers;
 
-const { randomAddress, randomHex } = testsUtils;
+const { randomAddress, randomHex } = testing;
 
 describe('gateway/Gateway', () => {
   describe('# deployment', () => {
@@ -372,7 +372,6 @@ describe('gateway/Gateway', () => {
       it('expect to revert when the request nonce is invalid', async () => {
         const { gateway, signers } = fixture;
 
-        randomAddress(), 1, ZeroAddress, 0, '0x';
         const tx = gateway.forwardRequest(
           {
             ...GATEWAY_REQUEST_DATA,

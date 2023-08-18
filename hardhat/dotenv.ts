@@ -2,7 +2,11 @@ import { resolve, join } from 'path';
 import { readFileSync } from 'fs';
 import { parse } from 'dotenv';
 
-const DOT_FILE_NAMES = ['.env.local', '.env', '.env.default'];
+const DOT_FILE_NAMES = [
+  '.env.local', //
+  '.env',
+  '.env.default',
+];
 
 const DOT_FILE_ROOT_PATH = resolve(join(__dirname, '..'));
 

@@ -1,4 +1,4 @@
-import { ethers, typeDataUtils, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { AddressLike, BigNumberish, BytesLike } from 'ethers';
 import { deployERC1271AccountMock } from '../account/extensions/fixtures';
 import { setupAccountRegistry } from '../account/fixtures';
@@ -6,9 +6,7 @@ import { GATEWAY_TYPED_DATA_DOMAIN } from './constants';
 
 const { deployContract, ZeroAddress } = ethers;
 
-const { createEncoder } = typeDataUtils;
-
-const { buildSigners } = testsUtils;
+const { buildSigners, createTypedDataEncoder } = testing;
 
 export async function deployGatewayRecipientMock(
   options: {
@@ -61,7 +59,7 @@ export async function setupGateway() {
 
   await gateway.initialize(accountRegistry);
 
-  const requestEncoder = await createEncoder<{
+  const requestEncoder = await createTypedDataEncoder<{
     from: string;
     nonce: BigNumberish;
     to: string;
@@ -92,7 +90,7 @@ export async function setupGateway() {
     ],
   });
 
-  const requestsEncoder = await createEncoder<{
+  const requestsEncoder = await createTypedDataEncoder<{
     from: string;
     nonce: BigNumberish;
     to: Array<string>;

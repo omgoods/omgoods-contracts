@@ -1,5 +1,6 @@
-import { ethers, proxyUtils, testsUtils, typeDataUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { BigNumberish } from 'ethers';
+import { createProxyAddressFactory } from '../../../common';
 import { setupERC20TokenRegistry } from '../fixtures';
 import {
   ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN,
@@ -8,11 +9,7 @@ import {
 
 const { deployContract, ZeroAddress, id, getContractAt } = ethers;
 
-const { createAddressFactory } = proxyUtils;
-
-const { buildSigners } = testsUtils;
-
-const { createEncoder } = typeDataUtils;
+const { buildSigners, createTypedDataEncoder } = testing;
 
 export async function deployERC20ControlledTokenImpl() {
   const tokenImpl = await deployContract('ERC20ControlledTokenImpl');
@@ -80,13 +77,13 @@ export async function setupERC20ControlledTokenFactory() {
 
   await tokenFactory.initialize(ZeroAddress, tokenRegistry, tokenImpl);
 
-  const computeTokenAddress = await createAddressFactory(
+  const computeTokenAddress = await createProxyAddressFactory(
     tokenRegistry,
     tokenImpl,
     (symbol) => id(symbol),
   );
 
-  const tokenTypeEncoder = await createEncoder<{
+  const tokenTypeEncoder = await createTypedDataEncoder<{
     name: string;
     symbol: string;
     owner: string;

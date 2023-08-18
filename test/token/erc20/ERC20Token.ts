@@ -1,13 +1,13 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { PANIC_CODES } from '@nomicfoundation/hardhat-chai-matchers/panic';
-import { ethers, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployERC20TokenMock, setupERC20TokenMock } from './fixtures';
 import { ERC20_TOKEN_MOCK_DATA } from './constants';
 
 const { ZeroAddress, MaxUint256 } = ethers;
 
-const { randomAddress } = testsUtils;
+const { randomAddress } = testing;
 
 describe('token/ERC20Token // mocked', () => {
   describe('# deployment', () => {

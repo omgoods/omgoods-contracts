@@ -1,12 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployTokenReceiverMock } from './fixtures';
 import { TOKEN_RECEIVER_SUPPORTED_INTERFACE_IDS } from './constants';
 
 const { ZeroAddress } = ethers;
 
-const { randomHex } = testsUtils;
+const { randomHex } = testing;
 
 describe('token/TokenReceiver // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployTokenReceiverMock>>;

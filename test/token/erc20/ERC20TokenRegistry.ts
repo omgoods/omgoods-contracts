@@ -1,9 +1,9 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { testsUtils } from 'hardhat';
+import { testing } from 'hardhat';
 import { expect } from 'chai';
 import { setupERC20TokenRegistry } from './fixtures';
 
-const { randomAddress } = testsUtils;
+const { randomAddress } = testing;
 
 describe('token/erc20/ERC20TokenRegistry', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20TokenRegistry>>;

@@ -1,4 +1,8 @@
-function getKey(...path: string[]): string {
+import { ethers } from 'ethers';
+
+const { getAddress } = ethers;
+
+function buildEnvKey(...path: string[]): string {
   return path
     .join('_')
     .replace(/([A-Z][a-z])/g, (char) => `_${char}`)
@@ -6,17 +10,17 @@ function getKey(...path: string[]): string {
     .toUpperCase();
 }
 
-export function getRaw(...path: string[]): string {
-  const key = getKey(...path);
+export function getEnv(...path: string[]): string {
+  const key = buildEnvKey(...path);
 
   return process.env[key] || null;
 }
 
-export function getAsUrl(...path: string[]): string {
+export function getEnvAsUrl(...path: string[]): string {
   let result: string = null;
 
   try {
-    const value = new URL(getRaw(...path));
+    const value = new URL(getEnv(...path));
 
     switch (value.protocol) {
       case 'http:':
@@ -33,11 +37,11 @@ export function getAsUrl(...path: string[]): string {
   return result;
 }
 
-export function getAsBool(...path: string[]): boolean {
+export function getEnvAsBool(...path: string[]): boolean {
   let result = false;
 
   try {
-    const value = getRaw(...path).toLowerCase();
+    const value = getEnv(...path).toLowerCase();
 
     switch (value.charAt(0)) {
       case '1':
@@ -53,11 +57,11 @@ export function getAsBool(...path: string[]): boolean {
   return result;
 }
 
-export function getAsInt(...path: string[]): number {
+export function getEnvAsInt(...path: string[]): number {
   let result = 0;
 
   try {
-    const value = parseInt(getRaw(...path), 10);
+    const value = parseInt(getEnv(...path), 10);
 
     if (value) {
       result = value;
@@ -67,4 +71,14 @@ export function getAsInt(...path: string[]): number {
   }
 
   return result;
+}
+
+export function prepareAddress(address: string): string {
+  let result: string;
+
+  try {
+    result = getAddress(address);
+  } catch (err) {}
+
+  return result || null;
 }

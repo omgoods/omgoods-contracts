@@ -1,55 +1,42 @@
 import { NetworksUserConfig, NetworkUserConfig } from 'hardhat/types';
 import { isHexString } from 'ethers';
-import { commonUtils } from '../common';
-import { envsUtils } from '../envs';
+import { prepareAddress, getEnv, getEnvAsInt, getEnvAsUrl } from '../common';
 import { NetworkConfig, NetworkType } from './interfaces';
 import { HARDHAT_NETWORK } from './constants';
-
-const { getAddress } = commonUtils;
-
-const { getRaw, getAsUrl, getAsInt } = envsUtils;
 
 function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
 
-  let owner = getRaw(type, 'ACCOUNTS_OWNER');
-  let deployer = getRaw(type, 'ACCOUNTS_DEPLOYER');
-  let forwarder = getRaw(type, 'ACCOUNTS_FORWARDER');
+  let owner = getEnv(type, 'ACCOUNTS_OWNER');
+  let deployer = getEnv(type, 'ACCOUNTS_DEPLOYER');
 
   if (owner && deployer) {
-    if (
-      isHexString(owner, 32) &&
-      isHexString(deployer, 32) &&
-      isHexString(forwarder, 32)
-    ) {
+    if (isHexString(owner, 32) && isHexString(deployer, 32)) {
       result = {
-        accounts: [owner, deployer, forwarder],
+        accounts: [owner, deployer],
       };
     } else {
-      owner = getAddress(owner);
-      deployer = getAddress(deployer);
-      forwarder = getAddress(forwarder);
+      owner = prepareAddress(owner);
+      deployer = prepareAddress(deployer);
 
-      if (owner && deployer && forwarder) {
+      if (owner && deployer) {
         result = {
-          ledgerAccounts: [owner, deployer, forwarder],
+          ledgerAccounts: [owner, deployer],
         };
       }
     }
   }
 
   if (!result) {
-    const mnemonic = getRaw(type, 'ACCOUNTS_MNEMONIC');
+    const mnemonic = getEnv(type, 'ACCOUNTS_MNEMONIC');
 
     if (mnemonic) {
-      const count = getAsInt(type, 'ACCOUNTS_COUNT');
-
       result = {
         accounts: {
           mnemonic,
-          path: getRaw(type, 'ACCOUNTS_PATH'),
-          initialIndex: getAsInt(type, 'ACCOUNTS_INITIAL_INDEX'),
-          count: count >= 3 ? count : HARDHAT_NETWORK.accounts.count,
+          path: getEnv(type, 'ACCOUNTS_PATH'),
+          initialIndex: getEnvAsInt(type, 'ACCOUNTS_INITIAL_INDEX'),
+          count: 2,
         },
       };
     }
@@ -65,7 +52,7 @@ export function buildNetworks(
     hardhat: HARDHAT_NETWORK,
     localhost: {
       ...HARDHAT_NETWORK,
-      url: getAsUrl('RPC_URLS_LOCALHOST'),
+      url: getEnvAsUrl('RPC_URLS_LOCALHOST'),
       live: false,
     },
   };
@@ -80,7 +67,7 @@ export function buildNetworks(
   for (const [name, config] of entries) {
     const { type, ...custom } = config;
 
-    const url = getAsUrl('RPC_URLS_', name);
+    const url = getEnvAsUrl('RPC_URLS_', name);
     const common = commonConfigs[type];
 
     if (url && common) {

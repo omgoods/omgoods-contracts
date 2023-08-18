@@ -1,11 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployTokenFactoryMock, setupTokenFactoryMock } from './fixtures';
 
 const { ZeroAddress, hashMessage } = ethers;
 
-const { randomAddress, randomHex } = testsUtils;
+const { randomAddress, randomHex } = testing;
 
 describe('token/TokenFactory // mocked', () => {
   describe('# deployment', () => {
@@ -137,8 +137,7 @@ describe('token/TokenFactory // mocked', () => {
 
     describe('_createToken()', () => {
       it('expect to create a token in the token registry', async () => {
-        const { tokenFactoryMock, tokenMock, signers, computeTokenAddress } =
-          fixture;
+        const { tokenFactoryMock, signers, computeTokenAddress } = fixture;
 
         const salt = randomHex();
         const initMessage = randomHex();

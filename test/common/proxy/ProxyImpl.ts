@@ -1,13 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, proxyUtils, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployProxyImplMock } from './fixtures';
+import { getProxyImplAddress } from './helpers';
 
 const { ZeroAddress } = ethers;
 
-const { getImplAddress } = proxyUtils;
-
-const { randomAddress } = testsUtils;
+const { randomAddress } = testing;
 
 describe('common/proxy/ProxyImpl // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployProxyImplMock>>;
@@ -63,7 +62,7 @@ describe('common/proxy/ProxyImpl // mocked', () => {
           .emit(proxyImplMock, 'ProxyImplUpdated')
           .withArgs(proxyImpl);
 
-        expect(await getImplAddress(proxyImplMock)).eq(proxyImpl);
+        expect(await getProxyImplAddress(proxyImplMock)).eq(proxyImpl);
       });
     });
   });

@@ -1,14 +1,23 @@
+import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { setBalance } from '@nomicfoundation/hardhat-network-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { AddressLike, BigNumberish } from 'ethers';
-import { commonUtils } from '../common';
+import {
+  AddressLike,
+  TypedDataDomain,
+  TypedDataField,
+  BigNumberish,
+} from 'ethers';
 import { Signers } from './interfaces';
 
-const { bindAll } = commonUtils;
-
-export class TestsUtils {
+export class Testing {
   constructor(private readonly hre: HardhatRuntimeEnvironment) {
-    bindAll(TestsUtils.prototype, this);
+    const methods = Object.getOwnPropertyNames(Testing.prototype);
+
+    for (const method of methods) {
+      if (method !== 'constructor') {
+        this[method] = this[method].bind(this);
+      }
+    }
   }
 
   randomHex(bytesSize = 32): string {
@@ -58,5 +67,34 @@ export class TestsUtils {
       ...named,
       unknown: signers.slice(names.length),
     } as Signers<K>;
+  }
+
+  async createTypedDataEncoder<D = Record<string, any>>(
+    verifyingContract: AddressLike,
+    domain: TypedDataDomain,
+    types: Record<string, Array<TypedDataField>>,
+  ): Promise<{
+    encode: (data: D) => string;
+    hash: (data: D) => string;
+    sign: (signer: HardhatEthersSigner, data: D) => Promise<string>;
+  }> {
+    const {
+      network: {
+        config: { chainId },
+      },
+      ethers: { resolveAddress, TypedDataEncoder },
+    } = this.hre;
+
+    domain = {
+      ...domain,
+      chainId,
+      verifyingContract: await resolveAddress(verifyingContract),
+    };
+
+    return {
+      encode: (data) => TypedDataEncoder.encode(domain, types, data),
+      hash: (data) => TypedDataEncoder.hash(domain, types, data),
+      sign: (signer, data) => signer.signTypedData(domain, types, data),
+    };
   }
 }

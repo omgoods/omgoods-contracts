@@ -1,11 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployGatewayRecipientMock } from './fixtures';
 
 const { concat } = ethers;
 
-const { randomAddress } = testsUtils;
+const { randomAddress } = testing;
 
 describe('gateway/GatewayRecipient // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployGatewayRecipientMock>>;

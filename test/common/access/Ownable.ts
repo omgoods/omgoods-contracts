@@ -1,11 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployOwnableMock } from './fixtures';
 
 const { ZeroAddress } = ethers;
 
-const { randomAddress } = testsUtils;
+const { randomAddress } = testing;
 
 describe('common/access/Ownable // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployOwnableMock>>;

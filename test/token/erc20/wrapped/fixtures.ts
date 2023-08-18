@@ -1,4 +1,5 @@
-import { ethers, proxyUtils, testsUtils, typeDataUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
+import { createProxyAddressFactory } from '../../../common';
 import {
   setupERC20TokenRegistry,
   deployERC20ExternalTokenMock,
@@ -12,10 +13,7 @@ import {
 const { deployContract, ZeroAddress, keccak256, getContractAt, MaxUint256 } =
   ethers;
 
-const { createAddressFactory } = proxyUtils;
-const { createEncoder } = typeDataUtils;
-
-const { buildSigners } = testsUtils;
+const { buildSigners, createTypedDataEncoder } = testing;
 
 export async function deployERC20WrappedTokenImpl() {
   const tokenImpl = await deployContract('ERC20WrappedTokenImpl');
@@ -87,13 +85,13 @@ export async function setupERC20WrappedTokenFactory() {
 
   await tokenFactory.initialize(ZeroAddress, tokenRegistry, tokenImpl);
 
-  const computeTokenAddress = await createAddressFactory(
+  const computeTokenAddress = await createProxyAddressFactory(
     tokenRegistry,
     tokenImpl,
     (owner) => keccak256(owner),
   );
 
-  const tokenTypeEncoder = await createEncoder<{
+  const tokenTypeEncoder = await createTypedDataEncoder<{
     underlyingToken: string;
   }>(tokenFactory, ERC20_WRAPPED_TOKEN_FACTORY_TYPED_DATA_DOMAIN, {
     Token: [

@@ -1,5 +1,5 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, testsUtils } from 'hardhat';
+import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import {
   deployERC20WrappedTokenFactory,
@@ -8,7 +8,7 @@ import {
 
 const { ZeroAddress } = ethers;
 
-const { randomAddress } = testsUtils;
+const { randomAddress } = testing;
 
 describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
   describe('# deployment', () => {

@@ -5,8 +5,11 @@ on:
     branches:
       - master
     paths:
-      - "contracts/**"
-      - "test/**"
+      - "**.sol"
+      - "**.ts"
+      - "**.js"
+      - "**.json"
+      - "**.yml"
 
 jobs:
   start:

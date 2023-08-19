@@ -1,4 +1,5 @@
-import { deployments, ethers, testing, runScript } from 'hardhat';
+import { deployments, ethers, testing } from 'hardhat';
+import { runScript } from '../common';
 
 const { getAddress } = deployments;
 

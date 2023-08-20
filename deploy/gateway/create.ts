@@ -1,15 +1,10 @@
 import { DeployFunction } from 'hardhat-deploy/types';
-import { TypedDataDomain } from 'ethers';
-
-const TYPED_DATA_DOMAIN: TypedDataDomain = {
-  name: 'Gateway',
-  version: '0.0.1',
-} as const;
 
 const func: DeployFunction = async (hre) => {
   const {
     deployments: { log, deploy },
     getNamedAccounts,
+    getTypedDataDomain,
   } = hre;
 
   log();
@@ -17,14 +12,15 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer: from, owner } = await getNamedAccounts();
 
+  const typeDataDomain = getTypedDataDomain('Gateway');
+
   await deploy('Gateway', {
     from,
     log: true,
-    deterministicDeployment: true,
     args: [
       owner, //
-      TYPED_DATA_DOMAIN.name,
-      TYPED_DATA_DOMAIN.version,
+      typeDataDomain.name,
+      typeDataDomain.version,
     ],
   });
 };

@@ -20,11 +20,13 @@ const func: DeployFunction = async (hre) => {
   await deploy('ERC20ControlledTokenImpl', {
     from,
     log: true,
+    deterministicDeployment: true,
   });
 
   await deploy('ERC20ControlledTokenFactory', {
     from,
     log: true,
+    deterministicDeployment: true,
     args: [
       owner, //
       TYPED_DATA_DOMAIN.name,

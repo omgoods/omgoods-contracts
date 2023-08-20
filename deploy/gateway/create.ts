@@ -20,6 +20,7 @@ const func: DeployFunction = async (hre) => {
   await deploy('Gateway', {
     from,
     log: true,
+    deterministicDeployment: true,
     args: [
       owner, //
       TYPED_DATA_DOMAIN.name,

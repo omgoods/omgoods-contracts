@@ -14,11 +14,13 @@ const func: DeployFunction = async (hre) => {
   await deploy('AccountImpl', {
     from,
     log: true,
+    deterministicDeployment: true,
   });
 
   await deploy('AccountRegistry', {
     from,
     log: true,
+    deterministicDeployment: true,
     args: [owner],
   });
 };

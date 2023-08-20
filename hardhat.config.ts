@@ -44,6 +44,9 @@ const config: HardhatUserConfig = {
   gasReporter: {
     enabled: getEnvAsBool('ENABLED_GAS_REPORTER'),
   },
+  deterministicDeployment: {
+    // TODO: https://github.com/wighawag/hardhat-deploy#4-deterministicdeployment-ability-to-specify-a-deployment-factory
+  },
 };
 
 export default config;

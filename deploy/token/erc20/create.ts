@@ -14,6 +14,7 @@ const func: DeployFunction = async (hre) => {
   await deploy('ERC20TokenRegistry', {
     from,
     log: true,
+    deterministicDeployment: true,
     args: [owner],
   });
 };

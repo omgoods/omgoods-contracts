@@ -7,7 +7,6 @@ import { ContractBuild } from './interfaces';
 import { writeCode } from './utils';
 import { DEFAULT_BUILD_CONFIG } from './constants';
 import * as templates from './templates';
-import { buildIndex } from './templates';
 
 task<{
   format: 'json' | 'ts-react' | 'ts-nest';

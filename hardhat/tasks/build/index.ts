@@ -7,6 +7,7 @@ import { ContractBuild } from './interfaces';
 import { writeCode } from './utils';
 import { DEFAULT_BUILD_CONFIG } from './constants';
 import * as templates from './templates';
+import { buildIndex } from './templates';
 
 task<{
   format: 'json' | 'ts-react' | 'ts-nest';
@@ -154,7 +155,7 @@ task<{
         break;
 
       default:
-        buildFile = `${buildName}.json`;
+        buildFile = buildName;
         break;
     }
 
@@ -163,6 +164,8 @@ task<{
     switch (args.format) {
       case 'ts-react':
       case 'ts-nest':
+        console.log(`saving ${buildFile}.ts`);
+
         await writeCode(
           `${buildPath}.ts`,
           templates.buildContract({
@@ -173,6 +176,8 @@ task<{
         break;
 
       default:
+        console.log(`saving ${buildFile}.json`);
+
         await writeJson(`${buildPath}.json`, contract, {
           spaces: 2,
         });
@@ -188,9 +193,11 @@ task<{
   switch (args.format) {
     case 'ts-react':
     case 'ts-nest':
+      console.log(`saving index.ts`);
+
       await writeCode(
         join(buildRootPath, 'index.ts'),
-        templates.buildContracts(contracts),
+        templates.buildIndex(contracts),
       );
       break;
   }

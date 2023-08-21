@@ -20,9 +20,9 @@ node_modules
 
 # hardhat
 .hardhat
-coverage*
-/typechain
 /build
+coverage*
+typechain
 
 # envs
 .env

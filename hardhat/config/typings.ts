@@ -3,10 +3,14 @@ import type { ContractConfig, ContractBuildConfig } from './interfaces';
 
 declare module 'hardhat/types/config' {
   export interface HardhatUserConfig {
-    contracts?: Record<string, ContractConfig<boolean | ContractBuildConfig>>;
+    contracts: Record<string, ContractConfig<boolean | ContractBuildConfig>>;
   }
 
   export interface HardhatConfig {
-    contracts: Record<string, ContractConfig>;
+    contracts: HardhatUserConfig['contracts'];
+  }
+
+  export interface ProjectPathsConfig {
+    build: string;
   }
 }

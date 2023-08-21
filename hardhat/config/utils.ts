@@ -1,11 +1,23 @@
+import { HardhatUserConfig } from 'hardhat/config';
 import { NetworksUserConfig, NetworkUserConfig } from 'hardhat/types';
-import { DeterministicDeploymentInfo } from 'hardhat-deploy/types';
-import { isHexString } from 'ethers';
-import { prepareAddress, getEnv, getEnvAsInt, getEnvAsUrl } from '../common';
+import {
+  isHexString,
+  computeAddress,
+  HDNodeWallet,
+  Mnemonic,
+  getIndexedAccountPath,
+} from 'ethers';
+import {
+  prepareAddress,
+  getEnv,
+  getEnvAsInt,
+  getEnvAsUrl,
+  getEnvAsBool,
+} from '../common';
 import { NetworkConfig, NetworkType } from './interfaces';
 import { HARDHAT_NETWORK } from './constants';
 
-function getCommonNetwork(type: NetworkType): NetworkUserConfig {
+function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
 
   let owner = getEnv(type, 'ACCOUNTS_OWNER');
@@ -35,7 +47,6 @@ function getCommonNetwork(type: NetworkType): NetworkUserConfig {
       result = {
         accounts: {
           mnemonic,
-          path: getEnv(type, 'ACCOUNTS_PATH'),
           initialIndex: getEnvAsInt(type, 'ACCOUNTS_INITIAL_INDEX'),
           count: 2,
         },
@@ -46,7 +57,7 @@ function getCommonNetwork(type: NetworkType): NetworkUserConfig {
   return result;
 }
 
-export function createConfigNetworks(
+export function createNetworksConfig(
   config: Record<string, NetworkConfig>,
 ): NetworksUserConfig {
   const result: NetworksUserConfig = {
@@ -60,21 +71,21 @@ export function createConfigNetworks(
 
   const configEntries = Object.entries(config);
 
-  const commonConfigs: Record<NetworkType, NetworkUserConfig> = {
-    mainnet: getCommonNetwork('mainnet'),
-    testnet: getCommonNetwork('testnet'),
+  const commonNetworkAccountsConfigs = {
+    mainnet: getNetworkAccountsConfig('mainnet'),
+    testnet: getNetworkAccountsConfig('testnet'),
   };
 
   for (const [name, config] of configEntries) {
     const { type, ...custom } = config;
 
     const url = getEnvAsUrl(name, 'URL');
-    const common = commonConfigs[type];
+    const accountsConfig = commonNetworkAccountsConfigs[type];
 
-    if (url && common) {
+    if (url && accountsConfig) {
       result[name] = {
         url,
-        ...common,
+        ...accountsConfig,
         ...custom,
         live: true,
         verify: {
@@ -89,19 +100,91 @@ export function createConfigNetworks(
   return result;
 }
 
-export function getDeterministicDeploymentConfig(): (
-  chainId: string,
-) => DeterministicDeploymentInfo {
-  return () => {
-    // TODO: add own deployment factory
-    // https://github.com/wighawag/hardhat-deploy#4-deterministicdeployment-ability-to-specify-a-deployment-factory
+export function createNamedAccountsConfig(
+  networks: NetworksUserConfig,
+): HardhatUserConfig['namedAccounts'] {
+  const result: Record<'owner' | 'deployer', Record<number, string>> = {
+    owner: {},
+    deployer: {},
+  };
 
-    return {
-      deployer: '0x3fab184622dc19b6109349b94811493bf2a45362',
-      factory: '0x4e59b44847b379578588920ca78fbf26c0b4956c',
-      funding: '10000000000000000',
-      signedTx:
-        '0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222',
-    };
+  const networksValues = Object.values(networks);
+
+  try {
+    for (const { chainId, accounts, ledgerAccounts } of networksValues) {
+      if (result.owner[chainId]) {
+        continue;
+      }
+
+      let addresses: string[] = [];
+
+      if (ledgerAccounts) {
+        addresses = ledgerAccounts;
+      } else if (Array.isArray(accounts)) {
+        addresses = (accounts as Array<string>).map((privateKey) =>
+          computeAddress(privateKey),
+        );
+      } else if (accounts && typeof accounts === 'object') {
+        const { mnemonic, initialIndex } = {
+          initialIndex: 0,
+          ...accounts,
+        };
+
+        const toIndex = initialIndex + 2;
+
+        for (let index = initialIndex; index < toIndex; index++) {
+          const { address } = HDNodeWallet.fromMnemonic(
+            Mnemonic.fromPhrase(mnemonic),
+            getIndexedAccountPath(index),
+          );
+
+          addresses.push(address);
+        }
+      }
+
+      if (addresses.length === 2) {
+        result.owner[chainId] = addresses[0];
+        result.deployer[chainId] = addresses[1];
+      }
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  return result;
+}
+
+export function createConfig(
+  config: Omit<HardhatUserConfig, 'networks'> & {
+    networks: Record<string, NetworkConfig>;
+  },
+): HardhatUserConfig {
+  const { networks: networksConfig, ...custom } = config;
+
+  const networks = createNetworksConfig(networksConfig);
+  const namedAccounts = createNamedAccountsConfig(networks);
+
+  return {
+    ...custom,
+    networks,
+    namedAccounts,
+    typechain: {
+      outDir: 'typechain',
+    },
+    gasReporter: {
+      enabled: getEnvAsBool('ENABLED_GAS_REPORTER'),
+    },
+    deterministicDeployment: () => {
+      // TODO: add own deployment factory
+      // https://github.com/wighawag/hardhat-deploy#4-deterministicdeployment-ability-to-specify-a-deployment-factory
+
+      return {
+        deployer: '0x3fab184622dc19b6109349b94811493bf2a45362',
+        factory: '0x4e59b44847b379578588920ca78fbf26c0b4956c',
+        funding: '10000000000000000',
+        signedTx:
+          '0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222',
+      };
+    },
   };
 }

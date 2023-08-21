@@ -1,3 +1,5 @@
 node_modules
 .hardhat
+/build
 coverage*
+typechain

@@ -91,9 +91,9 @@ contract Gateway is EIP712, Ownable, Initializable {
 
   constructor(
     address owner,
-    string memory name,
-    string memory version
-  ) EIP712(name, version) Ownable(owner) {
+    string memory typedDataDomainName,
+    string memory typedDataDomainVersion
+  ) EIP712(typedDataDomainName, typedDataDomainVersion) Ownable(owner) {
     //
   }
 

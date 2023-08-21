@@ -23,9 +23,9 @@ contract ERC20WrappedTokenFactory is EIP712, TokenFactory {
 
   constructor(
     address owner,
-    string memory name,
-    string memory version
-  ) TokenFactory(owner) EIP712(name, version) {
+    string memory typedDataDomainName,
+    string memory typedDataDomainVersion
+  ) TokenFactory(owner) EIP712(typedDataDomainName, typedDataDomainVersion) {
     //
   }
 

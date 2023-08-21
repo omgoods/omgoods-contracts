@@ -1,14 +1,9 @@
 import '@nomicfoundation/hardhat-ledger';
 import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
-import { HardhatUserConfig } from 'hardhat/config';
-import {
-  createConfigNetworks,
-  getDeterministicDeploymentConfig,
-  getEnvAsBool,
-} from './hardhat';
+import { createConfig } from './hardhat';
 
-const config: HardhatUserConfig = {
+export default createConfig({
   solidity: {
     version: '0.8.21',
     settings: {
@@ -16,18 +11,7 @@ const config: HardhatUserConfig = {
       optimizer: { enabled: true, runs: 10_000 },
     },
   },
-  paths: {
-    artifacts: '.hardhat/artifacts',
-    cache: '.hardhat/cache',
-  },
-  typechain: {
-    outDir: 'typechain',
-  },
-  namedAccounts: {
-    owner: 0,
-    deployer: 1,
-  },
-  networks: createConfigNetworks({
+  networks: {
     ethereum: {
       chainId: 1,
       type: 'mainnet',
@@ -44,11 +28,17 @@ const config: HardhatUserConfig = {
       chainId: 420,
       type: 'testnet',
     },
-  }),
+  },
   contracts: {
+    Account: {
+      build: {
+        name: 'AccountImpl',
+        address: false,
+      },
+    },
     AccountImpl: {
       build: {
-        name: 'Account',
+        abi: false,
       },
     },
     AccountRegistry: {
@@ -64,9 +54,15 @@ const config: HardhatUserConfig = {
     ERC20TokenRegistry: {
       build: true,
     },
+    ERC20ControlledToken: {
+      build: {
+        name: 'ERC20ControlledTokenImpl',
+        address: false,
+      },
+    },
     ERC20ControlledTokenImpl: {
       build: {
-        name: 'ERC20ControlledToken',
+        abi: false,
       },
     },
     ERC20ControlledTokenFactory: {
@@ -76,9 +72,15 @@ const config: HardhatUserConfig = {
       },
       build: true,
     },
+    ERC20FixedToken: {
+      build: {
+        name: 'ERC20FixedTokenImpl',
+        address: false,
+      },
+    },
     ERC20FixedTokenImpl: {
       build: {
-        name: 'ERC20FixedToken',
+        abi: false,
       },
     },
     ERC20FixedTokenFactory: {
@@ -88,9 +90,15 @@ const config: HardhatUserConfig = {
       },
       build: true,
     },
+    ERC20WrappedToken: {
+      build: {
+        name: 'ERC20WrappedTokenImpl',
+        address: false,
+      },
+    },
     ERC20WrappedTokenImpl: {
       build: {
-        name: 'ERC20WrappedToken',
+        abi: false,
       },
     },
     ERC20WrappedTokenFactory: {
@@ -107,17 +115,11 @@ const config: HardhatUserConfig = {
         byteCode: true,
       },
     },
-    IERC20: {
+    ERC20Token: {
       build: {
-        name: 'ERC20Token',
+        name: 'IERC20',
         address: false,
       },
     },
   },
-  deterministicDeployment: getDeterministicDeploymentConfig(),
-  gasReporter: {
-    enabled: getEnvAsBool('ENABLED_GAS_REPORTER'),
-  },
-};
-
-export default config;
+});

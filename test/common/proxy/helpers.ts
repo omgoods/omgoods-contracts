@@ -7,7 +7,6 @@ const {
   AbiCoder,
   resolveAddress,
   getContractFactory,
-  zeroPadValue,
   concat,
   keccak256,
   getCreate2Address,
@@ -31,7 +30,10 @@ export async function createProxyAddressFactory<T = string>(
   const initCodeHash = keccak256(
     concat([
       Proxy.bytecode,
-      zeroPadValue((await resolveAddress(proxyImpl)).toLowerCase(), 32),
+      AbiCoder.defaultAbiCoder().encode(
+        ['address'],
+        [await resolveAddress(proxyImpl)],
+      ),
     ]),
   );
 

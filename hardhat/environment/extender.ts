@@ -4,6 +4,13 @@ import { Testing } from './Testing';
 
 extendEnvironment((hre) => {
   const { deployments, ethers, config } = hre;
+
+  // testing
+
+  hre.testing = new Testing(hre);
+
+  // deployments
+
   const { deploy } = deployments;
 
   deployments.deploy = async (name, options) => {
@@ -20,10 +27,10 @@ extendEnvironment((hre) => {
 
     const deployment = await get(name);
 
-    return deployment ? deployment.address : null;
+    return deployment?.address || null;
   };
 
-  hre.testing = new Testing(hre);
+  // typed data
 
   hre.getTypedDataDomain = (contract) => {
     let result: TypedDataDomain;

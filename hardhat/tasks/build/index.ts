@@ -128,13 +128,11 @@ task<{
           ]);
         }
 
-        const address = getCreate2Address(
+        contract.addresses[networkEnv] = getCreate2Address(
           factory,
           id(name),
           keccak256(initCode),
         );
-
-        contract.addresses[networkEnv] = address;
       }
     }
 

@@ -1,10 +1,11 @@
 import { NetworksUserConfig, NetworkUserConfig } from 'hardhat/types';
+import { DeterministicDeploymentInfo } from 'hardhat-deploy/types';
 import { isHexString } from 'ethers';
 import { prepareAddress, getEnv, getEnvAsInt, getEnvAsUrl } from '../common';
 import { NetworkConfig, NetworkType } from './interfaces';
 import { HARDHAT_NETWORK } from './constants';
 
-function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
+function getCommonNetwork(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
 
   let owner = getEnv(type, 'ACCOUNTS_OWNER');
@@ -45,7 +46,7 @@ function buildCommonNetwork(type: NetworkType): NetworkUserConfig {
   return result;
 }
 
-export function buildNetworks(
+export function createConfigNetworks(
   config: Record<string, NetworkConfig>,
 ): NetworksUserConfig {
   const result: NetworksUserConfig = {
@@ -60,8 +61,8 @@ export function buildNetworks(
   const configEntries = Object.entries(config);
 
   const commonConfigs: Record<NetworkType, NetworkUserConfig> = {
-    mainnet: buildCommonNetwork('mainnet'),
-    testnet: buildCommonNetwork('testnet'),
+    mainnet: getCommonNetwork('mainnet'),
+    testnet: getCommonNetwork('testnet'),
   };
 
   for (const [name, config] of configEntries) {
@@ -86,4 +87,21 @@ export function buildNetworks(
   }
 
   return result;
+}
+
+export function getDeterministicDeploymentConfig(): (
+  chainId: string,
+) => DeterministicDeploymentInfo {
+  return () => {
+    // TODO: add own deployment factory
+    // https://github.com/wighawag/hardhat-deploy#4-deterministicdeployment-ability-to-specify-a-deployment-factory
+
+    return {
+      deployer: '0x3fab184622dc19b6109349b94811493bf2a45362',
+      factory: '0x4e59b44847b379578588920ca78fbf26c0b4956c',
+      funding: '10000000000000000',
+      signedTx:
+        '0xf8a58085174876e800830186a08080b853604580600e600039806000f350fe7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe03601600081602082378035828234f58015156039578182fd5b8082525050506014600cf31ba02222222222222222222222222222222222222222222222222222222222222222a02222222222222222222222222222222222222222222222222222222222222222',
+    };
+  };
 }

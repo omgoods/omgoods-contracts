@@ -9,6 +9,7 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
+    "build": "hardhat build",
     "verify:etherscan": "hardhat etherscan-verify",
     "events:generate": "hardhat --network localhost run ./scripts/events/generate.ts",
     "hardhat": "hardhat"

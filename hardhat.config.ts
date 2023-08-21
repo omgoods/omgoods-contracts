@@ -2,7 +2,11 @@ import '@nomicfoundation/hardhat-ledger';
 import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
 import { HardhatUserConfig } from 'hardhat/config';
-import { buildNetworks, getEnvAsBool } from './hardhat';
+import {
+  createConfigNetworks,
+  getDeterministicDeploymentConfig,
+  getEnvAsBool,
+} from './hardhat';
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -23,7 +27,7 @@ const config: HardhatUserConfig = {
     owner: 0,
     deployer: 1,
   },
-  networks: buildNetworks({
+  networks: createConfigNetworks({
     ethereum: {
       chainId: 1,
       type: 'mainnet',
@@ -110,11 +114,9 @@ const config: HardhatUserConfig = {
       },
     },
   },
+  deterministicDeployment: getDeterministicDeploymentConfig(),
   gasReporter: {
     enabled: getEnvAsBool('ENABLED_GAS_REPORTER'),
-  },
-  deterministicDeployment: {
-    // TODO: https://github.com/wighawag/hardhat-deploy#4-deterministicdeployment-ability-to-specify-a-deployment-factory
   },
 };
 

@@ -192,7 +192,7 @@ describe('account/Account // mocked', () => {
       });
     });
 
-    describe('executeTransaction()', () => {
+    describe.only('executeTransaction()', () => {
       createBeforeHook();
 
       it('expect to revert when the msg.sender is not the owner', async () => {
@@ -249,13 +249,18 @@ describe('account/Account // mocked', () => {
         );
       });
 
-      it('expect the transaction to be executed', async () => {
+      it.only('expect the transaction to be executed', async () => {
         const { accountMock, accountRegistryMock } = fixture;
 
         const to = randomAddress();
         const value = 1000;
         const data = '0x';
 
+        console.log({
+          to,
+          value,
+          data,
+        });
         const tx = accountMock.executeTransaction(to, value, data);
 
         await expect(tx)

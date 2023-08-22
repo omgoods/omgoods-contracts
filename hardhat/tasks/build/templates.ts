@@ -13,8 +13,16 @@ export function buildIndex(contracts: Array<ContractBuild>): string {
   const contractAddresses: string[] = [];
   const contractByteCodes: string[] = [];
   const contractInterfaces: string[] = [];
+  const contractTypedDataDomains: string[] = [];
 
-  for (const { buildName, buildFile, addresses, byteCode, abi } of contracts) {
+  for (const {
+    buildName,
+    buildFile,
+    addresses,
+    byteCode,
+    abi,
+    typeDataDomain,
+  } of contracts) {
     contractImports.push(
       `import { ${toConstantName(buildName)} } from './${buildFile}';`,
     );
@@ -44,10 +52,18 @@ export function buildIndex(contracts: Array<ContractBuild>): string {
         )}.abi)],`,
       );
     }
+
+    if (typeDataDomain) {
+      contractTypedDataDomains.push(
+        `[ContractNames.${buildName}, ${toConstantName(
+          buildName,
+        )}.typeDataDomain],`,
+      );
+    }
   }
 
   const lines = [
-    'import { Interface } from "ethers";',
+    'import { Interface, TypedDataDomain } from "ethers";',
     ...contractImports,
     '',
     'export enum NetworkTypes {',
@@ -70,6 +86,10 @@ export function buildIndex(contracts: Array<ContractBuild>): string {
     '',
     'export const CONTRACT_INTERFACES = new Map<ContractNames,Interface>([',
     ...contractInterfaces,
+    ']);',
+    '',
+    'export const CONTRACT_TYPED_DATA_DOMAINS = new Map<ContractNames,TypedDataDomain>([',
+    ...contractTypedDataDomains,
     ']);',
   ];
 

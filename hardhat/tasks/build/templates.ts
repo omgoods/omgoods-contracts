@@ -8,54 +8,69 @@ export function buildContract(contract: ContractBuild): string {
 }
 
 export function buildIndex(contracts: Array<ContractBuild>): string {
+  const contractImports: string[] = [];
+  const contractNames: string[] = [];
+  const contractAddresses: string[] = [];
+  const contractByteCodes: string[] = [];
+  const contractInterfaces: string[] = [];
+
+  for (const { buildName, buildFile, addresses, byteCode, abi } of contracts) {
+    contractImports.push(
+      `import { ${toConstantName(buildName)} } from './${buildFile}';`,
+    );
+
+    contractNames.push(
+      `${buildName} = '${buildName}',`, //
+    );
+
+    if (addresses) {
+      contractAddresses.push(
+        `[ContractNames.${buildName}, ${toConstantName(
+          buildName,
+        )}.addresses as Record<NetworkTypes, string>],`,
+      );
+    }
+
+    if (byteCode) {
+      contractByteCodes.push(
+        `[ContractNames.${buildName}, ${toConstantName(buildName)}.byteCode],`,
+      );
+    }
+
+    if (abi) {
+      contractInterfaces.push(
+        `[ContractNames.${buildName}, new Interface(${toConstantName(
+          buildName,
+        )}.abi)],`,
+      );
+    }
+  }
+
   const lines = [
     'import { Interface } from "ethers";',
-    ...contracts.map(({ buildName, buildFile }) => {
-      return `import { ${toConstantName(buildName)} } from './${buildFile}';`;
-    }),
+    ...contractImports,
     '',
-    'export enum NetworkEnvs {',
+    'export enum NetworkTypes {',
     " Mainnet = 'mainnet',",
     " Testnet = 'testnet',",
     " Localhost = 'localhost',",
     '};',
     '',
     'export enum ContractNames {',
-    ...contracts.map(({ buildName }) => `${buildName} = '${buildName}',`),
+    ...contractNames,
     '}',
     '',
-    'export const CONTRACT_ADDRESSES = new Map<ContractNames, Record<NetworkEnvs, string>>([',
-    ...contracts
-      .filter(({ addresses }) => !!addresses)
-      .map(
-        ({ buildName }) =>
-          `[ContractNames.${buildName}, ${toConstantName(
-            buildName,
-          )}.addresses as Record<NetworkEnvs, string>],`,
-      ),
-    '])',
+    'export const CONTRACT_ADDRESSES = new Map<ContractNames, Record<NetworkTypes, string>>([',
+    ...contractAddresses,
+    ']);',
     '',
     'export const CONTRACT_BYTE_CODES = new Map<ContractNames,string>([',
-    ...contracts
-      .filter(({ byteCode }) => !!byteCode)
-      .map(
-        ({ buildName }) =>
-          `[ContractNames.${buildName}, ${toConstantName(
-            buildName,
-          )}.byteCode],`,
-      ),
-    '])',
+    ...contractByteCodes,
+    ']);',
     '',
     'export const CONTRACT_INTERFACES = new Map<ContractNames,Interface>([',
-    ...contracts
-      .filter(({ abi }) => !!abi)
-      .map(
-        ({ buildName }) =>
-          `[ContractNames.${buildName}, new Interface(${toConstantName(
-            buildName,
-          )}.abi)],`,
-      ),
-    '])',
+    ...contractInterfaces,
+    ']);',
   ];
 
   return lines.join('\n');

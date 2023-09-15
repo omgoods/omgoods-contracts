@@ -30,20 +30,6 @@ export default createConfig({
     },
   },
   contracts: {
-    Account: {
-      build: {
-        name: 'AccountImpl',
-        address: false,
-      },
-    },
-    AccountImpl: {
-      build: {
-        abi: false,
-      },
-    },
-    AccountRegistry: {
-      build: true,
-    },
     Gateway: {
       typeDataDomain: {
         name: 'OM!goods Gateway',

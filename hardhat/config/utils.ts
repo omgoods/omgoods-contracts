@@ -65,7 +65,6 @@ export function createNetworksConfig(
     localhost: {
       ...HARDHAT_NETWORK,
       url: getEnvAsUrl('LOCALHOST_URL'),
-      live: false,
     },
   };
 

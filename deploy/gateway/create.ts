@@ -10,18 +10,14 @@ const func: DeployFunction = async (hre) => {
   log();
   log('# gateway/create');
 
-  const { deployer: from, owner } = await getNamedAccounts();
+  const { deployer: from } = await getNamedAccounts();
 
   const typeDataDomain = getTypedDataDomain('Gateway');
 
   await deploy('Gateway', {
     from,
     log: true,
-    args: [
-      owner, //
-      typeDataDomain.name,
-      typeDataDomain.version,
-    ],
+    args: [typeDataDomain.name, typeDataDomain.version],
   });
 };
 

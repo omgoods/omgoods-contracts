@@ -1,79 +1,15 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
-import { deployGateway, setupGateway } from './fixtures';
-import { GATEWAY_REQUEST_DATA, GATEWAY_REQUESTS_DATA } from './constants';
+import { setupGateway } from './fixtures';
+import { GATEWAY_REQUEST, GATEWAY_REQUEST_BATCH } from './constants';
+import { randomHash } from 'hardhat/internal/hardhat-network/provider/utils/random';
 
-const { ZeroAddress, randomBytes, hashMessage } = ethers;
+const { ZeroAddress } = ethers;
 
-const { randomAddress, randomHex } = testing;
+const { randomAddress } = testing;
 
 describe('gateway/Gateway', () => {
-  describe('# deployment', () => {
-    let fixture: Awaited<ReturnType<typeof deployGateway>>;
-
-    before(async () => {
-      fixture = await loadFixture(deployGateway);
-    });
-
-    describe('initialize()', () => {
-      it('expect to revert when the msg.sender is not the owner', async () => {
-        const { gateway, signers } = fixture;
-
-        const tx = gateway
-          .connect(signers.unknown.at(0))
-          .initialize(ZeroAddress);
-
-        await expect(tx).revertedWithCustomError(
-          gateway,
-          'MsgSenderIsNotTheContractOwner',
-        );
-      });
-
-      it('expect to revert when the account registry is the zero address', async () => {
-        const { gateway } = fixture;
-
-        const tx = gateway.initialize(ZeroAddress);
-
-        await expect(tx).revertedWithCustomError(
-          gateway,
-          'AccountRegistryIsTheZeroAddress',
-        );
-      });
-
-      it('expect to initialize the contract', async () => {
-        const { gateway } = fixture;
-
-        const accountRegistry = randomAddress();
-
-        const tx = gateway.initialize(accountRegistry);
-
-        await expect(tx).emit(gateway, 'Initialized').withArgs(accountRegistry);
-      });
-
-      describe('# after initialization', () => {
-        before(async () => {
-          const { gateway } = fixture;
-
-          if (!(await gateway.initialized())) {
-            await gateway.initialize(randomAddress());
-          }
-        });
-
-        it('expect to revert', async () => {
-          const { gateway } = fixture;
-
-          const tx = gateway.initialize(ZeroAddress);
-
-          await expect(tx).revertedWithCustomError(
-            gateway,
-            'AlreadyInitialized',
-          );
-        });
-      });
-    });
-  });
-
   let fixture: Awaited<ReturnType<typeof setupGateway>>;
 
   const createBeforeHook = () => {
@@ -85,11 +21,11 @@ describe('gateway/Gateway', () => {
   describe('# getters', () => {
     createBeforeHook();
 
-    describe('getNonce()', () => {
+    describe('getNextNonce()', () => {
       it('expect to return the correct nonce', async () => {
         const { gateway } = fixture;
 
-        const res = await gateway.getNonce(randomAddress());
+        const res = await gateway.getNextNonce(randomAddress());
 
         expect(res).eq(0);
       });
@@ -99,243 +35,67 @@ describe('gateway/Gateway', () => {
       it('expect to return the correct hash', async () => {
         const { gateway, requestEncoder } = fixture;
 
-        const res = await gateway.hashRequest(GATEWAY_REQUEST_DATA);
+        const res = await gateway.hashRequest(GATEWAY_REQUEST);
 
-        expect(res).eq(requestEncoder.hash(GATEWAY_REQUEST_DATA));
+        expect(res).eq(requestEncoder.hash(GATEWAY_REQUEST));
       });
     });
 
-    describe('hashRequests()', () => {
+    describe('hashRequestBatch()', () => {
       it('expect to return the correct hash', async () => {
-        const { gateway, requestsEncoder } = fixture;
+        const { gateway, requestBatchEncoder } = fixture;
 
-        const res = await gateway.hashRequests(GATEWAY_REQUESTS_DATA);
+        const res = await gateway.hashRequestBatch(GATEWAY_REQUEST_BATCH);
 
-        expect(res).eq(requestsEncoder.hash(GATEWAY_REQUESTS_DATA));
-      });
-    });
-
-    describe('recoverTrustedSigner()', () => {
-      it('expect to return the zero address when the signer is untrusted ', async () => {
-        const { gateway, signers } = fixture;
-
-        const res = await gateway.recoverTrustedSigner(
-          randomAddress(),
-          randomHex(),
-          await signers.unknown.at(0).signMessage(randomHex()),
-        );
-
-        expect(res).eq(ZeroAddress);
-      });
-
-      it('expect to return the signer is equal to the account', async () => {
-        const { gateway, signers } = fixture;
-
-        const message = randomBytes(32);
-        const hash = hashMessage(message);
-        const signer = signers.unknown.at(0);
-
-        const res = await gateway.recoverTrustedSigner(
-          signer.address,
-          hash,
-          await signer.signMessage(message),
-        );
-
-        expect(res).eq(signer.address);
-      });
-
-      it('expect to return the signer when they are the account owner', async () => {
-        const { gateway, accounts } = fixture;
-
-        const message = randomBytes(32);
-        const hash = hashMessage(message);
-        const account = accounts.unknown;
-
-        const res = await gateway.recoverTrustedSigner(
-          account.address,
-          hash,
-          await account.owner.signMessage(message),
-        );
-
-        expect(res).eq(account.owner.address);
-      });
-
-      it('expect to return the account when the signer is the ERC1271 account owner', async () => {
-        const { gateway, signers, erc1271AccountMock } = fixture;
-
-        const message = randomBytes(32);
-        const hash = hashMessage(message);
-        const account = await erc1271AccountMock.getAddress();
-
-        const res = await gateway.recoverTrustedSigner(
-          account,
-          hash,
-          await signers.owner.signMessage(message),
-        );
-
-        expect(res).eq(account);
+        expect(res).eq(requestBatchEncoder.hash(GATEWAY_REQUEST_BATCH));
       });
     });
   });
 
   describe('# setters', () => {
-    createBeforeHook();
-
     describe('sendRequest()', () => {
+      createBeforeHook();
+
       it('expect to revert when sending to the zero address', async () => {
         const { gateway } = fixture;
 
-        const tx = gateway.sendRequest(ZeroAddress, 0, '0x');
+        const tx = gateway.sendRequest(ZeroAddress, '0x');
 
         await expect(tx).revertedWithCustomError(
           gateway,
-          'RequestToTheZeroAddress',
-        );
-      });
-
-      it('expect to revert when sending to the gateway address', async () => {
-        const { gateway } = fixture;
-
-        const tx = gateway.sendRequest(await gateway.getAddress(), 0, '0x');
-
-        await expect(tx).revertedWithCustomError(
-          gateway,
-          'RequestToTheInvalidAddress',
+          'CallToTheZeroAddress',
         );
       });
 
       it('expect to revert due to the reverted call', async () => {
-        const { gateway, accountRegistry } = fixture;
+        const { gateway, erc1271AccountMock } = fixture;
 
         const tx = gateway.sendRequest(
-          await accountRegistry.getAddress(),
-          0,
-          accountRegistry.interface.encodeFunctionData('initialize', [
-            ZeroAddress,
-            ZeroAddress,
+          await erc1271AccountMock.getAddress(),
+          erc1271AccountMock.interface.encodeFunctionData('setOwner', [
             ZeroAddress,
           ]),
         );
 
         await expect(tx).revertedWithCustomError(
-          accountRegistry,
-          'AlreadyInitialized',
+          erc1271AccountMock,
+          'OwnerIsTheZeroAddress',
         );
       });
 
       it('expect request to be sent successfully', async () => {
         const { gateway, gatewayRecipientMock, signers } = fixture;
 
-        const sender = signers.unknown.at(0);
+        const account = signers.unknown.at(0);
         const to = await gatewayRecipientMock.getAddress();
-        const value = 0;
         const data =
           gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender');
 
-        const tx = gateway.connect(sender).sendRequest(to, value, data);
+        const tx = gateway.connect(account).sendRequest(to, data);
 
         await expect(tx)
           .emit(gateway, 'RequestSent')
-          .withArgs(sender.address, sender.address, to, value, data);
-
-        await expect(tx)
-          .emit(gatewayRecipientMock, 'MsgSender')
-          .withArgs(sender.address);
-      });
-    });
-
-    describe('sendRequests()', () => {
-      it('expect to revert when the requests batch is empty', async () => {
-        const { gateway } = fixture;
-
-        const tx = gateway.sendRequests([], [], []);
-
-        await expect(tx).revertedWithCustomError(gateway, 'EmptyRequestsBatch');
-      });
-
-      it('expect to revert when the requests batch size is invalid', async () => {
-        const { gateway } = fixture;
-
-        let tx = gateway.sendRequests([randomAddress()], [], []);
-
-        await expect(tx).revertedWithCustomError(
-          gateway,
-          'InvalidRequestsBatchSize',
-        );
-
-        tx = gateway.sendRequests([randomAddress()], [0], []);
-
-        await expect(tx).revertedWithCustomError(
-          gateway,
-          'InvalidRequestsBatchSize',
-        );
-      });
-
-      it('expect requests to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, signers } = fixture;
-
-        const sender = signers.unknown.at(0);
-        const to = [await gatewayRecipientMock.getAddress()];
-        const value = [0];
-        const data = [
-          gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender'),
-        ];
-
-        const tx = gateway.connect(sender).sendRequests(to, value, data);
-
-        await expect(tx).not.emit(gateway, 'RequestSent');
-
-        await expect(tx)
-          .emit(gateway, 'RequestsSent')
-          .withArgs(sender.address, sender.address, to, value, data);
-
-        await expect(tx)
-          .emit(gatewayRecipientMock, 'MsgSender')
-          .withArgs(sender.address);
-      });
-    });
-
-    describe('sendRequestFrom()', () => {
-      it('expect to revert when sending from the zero address', async () => {
-        const { gateway } = fixture;
-
-        const tx = gateway.sendRequestFrom(ZeroAddress, ZeroAddress, 0, '0x');
-
-        await expect(tx).revertedWithCustomError(
-          gateway,
-          'RequestFromTheZeroAddress',
-        );
-      });
-
-      it('expect to revert when the sender is not trusted', async () => {
-        const { gateway } = fixture;
-
-        const tx = gateway.sendRequestFrom(
-          randomAddress(),
-          ZeroAddress,
-          0,
-          '0x',
-        );
-
-        await expect(tx).revertedWithCustomError(gateway, 'RequestForbidden');
-      });
-
-      it('expect request to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, accounts } = fixture;
-
-        const account = accounts.created;
-        const to = await gatewayRecipientMock.getAddress();
-        const value = 0;
-        const data =
-          gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender');
-
-        const tx = gateway
-          .connect(account.owner)
-          .sendRequestFrom(account.address, to, value, data);
-
-        await expect(tx)
-          .emit(gateway, 'RequestSent')
-          .withArgs(account.owner.address, account.address, to, value, data);
+          .withArgs(account.address, 0, to, data);
 
         await expect(tx)
           .emit(gatewayRecipientMock, 'MsgSender')
@@ -343,24 +103,44 @@ describe('gateway/Gateway', () => {
       });
     });
 
-    describe('sendRequestsFrom()', () => {
-      it('expect requests to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, accounts } = fixture;
+    describe('sendRequestBatch()', () => {
+      createBeforeHook();
 
-        const account = accounts.created;
+      it('expect to revert when the request batch is empty', async () => {
+        const { gateway } = fixture;
+
+        const tx = gateway.sendRequestBatch([], []);
+
+        await expect(tx).revertedWithCustomError(gateway, 'EmptyRequestBatch');
+      });
+
+      it('expect to revert when the request batch size is invalid', async () => {
+        const { gateway } = fixture;
+
+        const tx = gateway.sendRequestBatch([randomAddress()], []);
+
+        await expect(tx).revertedWithCustomError(
+          gateway,
+          'InvalidRequestBatchSize',
+        );
+      });
+
+      it('expect request batch to be sent successfully', async () => {
+        const { gateway, gatewayRecipientMock, signers } = fixture;
+
+        const account = signers.unknown.at(0);
         const to = [await gatewayRecipientMock.getAddress()];
-        const value = [0];
         const data = [
           gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender'),
         ];
 
-        const tx = gateway
-          .connect(account.owner)
-          .sendRequestsFrom(account.address, to, value, data);
+        const tx = gateway.connect(account).sendRequestBatch(to, data);
+
+        await expect(tx).not.emit(gateway, 'RequestSent');
 
         await expect(tx)
-          .emit(gateway, 'RequestsSent')
-          .withArgs(account.owner.address, account.address, to, value, data);
+          .emit(gateway, 'RequestBatchSent')
+          .withArgs(account.address, 0, to, data);
 
         await expect(tx)
           .emit(gatewayRecipientMock, 'MsgSender')
@@ -369,20 +149,21 @@ describe('gateway/Gateway', () => {
     });
 
     describe('forwardRequest()', () => {
-      it('expect to revert when the request nonce is invalid', async () => {
-        const { gateway, signers } = fixture;
+      createBeforeHook();
+
+      it('expect to revert when the account is the zero address', async () => {
+        const { gateway } = fixture;
 
         const tx = gateway.forwardRequest(
-          {
-            ...GATEWAY_REQUEST_DATA,
-            nonce: 1,
-          },
-          await signers.owner.signMessage('aaa'),
+          ZeroAddress,
+          GATEWAY_REQUEST.to,
+          GATEWAY_REQUEST.data,
+          GATEWAY_REQUEST.data,
         );
 
         await expect(tx).revertedWithCustomError(
           gateway,
-          'InvalidRequestNonce',
+          'AccountIsTheZeroAddress',
         );
       });
 
@@ -390,22 +171,37 @@ describe('gateway/Gateway', () => {
         const { gateway, signers } = fixture;
 
         const tx = gateway.forwardRequest(
-          GATEWAY_REQUEST_DATA,
+          GATEWAY_REQUEST.account,
+          GATEWAY_REQUEST.to,
+          GATEWAY_REQUEST.data,
           await signers.owner.signMessage('aaa'),
         );
 
-        await expect(tx).revertedWithCustomError(gateway, 'RequestForbidden');
+        await expect(tx).revertedWithCustomError(gateway, 'InvalidSignature');
+      });
+
+      it('expect to revert when the request signer is not the account owner', async () => {
+        const { gateway, signers, erc1271AccountMock } = fixture;
+
+        const tx = gateway.forwardRequest(
+          erc1271AccountMock,
+          GATEWAY_REQUEST.to,
+          GATEWAY_REQUEST.data,
+          await signers.owner.signMessage('aaa'),
+        );
+
+        await expect(tx).revertedWithCustomError(gateway, 'InvalidSignature');
       });
 
       it('expect request to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, accounts, requestEncoder } =
+        const { gateway, gatewayRecipientMock, requestEncoder, signers } =
           fixture;
 
-        const account = accounts.created;
+        const signer = signers.unknown.at(0);
 
-        const requestData = {
-          ...GATEWAY_REQUEST_DATA,
-          from: account.address,
+        const request = {
+          ...GATEWAY_REQUEST,
+          account: signer.address,
           to: await gatewayRecipientMock.getAddress(),
           data: gatewayRecipientMock.interface.encodeFunctionData(
             'emitMsgSender',
@@ -413,73 +209,74 @@ describe('gateway/Gateway', () => {
         };
 
         const tx = gateway
-          .connect(account.owner)
+          .connect(signers.forwarder)
           .forwardRequest(
-            requestData,
-            await requestEncoder.sign(account.owner, requestData),
+            request.account,
+            request.to,
+            request.data,
+            await requestEncoder.sign(signer, request),
           );
-
-        await expect(tx)
-          .emit(gateway, 'NonceUpdated')
-          .withArgs(account.address, requestData.nonce + 1);
 
         await expect(tx)
           .emit(gateway, 'RequestSent')
-          .withArgs(
-            account.owner.address,
-            account.address,
-            requestData.to,
-            requestData.value,
-            requestData.data,
-          );
+          .withArgs(request.account, request.nonce, request.to, request.data);
 
         await expect(tx)
           .emit(gatewayRecipientMock, 'MsgSender')
-          .withArgs(account.address);
+          .withArgs(request.account);
+
+        expect(await gateway.getNextNonce(request.account)).eq(
+          request.nonce + 1,
+        );
       });
     });
 
-    describe('forwardRequests()', () => {
-      it('expect requests to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, accounts, requestsEncoder } =
-          fixture;
+    describe('forwardRequestBatch()', () => {
+      it('expect request batch to be sent successfully', async () => {
+        const {
+          gateway,
+          gatewayRecipientMock,
+          erc1271AccountMock,
+          requestBatchEncoder,
+          signers,
+        } = fixture;
 
-        const account = accounts.unknown;
+        const signer = signers.owner;
 
-        const requestsData = {
-          ...GATEWAY_REQUESTS_DATA,
-          from: account.address,
+        const requestBatch = {
+          ...GATEWAY_REQUEST_BATCH,
+          account: await erc1271AccountMock.getAddress(),
           to: [await gatewayRecipientMock.getAddress()],
-          value: [0],
           data: [
             gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender'),
           ],
         };
 
         const tx = gateway
-          .connect(account.owner)
-          .forwardRequests(
-            requestsData,
-            await requestsEncoder.sign(account.owner, requestsData),
+          .connect(signers.forwarder)
+          .forwardRequestBatch(
+            requestBatch.account,
+            requestBatch.to,
+            requestBatch.data,
+            await requestBatchEncoder.sign(signer, requestBatch),
           );
 
         await expect(tx)
-          .emit(gateway, 'NonceUpdated')
-          .withArgs(account.address, requestsData.nonce + 1);
-
-        await expect(tx)
-          .emit(gateway, 'RequestsSent')
+          .emit(gateway, 'RequestBatchSent')
           .withArgs(
-            account.owner.address,
-            account.address,
-            requestsData.to,
-            requestsData.value,
-            requestsData.data,
+            requestBatch.account,
+            requestBatch.nonce,
+            requestBatch.to,
+            requestBatch.data,
           );
 
         await expect(tx)
           .emit(gatewayRecipientMock, 'MsgSender')
-          .withArgs(account.address);
+          .withArgs(requestBatch.account);
+
+        expect(await gateway.getNextNonce(requestBatch.account)).eq(
+          requestBatch.nonce + 1,
+        );
       });
     });
   });

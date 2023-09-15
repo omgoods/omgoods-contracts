@@ -5,355 +5,245 @@ import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {IAccountRegistry} from "../account/IAccountRegistry.sol";
-import {Ownable} from "../common/access/Ownable.sol";
 import {Bytes} from "../common/utils/Bytes.sol";
-import {Initializable} from "../common/utils/Initializable.sol";
 
-contract Gateway is EIP712, Ownable, Initializable {
+contract Gateway is EIP712 {
   using ECDSA for bytes32;
   using Address for address;
   using Bytes for bytes[];
 
-  struct RequestData {
-    address from;
+  struct Request {
+    address account;
     uint256 nonce;
     address to;
-    uint256 value;
     bytes data;
   }
 
-  struct RequestsData {
-    address from;
+  struct RequestBatch {
+    address account;
     uint256 nonce;
     address[] to;
-    uint256[] value;
     bytes[] data;
   }
 
   bytes32 private constant REQUEST_TYPE_HASH =
     keccak256(
-      "Request(address from,uint256 nonce,address to,uint256 value,bytes data)"
+      "Request(address account,uint256 nonce,address to,bytes data)" //
     );
 
-  bytes32 private constant REQUESTS_TYPE_HASH =
+  bytes32 private constant REQUEST_BATCH_TYPE_HASH =
     keccak256(
-      "Requests(address from,uint256 nonce,address[] to,uint256[] value,bytes[] data)"
+      "RequestBatch(address account,uint256 nonce,address[] to,bytes[] data)"
     );
 
   // storage
 
-  address private _accountRegistry;
-
-  mapping(address => uint256) private _nonce;
+  mapping(address => uint256) private _nextNonce;
 
   // events
 
-  event Initialized(address accountRegistry);
+  event RequestSent(address account, uint256 nonce, address to, bytes data);
 
-  event NonceUpdated(address account, uint256 nonce);
-
-  event RequestSent(
-    address sender,
-    address from,
-    address to,
-    uint256 value,
-    bytes data
-  );
-
-  event RequestsSent(
-    address sender,
-    address from,
+  event RequestBatchSent(
+    address account,
+    uint256 nonce,
     address[] to,
-    uint256[] value,
     bytes[] data
   );
 
   // errors
 
-  error AccountRegistryIsTheZeroAddress();
+  error AccountIsTheZeroAddress();
 
-  error InvalidRequestNonce();
+  error InvalidSignature();
 
-  error RequestFromTheZeroAddress();
+  error CallToTheZeroAddress();
 
-  error RequestToTheZeroAddress();
+  error EmptyRequestBatch();
 
-  error RequestToTheInvalidAddress();
-
-  error RequestForbidden();
-
-  error InvalidRequestsBatchSize();
-
-  error EmptyRequestsBatch();
+  error InvalidRequestBatchSize();
 
   // deployment
 
   constructor(
-    address owner,
     string memory typedDataDomainName,
     string memory typedDataDomainVersion
-  ) EIP712(typedDataDomainName, typedDataDomainVersion) Ownable(owner) {
+  ) EIP712(typedDataDomainName, typedDataDomainVersion) {
     //
-  }
-
-  function initialize(
-    address accountRegistry
-  ) external onlyOwner initializeOnce {
-    if (accountRegistry == address(0)) {
-      revert AccountRegistryIsTheZeroAddress();
-    }
-
-    _accountRegistry = accountRegistry;
-
-    emit Initialized(accountRegistry);
   }
 
   // external getters
 
-  function getNonce(address account) external view returns (uint256) {
-    return _nonce[account];
+  function getNextNonce(address account) external view returns (uint256) {
+    return _nextNonce[account];
   }
 
   function hashRequest(
-    RequestData calldata requestData
+    Request calldata request
   ) external view returns (bytes32) {
-    return _hashRequest(requestData);
+    return
+      _hashRequest(request.account, request.nonce, request.to, request.data);
   }
 
-  function hashRequests(
-    RequestsData calldata requestsData
+  function hashRequestBatch(
+    RequestBatch calldata requestBatch
   ) external view returns (bytes32) {
-    return _hashRequests(requestsData);
-  }
-
-  function recoverTrustedSigner(
-    address account,
-    bytes32 hash,
-    bytes calldata signature
-  ) external view returns (address) {
-    return _recoverTrustedSigner(account, hash, signature);
+    return
+      _hashRequestBatch(
+        requestBatch.account,
+        requestBatch.nonce,
+        requestBatch.to,
+        requestBatch.data
+      );
   }
 
   // external setters
 
-  function sendRequest(
-    address to,
-    uint256 value,
-    bytes calldata data
-  ) external {
-    _sendRequest(msg.sender, msg.sender, to, value, data, true);
+  function sendRequest(address to, bytes calldata data) external {
+    _sendRequest(msg.sender, _nextNonce[msg.sender], to, data);
   }
 
-  function sendRequests(
+  function sendRequestBatch(
     address[] calldata to,
-    uint256[] calldata value,
     bytes[] calldata data
   ) external {
-    _sendRequests(msg.sender, msg.sender, to, value, data);
-  }
-
-  function sendRequestFrom(
-    address from,
-    address to,
-    uint256 value,
-    bytes calldata data
-  ) external {
-    _verifyRequest(msg.sender, from);
-
-    _sendRequest(msg.sender, from, to, value, data, true);
-  }
-
-  function sendRequestsFrom(
-    address from,
-    address[] calldata to,
-    uint256[] calldata value,
-    bytes[] calldata data
-  ) external {
-    _verifyRequest(msg.sender, from);
-
-    _sendRequests(msg.sender, from, to, value, data);
+    _sendRequestBatch(msg.sender, _nextNonce[msg.sender], to, data);
   }
 
   function forwardRequest(
-    RequestData calldata requestData,
-    bytes calldata senderSignature
+    address account,
+    address to,
+    bytes calldata data,
+    bytes calldata signature
   ) external {
-    address sender = _verifyRequest(
-      _hashRequest(requestData),
-      senderSignature,
-      requestData.from,
-      requestData.nonce
+    uint256 nonce = _nextNonce[account];
+
+    _verifyAccountSigner(
+      account,
+      _hashRequest(account, nonce, to, data),
+      signature
     );
 
-    _sendRequest(
-      sender,
-      requestData.from,
-      requestData.to,
-      requestData.value,
-      requestData.data,
-      true
-    );
+    _sendRequest(account, nonce, to, data);
   }
 
-  function forwardRequests(
-    RequestsData calldata requestsData,
-    bytes calldata senderSignature
+  function forwardRequestBatch(
+    address account,
+    address[] calldata to,
+    bytes[] calldata data,
+    bytes calldata signature
   ) external {
-    address sender = _verifyRequest(
-      _hashRequests(requestsData),
-      senderSignature,
-      requestsData.from,
-      requestsData.nonce
+    uint256 nonce = _nextNonce[account];
+
+    _verifyAccountSigner(
+      account,
+      _hashRequestBatch(account, nonce, to, data),
+      signature
     );
 
-    _sendRequests(
-      sender,
-      requestsData.from,
-      requestsData.to,
-      requestsData.value,
-      requestsData.data
-    );
+    _sendRequestBatch(account, nonce, to, data);
   }
 
   // private getters
 
   function _hashRequest(
-    RequestData calldata requestData
-  ) private view returns (bytes32) {
-    return
-      _hashTypedDataV4(
-        keccak256(
-          abi.encode(
-            REQUEST_TYPE_HASH,
-            requestData.from,
-            requestData.nonce,
-            requestData.to,
-            requestData.value,
-            keccak256(requestData.data)
-          )
-        )
-      );
-  }
-
-  function _hashRequests(
-    RequestsData calldata requestsData
-  ) private view returns (bytes32) {
-    return
-      _hashTypedDataV4(
-        keccak256(
-          abi.encode(
-            REQUESTS_TYPE_HASH,
-            requestsData.from,
-            requestsData.nonce,
-            keccak256(abi.encodePacked(requestsData.to)),
-            keccak256(abi.encodePacked(requestsData.value)),
-            requestsData.data.deepKeccak256()
-          )
-        )
-      );
-  }
-
-  function _isTrustedSender(
     address account,
-    address sender
-  ) private view returns (bool) {
+    uint256 nonce,
+    address to,
+    bytes calldata data
+  ) private view returns (bytes32) {
     return
-      account == sender ||
-      IAccountRegistry(_accountRegistry).isAccountOwner(account, sender);
+      _hashTypedDataV4(
+        keccak256(
+          abi.encode(REQUEST_TYPE_HASH, account, nonce, to, keccak256(data))
+        )
+      );
   }
 
-  function _recoverTrustedSigner(
+  function _hashRequestBatch(
+    address account,
+    uint256 nonce,
+    address[] calldata to,
+    bytes[] calldata data
+  ) private view returns (bytes32) {
+    return
+      _hashTypedDataV4(
+        keccak256(
+          abi.encode(
+            REQUEST_BATCH_TYPE_HASH,
+            account,
+            nonce,
+            keccak256(abi.encodePacked(to)),
+            data.deepKeccak256()
+          )
+        )
+      );
+  }
+
+  function _verifyAccountSigner(
     address account,
     bytes32 hash,
     bytes calldata signature
-  ) private view returns (address signer) {
-    signer = hash.recover(signature);
-
-    if (!_isTrustedSender(account, signer)) {
-      if (
-        account.isContract() &&
-        IERC1271(account).isValidSignature(hash, signature) ==
-        IERC1271(account).isValidSignature.selector
-      ) {
-        signer = account;
-      } else {
-        signer = address(0);
-      }
+  ) private view {
+    if (account == address(0)) {
+      revert AccountIsTheZeroAddress();
     }
 
-    return signer;
-  }
+    address signer = hash.recover(signature);
 
-  function _verifyRequest(address from) private pure {
-    if (from == address(0)) {
-      revert RequestFromTheZeroAddress();
-    }
-  }
-
-  function _verifyRequest(address sender, address from) private view {
-    _verifyRequest(from);
-
-    if (!_isTrustedSender(from, sender)) {
-      revert RequestForbidden();
+    if (
+      account != signer &&
+      (!account.isContract() ||
+        IERC1271(account).isValidSignature(hash, signature) !=
+        IERC1271(account).isValidSignature.selector)
+    ) {
+      revert InvalidSignature();
     }
   }
 
   // private setters
 
-  function _verifyRequest(
-    bytes32 hash,
-    bytes calldata signature,
-    address from,
-    uint256 nonce
-  ) private returns (address signer) {
-    _verifyRequest(from);
-
+  function _sendRequest(
+    address account,
+    uint256 nonce,
+    address to,
+    bytes calldata data
+  ) private {
     unchecked {
-      if (_nonce[from] != nonce) {
-        revert InvalidRequestNonce();
-      }
+      _nextNonce[account] = nonce + 1;
     }
 
-    uint256 newNonce;
+    _executeRequestCall(account, to, data);
 
-    unchecked {
-      newNonce = nonce + 1;
-    }
-
-    _nonce[from] = newNonce;
-
-    emit NonceUpdated(from, newNonce);
-
-    signer = _recoverTrustedSigner(from, hash, signature);
-
-    if (signer == address(0)) {
-      revert RequestForbidden();
-    }
-
-    return signer;
+    emit RequestSent(account, nonce, to, data);
   }
 
-  function _sendRequest(
-    address sender,
-    address from,
+  function _sendRequestBatch(
+    address account,
+    uint256 nonce,
+    address[] calldata to,
+    bytes[] calldata data
+  ) private {
+    unchecked {
+      _nextNonce[account] = nonce + 1;
+    }
+
+    _executeRequestBatchCalls(account, to, data);
+
+    emit RequestBatchSent(account, nonce, to, data);
+  }
+
+  function _executeRequestCall(
+    address account,
     address to,
-    uint256 value,
-    bytes calldata data,
-    bool triggerEvent
+    bytes calldata data
   ) private {
     if (to == address(0)) {
-      revert RequestToTheZeroAddress();
+      revert CallToTheZeroAddress();
     }
 
-    if (to == address(this)) {
-      revert RequestToTheInvalidAddress();
-    }
-
-    address contextMsgSender = to == _accountRegistry ? sender : from;
-
-    (bool success, bytes memory response) = payable(to).call{value: value}(
-      abi.encodePacked(data, contextMsgSender)
+    (bool success, bytes memory response) = to.call(
+      abi.encodePacked(data, account)
     );
 
     if (!success) {
@@ -362,37 +252,29 @@ contract Gateway is EIP712, Ownable, Initializable {
         revert(add(response, 32), mload(response))
       }
     }
-
-    if (triggerEvent) {
-      emit RequestSent(sender, from, to, value, data);
-    }
   }
 
-  function _sendRequests(
-    address sender,
-    address from,
+  function _executeRequestBatchCalls(
+    address account,
     address[] calldata to,
-    uint256[] calldata value,
     bytes[] calldata data
   ) private {
     uint256 len = to.length;
 
     if (len == 0) {
-      revert EmptyRequestsBatch();
+      revert EmptyRequestBatch();
     }
 
-    if (len != value.length || len != data.length) {
-      revert InvalidRequestsBatchSize();
+    if (len != data.length) {
+      revert InvalidRequestBatchSize();
     }
 
     for (uint256 index; index < len; ) {
-      _sendRequest(sender, from, to[index], value[index], data[index], false);
+      _executeRequestCall(account, to[index], data[index]);
 
       unchecked {
         ++index;
       }
     }
-
-    emit RequestsSent(sender, from, to, value, data);
   }
 }

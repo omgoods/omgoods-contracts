@@ -1,12 +1,24 @@
 import { ethers, testing } from 'hardhat';
 import { AddressLike, BigNumberish, BytesLike } from 'ethers';
-import { deployERC1271AccountMock } from '../account/extensions/fixtures';
-import { setupAccountRegistry } from '../account/fixtures';
 import { GATEWAY_TYPED_DATA_DOMAIN } from './constants';
 
-const { deployContract, ZeroAddress } = ethers;
+const { deployContract } = ethers;
 
 const { buildSigners, createTypedDataEncoder } = testing;
+
+export async function deployERC1271AccountMock(options: {
+  gateway: AddressLike;
+}) {
+  const { gateway } = options;
+
+  const erc1271AccountMock = await deployContract('ERC1271AccountMock', [
+    gateway,
+  ]);
+
+  return {
+    erc1271AccountMock,
+  };
+}
 
 export async function deployGatewayRecipientMock(
   options: {
@@ -31,25 +43,22 @@ export async function deployGatewayRecipientMock(
 }
 
 export async function deployGateway() {
-  const signers = await buildSigners('owner');
-
   const gateway = await deployContract('Gateway', [
-    ZeroAddress,
     GATEWAY_TYPED_DATA_DOMAIN.name,
     GATEWAY_TYPED_DATA_DOMAIN.version,
   ]);
 
   return {
     gateway,
-    signers,
   };
 }
 
 export async function setupGateway() {
-  const { erc1271AccountMock } = await deployERC1271AccountMock();
-  const { gateway, signers } = await deployGateway();
+  const signers = await buildSigners('owner', 'forwarder');
 
-  const { accountRegistry, accounts } = await setupAccountRegistry({
+  const { gateway } = await deployGateway();
+
+  const { erc1271AccountMock } = await deployERC1271AccountMock({
     gateway,
   });
 
@@ -57,18 +66,15 @@ export async function setupGateway() {
     gateway,
   });
 
-  await gateway.initialize(accountRegistry);
-
   const requestEncoder = await createTypedDataEncoder<{
-    from: string;
+    account: string;
     nonce: BigNumberish;
     to: string;
-    value: BigNumberish;
     data: BytesLike;
   }>(gateway, GATEWAY_TYPED_DATA_DOMAIN, {
     Request: [
       {
-        name: 'from',
+        name: 'account',
         type: 'address',
       },
       {
@@ -80,26 +86,21 @@ export async function setupGateway() {
         type: 'address',
       },
       {
-        name: 'value',
-        type: 'uint256',
-      },
-      {
         name: 'data',
         type: 'bytes',
       },
     ],
   });
 
-  const requestsEncoder = await createTypedDataEncoder<{
-    from: string;
+  const requestBatchEncoder = await createTypedDataEncoder<{
+    account: string;
     nonce: BigNumberish;
     to: Array<string>;
-    value: Array<BigNumberish>;
     data: Array<BytesLike>;
   }>(gateway, GATEWAY_TYPED_DATA_DOMAIN, {
-    Requests: [
+    RequestBatch: [
       {
-        name: 'from',
+        name: 'account',
         type: 'address',
       },
       {
@@ -111,10 +112,6 @@ export async function setupGateway() {
         type: 'address[]',
       },
       {
-        name: 'value',
-        type: 'uint256[]',
-      },
-      {
         name: 'data',
         type: 'bytes[]',
       },
@@ -124,11 +121,9 @@ export async function setupGateway() {
   return {
     gateway,
     gatewayRecipientMock,
-    accountRegistry,
-    accounts,
     signers,
     erc1271AccountMock,
     requestEncoder,
-    requestsEncoder,
+    requestBatchEncoder,
   };
 }

@@ -25,4 +25,4 @@ coverage*
 typechain
 
 # envs
-.env
+.env*.local

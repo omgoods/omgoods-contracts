@@ -1,4 +1,3 @@
-import './dotenv';
 import './environment';
 import './tasks';
 

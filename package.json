@@ -17,12 +17,12 @@
     "@openzeppelin/contracts": "4.9.3"
   },
   "devDependencies": {
+    "@newobject/dotenv": "0.1.2",
     "@nomicfoundation/hardhat-ledger": "1.0.1",
     "@nomicfoundation/hardhat-toolbox": "3.0.0",
     "@types/fs-extra": "11.0.1",
     "@typescript-eslint/eslint-plugin": "6.4.0",
     "@typescript-eslint/parser": "6.4.0",
-    "dotenv": "16.3.1",
     "eslint": "8.47.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-config-standard": "17.1.0",

@@ -108,5 +108,11 @@ export default createConfig({
         address: false,
       },
     },
+    ERC1271Account: {
+      build: {
+        name: 'IERC1271',
+        address: false,
+      },
+    },
   },
 });

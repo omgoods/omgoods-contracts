@@ -151,7 +151,6 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
       it('expect to revert when the underlying token has invalid decimals (18)', async () => {
         const {
           tokenFactory,
-          tokenRegistry,
           signers,
           tokenTypeEncoder,
           underlyingTokenWithInvalidDecimals,

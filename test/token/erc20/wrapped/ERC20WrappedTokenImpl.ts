@@ -5,7 +5,7 @@ import {
   deployERC20WrappedTokenImpl,
   setupERC20WrappedToken,
 } from './fixtures';
-import { ERC20_WRAPPED_TOKEN_DATA } from './constants';
+import { ERC20_WRAPPED_TOKEN } from './constants';
 
 const { ZeroAddress } = ethers;
 
@@ -90,7 +90,7 @@ describe('token/erc20/controlled/ERC20WrappedTokenImpl', () => {
 
         const res = await token.totalSupply();
 
-        expect(res).eq(ERC20_WRAPPED_TOKEN_DATA.initialSupply);
+        expect(res).eq(ERC20_WRAPPED_TOKEN.initialSupply);
       });
     });
 
@@ -100,7 +100,7 @@ describe('token/erc20/controlled/ERC20WrappedTokenImpl', () => {
 
         const res = await token.balanceOf(signers.owner);
 
-        expect(res).eq(ERC20_WRAPPED_TOKEN_DATA.initialSupply);
+        expect(res).eq(ERC20_WRAPPED_TOKEN.initialSupply);
       });
     });
 

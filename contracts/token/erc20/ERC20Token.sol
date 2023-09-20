@@ -71,7 +71,7 @@ abstract contract ERC20Token is IERC20Metadata, Token {
     return _symbol;
   }
 
-  function decimals() external view virtual returns (uint8) {
+  function decimals() external pure returns (uint8) {
     return 18;
   }
 

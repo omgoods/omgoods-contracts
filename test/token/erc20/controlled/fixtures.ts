@@ -4,7 +4,7 @@ import { createProxyAddressFactory } from '../../../common';
 import { setupERC20TokenRegistry } from '../fixtures';
 import {
   ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN,
-  ERC20_CONTROLLED_TOKEN_DATA,
+  ERC20_CONTROLLED_TOKEN,
 } from './constants';
 
 const { deployContract, ZeroAddress, id, getContractAt } = ethers;
@@ -42,12 +42,12 @@ export async function setupERC20ControlledToken() {
 
   const token = await getContractAt(
     'ERC20ControlledTokenImpl',
-    computeTokenAddress(ERC20_CONTROLLED_TOKEN_DATA.symbol),
+    computeTokenAddress(ERC20_CONTROLLED_TOKEN.symbol),
     signers.owner,
   );
 
   const tokenData = {
-    ...ERC20_CONTROLLED_TOKEN_DATA,
+    ...ERC20_CONTROLLED_TOKEN,
     owner: signers.owner.address,
     minter: signers.minter.address,
     burner: signers.burner.address,

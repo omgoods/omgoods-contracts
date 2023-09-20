@@ -6,8 +6,8 @@ import {
 } from '../fixtures';
 import {
   ERC20_WRAPPED_TOKEN_FACTORY_TYPED_DATA_DOMAIN,
-  ERC20_WRAPPED_TOKEN_DATA,
-  ERC20_UNDERLYING_TOKEN_DATA,
+  ERC20_WRAPPED_TOKEN,
+  ERC20_UNDERLYING_TOKEN,
 } from './constants';
 
 const { deployContract, ZeroAddress, keccak256, getContractAt, MaxUint256 } =
@@ -45,7 +45,7 @@ export async function setupERC20WrappedToken() {
     await setupERC20WrappedTokenFactory();
 
   const underlyingToken = await deployERC20ExternalTokenMock(
-    ERC20_UNDERLYING_TOKEN_DATA,
+    ERC20_UNDERLYING_TOKEN,
     signers.owner,
   );
 
@@ -64,7 +64,7 @@ export async function setupERC20WrappedToken() {
 
   await underlyingToken.approve(token, MaxUint256);
 
-  await token.deposit(ERC20_WRAPPED_TOKEN_DATA.initialSupply);
+  await token.deposit(ERC20_WRAPPED_TOKEN.initialSupply);
 
   return {
     tokenFactory,
@@ -82,6 +82,18 @@ export async function setupERC20WrappedTokenFactory() {
   const { tokenRegistry } = await setupERC20TokenRegistry({
     tokenFactory,
   });
+
+  const underlyingToken = await deployERC20ExternalTokenMock(
+    ERC20_UNDERLYING_TOKEN,
+    signers.owner,
+  );
+
+  const underlyingTokenWithInvalidDecimals = await deployERC20ExternalTokenMock(
+    {
+      decimals: 5,
+    },
+    signers.owner,
+  );
 
   await tokenFactory.initialize(ZeroAddress, tokenRegistry, tokenImpl);
 
@@ -103,6 +115,9 @@ export async function setupERC20WrappedTokenFactory() {
   });
 
   return {
+    underlyingToken: await underlyingToken.getAddress(),
+    underlyingTokenWithInvalidDecimals:
+      await underlyingTokenWithInvalidDecimals.getAddress(),
     tokenRegistry,
     tokenFactory,
     computeTokenAddress,

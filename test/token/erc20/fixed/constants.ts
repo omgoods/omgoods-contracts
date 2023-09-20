@@ -8,7 +8,7 @@ export const ERC20_FIXED_TOKEN_FACTORY_TYPED_DATA_DOMAIN: TypedDataDomain = {
   version: '0.0.0',
 };
 
-export const ERC20_FIXED_TOKEN_DATA = {
+export const ERC20_FIXED_TOKEN = {
   name: 'Test',
   symbol: 'TEST',
   owner: randomAddress(),

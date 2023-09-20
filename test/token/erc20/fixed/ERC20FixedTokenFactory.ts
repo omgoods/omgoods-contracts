@@ -5,7 +5,7 @@ import {
   deployERC20FixedTokenFactory,
   setupERC20FixedTokenFactory,
 } from './fixtures';
-import { ERC20_FIXED_TOKEN_DATA } from './constants';
+import { ERC20_FIXED_TOKEN } from './constants';
 
 const { ZeroAddress } = ethers;
 
@@ -105,9 +105,9 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
       it('expect to return the correct hash', async () => {
         const { tokenFactory, tokenTypeEncoder } = fixture;
 
-        const res = await tokenFactory.hashToken(ERC20_FIXED_TOKEN_DATA);
+        const res = await tokenFactory.hashToken(ERC20_FIXED_TOKEN);
 
-        expect(res).eq(tokenTypeEncoder.hash(ERC20_FIXED_TOKEN_DATA));
+        expect(res).eq(tokenTypeEncoder.hash(ERC20_FIXED_TOKEN));
       });
     });
   });
@@ -121,7 +121,7 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           {
-            ...ERC20_FIXED_TOKEN_DATA,
+            ...ERC20_FIXED_TOKEN,
             owner: ZeroAddress,
           },
           '0x',
@@ -138,7 +138,7 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           {
-            ...ERC20_FIXED_TOKEN_DATA,
+            ...ERC20_FIXED_TOKEN,
             totalSupply: 0,
           },
           '0x',
@@ -154,7 +154,7 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
         const { tokenFactory, tokenRegistry, signers } = fixture;
 
         const tx = tokenFactory.createToken(
-          ERC20_FIXED_TOKEN_DATA,
+          ERC20_FIXED_TOKEN,
           await signers.unknown.at(0).signMessage('invalid'),
         );
 
@@ -173,21 +173,21 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
           computeTokenAddress,
         } = fixture;
 
-        const token = computeTokenAddress(ERC20_FIXED_TOKEN_DATA.symbol);
+        const token = computeTokenAddress(ERC20_FIXED_TOKEN.symbol);
 
         const tx = tokenFactory.createToken(
-          ERC20_FIXED_TOKEN_DATA,
-          await tokenTypeEncoder.sign(signers.owner, ERC20_FIXED_TOKEN_DATA),
+          ERC20_FIXED_TOKEN,
+          await tokenTypeEncoder.sign(signers.owner, ERC20_FIXED_TOKEN),
         );
 
         await expect(tx)
           .emit(tokenFactory, 'TokenCreated')
           .withArgs(
             token,
-            ERC20_FIXED_TOKEN_DATA.name,
-            ERC20_FIXED_TOKEN_DATA.symbol,
-            ERC20_FIXED_TOKEN_DATA.owner,
-            ERC20_FIXED_TOKEN_DATA.totalSupply,
+            ERC20_FIXED_TOKEN.name,
+            ERC20_FIXED_TOKEN.symbol,
+            ERC20_FIXED_TOKEN.owner,
+            ERC20_FIXED_TOKEN.totalSupply,
           );
 
         await expect(tx)

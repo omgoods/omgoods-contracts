@@ -5,6 +5,7 @@ import {
   deployERC20WrappedTokenFactory,
   setupERC20WrappedTokenFactory,
 } from './fixtures';
+import { ERC20_UNDERLYING_TOKEN } from './constants';
 
 const { ZeroAddress } = ethers;
 
@@ -133,16 +134,39 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
       });
 
       it('expect to revert when the guardian signature is invalid', async () => {
-        const { tokenFactory, tokenRegistry, signers } = fixture;
+        const { tokenFactory, underlyingToken, tokenRegistry, signers } =
+          fixture;
 
         const tx = tokenFactory.createToken(
-          randomAddress(),
+          underlyingToken,
           await signers.unknown.at(0).signMessage('invalid'),
         );
 
         await expect(tx).revertedWithCustomError(
           tokenRegistry,
           'InvalidGuardianSignature',
+        );
+      });
+
+      it('expect to revert when the underlying token has invalid decimals (18)', async () => {
+        const {
+          tokenFactory,
+          tokenRegistry,
+          signers,
+          tokenTypeEncoder,
+          underlyingTokenWithInvalidDecimals,
+        } = fixture;
+
+        const tx = tokenFactory.createToken(
+          underlyingTokenWithInvalidDecimals,
+          await tokenTypeEncoder.sign(signers.owner, {
+            underlyingToken: underlyingTokenWithInvalidDecimals,
+          }),
+        );
+
+        await expect(tx).revertedWithCustomError(
+          tokenFactory,
+          'UnderlyingTokenWithInvalidDecimals',
         );
       });
 
@@ -153,9 +177,8 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
           signers,
           tokenTypeEncoder,
           computeTokenAddress,
+          underlyingToken,
         } = fixture;
-
-        const underlyingToken = randomAddress();
 
         const token = computeTokenAddress(underlyingToken);
 
@@ -168,7 +191,12 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
 
         await expect(tx)
           .emit(tokenFactory, 'TokenCreated')
-          .withArgs(token, underlyingToken);
+          .withArgs(
+            token,
+            underlyingToken,
+            ERC20_UNDERLYING_TOKEN.name,
+            ERC20_UNDERLYING_TOKEN.symbol,
+          );
 
         await expect(tx)
           .emit(tokenRegistry, 'TokenCreated')

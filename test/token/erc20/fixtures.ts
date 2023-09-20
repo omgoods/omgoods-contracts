@@ -1,10 +1,7 @@
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { ethers, testing } from 'hardhat';
 import { AddressLike } from 'ethers';
-import {
-  ERC20_TOKEN_MOCK_DATA,
-  ERC20_EXTERNAL_TOKEN_MOCK_DATA,
-} from './constants';
+import { ERC20_TOKEN_MOCK, ERC20_EXTERNAL_TOKEN_MOCK } from './constants';
 
 const { deployContract, ZeroAddress, MaxUint256 } = ethers;
 
@@ -22,14 +19,21 @@ export async function deployERC20TokenMock() {
 }
 
 export async function deployERC20ExternalTokenMock(
-  options: typeof ERC20_EXTERNAL_TOKEN_MOCK_DATA = ERC20_EXTERNAL_TOKEN_MOCK_DATA,
+  options: Partial<
+    typeof ERC20_EXTERNAL_TOKEN_MOCK
+  > = ERC20_EXTERNAL_TOKEN_MOCK,
   owner?: HardhatEthersSigner,
 ) {
   const signers = await buildSigners('owner');
 
+  const { name, symbol, decimals, initialSupply } = {
+    ...ERC20_EXTERNAL_TOKEN_MOCK,
+    ...options,
+  };
+
   return deployContract(
     'ERC20ExternalTokenMock',
-    [options.name, options.symbol, options.decimals, options.initialSupply],
+    [name, symbol, decimals, initialSupply],
     owner || signers.owner,
   );
 }
@@ -57,13 +61,13 @@ export async function setupERC20TokenMock() {
   await tokenMock.initialize(
     ZeroAddress,
     tokenRegistry,
-    ERC20_TOKEN_MOCK_DATA.name,
-    ERC20_TOKEN_MOCK_DATA.symbol,
+    ERC20_TOKEN_MOCK.name,
+    ERC20_TOKEN_MOCK.symbol,
   );
 
-  await tokenMock.mint(signers.owner, ERC20_TOKEN_MOCK_DATA.initialSupply);
+  await tokenMock.mint(signers.owner, ERC20_TOKEN_MOCK.initialSupply);
 
-  await tokenMock.approve(signers.account, ERC20_TOKEN_MOCK_DATA.initialSupply);
+  await tokenMock.approve(signers.account, ERC20_TOKEN_MOCK.initialSupply);
 
   await tokenMock.approve(signers.operator, MaxUint256);
 

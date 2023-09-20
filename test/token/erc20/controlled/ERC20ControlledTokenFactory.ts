@@ -5,7 +5,7 @@ import {
   deployERC20ControlledTokenFactory,
   setupERC20ControlledTokenFactory,
 } from './fixtures';
-import { ERC20_CONTROLLED_TOKEN_DATA } from './constants';
+import { ERC20_CONTROLLED_TOKEN } from './constants';
 
 const { ZeroAddress } = ethers;
 
@@ -105,9 +105,9 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
       it('expect to return the correct hash', async () => {
         const { tokenFactory, tokenTypeEncoder } = fixture;
 
-        const res = await tokenFactory.hashToken(ERC20_CONTROLLED_TOKEN_DATA);
+        const res = await tokenFactory.hashToken(ERC20_CONTROLLED_TOKEN);
 
-        expect(res).eq(tokenTypeEncoder.hash(ERC20_CONTROLLED_TOKEN_DATA));
+        expect(res).eq(tokenTypeEncoder.hash(ERC20_CONTROLLED_TOKEN));
       });
     });
   });
@@ -121,7 +121,7 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           {
-            ...ERC20_CONTROLLED_TOKEN_DATA,
+            ...ERC20_CONTROLLED_TOKEN,
             owner: ZeroAddress,
           },
           '0x',
@@ -138,7 +138,7 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           {
-            ...ERC20_CONTROLLED_TOKEN_DATA,
+            ...ERC20_CONTROLLED_TOKEN,
             minter: ZeroAddress,
           },
           '0x',
@@ -154,7 +154,7 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
         const { tokenFactory, tokenRegistry, signers } = fixture;
 
         const tx = tokenFactory.createToken(
-          ERC20_CONTROLLED_TOKEN_DATA,
+          ERC20_CONTROLLED_TOKEN,
           await signers.unknown.at(0).signMessage('invalid'),
         );
 
@@ -173,26 +173,23 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
           computeTokenAddress,
         } = fixture;
 
-        const token = computeTokenAddress(ERC20_CONTROLLED_TOKEN_DATA.symbol);
+        const token = computeTokenAddress(ERC20_CONTROLLED_TOKEN.symbol);
 
         const tx = tokenFactory.createToken(
-          ERC20_CONTROLLED_TOKEN_DATA,
-          await tokenTypeEncoder.sign(
-            signers.owner,
-            ERC20_CONTROLLED_TOKEN_DATA,
-          ),
+          ERC20_CONTROLLED_TOKEN,
+          await tokenTypeEncoder.sign(signers.owner, ERC20_CONTROLLED_TOKEN),
         );
 
         await expect(tx)
           .emit(tokenFactory, 'TokenCreated')
           .withArgs(
             token,
-            ERC20_CONTROLLED_TOKEN_DATA.name,
-            ERC20_CONTROLLED_TOKEN_DATA.symbol,
-            ERC20_CONTROLLED_TOKEN_DATA.owner,
-            ERC20_CONTROLLED_TOKEN_DATA.minter,
-            ERC20_CONTROLLED_TOKEN_DATA.burner,
-            ERC20_CONTROLLED_TOKEN_DATA.initialSupply,
+            ERC20_CONTROLLED_TOKEN.name,
+            ERC20_CONTROLLED_TOKEN.symbol,
+            ERC20_CONTROLLED_TOKEN.owner,
+            ERC20_CONTROLLED_TOKEN.minter,
+            ERC20_CONTROLLED_TOKEN.burner,
+            ERC20_CONTROLLED_TOKEN.initialSupply,
           );
 
         await expect(tx)

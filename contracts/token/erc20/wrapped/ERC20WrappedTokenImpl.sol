@@ -39,10 +39,6 @@ contract ERC20WrappedTokenImpl is ProxyImpl, ERC20Token {
     return _underlyingToken.symbol();
   }
 
-  function decimals() external view override returns (uint8) {
-    return _underlyingToken.decimals();
-  }
-
   function getUnderlyingToken() external view returns (address) {
     return address(_underlyingToken);
   }

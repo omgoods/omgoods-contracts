@@ -3,7 +3,7 @@ import { PANIC_CODES } from '@nomicfoundation/hardhat-chai-matchers/panic';
 import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { deployERC20TokenMock, setupERC20TokenMock } from './fixtures';
-import { ERC20_TOKEN_MOCK_DATA } from './constants';
+import { ERC20_TOKEN_MOCK } from './constants';
 
 const { ZeroAddress, MaxUint256 } = ethers;
 
@@ -78,7 +78,7 @@ describe('token/ERC20Token // mocked', () => {
 
         const res = await tokenMock.name();
 
-        expect(res).eq(ERC20_TOKEN_MOCK_DATA.name);
+        expect(res).eq(ERC20_TOKEN_MOCK.name);
       });
     });
 
@@ -88,7 +88,7 @@ describe('token/ERC20Token // mocked', () => {
 
         const res = await tokenMock.symbol();
 
-        expect(res).eq(ERC20_TOKEN_MOCK_DATA.symbol);
+        expect(res).eq(ERC20_TOKEN_MOCK.symbol);
       });
     });
 
@@ -98,7 +98,7 @@ describe('token/ERC20Token // mocked', () => {
 
         const res = await tokenMock.decimals();
 
-        expect(res).eq(ERC20_TOKEN_MOCK_DATA.decimals);
+        expect(res).eq(ERC20_TOKEN_MOCK.decimals);
       });
     });
 
@@ -108,7 +108,7 @@ describe('token/ERC20Token // mocked', () => {
 
         const res = await tokenMock.totalSupply();
 
-        expect(res).eq(ERC20_TOKEN_MOCK_DATA.initialSupply);
+        expect(res).eq(ERC20_TOKEN_MOCK.initialSupply);
       });
     });
 
@@ -118,7 +118,7 @@ describe('token/ERC20Token // mocked', () => {
 
         const res = await tokenMock.balanceOf(signers.owner);
 
-        expect(res).eq(ERC20_TOKEN_MOCK_DATA.initialSupply);
+        expect(res).eq(ERC20_TOKEN_MOCK.initialSupply);
       });
     });
 
@@ -128,7 +128,7 @@ describe('token/ERC20Token // mocked', () => {
 
         const res = await tokenMock.allowance(signers.owner, signers.account);
 
-        expect(res).eq(ERC20_TOKEN_MOCK_DATA.initialSupply);
+        expect(res).eq(ERC20_TOKEN_MOCK.initialSupply);
       });
     });
   });

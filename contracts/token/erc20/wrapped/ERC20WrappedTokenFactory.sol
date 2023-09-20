@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {TokenFactory} from "../../TokenFactory.sol";
 import {ERC20WrappedTokenImpl} from "./ERC20WrappedTokenImpl.sol";
@@ -13,11 +14,18 @@ contract ERC20WrappedTokenFactory is EIP712, TokenFactory {
 
   event Initialized(address gateway, address tokenRegistry, address tokenImpl);
 
-  event TokenCreated(address token, address underlyingToken);
+  event TokenCreated(
+    address token,
+    address underlyingToken,
+    string name,
+    string symbol
+  );
 
   // errors
 
   error UnderlyingTokenIsTheZeroAddress();
+
+  error UnderlyingTokenWithInvalidDecimals();
 
   // deployment
 
@@ -61,6 +69,12 @@ contract ERC20WrappedTokenFactory is EIP712, TokenFactory {
       revert UnderlyingTokenIsTheZeroAddress();
     }
 
+    uint256 _decimals = IERC20Metadata(underlyingToken).decimals();
+
+    if (_decimals != 18) {
+      revert UnderlyingTokenWithInvalidDecimals();
+    }
+
     address token = _createToken(
       keccak256(abi.encodePacked(underlyingToken)),
       _hashToken(underlyingToken),
@@ -73,7 +87,12 @@ contract ERC20WrappedTokenFactory is EIP712, TokenFactory {
       underlyingToken
     );
 
-    emit TokenCreated(token, underlyingToken);
+    emit TokenCreated(
+      token,
+      underlyingToken,
+      IERC20Metadata(underlyingToken).name(),
+      IERC20Metadata(underlyingToken).symbol()
+    );
   }
 
   // private getters

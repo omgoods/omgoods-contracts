@@ -1,23 +1,23 @@
 import { DeployFunction } from 'hardhat-deploy/types';
-import { MaxUint256, parseEther } from 'ethers';
+import { parseEther } from 'ethers';
 
 const TOKEN = {
-  name: 'Fixed Token',
-  symbol: 'FIXED',
-  totalSupply: parseEther('100000000'),
+  name: 'Controlled Token',
+  symbol: 'CONTROLLED',
+  initialSupply: parseEther('50000000'),
 };
 
 const TOKEN_TRANSFERS = [
-  parseEther('200'),
-  parseEther('1.5'),
-  parseEther('4000'),
-  parseEther('40'),
+  parseEther('100'),
+  parseEther('3.5'),
+  parseEther('100'),
+  parseEther('10'),
 ];
 
 const TOKEN_APPROVALS = [
-  parseEther('4000'), //
-  MaxUint256,
-  0,
+  parseEther('1000'),
+  parseEther('100'),
+  parseEther('10'),
 ];
 
 const func: DeployFunction = async (hre) => {
@@ -30,19 +30,21 @@ const func: DeployFunction = async (hre) => {
   } = hre;
 
   log();
-  log('# token/erc20/fixed/seed');
+  log('# token/erc20/controlled/seed');
 
   const { owner: from } = await getNamedAccounts();
 
   const tokenData = {
     ...TOKEN,
     owner: from,
+    minter: from,
+    burner: from,
   };
 
-  const typedDataEncoder = await createEncoder('ERC20FixedTokenFactory');
+  const typedDataEncoder = await createEncoder('ERC20ControlledTokenFactory');
 
   await execute(
-    'ERC20FixedTokenFactory',
+    'ERC20ControlledTokenFactory',
     {
       from,
       log: true,
@@ -53,20 +55,32 @@ const func: DeployFunction = async (hre) => {
   );
 
   const token = await getContractAt(
-    'ERC20FixedTokenImpl',
-    await read('ERC20FixedTokenFactory', 'computeToken', tokenData.symbol),
+    'ERC20ControlledTokenImpl',
+    await read('ERC20ControlledTokenFactory', 'computeToken', tokenData.symbol),
+  );
+
+  const account = randomAddress();
+
+  await logTx(
+    'ERC20ControlledTokenFactory.mint',
+    token.mint(account, parseEther('100')),
+  );
+
+  await logTx(
+    'ERC20ControlledTokenFactory.burn',
+    token.burn(account, parseEther('50')),
   );
 
   for (const amount of TOKEN_TRANSFERS) {
     await logTx(
-      'ERC20FixedTokenFactory.transfer',
+      'ERC20ControlledTokenFactory.transfer',
       token.transfer(randomAddress(), amount),
     );
   }
 
   for (const amount of TOKEN_APPROVALS) {
     await logTx(
-      'ERC20FixedTokenFactory.approve',
+      'ERC20ControlledTokenFactory.approve',
       token.approve(randomAddress(), amount),
     );
   }

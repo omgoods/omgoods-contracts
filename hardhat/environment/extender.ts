@@ -17,8 +17,8 @@ extendEnvironment((hre) => {
     const { id } = ethers;
 
     return deploy(name, {
-      ...options,
       deterministicDeployment: id(name),
+      ...options,
     });
   };
 

@@ -13,7 +13,7 @@ export function buildIndex(contracts: Array<ContractBuild>): string {
   const contractAddresses: string[] = [];
   const contractByteCodes: string[] = [];
   const contractInterfaces: string[] = [];
-  const contractTypedDataDomains: string[] = [];
+  const contractTypedData: string[] = [];
 
   for (const {
     buildName,
@@ -21,7 +21,7 @@ export function buildIndex(contracts: Array<ContractBuild>): string {
     addresses,
     byteCode,
     abi,
-    typeDataDomain,
+    typedData,
   } of contracts) {
     contractImports.push(
       `import { ${toConstantName(buildName)} } from './${buildFile}';`,
@@ -53,17 +53,15 @@ export function buildIndex(contracts: Array<ContractBuild>): string {
       );
     }
 
-    if (typeDataDomain) {
-      contractTypedDataDomains.push(
-        `[ContractNames.${buildName}, ${toConstantName(
-          buildName,
-        )}.typeDataDomain],`,
+    if (typedData) {
+      contractTypedData.push(
+        `[ContractNames.${buildName}, ${toConstantName(buildName)}.typedData],`,
       );
     }
   }
 
   const lines = [
-    'import { Interface, TypedDataDomain } from "ethers";',
+    'import { Interface, TypedDataDomain, TypedDataField } from "ethers";',
     ...contractImports,
     '',
     'export enum NetworkTypes {',
@@ -88,8 +86,11 @@ export function buildIndex(contracts: Array<ContractBuild>): string {
     ...contractInterfaces,
     ']);',
     '',
-    'export const CONTRACT_TYPED_DATA_DOMAINS = new Map<ContractNames,TypedDataDomain>([',
-    ...contractTypedDataDomains,
+    'export const CONTRACT_TYPED_DATA = new Map<ContractNames,{',
+    '    domain: TypedDataDomain;',
+    '    types: Record<string, Array<TypedDataField>>',
+    '}>([',
+    ...contractTypedData,
     ']);',
   ];
 

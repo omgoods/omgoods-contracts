@@ -52,7 +52,7 @@ task<{
   const contracts: Array<ContractBuild> = [];
   const contractsConfigEntries = Object.entries(contractsConfig);
 
-  for (let [buildName, { typeDataDomain, build }] of contractsConfigEntries) {
+  for (let [buildName, { typedData, build }] of contractsConfigEntries) {
     if (!build) {
       continue;
     }
@@ -74,7 +74,7 @@ task<{
     }
 
     const contract: ContractBuild = {
-      typeDataDomain: typeDataDomain || null,
+      typedData: typedData || null,
       addresses: null,
       byteCode: null,
       abi: null,
@@ -114,11 +114,11 @@ task<{
                     break;
 
                   case 'typedDataDomainName':
-                    result = typeDataDomain.name;
+                    result = typedData.domain.name;
                     break;
 
                   case 'typedDataDomainVersion':
-                    result = typeDataDomain.version;
+                    result = typedData.domain.version;
                     break;
                 }
 

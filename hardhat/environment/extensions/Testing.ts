@@ -1,12 +1,6 @@
-import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 import { setBalance } from '@nomicfoundation/hardhat-network-helpers';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import {
-  AddressLike,
-  TypedDataDomain,
-  TypedDataField,
-  BigNumberish,
-} from 'ethers';
+import { AddressLike, BigNumberish } from 'ethers';
 import { Signers } from './interfaces';
 
 export class Testing {
@@ -67,34 +61,5 @@ export class Testing {
       ...named,
       unknown: signers.slice(names.length),
     } as Signers<K>;
-  }
-
-  async createTypedDataEncoder<D = Record<string, any>>(
-    verifyingContract: AddressLike,
-    domain: TypedDataDomain,
-    types: Record<string, Array<TypedDataField>>,
-  ): Promise<{
-    encode: (data: D) => string;
-    hash: (data: D) => string;
-    sign: (signer: HardhatEthersSigner, data: D) => Promise<string>;
-  }> {
-    const {
-      network: {
-        config: { chainId },
-      },
-      ethers: { resolveAddress, TypedDataEncoder },
-    } = this.hre;
-
-    domain = {
-      ...domain,
-      chainId,
-      verifyingContract: await resolveAddress(verifyingContract),
-    };
-
-    return {
-      encode: (data) => TypedDataEncoder.encode(domain, types, data),
-      hash: (data) => TypedDataEncoder.hash(domain, types, data),
-      sign: (signer, data) => signer.signTypedData(domain, types, data),
-    };
   }
 }

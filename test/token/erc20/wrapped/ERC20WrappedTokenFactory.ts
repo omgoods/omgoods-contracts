@@ -103,14 +103,14 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
 
     describe('hashToken()', () => {
       it('expect to return the correct hash', async () => {
-        const { tokenFactory, tokenTypeEncoder } = fixture;
+        const { tokenFactory, typedDataEncoder } = fixture;
 
         const underlyingToken = randomAddress();
 
         const res = await tokenFactory.hashToken(underlyingToken);
 
         expect(res).eq(
-          tokenTypeEncoder.hash({
+          typedDataEncoder.hash('Token', {
             underlyingToken,
           }),
         );
@@ -152,13 +152,13 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
         const {
           tokenFactory,
           signers,
-          tokenTypeEncoder,
+          typedDataEncoder,
           underlyingTokenWithInvalidDecimals,
         } = fixture;
 
         const tx = tokenFactory.createToken(
           underlyingTokenWithInvalidDecimals,
-          await tokenTypeEncoder.sign(signers.owner, {
+          await typedDataEncoder.sign(signers.owner, 'Token', {
             underlyingToken: underlyingTokenWithInvalidDecimals,
           }),
         );
@@ -174,7 +174,7 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
           tokenFactory,
           tokenRegistry,
           signers,
-          tokenTypeEncoder,
+          typedDataEncoder,
           computeTokenAddress,
           underlyingToken,
         } = fixture;
@@ -183,7 +183,7 @@ describe('token/erc20/controlled/ERC20WrappedTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           underlyingToken,
-          await tokenTypeEncoder.sign(signers.owner, {
+          await typedDataEncoder.sign(signers.owner, 'Token', {
             underlyingToken,
           }),
         );

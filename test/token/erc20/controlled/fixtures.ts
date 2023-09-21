@@ -1,15 +1,14 @@
-import { ethers, testing } from 'hardhat';
+import { ethers, testing, typedData } from 'hardhat';
 import { BigNumberish } from 'ethers';
 import { createProxyAddressFactory } from '../../../common';
 import { setupERC20TokenRegistry } from '../fixtures';
-import {
-  ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN,
-  ERC20_CONTROLLED_TOKEN,
-} from './constants';
+import { ERC20_CONTROLLED_TOKEN } from './constants';
 
 const { deployContract, ZeroAddress, id, getContractAt } = ethers;
 
-const { buildSigners, createTypedDataEncoder } = testing;
+const { buildSigners } = testing;
+
+const { getDomainArgs, createEncoder } = typedData;
 
 export async function deployERC20ControlledTokenImpl() {
   const tokenImpl = await deployContract('ERC20ControlledTokenImpl');
@@ -24,8 +23,7 @@ export async function deployERC20ControlledTokenFactory() {
 
   const tokenFactory = await deployContract('ERC20ControlledTokenFactory', [
     ZeroAddress,
-    ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.name,
-    ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.version,
+    ...getDomainArgs('ERC20ControlledTokenFactory'),
   ]);
 
   return {
@@ -37,7 +35,7 @@ export async function deployERC20ControlledTokenFactory() {
 export async function setupERC20ControlledToken() {
   const signers = await buildSigners('guardian', 'owner', 'minter', 'burner');
 
-  const { tokenFactory, computeTokenAddress, tokenTypeEncoder } =
+  const { tokenFactory, computeTokenAddress, typedDataEncoder } =
     await setupERC20ControlledTokenFactory();
 
   const token = await getContractAt(
@@ -55,7 +53,7 @@ export async function setupERC20ControlledToken() {
 
   await tokenFactory.createToken(
     tokenData,
-    await tokenTypeEncoder.sign(signers.guardian, tokenData),
+    await typedDataEncoder.sign(signers.guardian, 'Token', tokenData),
   );
 
   return {
@@ -83,47 +81,22 @@ export async function setupERC20ControlledTokenFactory() {
     (symbol) => id(symbol),
   );
 
-  const tokenTypeEncoder = await createTypedDataEncoder<{
-    name: string;
-    symbol: string;
-    owner: string;
-    minter: string;
-    burner: string;
-    initialSupply: BigNumberish;
-  }>(tokenFactory, ERC20_CONTROLLED_TOKEN_FACTORY_TYPED_DATA_DOMAIN, {
-    Token: [
-      {
-        name: 'name',
-        type: 'string',
-      },
-      {
-        name: 'symbol',
-        type: 'string',
-      },
-      {
-        name: 'owner',
-        type: 'address',
-      },
-      {
-        name: 'minter',
-        type: 'address',
-      },
-      {
-        name: 'burner',
-        type: 'address',
-      },
-      {
-        name: 'initialSupply',
-        type: 'uint256',
-      },
-    ],
-  });
+  const typedDataEncoder = await createEncoder<{
+    Token: {
+      name: string;
+      symbol: string;
+      owner: string;
+      minter: string;
+      burner: string;
+      initialSupply: BigNumberish;
+    };
+  }>('ERC20ControlledTokenFactory', tokenFactory);
 
   return {
     tokenRegistry,
     tokenFactory,
     computeTokenAddress,
-    tokenTypeEncoder,
+    typedDataEncoder,
     signers,
   };
 }

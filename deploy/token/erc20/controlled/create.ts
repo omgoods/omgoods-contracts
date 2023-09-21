@@ -3,16 +3,14 @@ import { DeployFunction } from 'hardhat-deploy/types';
 const func: DeployFunction = async (hre) => {
   const {
     deployments: { log, deploy },
+    typedData: { getDomainArgs },
     getNamedAccounts,
-    getTypedDataDomain,
   } = hre;
 
   log();
   log('# token/erc20/controlled/create');
 
   const { deployer: from, owner } = await getNamedAccounts();
-
-  const typeDataDomain = getTypedDataDomain('ERC20ControlledTokenFactory');
 
   await deploy('ERC20ControlledTokenImpl', {
     from,
@@ -24,8 +22,7 @@ const func: DeployFunction = async (hre) => {
     log: true,
     args: [
       owner, //
-      typeDataDomain.name,
-      typeDataDomain.version,
+      ...getDomainArgs('ERC20ControlledTokenFactory'),
     ],
   });
 };

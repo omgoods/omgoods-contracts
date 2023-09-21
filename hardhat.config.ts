@@ -32,9 +32,49 @@ export default createConfig({
   },
   contracts: {
     Gateway: {
-      typeDataDomain: {
-        name: 'OM!goods Gateway',
-        version: '0.0.1',
+      typedData: {
+        domain: {
+          name: 'OM!goods Gateway',
+          version: '0.0.1',
+        },
+        types: {
+          Request: [
+            {
+              name: 'account',
+              type: 'address',
+            },
+            {
+              name: 'nonce',
+              type: 'uint256',
+            },
+            {
+              name: 'to',
+              type: 'address',
+            },
+            {
+              name: 'data',
+              type: 'bytes',
+            },
+          ],
+          RequestBatch: [
+            {
+              name: 'account',
+              type: 'address',
+            },
+            {
+              name: 'nonce',
+              type: 'uint256',
+            },
+            {
+              name: 'to',
+              type: 'address[]',
+            },
+            {
+              name: 'data',
+              type: 'bytes[]',
+            },
+          ],
+        },
       },
       build: true,
     },
@@ -53,9 +93,39 @@ export default createConfig({
       },
     },
     ERC20ControlledTokenFactory: {
-      typeDataDomain: {
-        name: 'OM!goods ERC20 Controlled Token',
-        version: '0.0.1',
+      typedData: {
+        domain: {
+          name: 'OM!goods ERC20 Controlled Token',
+          version: '0.0.1',
+        },
+        types: {
+          Token: [
+            {
+              name: 'name',
+              type: 'string',
+            },
+            {
+              name: 'symbol',
+              type: 'string',
+            },
+            {
+              name: 'owner',
+              type: 'address',
+            },
+            {
+              name: 'minter',
+              type: 'address',
+            },
+            {
+              name: 'burner',
+              type: 'address',
+            },
+            {
+              name: 'initialSupply',
+              type: 'uint256',
+            },
+          ],
+        },
       },
       build: true,
     },
@@ -71,9 +141,31 @@ export default createConfig({
       },
     },
     ERC20FixedTokenFactory: {
-      typeDataDomain: {
-        name: 'OM!goods ERC20 Fixed Token',
-        version: '0.0.1',
+      typedData: {
+        domain: {
+          name: 'OM!goods ERC20 Fixed Token',
+          version: '0.0.1',
+        },
+        types: {
+          Token: [
+            {
+              name: 'name',
+              type: 'string',
+            },
+            {
+              name: 'symbol',
+              type: 'string',
+            },
+            {
+              name: 'owner',
+              type: 'address',
+            },
+            {
+              name: 'totalSupply',
+              type: 'uint256',
+            },
+          ],
+        },
       },
       build: true,
     },
@@ -89,9 +181,19 @@ export default createConfig({
       },
     },
     ERC20WrappedTokenFactory: {
-      typeDataDomain: {
-        name: 'OM!goods ERC20 Wrapped Token',
-        version: '0.0.1',
+      typedData: {
+        domain: {
+          name: 'OM!goods ERC20 Wrapped Token',
+          version: '0.0.1',
+        },
+        types: {
+          Token: [
+            {
+              name: 'underlyingToken',
+              type: 'address',
+            },
+          ],
+        },
       },
       build: true,
     },

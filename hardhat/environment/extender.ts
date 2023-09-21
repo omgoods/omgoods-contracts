@@ -1,13 +1,13 @@
 import { extendEnvironment } from 'hardhat/config';
-import { TypedDataDomain } from 'ethers';
-import { Testing } from './Testing';
+import { Testing, TypedData } from './extensions';
 
 extendEnvironment((hre) => {
-  const { deployments, ethers, config } = hre;
+  const { deployments, ethers } = hre;
 
-  // testing
+  // extensions
 
   hre.testing = new Testing(hre);
+  hre.typedData = new TypedData(hre);
 
   // deployments
 
@@ -30,23 +30,17 @@ extendEnvironment((hre) => {
     return deployment?.address || null;
   };
 
-  // typed data
+  deployments.logTx = async (name, txP) => {
+    const tx = await txP;
 
-  hre.getTypedDataDomain = (contract) => {
-    let result: TypedDataDomain;
+    const { stdout } = process;
 
-    const { contracts } = config;
+    const { hash } = tx;
 
-    try {
-      ({ typeDataDomain: result } = contracts[contract]);
-    } catch (err) {
-      //
-    }
+    stdout.write(`executing ${name} (tx: ${hash}) ...`);
 
-    if (!result) {
-      throw Error(`${contract} type data domain not found`);
-    }
+    const { gasUsed } = await tx.wait();
 
-    return result;
+    stdout.write(`: performed with ${gasUsed} gas\n`);
   };
 });

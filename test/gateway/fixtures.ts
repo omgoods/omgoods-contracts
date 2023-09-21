@@ -1,10 +1,11 @@
-import { ethers, testing } from 'hardhat';
+import { ethers, testing, typedData } from 'hardhat';
 import { AddressLike, BigNumberish, BytesLike } from 'ethers';
-import { GATEWAY_TYPED_DATA_DOMAIN } from './constants';
 
 const { deployContract } = ethers;
 
-const { buildSigners, createTypedDataEncoder } = testing;
+const { buildSigners } = testing;
+
+const { getDomainArgs, createEncoder } = typedData;
 
 export async function deployERC1271AccountMock(options: {
   gateway: AddressLike;
@@ -43,10 +44,7 @@ export async function deployGatewayRecipientMock(
 }
 
 export async function deployGateway() {
-  const gateway = await deployContract('Gateway', [
-    GATEWAY_TYPED_DATA_DOMAIN.name,
-    GATEWAY_TYPED_DATA_DOMAIN.version,
-  ]);
+  const gateway = await deployContract('Gateway', getDomainArgs('Gateway'));
 
   return {
     gateway,
@@ -66,64 +64,26 @@ export async function setupGateway() {
     gateway,
   });
 
-  const requestEncoder = await createTypedDataEncoder<{
-    account: string;
-    nonce: BigNumberish;
-    to: string;
-    data: BytesLike;
-  }>(gateway, GATEWAY_TYPED_DATA_DOMAIN, {
-    Request: [
-      {
-        name: 'account',
-        type: 'address',
-      },
-      {
-        name: 'nonce',
-        type: 'uint256',
-      },
-      {
-        name: 'to',
-        type: 'address',
-      },
-      {
-        name: 'data',
-        type: 'bytes',
-      },
-    ],
-  });
-
-  const requestBatchEncoder = await createTypedDataEncoder<{
-    account: string;
-    nonce: BigNumberish;
-    to: Array<string>;
-    data: Array<BytesLike>;
-  }>(gateway, GATEWAY_TYPED_DATA_DOMAIN, {
-    RequestBatch: [
-      {
-        name: 'account',
-        type: 'address',
-      },
-      {
-        name: 'nonce',
-        type: 'uint256',
-      },
-      {
-        name: 'to',
-        type: 'address[]',
-      },
-      {
-        name: 'data',
-        type: 'bytes[]',
-      },
-    ],
-  });
+  const typedDataEncoder = await createEncoder<{
+    Request: {
+      account: string;
+      nonce: BigNumberish;
+      to: string;
+      data: BytesLike;
+    };
+    RequestBatch: {
+      account: string;
+      nonce: BigNumberish;
+      to: Array<string>;
+      data: Array<BytesLike>;
+    };
+  }>('Gateway', gateway);
 
   return {
     gateway,
     gatewayRecipientMock,
     signers,
     erc1271AccountMock,
-    requestEncoder,
-    requestBatchEncoder,
+    typedDataEncoder,
   };
 }

@@ -12,14 +12,14 @@ contract Gateway is EIP712 {
   using Address for address;
   using Bytes for bytes[];
 
-  struct Request {
+  struct RequestData {
     address account;
     uint256 nonce;
     address to;
     bytes data;
   }
 
-  struct RequestBatch {
+  struct RequestBatchData {
     address account;
     uint256 nonce;
     address[] to;
@@ -79,21 +79,26 @@ contract Gateway is EIP712 {
   }
 
   function hashRequest(
-    Request calldata request
+    RequestData calldata requestData
   ) external view returns (bytes32) {
     return
-      _hashRequest(request.account, request.nonce, request.to, request.data);
+      _hashRequest(
+        requestData.account,
+        requestData.nonce,
+        requestData.to,
+        requestData.data
+      );
   }
 
   function hashRequestBatch(
-    RequestBatch calldata requestBatch
+    RequestBatchData calldata requestBatchData
   ) external view returns (bytes32) {
     return
       _hashRequestBatch(
-        requestBatch.account,
-        requestBatch.nonce,
-        requestBatch.to,
-        requestBatch.data
+        requestBatchData.account,
+        requestBatchData.nonce,
+        requestBatchData.to,
+        requestBatchData.data
       );
   }
 
@@ -242,6 +247,7 @@ contract Gateway is EIP712 {
       revert CallToTheZeroAddress();
     }
 
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory response) = to.call(
       abi.encodePacked(data, account)
     );

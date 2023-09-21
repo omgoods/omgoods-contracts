@@ -1,19 +1,17 @@
-import { ethers, testing } from 'hardhat';
+import { ethers, testing, typedData } from 'hardhat';
 import { createProxyAddressFactory } from '../../../common';
 import {
   setupERC20TokenRegistry,
   deployERC20ExternalTokenMock,
 } from '../fixtures';
-import {
-  ERC20_WRAPPED_TOKEN_FACTORY_TYPED_DATA_DOMAIN,
-  ERC20_WRAPPED_TOKEN,
-  ERC20_UNDERLYING_TOKEN,
-} from './constants';
+import { ERC20_WRAPPED_TOKEN, ERC20_UNDERLYING_TOKEN } from './constants';
 
 const { deployContract, ZeroAddress, keccak256, getContractAt, MaxUint256 } =
   ethers;
 
-const { buildSigners, createTypedDataEncoder } = testing;
+const { buildSigners } = testing;
+
+const { getDomainArgs, createEncoder } = typedData;
 
 export async function deployERC20WrappedTokenImpl() {
   const tokenImpl = await deployContract('ERC20WrappedTokenImpl');
@@ -28,8 +26,7 @@ export async function deployERC20WrappedTokenFactory() {
 
   const tokenFactory = await deployContract('ERC20WrappedTokenFactory', [
     ZeroAddress,
-    ERC20_WRAPPED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.name,
-    ERC20_WRAPPED_TOKEN_FACTORY_TYPED_DATA_DOMAIN.version,
+    ...getDomainArgs('ERC20WrappedTokenFactory'),
   ]);
 
   return {
@@ -41,7 +38,7 @@ export async function deployERC20WrappedTokenFactory() {
 export async function setupERC20WrappedToken() {
   const signers = await buildSigners('guardian', 'owner');
 
-  const { tokenFactory, computeTokenAddress, tokenTypeEncoder } =
+  const { tokenFactory, computeTokenAddress, typedDataEncoder } =
     await setupERC20WrappedTokenFactory();
 
   const underlyingToken = await deployERC20ExternalTokenMock(
@@ -57,7 +54,7 @@ export async function setupERC20WrappedToken() {
 
   await tokenFactory.createToken(
     underlyingToken,
-    await tokenTypeEncoder.sign(signers.guardian, {
+    await typedDataEncoder.sign(signers.guardian, 'Token', {
       underlyingToken: await underlyingToken.getAddress(),
     }),
   );
@@ -103,16 +100,11 @@ export async function setupERC20WrappedTokenFactory() {
     (owner) => keccak256(owner),
   );
 
-  const tokenTypeEncoder = await createTypedDataEncoder<{
-    underlyingToken: string;
-  }>(tokenFactory, ERC20_WRAPPED_TOKEN_FACTORY_TYPED_DATA_DOMAIN, {
-    Token: [
-      {
-        name: 'underlyingToken',
-        type: 'address',
-      },
-    ],
-  });
+  const typedDataEncoder = await createEncoder<{
+    Token: {
+      underlyingToken: string;
+    };
+  }>('ERC20WrappedTokenFactory', tokenFactory);
 
   return {
     underlyingToken: await underlyingToken.getAddress(),
@@ -121,7 +113,7 @@ export async function setupERC20WrappedTokenFactory() {
     tokenRegistry,
     tokenFactory,
     computeTokenAddress,
-    tokenTypeEncoder,
+    typedDataEncoder,
     signers,
   };
 }

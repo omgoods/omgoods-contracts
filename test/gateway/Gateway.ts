@@ -3,7 +3,6 @@ import { ethers, testing } from 'hardhat';
 import { expect } from 'chai';
 import { setupGateway } from './fixtures';
 import { GATEWAY_REQUEST, GATEWAY_REQUEST_BATCH } from './constants';
-import { randomHash } from 'hardhat/internal/hardhat-network/provider/utils/random';
 
 const { ZeroAddress } = ethers;
 
@@ -33,21 +32,23 @@ describe('gateway/Gateway', () => {
 
     describe('hashRequest()', () => {
       it('expect to return the correct hash', async () => {
-        const { gateway, requestEncoder } = fixture;
+        const { gateway, typedDataEncoder } = fixture;
 
         const res = await gateway.hashRequest(GATEWAY_REQUEST);
 
-        expect(res).eq(requestEncoder.hash(GATEWAY_REQUEST));
+        expect(res).eq(typedDataEncoder.hash('Request', GATEWAY_REQUEST));
       });
     });
 
     describe('hashRequestBatch()', () => {
       it('expect to return the correct hash', async () => {
-        const { gateway, requestBatchEncoder } = fixture;
+        const { gateway, typedDataEncoder } = fixture;
 
         const res = await gateway.hashRequestBatch(GATEWAY_REQUEST_BATCH);
 
-        expect(res).eq(requestBatchEncoder.hash(GATEWAY_REQUEST_BATCH));
+        expect(res).eq(
+          typedDataEncoder.hash('RequestBatch', GATEWAY_REQUEST_BATCH),
+        );
       });
     });
   });
@@ -194,7 +195,7 @@ describe('gateway/Gateway', () => {
       });
 
       it('expect request to be sent successfully', async () => {
-        const { gateway, gatewayRecipientMock, requestEncoder, signers } =
+        const { gateway, gatewayRecipientMock, typedDataEncoder, signers } =
           fixture;
 
         const signer = signers.unknown.at(0);
@@ -214,7 +215,7 @@ describe('gateway/Gateway', () => {
             request.account,
             request.to,
             request.data,
-            await requestEncoder.sign(signer, request),
+            await typedDataEncoder.sign(signer, 'Request', request),
           );
 
         await expect(tx)
@@ -237,7 +238,7 @@ describe('gateway/Gateway', () => {
           gateway,
           gatewayRecipientMock,
           erc1271AccountMock,
-          requestBatchEncoder,
+          typedDataEncoder,
           signers,
         } = fixture;
 
@@ -258,7 +259,7 @@ describe('gateway/Gateway', () => {
             requestBatch.account,
             requestBatch.to,
             requestBatch.data,
-            await requestBatchEncoder.sign(signer, requestBatch),
+            await typedDataEncoder.sign(signer, 'RequestBatch', requestBatch),
           );
 
         await expect(tx)

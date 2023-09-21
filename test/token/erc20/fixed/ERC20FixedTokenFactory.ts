@@ -103,11 +103,11 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
 
     describe('hashToken()', () => {
       it('expect to return the correct hash', async () => {
-        const { tokenFactory, tokenTypeEncoder } = fixture;
+        const { tokenFactory, typedDataEncoder } = fixture;
 
         const res = await tokenFactory.hashToken(ERC20_FIXED_TOKEN);
 
-        expect(res).eq(tokenTypeEncoder.hash(ERC20_FIXED_TOKEN));
+        expect(res).eq(typedDataEncoder.hash('Token', ERC20_FIXED_TOKEN));
       });
     });
   });
@@ -169,7 +169,7 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
           tokenFactory,
           tokenRegistry,
           signers,
-          tokenTypeEncoder,
+          typedDataEncoder,
           computeTokenAddress,
         } = fixture;
 
@@ -177,7 +177,11 @@ describe('token/erc20/controlled/ERC20FixedTokenFactory', () => {
 
         const tx = tokenFactory.createToken(
           ERC20_FIXED_TOKEN,
-          await tokenTypeEncoder.sign(signers.owner, ERC20_FIXED_TOKEN),
+          await typedDataEncoder.sign(
+            signers.owner,
+            'Token',
+            ERC20_FIXED_TOKEN,
+          ),
         );
 
         await expect(tx)

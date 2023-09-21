@@ -1,5 +1,5 @@
 import { HttpNetworkUserConfig } from 'hardhat/types';
-import { TypedDataDomain } from 'ethers';
+import { TypedDataDomain, TypedDataField } from 'ethers';
 
 export type NetworkType = 'mainnet' | 'testnet';
 
@@ -18,7 +18,12 @@ export interface ContractBuildConfig {
   byteCode?: boolean;
 }
 
+export interface ContractTypedDataConfig {
+  domain: Required<Pick<TypedDataDomain, 'name' | 'version'>>;
+  types: Record<string, Array<TypedDataField>>;
+}
+
 export interface ContractConfig<B = ContractBuildConfig> {
-  typeDataDomain?: Required<Pick<TypedDataDomain, 'name' | 'version'>>;
+  typedData?: ContractTypedDataConfig;
   build?: B;
 }

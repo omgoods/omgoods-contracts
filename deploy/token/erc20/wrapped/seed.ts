@@ -1,11 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 import { parseEther, MaxUint256 } from 'ethers';
 
-const TOKEN = {
-  name: 'Wrapped Token',
-  symbol: 'WRAPPED',
-};
-
 const TOKEN_TRANSFERS = [
   parseEther('50'),
   parseEther('4000'),
@@ -21,7 +16,7 @@ const TOKEN_APPROVALS = [
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy, read, execute, logTx, getAddress },
+    deployments: { log, deploy, read, execute, logTx },
     ethers: { getContractAt },
     typedData: { createEncoder },
     testing: { randomAddress },

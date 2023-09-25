@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {TokenFactory} from "../../TokenFactory.sol";
+import {ERC20TokenFactory} from "../ERC20TokenFactory.sol";
 import {ERC20FixedTokenImpl} from "./ERC20FixedTokenImpl.sol";
 
-contract ERC20FixedTokenFactory is EIP712, TokenFactory {
+contract ERC20FixedTokenFactory is ERC20TokenFactory {
   struct TokenData {
     address owner;
     uint256 totalSupply;
@@ -13,45 +12,23 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
     string symbol;
   }
 
-  bytes32 private constant TOKEN_TYPE_HASH =
+  bytes32 private constant TOKEN_TYPEHASH =
     keccak256(
       "Token(string name,string symbol,address owner,uint256 totalSupply)"
     );
 
   // events
 
-  event Initialized(address gateway, address tokenRegistry, address tokenImpl);
-
-  event TokenCreated(
-    address token,
-    string name,
-    string symbol,
-    address owner,
-    uint256 totalSupply
-  );
-
-  // errors
-
-  error InsufficientTotalSupply();
+  event TokenCreated(address token, TokenData tokenData);
 
   // deployment
 
   constructor(
     address owner,
-    string memory typedDataDomainName,
-    string memory typedDataDomainVersion
-  ) TokenFactory(owner) EIP712(typedDataDomainName, typedDataDomainVersion) {
+    string memory name,
+    string memory version
+  ) ERC20TokenFactory(owner, name, version) {
     //
-  }
-
-  function initialize(
-    address gateway,
-    address tokenRegistry,
-    address tokenImpl
-  ) external {
-    _initialize(gateway, tokenRegistry, tokenImpl);
-
-    emit Initialized(gateway, tokenRegistry, tokenImpl);
   }
 
   // external getters
@@ -62,48 +39,15 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
     return _computeToken(keccak256(abi.encodePacked(symbol)));
   }
 
-  function hashToken(
-    TokenData calldata tokenData
-  ) external view returns (bytes32) {
-    return _hashToken(tokenData);
-  }
-
   // external setters
 
   function createToken(
     TokenData calldata tokenData,
-    bytes calldata guardianSignature
+    bytes calldata signature
   ) external {
-    if (tokenData.owner == address(0)) {
-      revert TokenOwnerIsTheZeroAddress();
-    }
+    _verifyGuardianSignature(_hashToken(tokenData), signature);
 
-    if (tokenData.totalSupply == 0) {
-      revert InsufficientTotalSupply();
-    }
-
-    address token = _createToken(
-      keccak256(abi.encodePacked(tokenData.symbol)),
-      _hashToken(tokenData),
-      guardianSignature
-    );
-
-    ERC20FixedTokenImpl(token).initialize(
-      _gateway,
-      _tokenRegistry,
-      tokenData.name,
-      tokenData.symbol,
-      tokenData.owner,
-      tokenData.totalSupply
-    );
-
-    emit TokenCreated(
-      token,
-      tokenData.name,
-      tokenData.symbol,
-      tokenData.owner,
-      tokenData.totalSupply
-    );
+    _createToken(tokenData);
   }
 
   // private getters
@@ -115,7 +59,7 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
       _hashTypedDataV4(
         keccak256(
           abi.encode(
-            TOKEN_TYPE_HASH,
+            TOKEN_TYPEHASH,
             keccak256(abi.encodePacked(tokenData.name)),
             keccak256(abi.encodePacked(tokenData.symbol)),
             tokenData.owner,
@@ -123,5 +67,21 @@ contract ERC20FixedTokenFactory is EIP712, TokenFactory {
           )
         )
       );
+  }
+
+  // private setters
+
+  function _createToken(TokenData calldata tokenData) private {
+    address token = _createToken(keccak256(abi.encodePacked(tokenData.symbol)));
+
+    ERC20FixedTokenImpl(token).initialize(
+      _gateway,
+      tokenData.name,
+      tokenData.symbol,
+      tokenData.owner,
+      tokenData.totalSupply
+    );
+
+    emit TokenCreated(token, tokenData);
   }
 }

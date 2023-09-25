@@ -9,6 +9,5 @@ extendConfig((config) => {
     ...paths,
     artifacts: join(root, '.hardhat/artifacts'),
     cache: join(root, '.hardhat/cache'),
-    build: join(root, 'build'),
   };
 });

@@ -1,37 +1,33 @@
-import { ethers, testing } from 'hardhat';
-import { AddressLike } from 'ethers';
+import { ethers } from 'hardhat';
+import { ZeroAddress } from 'ethers';
 
-const { deployContract, ZeroAddress } = ethers;
-
-const { buildSigners } = testing;
+const { deployContract, getSigners } = ethers;
 
 export async function deployGuardedMock() {
-  const signers = await buildSigners('owner', 'guardian');
+  const [owner, guardian, ...unknown] = await getSigners();
 
-  const guardedMock = await deployContract('GuardedMock', [signers.guardian]);
+  const guardedMock = await deployContract('GuardedMock', [guardian]);
 
   return {
     guardedMock,
-    signers,
+    signers: {
+      owner,
+      guardian,
+      unknown,
+    },
   };
 }
 
-export async function deployOwnableMock(
-  options: {
-    owner?: AddressLike;
-  } = {},
-) {
-  const signers = await buildSigners('owner');
+export async function deployOwnableMock() {
+  const [owner, ...unknown] = await getSigners();
 
-  const { owner } = {
-    owner: ZeroAddress,
-    ...options,
-  };
-
-  const ownableMock = await deployContract('OwnableMock', [owner]);
+  const ownableMock = await deployContract('OwnableMock', [ZeroAddress]);
 
   return {
     ownableMock,
-    signers,
+    signers: {
+      owner,
+      unknown,
+    },
   };
 }

@@ -1,6 +1,4 @@
-import { ethers } from 'ethers';
-
-const { getAddress } = ethers;
+import { getAddress } from 'ethers';
 
 function getEnvKey(...path: string[]): string {
   return path

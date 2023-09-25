@@ -1,11 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers, testing } from 'hardhat';
+import { hashMessage, ZeroAddress, randomBytes } from 'ethers';
 import { expect } from 'chai';
+import { randomAddress } from '../../helpers';
 import { deployGuardedMock } from './fixtures';
-
-const { hashMessage, ZeroAddress, randomBytes } = ethers;
-
-const { randomAddress } = testing;
 
 describe('common/access/Guarded // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployGuardedMock>>;

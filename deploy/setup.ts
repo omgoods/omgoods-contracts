@@ -2,20 +2,19 @@ import { DeployFunction } from 'hardhat-deploy/types';
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, read, execute, getAddress },
+    deployments: { log, read, execute, get },
     getNamedAccounts,
   } = hre;
 
   log();
-  log('# token/erc20/fixed/setup');
+  log('# setup');
 
   if (await read('ERC20FixedTokenFactory', 'initialized')) {
     log('ERC20FixedTokenFactory already initialized');
   } else {
     const { owner: from } = await getNamedAccounts();
-    const gateway = await getAddress('Gateway');
-    const tokenRegistry = await getAddress('ERC20TokenRegistry');
-    const tokenImpl = await getAddress('ERC20FixedTokenImpl');
+    const { address: gateway } = await get('Gateway');
+    const { address: tokenImpl } = await get('ERC20FixedTokenImpl');
 
     await execute(
       'ERC20FixedTokenFactory',
@@ -25,7 +24,6 @@ const func: DeployFunction = async (hre) => {
       },
       'initialize',
       gateway,
-      tokenRegistry,
       tokenImpl,
     );
   }

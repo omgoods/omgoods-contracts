@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
 
-abstract contract Ownable is Context {
+abstract contract Ownable is GatewayRecipient {
   // storage
 
   address internal _owner;
@@ -43,16 +43,18 @@ abstract contract Ownable is Context {
   // external setters
 
   function setOwner(address owner) external onlyOwner {
-    if (owner == address(0)) {
-      revert OwnerIsTheZeroAddress();
-    }
-
-    _afterOwnerUpdated(owner);
+    _setOwner(owner);
   }
 
   // internal setters
 
-  function _afterOwnerUpdated(address owner) internal virtual {
+  function _setOwner(address owner) internal virtual {
+    if (owner == address(0)) {
+      revert OwnerIsTheZeroAddress();
+    }
+
+    _owner = owner;
+
     emit OwnerUpdated(owner);
   }
 }

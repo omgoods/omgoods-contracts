@@ -9,12 +9,11 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
-    "build": "hardhat build",
     "verify:etherscan": "hardhat etherscan-verify",
     "hardhat": "hardhat"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "4.9.3"
+    "@openzeppelin/contracts": "5.0.0-rc.0"
   },
   "devDependencies": {
     "@newobject/dotenv": "0.1.2",

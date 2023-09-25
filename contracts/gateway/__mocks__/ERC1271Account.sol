@@ -3,11 +3,9 @@ pragma solidity 0.8.21;
 
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
-import {Ownable} from "../../common/access/Ownable.sol";
-import {GatewayRecipient} from "../GatewayRecipient.sol";
+import {Ownable} from "../../access/Ownable.sol";
 
-contract ERC1271AccountMock is IERC1271, Ownable, GatewayRecipient {
+contract ERC1271Account is IERC1271, Ownable {
   using ECDSA for bytes32;
 
   // events
@@ -49,17 +47,5 @@ contract ERC1271AccountMock is IERC1271, Ownable, GatewayRecipient {
     }
 
     emit TransactionExecuted(to, value, data);
-  }
-
-  // internal getters
-
-  function _msgSender()
-    internal
-    view
-    virtual
-    override(Context, GatewayRecipient)
-    returns (address)
-  {
-    return GatewayRecipient._msgSender();
   }
 }

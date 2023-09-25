@@ -3,14 +3,19 @@ import { DeployFunction } from 'hardhat-deploy/types';
 const func: DeployFunction = async (hre) => {
   const {
     deployments: { log, deploy },
-    typedData: { getDomainArgs },
     getNamedAccounts,
   } = hre;
 
   log();
-  log('# token/erc20/fixed/create');
+  log('# create');
 
   const { deployer: from, owner } = await getNamedAccounts();
+
+  await deploy('Gateway', {
+    from,
+    log: true,
+    args: ['OM!goods Gateway', '0.0.1'],
+  });
 
   await deploy('ERC20FixedTokenImpl', {
     from,
@@ -20,10 +25,7 @@ const func: DeployFunction = async (hre) => {
   await deploy('ERC20FixedTokenFactory', {
     from,
     log: true,
-    args: [
-      owner, //
-      ...getDomainArgs('ERC20FixedTokenFactory'),
-    ],
+    args: [owner, 'OM!goods ERC20 Fixed Token Factory', '0.0.1'],
   });
 };
 

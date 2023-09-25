@@ -4,12 +4,10 @@ pragma solidity 0.8.21;
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
-import {Address} from "@openzeppelin/contracts/utils/Address.sol";
-import {Bytes} from "../common/utils/Bytes.sol";
+import {Bytes} from "../utils/Bytes.sol";
 
 contract Gateway is EIP712 {
   using ECDSA for bytes32;
-  using Address for address;
   using Bytes for bytes[];
 
   struct RequestData {
@@ -65,10 +63,7 @@ contract Gateway is EIP712 {
 
   // deployment
 
-  constructor(
-    string memory typedDataDomainName,
-    string memory typedDataDomainVersion
-  ) EIP712(typedDataDomainName, typedDataDomainVersion) {
+  constructor(string memory name, string memory version) EIP712(name, version) {
     //
   }
 
@@ -198,7 +193,7 @@ contract Gateway is EIP712 {
 
     if (
       account != signer &&
-      (!account.isContract() ||
+      (account.code.length == 0 ||
         IERC1271(account).isValidSignature(hash, signature) !=
         IERC1271(account).isValidSignature.selector)
     ) {

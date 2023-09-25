@@ -21,6 +21,7 @@ node_modules
 # hardhat
 .hardhat
 /build
+/_bak
 coverage*
 typechain
 

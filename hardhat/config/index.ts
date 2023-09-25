@@ -1,4 +1,3 @@
-import './typings';
 import './extender';
 
 export * from './constants';

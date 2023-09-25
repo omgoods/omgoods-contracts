@@ -75,7 +75,15 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   // internal setters
 
-  function _createToken(bytes32 salt) internal returns (address token) {
+  function _createToken(
+    bytes32 salt,
+    bytes32 hash,
+    bytes calldata signature
+  ) internal returns (address token) {
+    if (_msgSender() != _owner) {
+      _verifyGuardianSignature(hash, signature);
+    }
+
     token = Clones.cloneDeterministic(_tokenImpl, salt);
 
     _tokens[token] = true;

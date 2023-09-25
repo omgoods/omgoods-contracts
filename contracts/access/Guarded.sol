@@ -76,7 +76,7 @@ abstract contract Guarded is Ownable {
   function _verifyGuardianSignature(
     bytes32 hash,
     bytes calldata signature
-  ) internal view {
+  ) internal view virtual {
     if (!_hasGuardian(hash.recover(signature))) {
       revert InvalidGuardianSignature();
     }

@@ -45,9 +45,21 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
     TokenData calldata tokenData,
     bytes calldata signature
   ) external {
-    _verifyGuardianSignature(_hashToken(tokenData), signature);
+    address token = _createToken(
+      keccak256(abi.encodePacked(tokenData.symbol)),
+      _hashToken(tokenData),
+      signature
+    );
 
-    _createToken(tokenData);
+    ERC20FixedTokenImpl(token).initialize(
+      _gateway,
+      tokenData.name,
+      tokenData.symbol,
+      tokenData.owner,
+      tokenData.totalSupply
+    );
+
+    emit TokenCreated(token, tokenData);
   }
 
   // private getters
@@ -67,21 +79,5 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
           )
         )
       );
-  }
-
-  // private setters
-
-  function _createToken(TokenData calldata tokenData) private {
-    address token = _createToken(keccak256(abi.encodePacked(tokenData.symbol)));
-
-    ERC20FixedTokenImpl(token).initialize(
-      _gateway,
-      tokenData.name,
-      tokenData.symbol,
-      tokenData.owner,
-      tokenData.totalSupply
-    );
-
-    emit TokenCreated(token, tokenData);
   }
 }

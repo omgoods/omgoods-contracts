@@ -16,13 +16,15 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   // events
 
-  event Initialized(address gateway, address tokenImpl);
+  event Initialized(address gateway, address[] guardians, address tokenImpl);
 
   event TokenOwnerUpdated(address token, address owner);
 
   // errors
 
   error MsgSenderIsNotTheToken();
+
+  error TokenImplIsTheZeroAddress();
 
   // modifiers
 
@@ -49,13 +51,17 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
     address[] calldata guardians,
     address tokenImpl
   ) external initializeOnce onlyOwner {
+    if (tokenImpl == address(0)) {
+      revert TokenImplIsTheZeroAddress();
+    }
+
     _gateway = gateway;
 
     _addGuardians(guardians);
 
     _tokenImpl = tokenImpl;
 
-    emit Initialized(gateway, tokenImpl);
+    emit Initialized(gateway, guardians, tokenImpl);
   }
 
   // external getters

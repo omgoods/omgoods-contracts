@@ -14,6 +14,7 @@ import {
   BytesLike,
   getCreate2Address,
 } from 'ethers';
+import { TYPED_DATA_DOMAIN } from './constants';
 
 export function randomHex(bytesSize = 32): string {
   return hexlify(randomBytes(bytesSize));
@@ -50,11 +51,7 @@ export async function createTypedDataHelper<
   D extends Record<string, Record<string, any>>,
   P extends keyof D = keyof D,
 >(options: {
-  domain: {
-    name: string;
-    version: string;
-    verifyingContract: AddressLike;
-  };
+  verifyingContract: AddressLike;
   types: Record<P, Array<TypedDataField>>;
 }): Promise<{
   encode: (primaryType: P, data: D[P]) => string;
@@ -69,15 +66,11 @@ export async function createTypedDataHelper<
     config: { chainId },
   } = network;
 
-  const {
-    domain: { name, version, verifyingContract },
-    types,
-  } = options;
+  const { verifyingContract, types } = options;
 
   const domain: TypedDataDomain = {
+    ...TYPED_DATA_DOMAIN,
     chainId,
-    name,
-    version,
     verifyingContract: await resolveAddress(verifyingContract),
   };
 
@@ -103,7 +96,7 @@ export async function createProxyCloneAddressFactory<T = string>(
   const deployer = await resolveAddress(proxyFactory);
   const initCodeHash = keccak256(
     concat([
-      '0x3d602d80600a3d3981f3363d3d373d3d3d363d73000000',
+      '0x3d602d80600a3d3981f3363d3d373d3d3d363d73',
       (await resolveAddress(proxyImpl)).toLowerCase(),
       '0x5af43d82803e903d91602b57fd5bf3',
     ]),

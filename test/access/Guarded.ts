@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { hashMessage, ZeroAddress, randomBytes } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../helpers';
+import { randomAddress } from '../common';
 import { deployGuardedMock } from './fixtures';
 
 describe('access/Guarded // mocked', () => {

@@ -1,19 +1,22 @@
 import { ethers } from 'hardhat';
 import { AddressLike, BigNumberish, BytesLike } from 'ethers';
-import { getSigners, createTypedDataHelper } from '../helpers';
-import { GATEWAY_DOMAIN } from './constants';
+import {
+  getSigners,
+  createTypedDataHelper,
+  TYPED_DATA_DOMAIN,
+} from '../common';
 
 const { deployContract } = ethers;
 
 export async function deployERC1271AccountMock(options: {
   gateway: AddressLike;
 }) {
-  const erc1271AccountMock = await deployContract('ERC1271AccountMock', [
+  const accountMock = await deployContract('ERC1271AccountMock', [
     options.gateway,
   ]);
 
   return {
-    erc1271AccountMock,
+    accountMock,
   };
 }
 
@@ -34,8 +37,8 @@ export async function deployGatewayRecipientMock(options?: {
 
 export async function deployGateway() {
   const gateway = await deployContract('Gateway', [
-    GATEWAY_DOMAIN.name,
-    GATEWAY_DOMAIN.version,
+    TYPED_DATA_DOMAIN.name,
+    TYPED_DATA_DOMAIN.version,
   ]);
 
   return {
@@ -48,7 +51,7 @@ export async function setupGateway() {
 
   const { gateway } = await deployGateway();
 
-  const { erc1271AccountMock } = await deployERC1271AccountMock({
+  const { accountMock } = await deployERC1271AccountMock({
     gateway,
   });
 
@@ -70,10 +73,7 @@ export async function setupGateway() {
       data: Array<BytesLike>;
     };
   }>({
-    domain: {
-      ...GATEWAY_DOMAIN,
-      verifyingContract: gateway,
-    },
+    verifyingContract: gateway,
     types: {
       Request: [
         {
@@ -118,7 +118,7 @@ export async function setupGateway() {
     gateway,
     gatewayRecipientMock,
     signers,
-    erc1271AccountMock,
+    accountMock,
     typedDataHelper,
   };
 }

@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../helpers';
+import { randomAddress } from '../common';
 import { setupGateway } from './fixtures';
 import { GATEWAY_REQUEST, GATEWAY_REQUEST_BATCH } from './constants';
 
@@ -66,17 +66,15 @@ describe('gateway/Gateway', () => {
       });
 
       it('expect to revert due to the reverted call', async () => {
-        const { gateway, erc1271AccountMock } = fixture;
+        const { gateway, accountMock } = fixture;
 
         const tx = gateway.sendRequest(
-          await erc1271AccountMock.getAddress(),
-          erc1271AccountMock.interface.encodeFunctionData('setOwner', [
-            ZeroAddress,
-          ]),
+          await accountMock.getAddress(),
+          accountMock.interface.encodeFunctionData('setOwner', [ZeroAddress]),
         );
 
         await expect(tx).revertedWithCustomError(
-          erc1271AccountMock,
+          accountMock,
           'OwnerIsTheZeroAddress',
         );
       });
@@ -179,10 +177,10 @@ describe('gateway/Gateway', () => {
       });
 
       it('expect to revert when the request signer is not the account owner', async () => {
-        const { gateway, signers, erc1271AccountMock } = fixture;
+        const { gateway, signers, accountMock } = fixture;
 
         const tx = gateway.forwardRequest(
-          erc1271AccountMock,
+          accountMock,
           GATEWAY_REQUEST.to,
           GATEWAY_REQUEST.data,
           await signers.owner.signMessage('aaa'),
@@ -234,7 +232,7 @@ describe('gateway/Gateway', () => {
         const {
           gateway,
           gatewayRecipientMock,
-          erc1271AccountMock,
+          accountMock,
           typedDataHelper,
           signers,
         } = fixture;
@@ -243,7 +241,7 @@ describe('gateway/Gateway', () => {
 
         const requestBatch = {
           ...GATEWAY_REQUEST_BATCH,
-          account: await erc1271AccountMock.getAddress(),
+          account: await accountMock.getAddress(),
           to: [await gatewayRecipientMock.getAddress()],
           data: [
             gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender'),

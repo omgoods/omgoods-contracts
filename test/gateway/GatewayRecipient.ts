@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { concat } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../helpers';
+import { randomAddress } from '../common';
 import { deployGatewayRecipientMock } from './fixtures';
 
 describe('gateway/GatewayRecipient // mocked', () => {

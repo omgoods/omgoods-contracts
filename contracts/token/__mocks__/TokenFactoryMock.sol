@@ -5,10 +5,6 @@ import {TokenFactory} from "../TokenFactory.sol";
 import {TokenImplMock} from "./TokenImplMock.sol";
 
 contract TokenFactoryMock is TokenFactory {
-  // events
-
-  event TokenCreated(address token);
-
   // deployment
 
   constructor(
@@ -34,16 +30,20 @@ contract TokenFactoryMock is TokenFactory {
 
   // external setters
 
+  function addToken(address token) external {
+    _tokens[token] = true;
+  }
+
   function createToken(
     bytes32 salt,
     string calldata name,
     string calldata symbol,
     address owner
-  ) external {
-    address token = _createToken(salt);
+  ) external returns (address token) {
+    token = _createToken(salt);
 
     TokenImplMock(token).initialize(_gateway, name, symbol, owner);
 
-    emit TokenCreated(token);
+    return token;
   }
 }

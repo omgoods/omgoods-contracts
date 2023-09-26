@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { keccak256, concat } from 'ethers';
 import { expect } from 'chai';
-import { randomHex } from '../helpers';
+import { randomHex } from '../common';
 import { deployBytesMock } from './fixtures';
 
 describe('utils/Bytes // mocked', () => {

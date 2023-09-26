@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../helpers';
+import { randomAddress } from '../common';
 import { deployOwnableMock } from './fixtures';
 
 describe('access/Ownable // mocked', () => {

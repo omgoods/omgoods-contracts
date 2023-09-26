@@ -1,6 +1,6 @@
 import { ethers } from 'hardhat';
 import { ZeroAddress, AddressLike } from 'ethers';
-import { getSigners } from '../helpers';
+import { getSigners } from '../common';
 
 const { deployContract } = ethers;
 

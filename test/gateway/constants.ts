@@ -1,9 +1,4 @@
-import { randomAddress, randomHex } from '../helpers';
-
-export const GATEWAY_DOMAIN = {
-  name: 'Gateway',
-  version: '0.0.0',
-};
+import { randomAddress, randomHex } from '../common';
 
 export const GATEWAY_REQUEST = {
   account: randomAddress(),

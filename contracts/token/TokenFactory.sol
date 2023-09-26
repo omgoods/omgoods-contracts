@@ -12,7 +12,7 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   address private _tokenImpl;
 
-  mapping(address => bool) private _tokens;
+  mapping(address => bool) internal _tokens;
 
   // events
 
@@ -76,17 +76,18 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
     return Clones.predictDeterministicAddress(_tokenImpl, salt);
   }
 
-  // internal setters
-
-  function _createToken(
-    bytes32 salt,
+  function _verifyGuardianSignature(
     bytes32 hash,
     bytes calldata signature
-  ) internal returns (address token) {
+  ) internal view override {
     if (_msgSender() != _owner) {
-      _verifyGuardianSignature(hash, signature);
+      super._verifyGuardianSignature(hash, signature);
     }
+  }
 
+  // internal setters
+
+  function _createToken(bytes32 salt) internal returns (address token) {
     token = Clones.cloneDeterministic(_tokenImpl, salt);
 
     _tokens[token] = true;

@@ -8,8 +8,6 @@ import {TokenImpl} from "../TokenImpl.sol";
 import {ERC20TokenFactory} from "./ERC20TokenFactory.sol";
 
 contract ERC20TokenImpl is ERC20, TokenImpl {
-  // storage
-
   // deployment
 
   constructor() ERC20("", "") TokenImpl() {

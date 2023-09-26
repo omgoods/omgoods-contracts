@@ -51,11 +51,9 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
     TokenData calldata tokenData,
     bytes calldata signature
   ) external {
-    address token = _createToken(
-      keccak256(abi.encodePacked(tokenData.symbol)),
-      _hashToken(tokenData),
-      signature
-    );
+    _verifyGuardianSignature(_hashToken(tokenData), signature);
+
+    address token = _createToken(keccak256(abi.encodePacked(tokenData.symbol)));
 
     ERC20FixedTokenImpl(token).initialize(
       _gateway,

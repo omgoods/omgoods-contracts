@@ -80,34 +80,3 @@ export function prepareAddress(address: string): string {
 
   return result || null;
 }
-
-export function toConstantName(text: string, ...texts: string[]): string;
-export function toConstantName(...parts: string[]): string {
-  let text = parts.join('');
-
-  if (text) {
-    text = text.replace('ERC', 'erc');
-
-    text = text.replace(
-      /([a-z0-9][A-Z])/g,
-      (value: string) => `${value[0]}_${value[1]}`,
-    );
-
-    text = text.toUpperCase();
-  }
-
-  return text;
-}
-
-export function toKebabCase(text: string): string {
-  if (text) {
-    text = text.replace('ERC', 'erc');
-    text = text.replace(
-      /([a-z0-9][A-Z])/g,
-      (value: string) => `${value[0]}-${value[1]}`,
-    );
-    text = text.toLowerCase();
-  }
-
-  return text;
-}

@@ -3,7 +3,6 @@ pragma solidity 0.8.21;
 
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {Guarded} from "../access/Guarded.sol";
 import {Initializable} from "../utils/Initializable.sol";
 

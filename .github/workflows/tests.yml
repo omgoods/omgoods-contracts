@@ -32,3 +32,5 @@ jobs:
 
       - name: Run tests
         run: npm run test
+        env:
+          ENABLED_GAS_REPORTER: 1

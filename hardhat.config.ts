@@ -2,7 +2,7 @@ import '@newobject/dotenv/setup';
 import '@nomicfoundation/hardhat-ledger';
 import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';
-import { createConfig } from './hardhat';
+import { createConfig } from './src';
 
 export default createConfig({
   solidity: {

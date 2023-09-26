@@ -24,6 +24,7 @@ const func: DeployFunction = async (hre) => {
       },
       'initialize',
       gateway,
+      [], // guardians
       tokenImpl,
     );
   }

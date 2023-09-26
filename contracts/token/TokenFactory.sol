@@ -46,9 +46,12 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   function initialize(
     address gateway,
+    address[] calldata guardians,
     address tokenImpl
   ) external initializeOnce onlyOwner {
     _gateway = gateway;
+
+    _addGuardians(guardians);
 
     _tokenImpl = tokenImpl;
 

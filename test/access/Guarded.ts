@@ -1,10 +1,10 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { hashMessage, ZeroAddress, randomBytes } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../../helpers';
+import { randomAddress } from '../helpers';
 import { deployGuardedMock } from './fixtures';
 
-describe('common/access/Guarded // mocked', () => {
+describe('access/Guarded // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployGuardedMock>>;
 
   const createBeforeHook = () => {

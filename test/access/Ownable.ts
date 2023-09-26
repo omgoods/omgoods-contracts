@@ -1,13 +1,10 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ethers } from 'hardhat';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../../helpers';
+import { randomAddress } from '../helpers';
 import { deployOwnableMock } from './fixtures';
 
-const { deployContract } = ethers;
-
-describe('common/access/Ownable // mocked', () => {
+describe('access/Ownable // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployOwnableMock>>;
 
   const createBeforeHook = () => {
@@ -29,7 +26,9 @@ describe('common/access/Ownable // mocked', () => {
       it('expect to deploy the contract with a custom owner', async () => {
         const owner = randomAddress();
 
-        const ownableMock = await deployContract('OwnableMock', [owner]);
+        const { ownableMock } = await deployOwnableMock({
+          owner,
+        });
 
         const res = await ownableMock.getOwner();
 

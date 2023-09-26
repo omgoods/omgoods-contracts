@@ -18,10 +18,12 @@
 # node
 node_modules
 
+# development
+/_bak
+/test.*
+
 # hardhat
 .hardhat
-/build
-/_bak
 coverage*
 typechain
 

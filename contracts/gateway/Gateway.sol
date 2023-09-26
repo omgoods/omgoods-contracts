@@ -24,12 +24,12 @@ contract Gateway is EIP712 {
     bytes[] data;
   }
 
-  bytes32 private constant REQUEST_TYPE_HASH =
+  bytes32 private constant REQUEST_TYPEHASH =
     keccak256(
       "Request(address account,uint256 nonce,address to,bytes data)" //
     );
 
-  bytes32 private constant REQUEST_BATCH_TYPE_HASH =
+  bytes32 private constant REQUEST_BATCH_TYPEHASH =
     keccak256(
       "RequestBatch(address account,uint256 nonce,address[] to,bytes[] data)"
     );
@@ -155,7 +155,7 @@ contract Gateway is EIP712 {
     return
       _hashTypedDataV4(
         keccak256(
-          abi.encode(REQUEST_TYPE_HASH, account, nonce, to, keccak256(data))
+          abi.encode(REQUEST_TYPEHASH, account, nonce, to, keccak256(data))
         )
       );
   }
@@ -170,7 +170,7 @@ contract Gateway is EIP712 {
       _hashTypedDataV4(
         keccak256(
           abi.encode(
-            REQUEST_BATCH_TYPE_HASH,
+            REQUEST_BATCH_TYPEHASH,
             account,
             nonce,
             keccak256(abi.encodePacked(to)),

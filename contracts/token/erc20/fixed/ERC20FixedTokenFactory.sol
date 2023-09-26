@@ -19,7 +19,13 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
 
   // events
 
-  event TokenCreated(address token, TokenData tokenData);
+  event TokenCreated(
+    address token,
+    string name,
+    string symbol,
+    address owner,
+    uint256 totalSupply
+  );
 
   // deployment
 
@@ -59,7 +65,13 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
       tokenData.totalSupply
     );
 
-    emit TokenCreated(token, tokenData);
+    emit TokenCreated(
+      token,
+      tokenData.name,
+      tokenData.symbol,
+      tokenData.owner,
+      tokenData.totalSupply
+    );
   }
 
   // private getters

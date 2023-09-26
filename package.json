@@ -4,7 +4,7 @@
   "scripts": {
     "start": "hardhat node",
     "linter": "solhint \"contracts/**/*.sol\"",
-    "format": "prettier --write \"{contracts,deploy,hardhat,scripts,test}/**/*.{ts,sol}\"",
+    "format": "prettier --write \"{contracts,deploy,src,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",

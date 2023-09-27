@@ -2,20 +2,17 @@
 pragma solidity 0.8.21;
 
 import {ERC20TokenFactory} from "../ERC20TokenFactory.sol";
-import {ERC20FixedTokenImpl} from "./ERC20FixedTokenImpl.sol";
+import {ERC20ControlledTokenImpl} from "./ERC20ControlledTokenImpl.sol";
 
-contract ERC20FixedTokenFactory is ERC20TokenFactory {
+contract ERC20ControlledTokenFactory is ERC20TokenFactory {
   struct TokenData {
-    address owner;
-    uint256 totalSupply;
     string name;
     string symbol;
+    address controller;
   }
 
   bytes32 private constant TOKEN_TYPEHASH =
-    keccak256(
-      "Token(string name,string symbol,address owner,uint256 totalSupply)"
-    );
+    keccak256("Token(string name,string symbol,address controller)");
 
   // events
 
@@ -23,9 +20,12 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
     address token,
     string name,
     string symbol,
-    address owner,
-    uint256 totalSupply
+    address controller
   );
+
+  // errors
+
+  error TokenControllerIsTheZeroAddress();
 
   // deployment
 
@@ -57,24 +57,26 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
     TokenData calldata tokenData,
     bytes calldata signature
   ) external {
+    if (tokenData.controller == address(0)) {
+      revert TokenControllerIsTheZeroAddress();
+    }
+
     _verifyGuardianSignature(_hashToken(tokenData), signature);
 
     address token = _createToken(keccak256(abi.encodePacked(tokenData.symbol)));
 
-    ERC20FixedTokenImpl(token).initialize(
+    ERC20ControlledTokenImpl(token).initialize(
       _gateway,
       tokenData.name,
       tokenData.symbol,
-      tokenData.owner,
-      tokenData.totalSupply
+      tokenData.controller
     );
 
     emit TokenCreated(
       token,
       tokenData.name,
       tokenData.symbol,
-      tokenData.owner,
-      tokenData.totalSupply
+      tokenData.controller
     );
   }
 
@@ -90,8 +92,7 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
             TOKEN_TYPEHASH,
             keccak256(abi.encodePacked(tokenData.name)),
             keccak256(abi.encodePacked(tokenData.symbol)),
-            tokenData.owner,
-            tokenData.totalSupply
+            tokenData.controller
           )
         )
       );

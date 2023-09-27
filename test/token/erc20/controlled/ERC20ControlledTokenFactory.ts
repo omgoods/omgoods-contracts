@@ -1,14 +1,15 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
+import { ZeroAddress } from 'ethers';
 import { randomAddress } from '../../../common';
-import { FIXED_TOKEN } from './constants';
-import { setupERC20FixedTokenFactory } from './fixtures';
+import { TOKEN } from '../../constants';
+import { setupERC20ControlledTokenFactory } from './fixtures';
 
-describe('token/ERC20/fixed/ERC20FixedTokenFactory', () => {
-  let fixture: Awaited<ReturnType<typeof setupERC20FixedTokenFactory>>;
+describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
+  let fixture: Awaited<ReturnType<typeof setupERC20ControlledTokenFactory>>;
 
   before(async () => {
-    fixture = await loadFixture(setupERC20FixedTokenFactory);
+    fixture = await loadFixture(setupERC20ControlledTokenFactory);
   });
 
   describe('# getters', () => {
@@ -16,9 +17,9 @@ describe('token/ERC20/fixed/ERC20FixedTokenFactory', () => {
       it('expect to return the correct address', async () => {
         const { tokenFactory, computeToken } = fixture;
 
-        const res = await tokenFactory.computeToken(FIXED_TOKEN.symbol);
+        const res = await tokenFactory.computeToken(TOKEN.symbol);
 
-        expect(res).eq(computeToken(FIXED_TOKEN.symbol));
+        expect(res).eq(computeToken(TOKEN.symbol));
       });
     });
 
@@ -27,8 +28,8 @@ describe('token/ERC20/fixed/ERC20FixedTokenFactory', () => {
         const { tokenFactory, typeDataHelper } = fixture;
 
         const tokenData = {
-          ...FIXED_TOKEN,
-          owner: randomAddress(),
+          ...TOKEN,
+          controller: randomAddress(),
         };
 
         const res = await tokenFactory.hashToken(tokenData);
@@ -40,14 +41,31 @@ describe('token/ERC20/fixed/ERC20FixedTokenFactory', () => {
 
   describe('# setters', () => {
     describe('creatToken()', () => {
+      it('expect to revert when the controller is the zero address', async () => {
+        const { tokenFactory } = fixture;
+
+        const tx = tokenFactory.createToken(
+          {
+            ...TOKEN,
+            controller: ZeroAddress,
+          },
+          '0x',
+        );
+
+        await expect(tx).revertedWithCustomError(
+          tokenFactory,
+          'TokenControllerIsTheZeroAddress',
+        );
+      });
+
       it('expect to revert when the signature is invalid', async () => {
         const { tokenFactory, typeDataHelper, signers } = fixture;
 
         const sender = signers.unknown.at(0);
 
         const tokenData = {
-          ...FIXED_TOKEN,
-          owner: randomAddress(),
+          ...TOKEN,
+          controller: randomAddress(),
         };
 
         const tx = tokenFactory
@@ -69,9 +87,9 @@ describe('token/ERC20/fixed/ERC20FixedTokenFactory', () => {
         const sender = signers.unknown.at(0);
 
         const tokenData = {
-          ...FIXED_TOKEN,
+          ...TOKEN,
           symbol: 'NEW',
-          owner: randomAddress(),
+          controller: randomAddress(),
         };
 
         const tx = tokenFactory
@@ -87,8 +105,7 @@ describe('token/ERC20/fixed/ERC20FixedTokenFactory', () => {
             computeToken(tokenData.symbol),
             tokenData.name,
             tokenData.symbol,
-            tokenData.owner,
-            tokenData.totalSupply,
+            tokenData.controller,
           );
       });
     });

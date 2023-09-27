@@ -2,17 +2,20 @@
 pragma solidity 0.8.21;
 
 import {ERC20TokenFactory} from "../ERC20TokenFactory.sol";
-import {ERC20ControlledTokenImpl} from "./ERC20ControlledTokenImpl.sol";
+import {ERC20FixedTokenImpl} from "./ERC20FixedTokenImpl.sol";
 
-contract ERC20ControlledTokenFactory is ERC20TokenFactory {
+contract ERC20FixedTokenFactory is ERC20TokenFactory {
   struct TokenData {
+    address owner;
+    uint256 totalSupply;
     string name;
     string symbol;
-    address controller;
   }
 
   bytes32 private constant TOKEN_TYPEHASH =
-    keccak256("Token(string name,string symbol,address controller)");
+    keccak256(
+      "Token(string name,string symbol,address owner,uint256 totalSupply)"
+    );
 
   // events
 
@@ -20,8 +23,15 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
     address token,
     string name,
     string symbol,
-    address controller
+    address owner,
+    uint256 totalSupply
   );
+
+  // errors
+
+  error TokenOwnerIsTheZeroAddress();
+
+  error InvalidTokenTotalSupply();
 
   // deployment
 
@@ -53,22 +63,32 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
     TokenData calldata tokenData,
     bytes calldata signature
   ) external {
+    if (tokenData.owner == address(0)) {
+      revert TokenOwnerIsTheZeroAddress();
+    }
+
+    if (tokenData.totalSupply == 0) {
+      revert InvalidTokenTotalSupply();
+    }
+
     _verifyGuardianSignature(_hashToken(tokenData), signature);
 
     address token = _createToken(keccak256(abi.encodePacked(tokenData.symbol)));
 
-    ERC20ControlledTokenImpl(token).initialize(
+    ERC20FixedTokenImpl(token).initialize(
       _gateway,
       tokenData.name,
       tokenData.symbol,
-      tokenData.controller
+      tokenData.owner,
+      tokenData.totalSupply
     );
 
     emit TokenCreated(
       token,
       tokenData.name,
       tokenData.symbol,
-      tokenData.controller
+      tokenData.owner,
+      tokenData.totalSupply
     );
   }
 
@@ -84,7 +104,8 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
             TOKEN_TYPEHASH,
             keccak256(abi.encodePacked(tokenData.name)),
             keccak256(abi.encodePacked(tokenData.symbol)),
-            tokenData.controller
+            tokenData.owner,
+            tokenData.totalSupply
           )
         )
       );

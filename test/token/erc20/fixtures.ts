@@ -8,11 +8,13 @@ const { deployContract } = ethers;
 export async function deployERC20ExternalTokenMock(options?: {
   name?: string;
   symbol?: string;
+  decimals?: BigNumberish;
   initialSupply?: BigNumberish;
 }) {
   const externalToken = await deployContract('ERC20ExternalTokenMock', [
     options?.name || TOKEN.name,
     options?.symbol || TOKEN.symbol,
+    options?.decimals || 18,
     options?.initialSupply || parseEther('100000000'),
   ]);
 

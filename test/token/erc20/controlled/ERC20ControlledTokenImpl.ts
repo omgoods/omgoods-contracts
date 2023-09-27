@@ -1,10 +1,10 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { setupERC20ControlledTokenFactory } from './fixtures';
 import { randomAddress } from '../../../common';
+import { setupERC20ControlledTokenFactory } from './fixtures';
 
-describe('token/ERC20/controlled/ERC20ControlledTokenImpl', () => {
+describe('token/erc20/controlled/ERC20ControlledTokenImpl', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20ControlledTokenFactory>>;
 
   before(async () => {

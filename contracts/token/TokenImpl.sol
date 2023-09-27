@@ -10,9 +10,9 @@ abstract contract TokenImpl is Ownable, Initializable {
 
   address internal _tokenFactory;
 
-  string private _name;
+  string internal _name;
 
-  string private _symbol;
+  string internal _symbol;
 
   // deployment
 
@@ -35,7 +35,9 @@ abstract contract TokenImpl is Ownable, Initializable {
     _initialize(gateway);
 
     _name = name_;
+
     _symbol = symbol_;
+
     _owner = owner;
   }
 

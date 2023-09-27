@@ -10,9 +10,9 @@ describe('utils/Initializable // mocked', () => {
       fixture = await loadFixture(deployInitializableMock);
 
       if (initialize) {
-        const { initializableMock } = fixture;
+        const { initializable } = fixture;
 
-        await initializableMock.initialize();
+        await initializable.initialize();
       }
     });
   };
@@ -22,23 +22,23 @@ describe('utils/Initializable // mocked', () => {
 
     describe('initializeOnce()', () => {
       it('expect to initialize the contract', async () => {
-        const { initializableMock } = fixture;
+        const { initializable } = fixture;
 
-        const tx = initializableMock.initialize();
+        const tx = initializable.initialize();
 
-        await expect(tx).emit(initializableMock, 'Initialized');
+        await expect(tx).emit(initializable, 'Initialized');
       });
 
       describe('# after initialization', () => {
         createBeforeHook(true);
 
         it('expect to revert', async () => {
-          const { initializableMock } = fixture;
+          const { initializable } = fixture;
 
-          const tx = initializableMock.initialize();
+          const tx = initializable.initialize();
 
           await expect(tx).revertedWithCustomError(
-            initializableMock,
+            initializable,
             'AlreadyInitialized',
           );
         });
@@ -51,9 +51,9 @@ describe('utils/Initializable // mocked', () => {
 
     describe('initialized()', () => {
       it('expect to return false before initialization', async () => {
-        const { initializableMock } = fixture;
+        const { initializable } = fixture;
 
-        const res = await initializableMock.initialized();
+        const res = await initializable.initialized();
 
         expect(res).false;
       });
@@ -62,9 +62,9 @@ describe('utils/Initializable // mocked', () => {
         createBeforeHook(true);
 
         it('expect to return true', async () => {
-          const { initializableMock } = fixture;
+          const { initializable } = fixture;
 
-          const res = await initializableMock.initialized();
+          const res = await initializable.initialized();
 
           expect(res).true;
         });

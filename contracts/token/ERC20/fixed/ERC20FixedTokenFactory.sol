@@ -45,6 +45,12 @@ contract ERC20FixedTokenFactory is ERC20TokenFactory {
     return _computeToken(keccak256(abi.encodePacked(symbol)));
   }
 
+  function hashToken(
+    TokenData calldata tokenData
+  ) external view returns (bytes32) {
+    return _hashToken(tokenData);
+  }
+
   // external setters
 
   function createToken(

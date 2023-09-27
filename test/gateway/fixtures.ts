@@ -11,12 +11,10 @@ const { deployContract } = ethers;
 export async function deployERC1271AccountMock(options: {
   gateway: AddressLike;
 }) {
-  const accountMock = await deployContract('ERC1271AccountMock', [
-    options.gateway,
-  ]);
+  const account = await deployContract('ERC1271AccountMock', [options.gateway]);
 
   return {
-    accountMock,
+    account,
   };
 }
 
@@ -25,12 +23,12 @@ export async function deployGatewayRecipientMock(options?: {
 }) {
   const signers = await getSigners('gateway');
 
-  const gatewayRecipientMock = await deployContract('GatewayRecipientMock', [
+  const gatewayRecipient = await deployContract('GatewayRecipientMock', [
     options?.gateway || signers.gateway,
   ]);
 
   return {
-    gatewayRecipientMock,
+    gatewayRecipient,
     signers,
   };
 }
@@ -51,11 +49,11 @@ export async function setupGateway() {
 
   const { gateway } = await deployGateway();
 
-  const { accountMock } = await deployERC1271AccountMock({
+  const { account } = await deployERC1271AccountMock({
     gateway,
   });
 
-  const { gatewayRecipientMock } = await deployGatewayRecipientMock({
+  const { gatewayRecipient } = await deployGatewayRecipientMock({
     gateway,
   });
 
@@ -72,53 +70,50 @@ export async function setupGateway() {
       to: Array<string>;
       data: Array<BytesLike>;
     };
-  }>({
-    verifyingContract: gateway,
-    types: {
-      Request: [
-        {
-          name: 'account',
-          type: 'address',
-        },
-        {
-          name: 'nonce',
-          type: 'uint256',
-        },
-        {
-          name: 'to',
-          type: 'address',
-        },
-        {
-          name: 'data',
-          type: 'bytes',
-        },
-      ],
-      RequestBatch: [
-        {
-          name: 'account',
-          type: 'address',
-        },
-        {
-          name: 'nonce',
-          type: 'uint256',
-        },
-        {
-          name: 'to',
-          type: 'address[]',
-        },
-        {
-          name: 'data',
-          type: 'bytes[]',
-        },
-      ],
-    },
+  }>(gateway, {
+    Request: [
+      {
+        name: 'account',
+        type: 'address',
+      },
+      {
+        name: 'nonce',
+        type: 'uint256',
+      },
+      {
+        name: 'to',
+        type: 'address',
+      },
+      {
+        name: 'data',
+        type: 'bytes',
+      },
+    ],
+    RequestBatch: [
+      {
+        name: 'account',
+        type: 'address',
+      },
+      {
+        name: 'nonce',
+        type: 'uint256',
+      },
+      {
+        name: 'to',
+        type: 'address[]',
+      },
+      {
+        name: 'data',
+        type: 'bytes[]',
+      },
+    ],
   });
 
   return {
     gateway,
-    gatewayRecipientMock,
+    gatewayRecipient,
     signers,
-    accountMock,
+    account,
     typedDataHelper,
   };
 }

@@ -14,6 +14,12 @@ contract GatewayRecipientMock is GatewayRecipient {
     _gateway = gateway;
   }
 
+  // external getters
+
+  function msgSender() external view returns (address) {
+    return _msgSender();
+  }
+
   // external setters
 
   function emitMsgSender() external {

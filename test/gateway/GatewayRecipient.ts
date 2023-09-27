@@ -1,5 +1,5 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { concat } from 'ethers';
+import { concat, AbiCoder } from 'ethers';
 import { expect } from 'chai';
 import { randomAddress } from '../common';
 import { deployGatewayRecipientMock } from './fixtures';
@@ -14,9 +14,9 @@ describe('gateway/GatewayRecipient // mocked', () => {
   describe('# getters', () => {
     describe('getGateway()', () => {
       it('expect to return the gateway', async () => {
-        const { gatewayRecipientMock, signers } = fixture;
+        const { gatewayRecipient, signers } = fixture;
 
-        const res = await gatewayRecipientMock.getGateway();
+        const res = await gatewayRecipient.getGateway();
 
         expect(res).eq(signers.gateway.address);
       });
@@ -24,33 +24,31 @@ describe('gateway/GatewayRecipient // mocked', () => {
 
     describe('_msgSender()', () => {
       it('expect it to return the correct address for calls from the gateway', async () => {
-        const { gatewayRecipientMock, signers } = fixture;
+        const { gatewayRecipient, signers } = fixture;
 
         const sender = randomAddress();
 
-        const tx = signers.gateway.sendTransaction({
-          to: gatewayRecipientMock,
+        const res = await signers.gateway.call({
+          to: gatewayRecipient,
           data: concat([
-            gatewayRecipientMock.interface.encodeFunctionData('emitMsgSender'),
+            gatewayRecipient.interface.encodeFunctionData('msgSender'),
             sender,
           ]),
         });
 
-        await expect(tx)
-          .emit(gatewayRecipientMock, 'MsgSender')
-          .withArgs(sender);
+        expect(res).eq(
+          AbiCoder.defaultAbiCoder().encode(['address'], [sender]),
+        );
       });
 
       it('expect it to return the correct address for calls from outside the gateway', async () => {
-        const { gatewayRecipientMock, signers } = fixture;
+        const { gatewayRecipient, signers } = fixture;
 
         const sender = signers.unknown.at(0);
 
-        const tx = gatewayRecipientMock.connect(sender).emitMsgSender();
+        const res = await gatewayRecipient.connect(sender).msgSender();
 
-        await expect(tx)
-          .emit(gatewayRecipientMock, 'MsgSender')
-          .withArgs(sender.address);
+        expect(res).eq(sender.address);
       });
     });
   });

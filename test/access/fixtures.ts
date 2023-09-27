@@ -7,10 +7,10 @@ const { deployContract } = ethers;
 export async function deployGuardedMock() {
   const signers = await getSigners('owner', 'guardian');
 
-  const guardedMock = await deployContract('GuardedMock', [signers.guardian]);
+  const guarded = await deployContract('GuardedMock', [signers.guardian]);
 
   return {
-    guardedMock,
+    guarded,
     signers,
   };
 }
@@ -18,12 +18,12 @@ export async function deployGuardedMock() {
 export async function deployOwnableMock(options?: { owner: AddressLike }) {
   const signers = await getSigners('owner');
 
-  const ownableMock = await deployContract('OwnableMock', [
+  const ownable = await deployContract('OwnableMock', [
     options?.owner || ZeroAddress,
   ]);
 
   return {
-    ownableMock,
+    ownable,
     signers,
   };
 }

@@ -3,17 +3,17 @@ import { ethers } from 'hardhat';
 const { deployContract } = ethers;
 
 export async function deployBytesMock() {
-  const bytesMock = await deployContract('BytesMock');
+  const bytes = await deployContract('BytesMock');
 
   return {
-    bytesMock,
+    bytes,
   };
 }
 
 export async function deployInitializableMock() {
-  const initializableMock = await deployContract('InitializableMock');
+  const initializable = await deployContract('InitializableMock');
 
   return {
-    initializableMock,
+    initializable,
   };
 }

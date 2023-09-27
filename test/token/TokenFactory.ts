@@ -2,7 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress, randomBytes, hashMessage } from 'ethers';
 import { expect } from 'chai';
 import { randomAddress, randomHex } from '../common';
-import { TOKEN_MOCK } from './constants';
+import { TOKEN } from './constants';
 import { deployTokenFactoryMock, setupTokenFactoryMock } from './fixtures';
 
 describe('token/TokenFactory // mocked', () => {
@@ -15,63 +15,59 @@ describe('token/TokenFactory // mocked', () => {
 
     describe('initialize()', () => {
       it('expect to revert when the msg.sender is not the owner', async () => {
-        const { tokenFactoryMock, signers } = fixture;
+        const { tokenFactory, signers } = fixture;
 
-        const tx = tokenFactoryMock
+        const tx = tokenFactory
           .connect(signers.unknown.at(0))
           .initialize(ZeroAddress, [], ZeroAddress);
 
         await expect(tx).revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'MsgSenderIsNotTheContractOwner',
         );
       });
 
       it('expect to revert when the token impl is the zero address', async () => {
-        const { tokenFactoryMock } = fixture;
+        const { tokenFactory } = fixture;
 
-        const tx = tokenFactoryMock.initialize(ZeroAddress, [], ZeroAddress);
+        const tx = tokenFactory.initialize(ZeroAddress, [], ZeroAddress);
 
         await expect(tx).revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'TokenImplIsTheZeroAddress',
         );
       });
 
       it('expect to initialize the contract', async () => {
-        const { tokenFactoryMock } = fixture;
+        const { tokenFactory } = fixture;
 
         const gateway = randomAddress();
         const guardians = [randomAddress()];
         const tokenImpl = randomAddress();
 
-        const tx = tokenFactoryMock.initialize(gateway, guardians, tokenImpl);
+        const tx = tokenFactory.initialize(gateway, guardians, tokenImpl);
 
         await expect(tx)
-          .emit(tokenFactoryMock, 'Initialized')
+          .emit(tokenFactory, 'Initialized')
           .withArgs(gateway, guardians, tokenImpl);
       });
 
       describe('# after initialization', () => {
         before(async () => {
-          const { tokenFactoryMock } = fixture;
+          const { tokenFactory } = fixture;
 
-          if (!(await tokenFactoryMock.initialized())) {
-            await tokenFactoryMock.initialize(
-              randomAddress(),
-              [],
-              randomAddress(),
-            );
+          if (!(await tokenFactory.initialized())) {
+            await tokenFactory.initialize(randomAddress(), [], randomAddress());
           }
         });
 
         it('expect to revert', async () => {
-          const { tokenFactoryMock } = fixture;
+          const { tokenFactory } = fixture;
 
-          const tx = tokenFactoryMock.initialize(ZeroAddress, [], ZeroAddress);
+          const tx = tokenFactory.initialize(ZeroAddress, [], ZeroAddress);
 
           await expect(tx).revertedWithCustomError(
-            tokenFactoryMock,
+            tokenFactory,
             'AlreadyInitialized',
           );
         });
@@ -88,17 +84,17 @@ describe('token/TokenFactory // mocked', () => {
   describe('# getters', () => {
     describe('hasToken()', () => {
       it('expect to return true when the token exists', async () => {
-        const { tokenFactoryMock, tokenMock } = fixture;
+        const { tokenFactory, token } = fixture;
 
-        const res = await tokenFactoryMock.hasToken(tokenMock);
+        const res = await tokenFactory.hasToken(token);
 
         expect(res).true;
       });
 
       it("expect to return false when the token doesn't exist", async () => {
-        const { tokenFactoryMock } = fixture;
+        const { tokenFactory } = fixture;
 
-        const res = await tokenFactoryMock.hasToken(randomAddress());
+        const res = await tokenFactory.hasToken(randomAddress());
 
         expect(res).false;
       });
@@ -106,13 +102,13 @@ describe('token/TokenFactory // mocked', () => {
 
     describe('_computeToken()', () => {
       it('expect to return the correct address', async () => {
-        const { tokenFactoryMock, computeTokenMock } = fixture;
+        const { tokenFactory, computeToken } = fixture;
 
         const salt = randomHex();
 
-        const res = await tokenFactoryMock.computeToken(salt);
+        const res = await tokenFactory.computeToken(salt);
 
-        expect(res).eq(computeTokenMock(salt));
+        expect(res).eq(computeToken(salt));
       });
     });
 
@@ -121,9 +117,9 @@ describe('token/TokenFactory // mocked', () => {
       const hash = hashMessage(message);
 
       it('expect not to revert when the guardian signature is valid', async () => {
-        const { tokenFactoryMock, signers } = fixture;
+        const { tokenFactory, signers } = fixture;
 
-        const tx = tokenFactoryMock
+        const tx = tokenFactory
           .connect(signers.unknown.at(0))
           .verifyGuardianSignature(
             hash,
@@ -131,15 +127,15 @@ describe('token/TokenFactory // mocked', () => {
           );
 
         await expect(tx).not.revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'InvalidGuardianSignature',
         );
       });
 
       it('expect not to revert when the owner signature is valid', async () => {
-        const { tokenFactoryMock, signers } = fixture;
+        const { tokenFactory, signers } = fixture;
 
-        const tx = tokenFactoryMock
+        const tx = tokenFactory
           .connect(signers.unknown.at(0))
           .verifyGuardianSignature(
             hash,
@@ -147,29 +143,29 @@ describe('token/TokenFactory // mocked', () => {
           );
 
         await expect(tx).not.revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'InvalidGuardianSignature',
         );
       });
 
       it('expect not to revert when the sender is the owner', async () => {
-        const { tokenFactoryMock, signers } = fixture;
+        const { tokenFactory, signers } = fixture;
 
-        const tx = tokenFactoryMock.verifyGuardianSignature(
+        const tx = tokenFactory.verifyGuardianSignature(
           hash,
           await signers.unknown.at(0).signMessage(message),
         );
 
         await expect(tx).not.revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'InvalidGuardianSignature',
         );
       });
 
       it('expect to revert when the signature is invalid', async () => {
-        const { tokenFactoryMock, signers } = fixture;
+        const { tokenFactory, signers } = fixture;
 
-        const tx = tokenFactoryMock
+        const tx = tokenFactory
           .connect(signers.unknown.at(0))
           .verifyGuardianSignature(
             hash,
@@ -177,7 +173,7 @@ describe('token/TokenFactory // mocked', () => {
           );
 
         await expect(tx).revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'InvalidGuardianSignature',
         );
       });
@@ -187,61 +183,61 @@ describe('token/TokenFactory // mocked', () => {
   describe('# setters', () => {
     describe('emitTokenOwnerUpdated()', () => {
       it('expect to revert when the sender is not a token', async () => {
-        const { tokenFactoryMock } = fixture;
+        const { tokenFactory } = fixture;
 
-        const tx = tokenFactoryMock.emitTokenOwnerUpdated(randomAddress());
+        const tx = tokenFactory.emitTokenOwnerUpdated(randomAddress());
 
         await expect(tx).revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'MsgSenderIsNotTheToken',
         );
       });
 
       it('expect to emit the event', async () => {
-        const { tokenFactoryMock, signers } = fixture;
+        const { tokenFactory, signers } = fixture;
 
         const owner = randomAddress();
 
-        const tx = tokenFactoryMock
+        const tx = tokenFactory
           .connect(signers.token)
           .emitTokenOwnerUpdated(owner);
 
         await expect(tx)
-          .emit(tokenFactoryMock, 'TokenOwnerUpdated')
+          .emit(tokenFactory, 'TokenOwnerUpdated')
           .withArgs(signers.token.address, owner);
       });
     });
 
     describe('_createToken()', () => {
       it('expect to revert when the token already exists', async () => {
-        const { tokenFactoryMock } = fixture;
+        const { tokenFactory } = fixture;
 
-        const tx = tokenFactoryMock.createToken(
-          TOKEN_MOCK.salt,
-          TOKEN_MOCK.name,
-          TOKEN_MOCK.symbol,
+        const tx = tokenFactory.createToken(
+          TOKEN.salt,
+          TOKEN.name,
+          TOKEN.symbol,
           randomAddress(),
         );
 
         await expect(tx).revertedWithCustomError(
-          tokenFactoryMock,
+          tokenFactory,
           'ERC1167FailedCreateClone',
         );
       });
 
       it('expect to create a token', async () => {
-        const { tokenFactoryMock, computeTokenMock } = fixture;
+        const { tokenFactory, computeToken } = fixture;
 
         const salt = randomHex();
 
-        const res = await tokenFactoryMock.createToken.staticCall(
+        const res = await tokenFactory.createToken.staticCall(
           salt,
-          TOKEN_MOCK.name,
-          TOKEN_MOCK.symbol,
+          TOKEN.name,
+          TOKEN.symbol,
           randomAddress(),
         );
 
-        expect(res).eq(computeTokenMock(salt));
+        expect(res).eq(computeToken(salt));
       });
     });
   });

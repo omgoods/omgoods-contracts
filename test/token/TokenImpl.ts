@@ -2,7 +2,7 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
 import { randomAddress } from '../common';
-import { TOKEN_MOCK } from './constants';
+import { TOKEN } from './constants';
 import { setupTokenFactoryMock } from './fixtures';
 
 describe('token/TokenImpl // mocked', () => {
@@ -15,12 +15,12 @@ describe('token/TokenImpl // mocked', () => {
   describe('# deployment', () => {
     describe('initialize()', () => {
       it('expect to revert', async () => {
-        const { tokenImplMock } = fixture;
+        const { tokenImpl } = fixture;
 
-        const tx = tokenImplMock.initialize(ZeroAddress, '', '', ZeroAddress);
+        const tx = tokenImpl.initialize(ZeroAddress, '', '', ZeroAddress);
 
         await expect(tx).revertedWithCustomError(
-          tokenImplMock,
+          tokenImpl,
           'AlreadyInitialized',
         );
       });
@@ -30,36 +30,36 @@ describe('token/TokenImpl // mocked', () => {
   describe('# getters', () => {
     describe('name()', () => {
       it('expect to return the name', async () => {
-        const { tokenMock } = fixture;
+        const { token } = fixture;
 
-        const res = await tokenMock.name();
+        const res = await token.name();
 
-        expect(res).eq(TOKEN_MOCK.name);
+        expect(res).eq(TOKEN.name);
       });
     });
 
     describe('name()', () => {
       it('expect to return the symbol', async () => {
-        const { tokenMock } = fixture;
+        const { token } = fixture;
 
-        const res = await tokenMock.symbol();
+        const res = await token.symbol();
 
-        expect(res).eq(TOKEN_MOCK.symbol);
+        expect(res).eq(TOKEN.symbol);
       });
     });
 
     describe('# setters', () => {
       describe('_setOwner()', () => {
         it('expect to emit the event', async () => {
-          const { tokenMock, tokenFactoryMock } = fixture;
+          const { token, tokenFactory } = fixture;
 
           const owner = randomAddress();
 
-          const tx = tokenMock.setOwner(owner);
+          const tx = token.setOwner(owner);
 
           await expect(tx)
-            .emit(tokenFactoryMock, 'TokenOwnerUpdated')
-            .withArgs(await tokenMock.getAddress(), owner);
+            .emit(tokenFactory, 'TokenOwnerUpdated')
+            .withArgs(await token.getAddress(), owner);
         });
       });
     });

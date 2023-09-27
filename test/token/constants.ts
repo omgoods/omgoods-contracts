@@ -1,7 +1,7 @@
 import { randomHex } from '../common';
 
-export const TOKEN_MOCK = {
+export const TOKEN = {
   salt: randomHex(),
-  name: 'Mock',
-  symbol: 'MOCK',
+  name: 'Test',
+  symbol: 'TEST',
 };

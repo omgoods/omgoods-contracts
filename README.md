@@ -23,9 +23,11 @@ npm run verify:etherscan  # verifies deployed contracts on etherscan
 npm run hardhat           # hardhat cli wrapper
 ```
 
-## No license
+## License
 
-[license-image]: https://img.shields.io/badge/License-NONE-red.svg
+NONE
+
+[license-image]: https://img.shields.io/badge/license-NONE-red.svg
 
 [coverage-image]: https://github.com/omgoods/omgoods-contracts/actions/workflows/coverage.yml/badge.svg
 [coverage-url]: https://github.com/omgoods/omgoods-contracts/actions/workflows/coverage.yml

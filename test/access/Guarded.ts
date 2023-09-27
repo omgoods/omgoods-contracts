@@ -18,25 +18,25 @@ describe('access/Guarded // mocked', () => {
 
     describe('hasGuardian()', () => {
       it("expect to return false if the guardian doesn't exist", async () => {
-        const { guardedMock } = fixture;
+        const { guarded } = fixture;
 
-        const res = await guardedMock.hasGuardian(randomAddress());
+        const res = await guarded.hasGuardian(randomAddress());
 
         expect(res).false;
       });
 
       it('expect to return true if the guardian exists', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const res = await guardedMock.hasGuardian(signers.guardian);
+        const res = await guarded.hasGuardian(signers.guardian);
 
         expect(res).true;
       });
 
       it('expect to return true for the owner', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const res = await guardedMock.hasGuardian(signers.owner);
+        const res = await guarded.hasGuardian(signers.owner);
 
         expect(res).true;
       });
@@ -47,29 +47,29 @@ describe('access/Guarded // mocked', () => {
       const hash = hashMessage(message);
 
       it('expect to revert when the signer is not a guardian', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const tx = guardedMock.verifyGuardianSignature(
+        const tx = guarded.verifyGuardianSignature(
           hash,
           await signers.unknown.at(0).signMessage(message),
         );
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'InvalidGuardianSignature',
         );
       });
 
       it('expect not to revert when the signer is a guardian', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const tx = guardedMock.verifyGuardianSignature(
+        const tx = guarded.verifyGuardianSignature(
           hash,
           await signers.guardian.signMessage(message),
         );
 
         await expect(tx).not.revertedWithCustomError(
-          guardedMock,
+          guarded,
           'InvalidGuardianSignature',
         );
       });
@@ -81,48 +81,48 @@ describe('access/Guarded // mocked', () => {
       createBeforeHook();
 
       it('expect to revert when the msg.sender is not the owner', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const tx = guardedMock
+        const tx = guarded
           .connect(signers.guardian)
           .addGuardian(randomAddress());
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'MsgSenderIsNotTheContractOwner',
         );
       });
 
       it('expect to revert when the guardian is the zero address', async () => {
-        const { guardedMock } = fixture;
+        const { guarded } = fixture;
 
-        const tx = guardedMock.addGuardian(ZeroAddress);
+        const tx = guarded.addGuardian(ZeroAddress);
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'GuardianIsTheZeroAddress',
         );
       });
 
       it('expect to revert when the guardian already exists', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const tx = guardedMock.addGuardian(signers.guardian);
+        const tx = guarded.addGuardian(signers.guardian);
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'GuardianAlreadyExists',
         );
       });
 
       it('expect to add a new guardian', async () => {
-        const { guardedMock } = fixture;
+        const { guarded } = fixture;
 
         const guardian = randomAddress();
 
-        const tx = guardedMock.addGuardian(guardian);
+        const tx = guarded.addGuardian(guardian);
 
-        await expect(tx).emit(guardedMock, 'GuardianAdded').withArgs(guardian);
+        await expect(tx).emit(guarded, 'GuardianAdded').withArgs(guardian);
       });
     });
 
@@ -130,47 +130,47 @@ describe('access/Guarded // mocked', () => {
       createBeforeHook();
 
       it('expect to revert when the msg.sender is not the owner', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const tx = guardedMock
+        const tx = guarded
           .connect(signers.guardian)
           .removeGuardian(randomAddress());
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'MsgSenderIsNotTheContractOwner',
         );
       });
 
       it('expect to revert when the guardian is the zero address', async () => {
-        const { guardedMock } = fixture;
+        const { guarded } = fixture;
 
-        const tx = guardedMock.removeGuardian(ZeroAddress);
+        const tx = guarded.removeGuardian(ZeroAddress);
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'GuardianIsTheZeroAddress',
         );
       });
 
       it("expect to revert when the guardian doesn't exist", async () => {
-        const { guardedMock } = fixture;
+        const { guarded } = fixture;
 
-        const tx = guardedMock.removeGuardian(randomAddress());
+        const tx = guarded.removeGuardian(randomAddress());
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'GuardianDoesntExist',
         );
       });
 
       it('expect to remove the guardian', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const tx = guardedMock.removeGuardian(signers.guardian);
+        const tx = guarded.removeGuardian(signers.guardian);
 
         await expect(tx)
-          .emit(guardedMock, 'GuardianRemoved')
+          .emit(guarded, 'GuardianRemoved')
           .withArgs(signers.guardian.address);
       });
     });
@@ -179,39 +179,36 @@ describe('access/Guarded // mocked', () => {
       createBeforeHook();
 
       it('expect to revert when one of the guardians is the zero address', async () => {
-        const { guardedMock } = fixture;
+        const { guarded } = fixture;
 
-        const tx = guardedMock.addGuardians([ZeroAddress, randomAddress()]);
+        const tx = guarded.addGuardians([ZeroAddress, randomAddress()]);
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'GuardianIsTheZeroAddress',
         );
       });
 
       it('expect to revert when one of the guardians already exists', async () => {
-        const { guardedMock, signers } = fixture;
+        const { guarded, signers } = fixture;
 
-        const tx = guardedMock.addGuardians([
-          randomAddress(),
-          signers.guardian,
-        ]);
+        const tx = guarded.addGuardians([randomAddress(), signers.guardian]);
 
         await expect(tx).revertedWithCustomError(
-          guardedMock,
+          guarded,
           'GuardianAlreadyExists',
         );
       });
 
       it('expect to add many guardians', async () => {
-        const { guardedMock } = fixture;
+        const { guarded } = fixture;
 
         const guardians = [randomAddress(), randomAddress()];
 
-        await guardedMock.addGuardians(guardians);
+        await guarded.addGuardians(guardians);
 
         for (const guardian of guardians) {
-          expect(await guardedMock.hasGuardian(guardian)).true;
+          expect(await guarded.hasGuardian(guardian)).true;
         }
       });
     });

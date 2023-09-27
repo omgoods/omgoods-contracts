@@ -14,19 +14,19 @@ describe('utils/Bytes // mocked', () => {
   describe('# getters', () => {
     describe('deepKeccak256()', () => {
       it('expect to return the correct hash', async () => {
-        const { bytesMock } = fixture;
+        const { bytes } = fixture;
 
         const data = [randomHex(10), randomHex(20), randomHex(30)];
 
-        const res = await bytesMock.deepKeccak256(data);
+        const res = await bytes.deepKeccak256(data);
 
         expect(res).eq(keccak256(concat(data.map((item) => keccak256(item)))));
       });
 
       it('expect to return the correct hash for empty data', async () => {
-        const { bytesMock } = fixture;
+        const { bytes } = fixture;
 
-        const res = await bytesMock.deepKeccak256([]);
+        const res = await bytes.deepKeccak256([]);
 
         expect(res).eq(keccak256('0x'));
       });

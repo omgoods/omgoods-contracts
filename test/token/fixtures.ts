@@ -1,71 +1,56 @@
 import { ethers } from 'hardhat';
-import {
-  getSigners,
-  createProxyCloneAddressFactory,
-  TYPED_DATA_DOMAIN,
-} from '../common';
-import { TOKEN_MOCK } from './constants';
+import { getSigners, createProxyCloneAddressFactory } from '../common';
+import { TOKEN } from './constants';
 
 const { deployContract, getContractAt } = ethers;
 
 export async function deployTokenFactoryMock() {
   const signers = await getSigners('owner', 'gateway', 'guardian', 'token');
 
-  const tokenFactoryMock = await deployContract('TokenFactoryMock', [
-    signers.owner,
-    TYPED_DATA_DOMAIN.name,
-    TYPED_DATA_DOMAIN.version,
-  ]);
+  const tokenFactory = await deployContract('TokenFactoryMock');
 
   return {
-    tokenFactoryMock,
+    tokenFactory,
     signers,
   };
 }
 
 export async function deployTokenImplMock() {
-  const tokenImplMock = await deployContract('TokenImplMock');
+  const tokenImpl = await deployContract('TokenImplMock');
 
   return {
-    tokenImplMock,
+    tokenImpl,
   };
 }
 
 export async function setupTokenFactoryMock() {
-  const { tokenImplMock } = await deployTokenImplMock();
+  const { tokenImpl } = await deployTokenImplMock();
 
-  const { tokenFactoryMock, signers } = await deployTokenFactoryMock();
+  const { tokenFactory, signers } = await deployTokenFactoryMock();
 
-  await tokenFactoryMock.initialize(
-    signers.gateway,
-    [signers.guardian],
-    tokenImplMock,
-  );
+  await tokenFactory.initialize(signers.gateway, [signers.guardian], tokenImpl);
 
-  await tokenFactoryMock.addToken(signers.token);
+  await tokenFactory.addToken(signers.token);
 
-  await tokenFactoryMock.createToken(
-    TOKEN_MOCK.salt,
-    TOKEN_MOCK.name,
-    TOKEN_MOCK.symbol,
+  await tokenFactory.createToken(
+    TOKEN.salt,
+    TOKEN.name,
+    TOKEN.symbol,
     signers.owner,
   );
 
-  const computeTokenMock = await createProxyCloneAddressFactory(
-    tokenFactoryMock,
-    tokenImplMock,
+  const computeToken = await createProxyCloneAddressFactory(
+    tokenFactory,
+    tokenImpl,
   );
 
-  const tokenMock = await getContractAt(
-    'TokenImplMock',
-    computeTokenMock(TOKEN_MOCK.salt),
-  );
+  const token = await getContractAt('TokenImpl', computeToken(TOKEN.salt));
 
   return {
-    tokenImplMock,
-    tokenFactoryMock,
+    tokenImpl,
+    tokenFactory,
     signers,
-    computeTokenMock,
-    tokenMock,
+    computeToken,
+    token,
   };
 }

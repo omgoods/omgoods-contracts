@@ -50,10 +50,10 @@ export async function getSigners<
 export async function createTypedDataHelper<
   D extends Record<string, Record<string, any>>,
   P extends keyof D = keyof D,
->(options: {
-  verifyingContract: AddressLike;
-  types: Record<P, Array<TypedDataField>>;
-}): Promise<{
+>(
+  verifyingContract: AddressLike,
+  types: Record<P, Array<TypedDataField>>,
+): Promise<{
   encode: (primaryType: P, data: D[P]) => string;
   hash: (primaryType: P, data: D[P]) => string;
   sign: (
@@ -65,8 +65,6 @@ export async function createTypedDataHelper<
   const {
     config: { chainId },
   } = network;
-
-  const { verifyingContract, types } = options;
 
   const domain: TypedDataDomain = {
     ...TYPED_DATA_DOMAIN,

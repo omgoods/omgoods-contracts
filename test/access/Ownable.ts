@@ -16,9 +16,9 @@ describe('access/Ownable // mocked', () => {
   describe('# deployment', () => {
     describe('constructor()', () => {
       it('expect to deploy the contract with the msg.sender as the owner', async () => {
-        const { ownableMock, signers } = await deployOwnableMock();
+        const { ownable, signers } = await deployOwnableMock();
 
-        const res = await ownableMock.getOwner();
+        const res = await ownable.getOwner();
 
         expect(res).eq(signers.owner.address);
       });
@@ -26,11 +26,11 @@ describe('access/Ownable // mocked', () => {
       it('expect to deploy the contract with a custom owner', async () => {
         const owner = randomAddress();
 
-        const { ownableMock } = await deployOwnableMock({
+        const { ownable } = await deployOwnableMock({
           owner,
         });
 
-        const res = await ownableMock.getOwner();
+        const res = await ownable.getOwner();
 
         expect(res).eq(owner);
       });
@@ -42,9 +42,9 @@ describe('access/Ownable // mocked', () => {
 
     describe('getOwner()', () => {
       it('expect to return the owner', async () => {
-        const { ownableMock, signers } = fixture;
+        const { ownable, signers } = fixture;
 
-        const res = await ownableMock.getOwner();
+        const res = await ownable.getOwner();
 
         expect(res).eq(signers.owner.address);
       });
@@ -56,41 +56,41 @@ describe('access/Ownable // mocked', () => {
       createBeforeHook();
 
       it('expect to revert when the msg.sender is not the owner', async () => {
-        const { ownableMock, signers } = fixture;
+        const { ownable, signers } = fixture;
 
-        const tx = ownableMock
+        const tx = ownable
           .connect(signers.unknown.at(0))
           .setOwner(randomAddress());
 
         await expect(tx).revertedWithCustomError(
-          ownableMock,
+          ownable,
           'MsgSenderIsNotTheContractOwner',
         );
       });
 
       it('expect to revert when the owner is the zero address', async () => {
-        const { ownableMock } = fixture;
+        const { ownable } = fixture;
 
-        const tx = ownableMock.setOwner(ZeroAddress);
+        const tx = ownable.setOwner(ZeroAddress);
 
         await expect(tx).revertedWithCustomError(
-          ownableMock,
+          ownable,
           'OwnerIsTheZeroAddress',
         );
       });
 
       it('expect to update the owner', async () => {
-        const { ownableMock, signers } = fixture;
+        const { ownable, signers } = fixture;
 
         const newOwner = signers.unknown.at(0);
 
-        const tx = ownableMock.setOwner(newOwner);
+        const tx = ownable.setOwner(newOwner);
 
         await expect(tx)
-          .emit(ownableMock, 'OwnerUpdated')
+          .emit(ownable, 'OwnerUpdated')
           .withArgs(newOwner.address);
 
-        fixture.ownableMock = ownableMock.connect(newOwner);
+        fixture.ownable = ownable.connect(newOwner);
       });
     });
   });

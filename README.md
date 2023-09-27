@@ -1,7 +1,7 @@
 # OM!goods contracts
 
-![License NONE][license-image]
 [![Coverage workflow][coverage-image]][coverage-url]
+![License NONE][license-image]
 
 ## Installation
 
@@ -27,7 +27,7 @@ npm run hardhat           # hardhat cli wrapper
 
 NONE
 
-[license-image]: https://img.shields.io/badge/license-NONE-red.svg
-
 [coverage-image]: https://github.com/omgoods/omgoods-contracts/actions/workflows/coverage.yml/badge.svg
 [coverage-url]: https://github.com/omgoods/omgoods-contracts/actions/workflows/coverage.yml
+
+[license-image]: https://img.shields.io/badge/license-NONE-red.svg

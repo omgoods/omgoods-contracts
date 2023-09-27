@@ -9,9 +9,8 @@ contract TokenImplMock is TokenImpl {
   function initialize(
     address gateway,
     string calldata name_,
-    string calldata symbol_,
-    address owner
+    string calldata symbol_
   ) external {
-    _initialize(gateway, name_, symbol_, owner);
+    _initialize(gateway, name_, symbol_);
   }
 }

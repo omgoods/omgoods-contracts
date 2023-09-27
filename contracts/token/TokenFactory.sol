@@ -69,12 +69,6 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
     return _tokens[token];
   }
 
-  // external setters
-
-  function emitTokenOwnerUpdated(address owner) external onlyToken {
-    emit TokenOwnerUpdated(msg.sender, owner);
-  }
-
   // internal getters
 
   function _computeToken(bytes32 salt) internal view returns (address) {

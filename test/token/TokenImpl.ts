@@ -1,7 +1,6 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../common';
 import { TOKEN } from './constants';
 import { setupTokenFactoryMock } from './fixtures';
 
@@ -17,7 +16,7 @@ describe('token/TokenImpl // mocked', () => {
       it('expect to revert', async () => {
         const { tokenImpl } = fixture;
 
-        const tx = tokenImpl.initialize(ZeroAddress, '', '', ZeroAddress);
+        const tx = tokenImpl.initialize(ZeroAddress, '', '');
 
         await expect(tx).revertedWithCustomError(
           tokenImpl,
@@ -45,22 +44,6 @@ describe('token/TokenImpl // mocked', () => {
         const res = await token.symbol();
 
         expect(res).eq(TOKEN.symbol);
-      });
-    });
-
-    describe('# setters', () => {
-      describe('_setOwner()', () => {
-        it('expect to emit the event', async () => {
-          const { token, tokenFactory } = fixture;
-
-          const owner = randomAddress();
-
-          const tx = token.setOwner(owner);
-
-          await expect(tx)
-            .emit(tokenFactory, 'TokenOwnerUpdated')
-            .withArgs(await token.getAddress(), owner);
-        });
       });
     });
   });

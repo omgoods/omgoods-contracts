@@ -1,10 +1,25 @@
 import { ethers } from 'hardhat';
-import { AddressLike } from 'ethers';
+import { AddressLike, BigNumberish, parseEther } from 'ethers';
 import { getSigners } from '../../common';
 import { TOKEN } from '../constants';
 
 const { deployContract } = ethers;
 
+export async function deployERC20ExternalTokenMock(options?: {
+  name?: string;
+  symbol?: string;
+  initialSupply?: BigNumberish;
+}) {
+  const externalToken = await deployContract('ERC20ExternalTokenMock', [
+    options?.name || TOKEN.name,
+    options?.symbol || TOKEN.symbol,
+    options?.initialSupply || parseEther('100000000'),
+  ]);
+
+  return {
+    externalToken,
+  };
+}
 export async function deployERC20TokenImplMock(options: {
   gateway: AddressLike;
   tokenFactory: AddressLike;

@@ -181,33 +181,6 @@ describe('token/TokenFactory // mocked', () => {
   });
 
   describe('# setters', () => {
-    describe('emitTokenOwnerUpdated()', () => {
-      it('expect to revert when the sender is not a token', async () => {
-        const { tokenFactory } = fixture;
-
-        const tx = tokenFactory.emitTokenOwnerUpdated(randomAddress());
-
-        await expect(tx).revertedWithCustomError(
-          tokenFactory,
-          'MsgSenderIsNotTheToken',
-        );
-      });
-
-      it('expect to emit the event', async () => {
-        const { tokenFactory, signers } = fixture;
-
-        const owner = randomAddress();
-
-        const tx = tokenFactory
-          .connect(signers.token)
-          .emitTokenOwnerUpdated(owner);
-
-        await expect(tx)
-          .emit(tokenFactory, 'TokenOwnerUpdated')
-          .withArgs(signers.token.address, owner);
-      });
-    });
-
     describe('_createToken()', () => {
       it('expect to revert when the token already exists', async () => {
         const { tokenFactory } = fixture;
@@ -216,7 +189,6 @@ describe('token/TokenFactory // mocked', () => {
           TOKEN.salt,
           TOKEN.name,
           TOKEN.symbol,
-          randomAddress(),
         );
 
         await expect(tx).revertedWithCustomError(
@@ -234,7 +206,6 @@ describe('token/TokenFactory // mocked', () => {
           salt,
           TOKEN.name,
           TOKEN.symbol,
-          randomAddress(),
         );
 
         expect(res).eq(computeToken(salt));

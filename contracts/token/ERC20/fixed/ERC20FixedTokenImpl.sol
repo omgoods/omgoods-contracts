@@ -13,7 +13,7 @@ contract ERC20FixedTokenImpl is ERC20TokenImpl {
     address owner,
     uint256 totalSupply_
   ) external {
-    _initialize(gateway, name_, symbol_, owner);
+    _initialize(gateway, name_, symbol_);
 
     _update(address(0), owner, totalSupply_);
   }

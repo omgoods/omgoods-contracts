@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {Ownable} from "../access/Ownable.sol";
+import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
 import {Initializable} from "../utils/Initializable.sol";
-import {TokenFactory} from "./TokenFactory.sol";
 
-abstract contract TokenImpl is Ownable, Initializable {
+abstract contract TokenImpl is GatewayRecipient, Initializable {
   // storage
 
   address internal _tokenFactory;
@@ -16,7 +15,7 @@ abstract contract TokenImpl is Ownable, Initializable {
 
   // deployment
 
-  constructor() Ownable(address(0)) {
+  constructor() {
     _initialized = true;
   }
 
@@ -29,16 +28,13 @@ abstract contract TokenImpl is Ownable, Initializable {
   function _initialize(
     address gateway,
     string calldata name_,
-    string calldata symbol_,
-    address owner
+    string calldata symbol_
   ) internal {
     _initialize(gateway);
 
     _name = name_;
 
     _symbol = symbol_;
-
-    _owner = owner;
   }
 
   // public getters
@@ -49,13 +45,5 @@ abstract contract TokenImpl is Ownable, Initializable {
 
   function symbol() public view virtual returns (string memory) {
     return _symbol;
-  }
-
-  // internal setters
-
-  function _setOwner(address owner) internal virtual override {
-    super._setOwner(owner);
-
-    TokenFactory(_tokenFactory).emitTokenOwnerUpdated(owner);
   }
 }

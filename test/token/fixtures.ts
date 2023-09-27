@@ -32,12 +32,7 @@ export async function setupTokenFactoryMock() {
 
   await tokenFactory.addToken(signers.token);
 
-  await tokenFactory.createToken(
-    TOKEN.salt,
-    TOKEN.name,
-    TOKEN.symbol,
-    signers.owner,
-  );
+  await tokenFactory.createToken(TOKEN.salt, TOKEN.name, TOKEN.symbol);
 
   const computeToken = await createProxyCloneAddressFactory(
     tokenFactory,

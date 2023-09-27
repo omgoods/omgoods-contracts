@@ -33,12 +33,11 @@ contract TokenFactoryMock is TokenFactory {
   function createToken(
     bytes32 salt,
     string calldata name,
-    string calldata symbol,
-    address owner
+    string calldata symbol
   ) external returns (address token) {
     token = _createToken(salt);
 
-    TokenImplMock(token).initialize(_gateway, name, symbol, owner);
+    TokenImplMock(token).initialize(_gateway, name, symbol);
 
     return token;
   }

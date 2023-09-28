@@ -72,10 +72,12 @@ describe('token/erc20/wrapped/ERC20WrappedTokenFactory', () => {
 
         const sender = signers.unknown.at(0);
 
+        const underlyingToken = await supportedToken.getAddress();
+
         const tx = tokenFactory.connect(sender).createToken(
-          supportedToken,
+          underlyingToken,
           await typeDataHelper.sign(sender, 'Token', {
-            underlyingToken: supportedToken,
+            underlyingToken,
           }),
         );
 
@@ -96,20 +98,22 @@ describe('token/erc20/wrapped/ERC20WrappedTokenFactory', () => {
 
         const sender = signers.unknown.at(0);
 
+        const underlyingToken = await supportedToken.getAddress();
+
         const tx = tokenFactory.connect(sender).createToken(
-          supportedToken,
+          underlyingToken,
           await typeDataHelper.sign(signers.guardian, 'Token', {
-            underlyingToken: supportedToken,
+            underlyingToken,
           }),
         );
 
         await expect(tx)
           .emit(tokenFactory, 'TokenCreated')
           .withArgs(
-            computeToken(supportedToken),
+            computeToken(underlyingToken),
             TOKEN.name,
             TOKEN.symbol,
-            supportedToken,
+            underlyingToken,
           );
       });
     });

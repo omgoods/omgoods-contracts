@@ -1,5 +1,5 @@
 import { ethers } from 'hardhat';
-import { ZeroAddress, keccak256 } from 'ethers';
+import { ZeroAddress, keccak256, parseEther, MaxUint256 } from 'ethers';
 import {
   getSigners,
   TYPED_DATA_DOMAIN,
@@ -19,7 +19,7 @@ export async function deployERC20WrappedTokenImpl() {
 }
 
 export async function deployERC20WrappedTokenFactory() {
-  const signers = await getSigners('owner', 'guardian', 'controller');
+  const signers = await getSigners('owner', 'guardian');
 
   const tokenFactory = await deployContract('ERC20WrappedTokenFactory', [
     signers.owner,
@@ -63,6 +63,10 @@ export async function setupERC20WrappedTokenFactory() {
     computeToken(await underlyingToken.getAddress()),
   );
 
+  await underlyingToken.approve(token, MaxUint256);
+
+  await token.deposit(parseEther('50000000'));
+
   const typeDataHelper = await createTypedDataHelper<{
     Token: {
       underlyingToken: string;
@@ -80,9 +84,9 @@ export async function setupERC20WrappedTokenFactory() {
     tokenFactory,
     tokenImpl,
     token,
-    underlyingToken: await underlyingToken.getAddress(),
-    supportedToken: await supportedToken.getAddress(),
-    unsupportedToken: await unsupportedToken.getAddress(),
+    underlyingToken,
+    supportedToken,
+    unsupportedToken,
     computeToken,
     signers,
     typeDataHelper,

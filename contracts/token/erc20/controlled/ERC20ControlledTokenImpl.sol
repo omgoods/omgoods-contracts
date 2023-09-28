@@ -47,11 +47,11 @@ contract ERC20ControlledTokenImpl is ERC20TokenImpl {
 
   // external setters
 
-  function mint(address to, uint256 amount) external onlyController {
-    _mint(to, amount);
+  function mint(address to, uint256 value) external onlyController {
+    _mint(to, value);
   }
 
-  function burn(address from, uint256 amount) external onlyController {
-    _burn(from, amount);
+  function burn(address from, uint256 value) external onlyController {
+    _burn(from, value);
   }
 }

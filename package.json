@@ -9,12 +9,13 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
+    "deploy:export": "hardhat export --network localhost --export-all ./deployments.ts",
     "verify:etherscan": "hardhat etherscan-verify",
     "events:generate": "hardhat --network localhost run ./scripts/events/generate.ts",
     "hardhat": "hardhat"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "5.0.0-rc.0"
+    "@openzeppelin/contracts": "5.0.0-rc.1"
   },
   "devDependencies": {
     "@newobject/dotenv": "0.1.2",

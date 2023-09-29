@@ -26,6 +26,7 @@ node_modules
 .hardhat
 coverage*
 typechain
+/deployments.ts
 
 # envs
 .env*.local

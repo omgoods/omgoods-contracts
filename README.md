@@ -19,6 +19,7 @@ npm run compile           # compiles contracts
 npm run test              # runs unit tests
 npm run coverage          # runs coverage tests
 npm run deploy            # deploys contracts
+npm run deploy:export     # export all deployments into one ./deployments.ts
 npm run verify:etherscan  # verifies deployed contracts on etherscan
 npm run hardhat           # hardhat cli wrapper
 ```

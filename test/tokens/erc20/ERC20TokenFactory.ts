@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { randomAddress } from '../../common';
 import { setupERC20TokenFactoryMock } from './fixtures';
 
-describe('token/erc20/ERC20TokenFactory // mocked', () => {
+describe('tokens/erc20/ERC20TokenFactory // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20TokenFactoryMock>>;
 
   before(async () => {

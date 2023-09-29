@@ -17,8 +17,6 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   event Initialized(address gateway, address[] guardians, address tokenImpl);
 
-  event TokenOwnerUpdated(address token, address owner);
-
   // errors
 
   error MsgSenderIsNotTheToken();

@@ -3,7 +3,7 @@ import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
 import { deployERC20FixedTokenImpl } from './fixtures';
 
-describe('token/erc20/fixed/ERC20FixedTokenImpl', () => {
+describe('tokens/erc20/fixed/ERC20FixedTokenImpl', () => {
   let fixture: Awaited<ReturnType<typeof deployERC20FixedTokenImpl>>;
 
   before(async () => {

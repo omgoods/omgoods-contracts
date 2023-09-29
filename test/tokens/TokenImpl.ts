@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { TOKEN } from './constants';
 import { setupTokenFactoryMock } from './fixtures';
 
-describe('token/TokenImpl // mocked', () => {
+describe('tokens/TokenImpl // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupTokenFactoryMock>>;
 
   before(async () => {

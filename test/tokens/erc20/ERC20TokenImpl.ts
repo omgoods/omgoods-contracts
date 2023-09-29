@@ -5,7 +5,7 @@ import { randomAddress } from '../../common';
 import { TOKEN } from '../constants';
 import { setupERC20TokenFactoryMock } from './fixtures';
 
-describe('token/erc20/ERC20TokenImpl // mocked', () => {
+describe('tokens/erc20/ERC20TokenImpl // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20TokenFactoryMock>>;
 
   before(async () => {

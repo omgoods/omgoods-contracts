@@ -5,7 +5,7 @@ import { randomAddress, randomHex } from '../common';
 import { TOKEN } from './constants';
 import { deployTokenFactoryMock, setupTokenFactoryMock } from './fixtures';
 
-describe('token/TokenFactory // mocked', () => {
+describe('tokens/TokenFactory // mocked', () => {
   describe('# deployment', () => {
     let fixture: Awaited<ReturnType<typeof deployTokenFactoryMock>>;
 

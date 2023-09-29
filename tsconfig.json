@@ -8,5 +8,5 @@
     "skipLibCheck": true
   },
   "files": ["hardhat.config.ts"],
-  "include": ["deploy", "src", "test", "typechain"]
+  "include": ["deploy", "scripts", "src", "test", "typechain"]
 }

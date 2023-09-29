@@ -1,15 +1,14 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
+import { FIXED_TOKEN } from './constants';
+import { setupERC20FixedTokenFactory } from './fixtures';
 import { ZeroAddress } from 'ethers';
-import { randomAddress } from '../../../common';
-import { TOKEN } from '../../constants';
-import { setupERC20ControlledTokenFactory } from './fixtures';
 
-describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
-  let fixture: Awaited<ReturnType<typeof setupERC20ControlledTokenFactory>>;
+describe('tokens/erc20/fixed/ERC20FixedTokenFactory', () => {
+  let fixture: Awaited<ReturnType<typeof setupERC20FixedTokenFactory>>;
 
   before(async () => {
-    fixture = await loadFixture(setupERC20ControlledTokenFactory);
+    fixture = await loadFixture(setupERC20FixedTokenFactory);
   });
 
   describe('# getters', () => {
@@ -17,9 +16,9 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
       it('expect to return the correct address', async () => {
         const { tokenFactory, computeToken } = fixture;
 
-        const res = await tokenFactory.computeToken(TOKEN.symbol);
+        const res = await tokenFactory.computeToken(FIXED_TOKEN.symbol);
 
-        expect(res).eq(computeToken(TOKEN.symbol));
+        expect(res).eq(computeToken(FIXED_TOKEN.symbol));
       });
     });
 
@@ -27,34 +26,46 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
       it('expect to return the correct hash', async () => {
         const { tokenFactory, typeDataHelper } = fixture;
 
-        const tokenData = {
-          ...TOKEN,
-          controller: randomAddress(),
-        };
+        const res = await tokenFactory.hashToken(FIXED_TOKEN);
 
-        const res = await tokenFactory.hashToken(tokenData);
-
-        expect(res).eq(typeDataHelper.hash('Token', tokenData));
+        expect(res).eq(typeDataHelper.hash('Token', FIXED_TOKEN));
       });
     });
   });
 
   describe('# setters', () => {
     describe('creatToken()', () => {
-      it('expect to revert when the controller is the zero address', async () => {
+      it('expect to revert when the owner is the zero address', async () => {
         const { tokenFactory } = fixture;
 
         const tx = tokenFactory.createToken(
           {
-            ...TOKEN,
-            controller: ZeroAddress,
+            ...FIXED_TOKEN,
+            owner: ZeroAddress,
           },
           '0x',
         );
 
         await expect(tx).revertedWithCustomError(
           tokenFactory,
-          'TokenControllerIsTheZeroAddress',
+          'TokenOwnerIsTheZeroAddress',
+        );
+      });
+
+      it('expect to revert when the total supply is the zero', async () => {
+        const { tokenFactory } = fixture;
+
+        const tx = tokenFactory.createToken(
+          {
+            ...FIXED_TOKEN,
+            totalSupply: 0,
+          },
+          '0x',
+        );
+
+        await expect(tx).revertedWithCustomError(
+          tokenFactory,
+          'InvalidTokenTotalSupply',
         );
       });
 
@@ -63,16 +74,11 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
 
         const sender = signers.unknown.at(0);
 
-        const tokenData = {
-          ...TOKEN,
-          controller: randomAddress(),
-        };
-
         const tx = tokenFactory
           .connect(sender)
           .createToken(
-            tokenData,
-            await typeDataHelper.sign(sender, 'Token', tokenData),
+            FIXED_TOKEN,
+            await typeDataHelper.sign(sender, 'Token', FIXED_TOKEN),
           );
 
         await expect(tx).revertedWithCustomError(
@@ -87,9 +93,8 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
         const sender = signers.unknown.at(0);
 
         const tokenData = {
-          ...TOKEN,
+          ...FIXED_TOKEN,
           symbol: 'NEW',
-          controller: randomAddress(),
         };
 
         const tx = tokenFactory
@@ -105,7 +110,8 @@ describe('token/erc20/controlled/ERC20ControlledTokenFactory', () => {
             computeToken(tokenData.symbol),
             tokenData.name,
             tokenData.symbol,
-            tokenData.controller,
+            tokenData.owner,
+            tokenData.totalSupply,
           );
       });
     });

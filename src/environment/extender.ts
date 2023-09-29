@@ -3,17 +3,11 @@ import { extendEnvironment } from 'hardhat/config';
 extendEnvironment((hre) => {
   const { deployments } = hre;
 
-  deployments.logTx = async (name, methodName, tx) => {
-    const { stdout } = process;
+  deployments.getAddress = async (name) => {
+    const { get } = deployments;
 
-    const res = await tx;
+    const deployment = await get(name);
 
-    const { hash } = res;
-
-    stdout.write(`executing "${name}.${methodName}" (tx: ${hash})...`);
-
-    const { gasUsed } = await res.wait();
-
-    stdout.write(`: performed with ${gasUsed} gas\n`);
+    return deployment?.address || null;
   };
 });

@@ -4,12 +4,13 @@
   "scripts": {
     "start": "hardhat node",
     "linter": "solhint \"contracts/**/*.sol\"",
-    "format": "prettier --write \"{contracts,deploy,src,test}/**/*.{ts,sol}\"",
+    "format": "prettier --write \"{contracts,deploy,scripts,src,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
     "verify:etherscan": "hardhat etherscan-verify",
+    "events:generate": "hardhat --network localhost run ./scripts/events/generate.ts",
     "hardhat": "hardhat"
   },
   "dependencies": {

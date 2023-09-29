@@ -2,7 +2,6 @@ import { DeployFunction } from 'hardhat-deploy/types';
 
 const func: DeployFunction = async (hre) => {
   const {
-    network: { live },
     deployments: { log, deploy },
     getNamedAccounts,
   } = hre;
@@ -13,17 +12,13 @@ const func: DeployFunction = async (hre) => {
   const { deployer } = await getNamedAccounts();
 
   await deploy('Gateway', {
-    from: deployer,
+    from: deployer, // nonce 0
     log: true,
     args: [
       'OM!goods Gateway', // name
       '0.0.1', // version
     ],
   });
-
-  if (live) {
-    return;
-  }
 };
 
 func.tags = ['gateway'];

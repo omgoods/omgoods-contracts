@@ -29,7 +29,6 @@ const func: DeployFunction = async (hre) => {
     args: [
       owner,
       `OM!goods ERC20 ${TOKEN_TYPE} Token Factory`, // name
-      '0.0.1', // version
     ],
   });
 

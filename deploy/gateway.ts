@@ -16,7 +16,6 @@ const func: DeployFunction = async (hre) => {
     log: true,
     args: [
       'OM!goods Gateway', // name
-      '0.0.1', // version
     ],
   });
 };

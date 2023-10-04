@@ -1,4 +1,5 @@
 import { readdir, stat, readJson, writeFile } from 'fs-extra';
+import { format } from 'prettier';
 import { join } from 'path';
 import { task } from 'hardhat/config';
 
@@ -11,11 +12,14 @@ task(
     } = hre;
 
     const deployments: Record<
-      string,
-      {
-        addresses: Record<number, string>;
-        abi: any;
-      }
+      number,
+      Record<
+        string,
+        {
+          address: string;
+          abi: unknown;
+        }
+      >
     > = {};
 
     const dirNames = await readdir(paths.deployments);
@@ -42,27 +46,34 @@ task(
 
             const name = fileName.slice(0, -5);
 
-            if (!deployments[name]) {
-              deployments[name] = {
-                addresses: {
-                  [chainId]: address,
-                },
-                abi,
-              };
-            } else {
-              deployments[name].addresses[chainId] = address;
+            if (!deployments[chainId]) {
+              deployments[chainId] = {};
             }
+
+            deployments[chainId][name] = {
+              address,
+              abi,
+            };
           }
         }
       }
     }
 
-    await writeFile(
-      `${paths.deployments}.ts`,
-      `export default ${JSON.stringify(deployments, null, 2)};`,
-      {
-        encoding: 'utf8',
-      },
-    );
+    let content = `export default {${Object.entries(deployments)
+      .map(
+        ([chainId, deployment]) =>
+          `[${chainId}]: ${JSON.stringify(deployment)}`,
+      )
+      .join(',')}} as const;`;
+
+    content = await (format(content, {
+      parser: 'typescript',
+      singleQuote: true,
+      trailingComma: 'all',
+    }) as Promise<string>);
+
+    await writeFile(`${paths.deployments}.ts`, content, {
+      encoding: 'utf8',
+    });
   },
 );

@@ -9,8 +9,8 @@
     "test": "hardhat test",
     "coverage": "hardhat coverage",
     "deploy": "hardhat deploy",
-    "deploy:export": "hardhat export --network localhost --export-all ./deployments.ts",
-    "verify:etherscan": "hardhat etherscan-verify",
+    "deployments:export": "hardhat deployments:export",
+    "deployments:verify": "hardhat deployments:verify",
     "events:generate": "hardhat --network localhost run ./scripts/events/generate.ts",
     "hardhat": "hardhat"
   },

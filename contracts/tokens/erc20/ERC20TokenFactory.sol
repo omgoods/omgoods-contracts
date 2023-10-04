@@ -17,11 +17,7 @@ abstract contract ERC20TokenFactory is TokenFactory {
 
   // deployment
 
-  constructor(
-    address owner,
-    string memory name,
-    string memory version
-  ) TokenFactory(owner, name, version) {
+  constructor(address owner, string memory name) TokenFactory(owner, name) {
     //
   }
 

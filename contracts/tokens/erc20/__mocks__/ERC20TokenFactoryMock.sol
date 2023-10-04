@@ -6,7 +6,7 @@ import {ERC20TokenFactory} from "../ERC20TokenFactory.sol";
 contract ERC20TokenFactoryMock is ERC20TokenFactory {
   // deployment
 
-  constructor() ERC20TokenFactory(address(0), "", "") {
+  constructor() ERC20TokenFactory(address(0), "") {
     //
   }
 

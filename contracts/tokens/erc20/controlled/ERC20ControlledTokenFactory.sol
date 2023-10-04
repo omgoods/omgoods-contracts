@@ -31,9 +31,8 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
 
   constructor(
     address owner,
-    string memory name,
-    string memory version
-  ) ERC20TokenFactory(owner, name, version) {
+    string memory name
+  ) ERC20TokenFactory(owner, name) {
     //
   }
 

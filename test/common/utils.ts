@@ -14,7 +14,7 @@ import {
   BytesLike,
   getCreate2Address,
 } from 'ethers';
-import { TYPED_DATA_DOMAIN } from './constants';
+import { TYPED_DATA_DOMAIN_NAME } from './constants';
 
 export function randomHex(bytesSize = 32): string {
   return hexlify(randomBytes(bytesSize));
@@ -67,7 +67,8 @@ export async function createTypedDataHelper<
   } = network;
 
   const domain: TypedDataDomain = {
-    ...TYPED_DATA_DOMAIN,
+    name: TYPED_DATA_DOMAIN_NAME,
+    version: '1',
     chainId,
     verifyingContract: await resolveAddress(verifyingContract),
   };

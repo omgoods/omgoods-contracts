@@ -37,9 +37,8 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   constructor(
     address owner,
-    string memory name,
-    string memory version
-  ) Guarded(owner) EIP712(name, version) {
+    string memory name
+  ) Guarded(owner) EIP712(name, "1") {
     //
   }
 

@@ -2,7 +2,7 @@ import { ethers } from 'hardhat';
 import { ZeroAddress, id, BigNumberish } from 'ethers';
 import {
   getSigners,
-  TYPED_DATA_DOMAIN,
+  TYPED_DATA_DOMAIN_NAME,
   createTypedDataHelper,
   createProxyCloneAddressFactory,
 } from '../../../common';
@@ -23,8 +23,7 @@ export async function deployERC20FixedTokenFactory() {
 
   const tokenFactory = await deployContract('ERC20FixedTokenFactory', [
     signers.owner,
-    TYPED_DATA_DOMAIN.name,
-    TYPED_DATA_DOMAIN.version,
+    TYPED_DATA_DOMAIN_NAME,
   ]);
 
   return {

@@ -3,7 +3,7 @@ import { AddressLike, BigNumberish, BytesLike } from 'ethers';
 import {
   getSigners,
   createTypedDataHelper,
-  TYPED_DATA_DOMAIN,
+  TYPED_DATA_DOMAIN_NAME,
 } from '../common';
 
 const { deployContract } = ethers;
@@ -34,10 +34,7 @@ export async function deployGatewayRecipientMock(options?: {
 }
 
 export async function deployGateway() {
-  const gateway = await deployContract('Gateway', [
-    TYPED_DATA_DOMAIN.name,
-    TYPED_DATA_DOMAIN.version,
-  ]);
+  const gateway = await deployContract('Gateway', [TYPED_DATA_DOMAIN_NAME]);
 
   return {
     gateway,

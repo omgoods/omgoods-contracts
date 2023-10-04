@@ -63,7 +63,7 @@ contract Gateway is EIP712 {
 
   // deployment
 
-  constructor(string memory name, string memory version) EIP712(name, version) {
+  constructor(string memory name) EIP712(name, "1") {
     //
   }
 

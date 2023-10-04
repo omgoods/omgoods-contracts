@@ -7,7 +7,7 @@ import {TokenImplMock} from "./TokenImplMock.sol";
 contract TokenFactoryMock is TokenFactory {
   // deployment
 
-  constructor() TokenFactory(address(0), "", "") {
+  constructor() TokenFactory(address(0), "") {
     //
   }
 

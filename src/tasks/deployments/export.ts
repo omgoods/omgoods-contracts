@@ -7,7 +7,6 @@ task(
   'Exports deployed contracts into ./deployments.ts',
   async (_, hre) => {
     const {
-      run,
       config: { paths, networks },
     } = hre;
 

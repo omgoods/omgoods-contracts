@@ -4,6 +4,17 @@ import { getSigners } from '../common';
 
 const { deployContract } = ethers;
 
+export async function deployControlledMock() {
+  const signers = await getSigners('controller');
+
+  const controlled = await deployContract('ControlledMock');
+
+  return {
+    controlled,
+    signers,
+  };
+}
+
 export async function deployGuardedMock() {
   const signers = await getSigners('owner', 'guardian');
 

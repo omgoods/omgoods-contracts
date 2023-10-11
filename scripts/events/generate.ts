@@ -49,7 +49,7 @@ async function generateERC20ControlledTokenFactoryEvents(
   tokenData: {
     name: string;
     symbol: string;
-    controller: AddressLike;
+    controllers: AddressLike[];
   },
   options: {
     mint: BigNumberish;
@@ -76,9 +76,15 @@ async function generateERC20ControlledTokenFactoryEvents(
     await logTx('creating token', tokenFactory.createToken(tokenData, '0x'));
   }
 
-  await logTx('mint tokens', token.mint(tokenData.controller, options.mint));
+  await logTx(
+    'mint tokens',
+    token.mint(tokenData.controllers[0], options.mint),
+  );
 
-  await logTx('burn tokens', token.burn(tokenData.controller, options.burn));
+  await logTx(
+    'burn tokens',
+    token.burn(tokenData.controllers[0], options.burn),
+  );
 
   await generateERC20TokenEvents(token, options);
 
@@ -127,7 +133,7 @@ runScript(async () => {
     {
       name: 'Controlled',
       symbol: 'CONTROLLED',
-      controller: signer,
+      controllers: [signer],
     },
     {
       mint: parseEther('200000000'),

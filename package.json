@@ -11,8 +11,8 @@
     "deploy": "hardhat deploy",
     "deployments:export": "hardhat deployments:export",
     "deployments:verify": "hardhat deployments:verify",
-    "events:generate": "hardhat --network localhost run ./scripts/events/generate.ts",
-    "tokens:create": "hardhat run ./scripts/tokens/create.ts",
+    "tokens:create": "hardhat run scripts/tokens/create/run.ts",
+    "tokens:seed": "hardhat --network localhost run ./scripts/tokens/seed/run.ts",
     "hardhat": "hardhat"
   },
   "dependencies": {
@@ -22,21 +22,21 @@
     "@newobject/dotenv": "0.1.2",
     "@nomicfoundation/hardhat-ledger": "1.0.1",
     "@nomicfoundation/hardhat-toolbox": "3.0.0",
-    "@types/fs-extra": "11.0.1",
-    "@types/prompts": "2.4.5",
-    "@typescript-eslint/eslint-plugin": "6.4.0",
-    "@typescript-eslint/parser": "6.4.0",
-    "eslint": "8.47.0",
+    "@types/fs-extra": "11.0.2",
+    "@types/prompts": "2.4.6",
+    "@typescript-eslint/eslint-plugin": "6.7.5",
+    "@typescript-eslint/parser": "6.7.5",
+    "eslint": "8.51.0",
     "eslint-config-prettier": "9.0.0",
     "eslint-config-standard": "17.1.0",
     "eslint-plugin-chai-friendly": "0.7.2",
     "eslint-plugin-node": "11.1.0",
     "fs-extra": "11.1.1",
-    "hardhat": "2.17.1",
-    "hardhat-deploy": "0.11.36",
-    "prettier": "3.0.1",
+    "hardhat": "2.18.0",
+    "hardhat-deploy": "0.11.42",
+    "prettier": "3.0.3",
     "prettier-plugin-solidity": "1.1.3",
     "prompts": "2.4.2",
-    "solhint": "3.6.1"
+    "solhint": "3.6.2"
   }
 }

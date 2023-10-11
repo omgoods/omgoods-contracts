@@ -29,6 +29,10 @@ contract ERC721TokenImplMock is ERC721TokenImpl {
 
   // external setters
 
+  function mint(address to, uint256 tokenId) external {
+    _mint(to, tokenId);
+  }
+
   function update(
     address to,
     uint256 tokenId,

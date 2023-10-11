@@ -5,7 +5,7 @@ import { randomAddress } from '../../../common';
 import { TOKEN } from '../../constants';
 import { setupERC20ControlledTokenFactory } from './fixtures';
 
-describe('tokens/erc20/controlled/ERC20ControlledTokenFactory', () => {
+describe('tokens/erc20/presets/ERC20ControlledTokenFactory', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20ControlledTokenFactory>>;
 
   before(async () => {

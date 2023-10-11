@@ -4,7 +4,7 @@ import { FIXED_TOKEN } from './constants';
 import { setupERC20FixedTokenFactory } from './fixtures';
 import { ZeroAddress } from 'ethers';
 
-describe('tokens/erc20/fixed/ERC20FixedTokenFactory', () => {
+describe('tokens/erc20/presets/ERC20FixedTokenFactory', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20FixedTokenFactory>>;
 
   before(async () => {

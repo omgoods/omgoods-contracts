@@ -16,7 +16,7 @@
     "hardhat": "hardhat"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "5.0.0-rc.1"
+    "@openzeppelin/contracts": "5.0.0"
   },
   "devDependencies": {
     "@newobject/dotenv": "0.1.2",

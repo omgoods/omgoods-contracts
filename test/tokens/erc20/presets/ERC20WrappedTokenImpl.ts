@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { randomAddress } from '../../../common';
 import { setupERC20WrappedTokenFactory } from './fixtures';
 
-describe('tokens/erc20/wrapped/ERC20WrappedTokenImpl', () => {
+describe('tokens/erc20/presets/ERC20WrappedTokenImpl', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20WrappedTokenFactory>>;
 
   before(async () => {

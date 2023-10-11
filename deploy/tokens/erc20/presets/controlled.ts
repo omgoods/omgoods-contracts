@@ -1,7 +1,7 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TOKEN_TYPE = 'Fixed';
-const TOKEN_TAG = `tokens/erc20/${TOKEN_TYPE.toLowerCase()}`;
+const TOKEN_TYPE = 'Controlled';
+const TOKEN_TAG = `tokens/erc20/presets/${TOKEN_TYPE.toLowerCase()}`;
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -19,12 +19,12 @@ const func: DeployFunction = async (hre) => {
   const tokenFactory = `ERC20${TOKEN_TYPE}TokenFactory`;
 
   const { address: tokenImpl } = await deploy(`ERC20${TOKEN_TYPE}TokenImpl`, {
-    from: deployer, // nonce 3
+    from: deployer, // nonce 1
     log: true,
   });
 
   await deploy(tokenFactory, {
-    from: deployer, // nonce 4
+    from: deployer, // nonce 2
     log: true,
     args: [
       owner,
@@ -50,6 +50,6 @@ const func: DeployFunction = async (hre) => {
 };
 
 func.tags = [TOKEN_TAG];
-func.dependencies = ['tokens/erc20/controlled'];
+func.dependencies = ['gateway'];
 
 module.exports = func;

@@ -4,7 +4,7 @@ import { expect } from 'chai';
 import { randomAddress } from '../../../common';
 import { setupERC20ControlledTokenFactory } from './fixtures';
 
-describe('tokens/erc20/controlled/ERC20ControlledTokenImpl', () => {
+describe('tokens/erc20/presets/ERC20ControlledTokenImpl', () => {
   let fixture: Awaited<ReturnType<typeof setupERC20ControlledTokenFactory>>;
 
   before(async () => {

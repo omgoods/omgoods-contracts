@@ -60,9 +60,9 @@ contract ERC20TokenImpl is ERC20, TokenImpl {
     address owner,
     address spender,
     uint256 value,
-    bool
+    bool emitEvent
   ) internal override {
-    super._approve(owner, spender, value, true);
+    super._approve(owner, spender, value, emitEvent);
 
     ERC20TokenFactory(_tokenFactory).emitTokenApproval(owner, spender, value);
   }

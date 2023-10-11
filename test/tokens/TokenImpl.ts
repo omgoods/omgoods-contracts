@@ -46,5 +46,15 @@ describe('tokens/TokenImpl // mocked', () => {
         expect(res).eq(TOKEN.symbol);
       });
     });
+
+    describe('getTokenFactory()', () => {
+      it('expect to return the factory address', async () => {
+        const { token, tokenFactory } = fixture;
+
+        const res = await token.getTokenFactory();
+
+        expect(res).eq(await tokenFactory.getAddress());
+      });
+    });
   });
 });

@@ -13,7 +13,7 @@ import {
   createTypedDataHelper,
   createProxyCloneAddressFactory,
 } from '../../../common';
-import { deployERC20ExternalTokenMock } from '../fixtures';
+import { deployERC20TokenMock } from '../fixtures';
 import { TOKEN } from '../../constants';
 import { FIXED_TOKEN } from './constants';
 
@@ -94,7 +94,7 @@ export async function setupERC20ControlledTokenFactory() {
   await tokenFactory.createToken(
     {
       ...TOKEN,
-      controller: signers.controller,
+      controllers: [signers.controller],
     },
     '0x',
   );
@@ -114,7 +114,7 @@ export async function setupERC20ControlledTokenFactory() {
     Token: {
       name: string;
       symbol: string;
-      controller: string;
+      controllers: string[];
     };
   }>(tokenFactory, {
     Token: [
@@ -127,8 +127,8 @@ export async function setupERC20ControlledTokenFactory() {
         type: 'string',
       },
       {
-        name: 'controller',
-        type: 'address',
+        name: 'controllers',
+        type: 'address[]',
       },
     ],
   });
@@ -210,16 +210,13 @@ export async function setupERC20WrappedTokenFactory() {
   const { tokenImpl } = await deployERC20WrappedTokenImpl();
   const { tokenFactory, signers } = await deployERC20WrappedTokenFactory();
 
-  const { externalToken: underlyingToken } =
-    await deployERC20ExternalTokenMock();
+  const underlyingToken = await deployERC20TokenMock();
 
-  const { externalToken: supportedToken } =
-    await deployERC20ExternalTokenMock();
+  const supportedToken = await deployERC20TokenMock();
 
-  const { externalToken: unsupportedToken } =
-    await deployERC20ExternalTokenMock({
-      decimals: 10,
-    });
+  const unsupportedToken = await deployERC20TokenMock({
+    decimals: 10,
+  });
 
   await tokenFactory.initialize(ZeroAddress, [signers.guardian], tokenImpl);
 

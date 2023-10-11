@@ -5,23 +5,20 @@ import { TOKEN } from '../constants';
 
 const { deployContract } = ethers;
 
-export async function deployERC20ExternalTokenMock(options?: {
+export async function deployERC20TokenMock(options?: {
   name?: string;
   symbol?: string;
   decimals?: BigNumberish;
   initialSupply?: BigNumberish;
 }) {
-  const externalToken = await deployContract('ERC20ExternalTokenMock', [
+  return await deployContract('ERC20TokenMock', [
     options?.name || TOKEN.name,
     options?.symbol || TOKEN.symbol,
     options?.decimals || 18,
     options?.initialSupply || parseEther('100000000'),
   ]);
-
-  return {
-    externalToken,
-  };
 }
+
 export async function deployERC20TokenImplMock(options: {
   gateway: AddressLike;
   tokenFactory: AddressLike;

@@ -23,7 +23,7 @@ contract GuardedMock is Guarded {
 
   // external setters
 
-  function addGuardians(address[] calldata guardians) external {
-    _addGuardians(guardians);
+  function setGuardians(address[] calldata guardians) external {
+    _setGuardians(guardians);
   }
 }

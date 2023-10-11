@@ -34,7 +34,7 @@ describe('tokens/erc20/presets/ERC20FixedTokenFactory', () => {
   });
 
   describe('# setters', () => {
-    describe('creatToken()', () => {
+    describe('createToken()', () => {
       it('expect to revert when the owner is the zero address', async () => {
         const { tokenFactory } = fixture;
 

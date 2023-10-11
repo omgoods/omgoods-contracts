@@ -1,6 +1,5 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { ZeroAddress } from 'ethers';
 import { randomAddress } from '../../../common';
 import { TOKEN } from '../../constants';
 import { setupERC20ControlledTokenFactory } from './fixtures';
@@ -29,7 +28,7 @@ describe('tokens/erc20/presets/ERC20ControlledTokenFactory', () => {
 
         const tokenData = {
           ...TOKEN,
-          controller: randomAddress(),
+          controllers: [randomAddress()],
         };
 
         const res = await tokenFactory.hashToken(tokenData);
@@ -40,21 +39,21 @@ describe('tokens/erc20/presets/ERC20ControlledTokenFactory', () => {
   });
 
   describe('# setters', () => {
-    describe('creatToken()', () => {
-      it('expect to revert when the controller is the zero address', async () => {
-        const { tokenFactory } = fixture;
+    describe('createToken()', () => {
+      it('expect to revert when the controllers list is empty', async () => {
+        const { tokenFactory, tokenImpl } = fixture;
 
         const tx = tokenFactory.createToken(
           {
             ...TOKEN,
-            controller: ZeroAddress,
+            controllers: [],
           },
           '0x',
         );
 
         await expect(tx).revertedWithCustomError(
           tokenFactory,
-          'TokenControllerIsTheZeroAddress',
+          'NotEnoughTokenControllers',
         );
       });
 
@@ -65,7 +64,7 @@ describe('tokens/erc20/presets/ERC20ControlledTokenFactory', () => {
 
         const tokenData = {
           ...TOKEN,
-          controller: randomAddress(),
+          controllers: [randomAddress()],
         };
 
         const tx = tokenFactory
@@ -89,7 +88,7 @@ describe('tokens/erc20/presets/ERC20ControlledTokenFactory', () => {
         const tokenData = {
           ...TOKEN,
           symbol: 'NEW',
-          controller: randomAddress(),
+          controllers: [randomAddress()],
         };
 
         const tx = tokenFactory
@@ -105,7 +104,7 @@ describe('tokens/erc20/presets/ERC20ControlledTokenFactory', () => {
             computeToken(tokenData.symbol),
             tokenData.name,
             tokenData.symbol,
-            tokenData.controller,
+            tokenData.controllers,
           );
       });
     });

@@ -16,24 +16,12 @@ describe('tokens/erc20/presets/ERC20ControlledTokenImpl', () => {
       it('expect to revert', async () => {
         const { tokenImpl } = fixture;
 
-        const tx = tokenImpl.initialize(ZeroAddress, '', '', ZeroAddress);
+        const tx = tokenImpl.initialize(ZeroAddress, '', '', [ZeroAddress]);
 
         await expect(tx).revertedWithCustomError(
           tokenImpl,
           'AlreadyInitialized',
         );
-      });
-    });
-  });
-
-  describe('# getters', () => {
-    describe('getController()', () => {
-      it('expect to return the controller', async () => {
-        const { token, signers } = fixture;
-
-        const res = await token.getController();
-
-        expect(res).eq(signers.controller.address);
       });
     });
   });

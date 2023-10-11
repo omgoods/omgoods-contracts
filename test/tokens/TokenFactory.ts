@@ -23,7 +23,7 @@ describe('tokens/TokenFactory // mocked', () => {
 
         await expect(tx).revertedWithCustomError(
           tokenFactory,
-          'MsgSenderIsNotTheContractOwner',
+          'MsgSenderIsNotTheOwner',
         );
       });
 

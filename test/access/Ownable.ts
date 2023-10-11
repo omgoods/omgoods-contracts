@@ -64,7 +64,7 @@ describe('access/Ownable // mocked', () => {
 
         await expect(tx).revertedWithCustomError(
           ownable,
-          'MsgSenderIsNotTheContractOwner',
+          'MsgSenderIsNotTheOwner',
         );
       });
 

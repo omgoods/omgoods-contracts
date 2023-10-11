@@ -46,4 +46,10 @@ abstract contract TokenImpl is GatewayRecipient, Initializable {
   function symbol() public view virtual returns (string memory) {
     return _symbol;
   }
+
+  // external getters
+
+  function getTokenFactory() external view virtual returns (address) {
+    return _tokenFactory;
+  }
 }

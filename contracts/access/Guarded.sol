@@ -19,7 +19,7 @@ abstract contract Guarded is Ownable {
 
   // errors
 
-  error MsgSenderIsNotTheContractGuardian();
+  error MsgSenderIsNotTheGuardian();
 
   error GuardianIsTheZeroAddress();
 
@@ -88,7 +88,7 @@ abstract contract Guarded is Ownable {
 
   // internal setters
 
-  function _addGuardians(address[] calldata guardians) internal {
+  function _setGuardians(address[] calldata guardians) internal {
     uint256 len = guardians.length;
 
     for (uint256 index; index < len; ) {

@@ -14,7 +14,7 @@ abstract contract Ownable is GatewayRecipient {
 
   // errors
 
-  error MsgSenderIsNotTheContractOwner();
+  error MsgSenderIsNotTheOwner();
 
   error OwnerIsTheZeroAddress();
 
@@ -22,7 +22,7 @@ abstract contract Ownable is GatewayRecipient {
 
   modifier onlyOwner() {
     if (_msgSender() != _owner) {
-      revert MsgSenderIsNotTheContractOwner();
+      revert MsgSenderIsNotTheOwner();
     }
 
     _;

@@ -53,7 +53,7 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
     _gateway = gateway;
 
-    _addGuardians(guardians);
+    _setGuardians(guardians);
 
     _tokenImpl = tokenImpl;
 

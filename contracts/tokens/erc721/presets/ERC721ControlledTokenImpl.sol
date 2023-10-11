@@ -1,27 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
+import {Controlled} from "../../../access/Controlled.sol";
 import {ERC721TokenImpl} from "../ERC721TokenImpl.sol";
 
-contract ERC721ControlledTokenImpl is ERC721TokenImpl {
-  // storage
-
-  address private _controller;
-
-  // errors
-
-  error MsgSenderIsNotTheController();
-
-  // modifiers
-
-  modifier onlyController() {
-    if (_msgSender() != _controller) {
-      revert MsgSenderIsNotTheController();
-    }
-
-    _;
-  }
-
+contract ERC721ControlledTokenImpl is Controlled, ERC721TokenImpl {
   // deployment
 
   constructor() ERC721TokenImpl() {
@@ -32,17 +15,11 @@ contract ERC721ControlledTokenImpl is ERC721TokenImpl {
     address gateway,
     string calldata name_,
     string calldata symbol_,
-    address controller
+    address[] calldata controllers
   ) external {
     _initialize(gateway, name_, symbol_);
 
-    _controller = controller;
-  }
-
-  // external getters
-
-  function getController() external view returns (address) {
-    return _controller;
+    _setControllers(controllers);
   }
 
   // external setters

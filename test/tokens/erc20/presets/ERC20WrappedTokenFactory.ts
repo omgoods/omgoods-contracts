@@ -43,7 +43,7 @@ describe('tokens/erc20/presets/ERC20WrappedTokenFactory', () => {
   });
 
   describe('# setters', () => {
-    describe('creatToken()', () => {
+    describe('createToken()', () => {
       it('expect to revert when the underlying token is the zero address', async () => {
         const { tokenFactory } = fixture;
 

@@ -8,11 +8,11 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
   struct TokenData {
     string name;
     string symbol;
-    address controller;
+    address[] controllers;
   }
 
   bytes32 private constant TOKEN_TYPEHASH =
-    keccak256("Token(string name,string symbol,address controller)");
+    keccak256("Token(string name,string symbol,address[] controllers)");
 
   // events
 
@@ -20,12 +20,12 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
     address token,
     string name,
     string symbol,
-    address controller
+    address[] controllers
   );
 
   // errors
 
-  error TokenControllerIsTheZeroAddress();
+  error NotEnoughTokenControllers();
 
   // deployment
 
@@ -56,8 +56,8 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
     TokenData calldata tokenData,
     bytes calldata signature
   ) external {
-    if (tokenData.controller == address(0)) {
-      revert TokenControllerIsTheZeroAddress();
+    if (tokenData.controllers.length == 0) {
+      revert NotEnoughTokenControllers();
     }
 
     _verifyGuardianSignature(_hashToken(tokenData), signature);
@@ -68,14 +68,14 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
       _gateway,
       tokenData.name,
       tokenData.symbol,
-      tokenData.controller
+      tokenData.controllers
     );
 
     emit TokenCreated(
       token,
       tokenData.name,
       tokenData.symbol,
-      tokenData.controller
+      tokenData.controllers
     );
   }
 
@@ -91,7 +91,7 @@ contract ERC20ControlledTokenFactory is ERC20TokenFactory {
             TOKEN_TYPEHASH,
             keccak256(abi.encodePacked(tokenData.name)),
             keccak256(abi.encodePacked(tokenData.symbol)),
-            tokenData.controller
+            keccak256(abi.encodePacked(tokenData.controllers))
           )
         )
       );

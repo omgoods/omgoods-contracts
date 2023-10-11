@@ -41,7 +41,7 @@ describe('tokens/erc20/presets/ERC20ControlledTokenFactory', () => {
   describe('# setters', () => {
     describe('createToken()', () => {
       it('expect to revert when the controllers list is empty', async () => {
-        const { tokenFactory, tokenImpl } = fixture;
+        const { tokenFactory } = fixture;
 
         const tx = tokenFactory.createToken(
           {

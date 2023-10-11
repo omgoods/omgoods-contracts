@@ -19,12 +19,12 @@ const func: DeployFunction = async (hre) => {
   const tokenFactory = `ERC721${TOKEN_TYPE}TokenFactory`;
 
   const { address: tokenImpl } = await deploy(`ERC721${TOKEN_TYPE}TokenImpl`, {
-    from: deployer, // nonce 1
+    from: deployer, // nonce 7
     log: true,
   });
 
   await deploy(tokenFactory, {
-    from: deployer, // nonce 2
+    from: deployer, // nonce 8
     log: true,
     args: [
       owner,

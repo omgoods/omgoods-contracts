@@ -7,8 +7,6 @@ on:
     paths:
       - "**.sol"
       - "**.ts"
-      - "**.js"
-      - "**.json"
       - "**.yml"
 
 jobs:

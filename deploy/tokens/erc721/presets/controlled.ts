@@ -1,34 +1,38 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TOKEN_TYPE = 'Controlled';
-const TOKEN_TAG = `tokens/erc721/presets/${TOKEN_TYPE.toLowerCase()}`;
+const FACTORY_NAME = 'Controlled';
+const TAG = `tokens/erc721/presets/${FACTORY_NAME.toLowerCase()}`;
 
 const func: DeployFunction = async (hre) => {
   const {
     deployments: { log, deploy, read, get, execute },
     getNamedAccounts,
+    processEnvs,
   } = hre;
 
   log();
-  log(`# ${TOKEN_TAG}`);
+  log(`# ${TAG}`);
 
   const { deployer, owner } = await getNamedAccounts();
 
   const { address: gateway } = await get('Gateway');
 
-  const tokenFactory = `ERC721${TOKEN_TYPE}TokenFactory`;
+  const tokenFactory = `ERC721${FACTORY_NAME}TokenFactory`;
 
-  const { address: tokenImpl } = await deploy(`ERC721${TOKEN_TYPE}TokenImpl`, {
-    from: deployer, // nonce 7
-    log: true,
-  });
+  const { address: tokenImpl } = await deploy(
+    `ERC721${FACTORY_NAME}TokenImpl`,
+    {
+      from: deployer, // nonce 7
+      log: true,
+    },
+  );
 
   await deploy(tokenFactory, {
     from: deployer, // nonce 8
     log: true,
     args: [
       owner,
-      `OM!goods ERC721 ${TOKEN_TYPE} Token Factory`, // name
+      `OM!goods ERC721 ${FACTORY_NAME} Token Factory`, // name
     ],
   });
 
@@ -43,13 +47,14 @@ const func: DeployFunction = async (hre) => {
       },
       'initialize',
       gateway,
-      [], // guardians
+      processEnvs.getAddresses('GUARDIANS'),
       tokenImpl,
+      processEnvs.getUrl('ERC721_BASE_URL'),
     );
   }
 };
 
-func.tags = [TOKEN_TAG];
+func.tags = [TAG];
 func.dependencies = ['tokens/erc20/presets/wrapped'];
 
 module.exports = func;

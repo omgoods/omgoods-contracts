@@ -1,53 +1,44 @@
 import { HardhatUserConfig } from 'hardhat/config';
 import { NetworksUserConfig, NetworkUserConfig } from 'hardhat/types';
 import {
-  isHexString,
   computeAddress,
   HDNodeWallet,
   Mnemonic,
   getIndexedAccountPath,
 } from 'ethers';
-import {
-  prepareAddress,
-  getEnv,
-  getEnvAsInt,
-  getEnvAsUrl,
-  getEnvAsBool,
-} from '../common';
+import { processEnvs } from '../common';
 import { NetworkConfig, NetworkType } from './interfaces';
 import { HARDHAT_NETWORK } from './constants';
 
 function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
 
-  let owner = getEnv(type, 'ACCOUNTS_OWNER');
-  let deployer = getEnv(type, 'ACCOUNTS_DEPLOYER');
+  let owner = processEnvs.getHex32(type, 'ACCOUNTS_OWNER');
+  let deployer = processEnvs.getHex32(type, 'ACCOUNTS_DEPLOYER');
 
   if (owner && deployer) {
-    if (isHexString(owner, 32) && isHexString(deployer, 32)) {
-      result = {
-        accounts: [owner, deployer],
-      };
-    } else {
-      owner = prepareAddress(owner);
-      deployer = prepareAddress(deployer);
+    result = {
+      accounts: [owner, deployer],
+    };
+  } else {
+    owner = processEnvs.getAddress(type, 'ACCOUNTS_OWNER');
+    deployer = processEnvs.getAddress(type, 'ACCOUNTS_DEPLOYER');
 
-      if (owner && deployer) {
-        result = {
-          ledgerAccounts: [owner, deployer],
-        };
-      }
+    if (owner && deployer) {
+      result = {
+        ledgerAccounts: [owner, deployer],
+      };
     }
   }
 
   if (!result) {
-    const mnemonic = getEnv(type, 'ACCOUNTS_MNEMONIC');
+    const mnemonic = processEnvs.getRaw(type, 'ACCOUNTS_MNEMONIC');
 
     if (mnemonic) {
       result = {
         accounts: {
           mnemonic,
-          initialIndex: getEnvAsInt(type, 'ACCOUNTS_INITIAL_INDEX'),
+          initialIndex: processEnvs.getInt(type, 'ACCOUNTS_INITIAL_INDEX'),
           count: 2,
         },
       };
@@ -64,7 +55,7 @@ export function createNetworksConfig(
     hardhat: HARDHAT_NETWORK,
     localhost: {
       ...HARDHAT_NETWORK,
-      url: getEnvAsUrl('LOCALHOST_URL'),
+      url: processEnvs.getUrl('LOCALHOST_URL'),
     },
   };
 
@@ -78,7 +69,7 @@ export function createNetworksConfig(
   for (const [name, config] of configEntries) {
     const { type, ...custom } = config;
 
-    const url = getEnvAsUrl(name, 'URL');
+    const url = processEnvs.getUrl(name, 'URL');
     const accountsConfig = commonNetworkAccountsConfigs[type];
 
     if (url && accountsConfig) {
@@ -87,9 +78,10 @@ export function createNetworksConfig(
         ...accountsConfig,
         ...custom,
         live: true,
+        type,
         verify: {
           etherscan: {
-            apiKey: getEnv(name, 'ETHERSCAN_API_KEY'),
+            apiKey: processEnvs.getRaw(name, 'ETHERSCAN_API_KEY'),
           },
         },
       };
@@ -171,7 +163,7 @@ export function createConfig(
       outDir: 'typechain',
     },
     gasReporter: {
-      enabled: getEnvAsBool('ENABLED_GAS_REPORTER'),
+      enabled: processEnvs.getBool('ENABLED_GAS_REPORTER'),
     },
   };
 }

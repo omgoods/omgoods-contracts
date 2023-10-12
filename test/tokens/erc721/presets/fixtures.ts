@@ -7,6 +7,7 @@ import {
   createProxyCloneAddressFactory,
 } from '../../../common';
 import { TOKEN } from '../../constants';
+import { TOKEN_BASE_URL } from '../constants';
 
 const { deployContract, getContractAt } = ethers;
 
@@ -36,7 +37,12 @@ export async function setupERC721ControlledTokenFactory() {
   const { tokenImpl } = await deployERC721ControlledTokenImpl();
   const { tokenFactory, signers } = await deployERC721ControlledTokenFactory();
 
-  await tokenFactory.initialize(ZeroAddress, [signers.guardian], tokenImpl);
+  await tokenFactory.initialize(
+    ZeroAddress,
+    [signers.guardian],
+    tokenImpl,
+    TOKEN_BASE_URL,
+  );
 
   await tokenFactory.createToken(
     {

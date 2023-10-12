@@ -6,6 +6,8 @@ import {TokenFactory} from "../TokenFactory.sol";
 abstract contract ERC20TokenFactory is TokenFactory {
   // events
 
+  event Initialized(address gateway, address[] guardians, address tokenImpl);
+
   event TokenTransfer(address token, address from, address to, uint256 value);
 
   event TokenApproval(
@@ -19,6 +21,16 @@ abstract contract ERC20TokenFactory is TokenFactory {
 
   constructor(address owner, string memory name) TokenFactory(owner, name) {
     //
+  }
+
+  function initialize(
+    address gateway,
+    address[] calldata guardians,
+    address tokenImpl
+  ) external {
+    _initialize(gateway, guardians, tokenImpl);
+
+    emit Initialized(gateway, guardians, tokenImpl);
   }
 
   // external setters

@@ -13,10 +13,6 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   mapping(address => bool) internal _tokens;
 
-  // events
-
-  event Initialized(address gateway, address[] guardians, address tokenImpl);
-
   // errors
 
   error MsgSenderIsNotTheToken();
@@ -42,11 +38,11 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
     //
   }
 
-  function initialize(
+  function _initialize(
     address gateway,
     address[] calldata guardians,
     address tokenImpl
-  ) external initializeOnce onlyOwner {
+  ) internal initializeOnce onlyOwner {
     if (tokenImpl == address(0)) {
       revert TokenImplIsTheZeroAddress();
     }
@@ -56,8 +52,6 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
     _setGuardians(guardians);
 
     _tokenImpl = tokenImpl;
-
-    emit Initialized(gateway, guardians, tokenImpl);
   }
 
   // external getters

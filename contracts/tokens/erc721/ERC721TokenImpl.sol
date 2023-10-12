@@ -36,6 +36,15 @@ contract ERC721TokenImpl is ERC721, TokenImpl {
     return TokenImpl.symbol();
   }
 
+  function tokenURI(
+    uint256 tokenId
+  ) public view override returns (string memory) {
+    _requireOwned(tokenId);
+
+    return
+      ERC721TokenFactory(_tokenFactory).computeTokenUrl(address(this), tokenId);
+  }
+
   // internal getters
 
   function _msgSender()

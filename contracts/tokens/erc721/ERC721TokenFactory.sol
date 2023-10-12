@@ -1,10 +1,25 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {TokenFactory} from "../TokenFactory.sol";
 
 abstract contract ERC721TokenFactory is TokenFactory {
+  using Strings for address;
+  using Strings for uint256;
+
+  // storage
+
+  string private _baseUrl;
+
   // events
+
+  event Initialized(
+    address gateway,
+    address[] guardians,
+    address tokenImpl,
+    string baseUrl
+  );
 
   event TokenTransfer(address token, address from, address to, uint256 tokenId);
 
@@ -28,7 +43,28 @@ abstract contract ERC721TokenFactory is TokenFactory {
     //
   }
 
+  function initialize(
+    address gateway,
+    address[] calldata guardians,
+    address tokenImpl,
+    string calldata baseUrl
+  ) external {
+    _initialize(gateway, guardians, tokenImpl);
+
+    _baseUrl = string.concat(baseUrl, block.chainid.toString(), "/");
+
+    emit Initialized(gateway, guardians, tokenImpl, baseUrl);
+  }
+
   // external setters
+
+  function computeTokenUrl(
+    address token,
+    uint256 tokenId
+  ) external view returns (string memory) {
+    return
+      string.concat(_baseUrl, token.toHexString(), "/", tokenId.toString());
+  }
 
   function emitTokenTransfer(
     address from,

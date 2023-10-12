@@ -4,6 +4,7 @@ import { concat, AbiCoder, ZeroAddress } from 'ethers';
 import { randomAddress } from '../../common';
 import { TOKEN } from '../constants';
 import { setupERC721TokenFactoryMock } from './fixtures';
+import { TOKEN_BASE_URL } from './constants';
 
 describe('tokens/erc721/ERC721TokenImpl // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupERC721TokenFactoryMock>>;
@@ -30,6 +31,24 @@ describe('tokens/erc721/ERC721TokenImpl // mocked', () => {
         const res = await tokenImpl.symbol();
 
         expect(res).eq(TOKEN.symbol);
+      });
+    });
+
+    describe('tokenURI()', () => {
+      const tokenId = 1;
+
+      before(async () => {
+        const { tokenImpl, signers } = fixture;
+
+        await tokenImpl.mint(signers.owner, tokenId);
+      });
+
+      it('expect to return the token uri', async () => {
+        const { tokenImpl, getTokenUrl } = fixture;
+
+        const res = await tokenImpl.tokenURI(tokenId);
+
+        expect(res).eq(await getTokenUrl(tokenImpl, tokenId));
       });
     });
 
@@ -71,7 +90,7 @@ describe('tokens/erc721/ERC721TokenImpl // mocked', () => {
 
         const from = ZeroAddress;
         const to = randomAddress();
-        const tokenId = 1;
+        const tokenId = 2;
 
         const tx = tokenImpl.update(to, tokenId, ZeroAddress);
 
@@ -82,7 +101,7 @@ describe('tokens/erc721/ERC721TokenImpl // mocked', () => {
     });
 
     describe('_approve()', () => {
-      const tokenId = 101;
+      const tokenId = 3;
 
       before(async () => {
         const { tokenImpl, signers } = fixture;

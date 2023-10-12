@@ -5,4 +5,5 @@ export const HARDHAT_NETWORK = {
     count: 10,
   },
   live: false,
+  type: 'localnet' as const,
 };

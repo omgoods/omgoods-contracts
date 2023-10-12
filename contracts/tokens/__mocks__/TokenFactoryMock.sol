@@ -5,10 +5,24 @@ import {TokenFactory} from "../TokenFactory.sol";
 import {TokenImplMock} from "./TokenImplMock.sol";
 
 contract TokenFactoryMock is TokenFactory {
+  // events
+
+  event Initialized(address gateway, address[] guardians, address tokenImpl);
+
   // deployment
 
   constructor() TokenFactory(address(0), "") {
     //
+  }
+
+  function initialize(
+    address gateway,
+    address[] calldata guardians,
+    address tokenImpl
+  ) external {
+    _initialize(gateway, guardians, tokenImpl);
+
+    emit Initialized(gateway, guardians, tokenImpl);
   }
 
   // external getters

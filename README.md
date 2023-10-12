@@ -9,12 +9,16 @@
 npm i
 ```
 
+## Configuration
+
+Copy `.env` to `.env.local` to set or override environment variables. 
+
 ## Scripts
 
 ```bash
 npm start                   # starts hardhat node
 
-npm run linter              # runs solidity linter
+npm run linter              # runs solhint
 npm run format              # runs prettier
 npm run compile             # compiles contracts
 npm run test                # runs unit tests

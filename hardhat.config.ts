@@ -1,4 +1,4 @@
-import '@newobject/dotenv/setup';
+import 'dotenv-pre/config';
 import '@nomicfoundation/hardhat-ledger';
 import '@nomicfoundation/hardhat-toolbox';
 import 'hardhat-deploy';

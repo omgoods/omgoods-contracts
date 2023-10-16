@@ -2,12 +2,12 @@ import prompts from 'prompts';
 import { ethers } from 'hardhat';
 import { parseEther } from 'ethers';
 import { logTx, randomAddress } from '../../common';
-import { promptMetadata } from './helpers';
+import { promptTokenMetadata } from './utils';
 
 const { getContractAt } = ethers;
 
 export async function createERC20FixedToken(address: string): Promise<void> {
-  const { name, symbol } = await promptMetadata();
+  const { name, symbol } = await promptTokenMetadata();
 
   const { owner } = await prompts({
     type: 'text',

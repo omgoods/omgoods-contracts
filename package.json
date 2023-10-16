@@ -11,8 +11,8 @@
     "deploy": "hardhat deploy",
     "deployments:export": "hardhat deployments:export",
     "deployments:verify": "hardhat deployments:verify",
+    "events:generate": "hardhat --network localhost run ./scripts/events/generate/run.ts",
     "tokens:create": "hardhat run scripts/tokens/create/run.ts",
-    "tokens:seed": "hardhat --network localhost run ./scripts/tokens/seed/run.ts",
     "hardhat": "hardhat"
   },
   "dependencies": {

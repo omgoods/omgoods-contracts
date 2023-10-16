@@ -1,6 +1,6 @@
 import prompts from 'prompts';
 
-export async function promptMetadata(): Promise<{
+export async function promptTokenMetadata(): Promise<{
   name: string;
   symbol: string;
 }> {

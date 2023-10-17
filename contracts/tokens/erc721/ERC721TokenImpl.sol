@@ -79,11 +79,13 @@ contract ERC721TokenImpl is ERC721, TokenImpl {
   ) internal override {
     super._approve(to, tokenId, auth, emitEvent);
 
-    ERC721TokenFactory(_tokenFactory).emitTokenApproval(
-      _ownerOf(tokenId),
-      to,
-      tokenId
-    );
+    if (emitEvent) {
+      ERC721TokenFactory(_tokenFactory).emitTokenApproval(
+        _ownerOf(tokenId),
+        to,
+        tokenId
+      );
+    }
   }
 
   function _setApprovalForAll(

@@ -36,7 +36,7 @@ abstract contract ERC20Token is ERC20, Token {
     super._update(from, to, value);
 
     _tokenRegistry.emitTokenEvent(
-      abi.encodeCall(IERC20TokenEvents.Transfer, (from, to, value))
+      abi.encodeCall(IERC20TokenEvents.transfer, (from, to, value))
     );
   }
 
@@ -49,7 +49,7 @@ abstract contract ERC20Token is ERC20, Token {
     super._approve(owner, spender, value, true);
 
     _tokenRegistry.emitTokenEvent(
-      abi.encodeCall(IERC20TokenEvents.Approval, (owner, spender, value))
+      abi.encodeCall(IERC20TokenEvents.approval, (owner, spender, value))
     );
   }
 }

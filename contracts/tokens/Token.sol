@@ -85,7 +85,7 @@ abstract contract Token is Ownable, Initializable {
 
     emit Unlocked();
 
-    _tokenRegistry.emitTokenEvent(abi.encodeCall(ITokenEvents.Unlocked, ()));
+    _tokenRegistry.emitTokenEvent(abi.encodeCall(ITokenEvents.unlocked, ()));
   }
 
   // internal setters
@@ -94,7 +94,7 @@ abstract contract Token is Ownable, Initializable {
     super._setOwner(owner);
 
     _tokenRegistry.emitTokenEvent(
-      abi.encodeCall(ITokenEvents.OwnerUpdated, (owner))
+      abi.encodeCall(ITokenEvents.ownerUpdated, (owner))
     );
   }
 }

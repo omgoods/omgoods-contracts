@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Controlled} from "../../../access/Controlled.sol";
 import {ERC20Token} from "../ERC20Token.sol";
 

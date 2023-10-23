@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 interface ITokenEvents {
   // external setters
 
-  function OwnerUpdated(address owner) external;
+  function ownerUpdated(address owner) external;
 
-  function Unlocked() external;
+  function unlocked() external;
 }

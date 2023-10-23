@@ -175,6 +175,7 @@ contract TokenRegistry is EIP712, Guarded {
 
     emit TokenCreated(token, tokenImpl, initCode);
 
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory response) = token.call(initCode);
 
     if (!success) {

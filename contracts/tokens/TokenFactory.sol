@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Guarded} from "../access/Guarded.sol";
+import {Ownable} from "../access/Ownable.sol";
 import {Initializable} from "../utils/Initializable.sol";
+import {TokenRegistry} from "./TokenRegistry.sol";
 
-abstract contract TokenFactory is EIP712, Guarded, Initializable {
+abstract contract TokenFactory is Ownable, Initializable {
   // storage
 
   address private _tokenImpl;
+
+  TokenRegistry private _tokenRegistry;
 
   mapping(address => bool) internal _tokens;
 
@@ -19,42 +21,43 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
 
   error TokenImplIsTheZeroAddress();
 
-  // modifiers
-
-  modifier onlyToken() {
-    if (!_tokens[msg.sender]) {
-      revert MsgSenderIsNotTheToken();
-    }
-
-    _;
-  }
+  error TokenRegistryIsTheZeroAddress();
 
   // deployment
 
-  constructor(
-    address owner,
-    string memory name
-  ) Guarded(owner) EIP712(name, "1") {
+  constructor(address owner) Ownable(owner) {
     //
   }
 
   function _initialize(
     address gateway,
-    address[] calldata guardians,
-    address tokenImpl
+    address tokenImpl,
+    address tokenRegistry
   ) internal initializeOnce onlyOwner {
     if (tokenImpl == address(0)) {
       revert TokenImplIsTheZeroAddress();
     }
 
+    if (tokenRegistry == address(0)) {
+      revert TokenImplIsTheZeroAddress();
+    }
+
     _gateway = gateway;
 
-    _setGuardians(guardians);
-
     _tokenImpl = tokenImpl;
+
+    _tokenRegistry = TokenRegistry(tokenRegistry);
   }
 
   // external getters
+
+  function getTokenImpl() external view returns (address) {
+    return _tokenImpl;
+  }
+
+  function getTokenRegistry() external view returns (address) {
+    return address(_tokenRegistry);
+  }
 
   function hasToken(address token) external view returns (bool) {
     return _tokens[token];
@@ -63,25 +66,25 @@ abstract contract TokenFactory is EIP712, Guarded, Initializable {
   // internal getters
 
   function _computeToken(bytes32 salt) internal view returns (address) {
-    return Clones.predictDeterministicAddress(_tokenImpl, salt);
-  }
-
-  function _verifyGuardianSignature(
-    bytes32 hash,
-    bytes calldata signature
-  ) internal view override {
-    if (_msgSender() != _owner) {
-      super._verifyGuardianSignature(hash, signature);
-    }
+    return
+      Clones.predictDeterministicAddress(
+        _tokenImpl,
+        salt,
+        address(_tokenRegistry)
+      );
   }
 
   // internal setters
 
-  function _createToken(bytes32 salt) internal returns (address token) {
-    token = Clones.cloneDeterministic(_tokenImpl, salt);
-
-    _tokens[token] = true;
-
-    return token;
+  function _createToken(
+    bytes32 salt,
+    bytes memory initCode,
+    bytes calldata guardianSignature
+  ) internal {
+    if (_msgSender() == _owner) {
+      _tokenRegistry.createToken(_tokenImpl, salt, initCode);
+    } else {
+      _tokenRegistry.createToken(_tokenImpl, salt, initCode, guardianSignature);
+    }
   }
 }

@@ -47,6 +47,12 @@ abstract contract Ownable is GatewayRecipient {
       revert OwnerIsTheZeroAddress();
     }
 
+    _setOwner(owner);
+  }
+
+  // internal setters
+
+  function _setOwner(address owner) internal virtual {
     _owner = owner;
 
     emit OwnerUpdated(owner);

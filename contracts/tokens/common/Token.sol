@@ -4,7 +4,6 @@ pragma solidity 0.8.21;
 import {Ownable} from "../../access/Ownable.sol";
 import {Initializable} from "../../utils/Initializable.sol";
 import {TokenRegistry} from "./TokenRegistry.sol";
-import {TokenEvents} from "./TokenEvents.sol";
 
 abstract contract Token is Ownable, Initializable {
   // storage
@@ -36,13 +35,17 @@ abstract contract Token is Ownable, Initializable {
 
   // internal setters
 
-  function _emitTokenRegistryEvent(bytes memory encodedEvent) internal {
-    TokenRegistry(_tokenRegistry).emitTokenEvent(encodedEvent);
+  function _emitTokenRegistryEvent(uint8 kind) internal {
+    _emitTokenRegistryEvent(kind, new bytes(0));
+  }
+
+  function _emitTokenRegistryEvent(uint8 kind, bytes memory encoded) internal {
+    TokenRegistry(_tokenRegistry).emitTokenEvent(kind, encoded);
   }
 
   function _setOwner(address owner) internal override {
     super._setOwner(owner);
 
-    _emitTokenRegistryEvent(abi.encodeCall(TokenEvents.ownerUpdated, (owner)));
+    _emitTokenRegistryEvent(0x00, abi.encode(owner));
   }
 }

@@ -2,7 +2,6 @@
 pragma solidity 0.8.21;
 
 import {TokenImpl} from "../TokenImpl.sol";
-import {BasicTokenEvents} from "./BasicTokenEvents.sol";
 
 contract BasicTokenImpl is TokenImpl {
   // storage
@@ -25,6 +24,8 @@ contract BasicTokenImpl is TokenImpl {
 
   error ExpectedUnlocked();
 
+  error ExpectedLocked();
+
   error AlreadyUnlocked();
 
   // modifiers
@@ -32,6 +33,14 @@ contract BasicTokenImpl is TokenImpl {
   modifier whenUnlocked() {
     if (!_unlocked) {
       revert ExpectedUnlocked();
+    }
+
+    _;
+  }
+
+  modifier whenLocked() {
+    if (_unlocked) {
+      revert ExpectedLocked();
     }
 
     _;
@@ -96,7 +105,7 @@ contract BasicTokenImpl is TokenImpl {
 
     emit Unlocked();
 
-    _emitTokenRegistryEvent(abi.encodeCall(BasicTokenEvents.unlocked, ()));
+    _emitTokenRegistryEvent(0x10);
   }
 
   // private getters

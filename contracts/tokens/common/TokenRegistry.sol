@@ -25,7 +25,7 @@ contract TokenRegistry is EIP712, Guarded {
 
   event TokenFactoryRemoved(address tokenFactory);
 
-  event TokenEvent(address token, bytes encodedEvent);
+  event TokenEvent(address token, uint8 kind, bytes encoded);
 
   // errors
 
@@ -135,8 +135,11 @@ contract TokenRegistry is EIP712, Guarded {
     emit TokenFactoryRemoved(tokenFactory);
   }
 
-  function emitTokenEvent(bytes calldata encodedEvent) external onlyToken {
-    emit TokenEvent(msg.sender, encodedEvent);
+  function emitTokenEvent(
+    uint8 kind,
+    bytes calldata encoded
+  ) external onlyToken {
+    emit TokenEvent(msg.sender, kind, encoded);
   }
 
   // private getters

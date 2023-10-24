@@ -5,7 +5,6 @@ import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {GatewayRecipient} from "../../gateway/GatewayRecipient.sol";
 import {Token} from "../common/Token.sol";
-import {ERC20TokenEvents} from "./ERC20TokenEvents.sol";
 
 abstract contract ERC20Token is ERC20, Token {
   // deployment
@@ -35,9 +34,7 @@ abstract contract ERC20Token is ERC20, Token {
   ) internal virtual override {
     super._update(from, to, value);
 
-    _emitTokenRegistryEvent(
-      abi.encodeCall(ERC20TokenEvents.transfer, (from, to, value))
-    );
+    _emitTokenRegistryEvent(0x50, abi.encode(from, to, value));
   }
 
   function _approve(
@@ -48,8 +45,6 @@ abstract contract ERC20Token is ERC20, Token {
   ) internal override {
     super._approve(owner, spender, value, true);
 
-    _emitTokenRegistryEvent(
-      abi.encodeCall(ERC20TokenEvents.approval, (owner, spender, value))
-    );
+    _emitTokenRegistryEvent(0x51, abi.encode(owner, spender, value));
   }
 }

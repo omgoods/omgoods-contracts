@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {TokenFactory} from "../../TokenFactory.sol";
-import {ERC20DefaultTokenImpl} from "./ERC20DefaultTokenImpl.sol";
+import {TokenFactory} from "../TokenFactory.sol";
+import {BasicTokenImpl} from "./BasicTokenImpl.sol";
 
-contract ERC20DefaultTokenFactory is TokenFactory {
+contract BasicTokenFactory is TokenFactory {
   // deployment
 
   constructor(address owner) TokenFactory(owner) {
@@ -24,17 +24,23 @@ contract ERC20DefaultTokenFactory is TokenFactory {
   function createToken(
     string calldata name,
     string calldata symbol,
-    address owner_,
-    address[] calldata controllers,
-    bool locked,
-    uint256 initialSupply,
+    address owner,
+    address controller,
+    bool unlocked,
     bytes calldata guardianSignature
   ) external {
     _createToken(
       keccak256(abi.encodePacked(symbol)),
       abi.encodeCall(
-        ERC20DefaultTokenImpl.initialize,
-        (_gateway, name, symbol, owner_, controllers, locked, initialSupply)
+        BasicTokenImpl.initialize,
+        (
+          _gateway, //
+          name,
+          symbol,
+          owner,
+          controller,
+          unlocked
+        )
       ),
       guardianSignature
     );

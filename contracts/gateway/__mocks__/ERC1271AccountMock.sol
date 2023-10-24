@@ -14,7 +14,9 @@ contract ERC1271AccountMock is IERC1271, Ownable {
 
   // deployment
 
-  constructor(address gateway) Ownable(address(0)) {
+  constructor(address gateway) {
+    _setInitialOwner(address(0));
+
     _gateway = gateway;
   }
 

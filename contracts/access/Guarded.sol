@@ -29,12 +29,6 @@ abstract contract Guarded is Ownable {
 
   error InvalidGuardianSignature();
 
-  // deployment
-
-  constructor(address owner) Ownable(owner) {
-    //
-  }
-
   // external getters
 
   function hasGuardian(address guardian) external view returns (bool) {
@@ -88,7 +82,7 @@ abstract contract Guarded is Ownable {
 
   // internal setters
 
-  function _setGuardians(address[] calldata guardians) internal {
+  function _addGuardians(address[] calldata guardians) internal {
     uint256 len = guardians.length;
 
     for (uint256 index; index < len; ) {

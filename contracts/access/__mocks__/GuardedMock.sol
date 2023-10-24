@@ -6,7 +6,9 @@ import {Guarded} from "../Guarded.sol";
 contract GuardedMock is Guarded {
   // deployment
 
-  constructor(address guardian) Guarded(address(0)) {
+  constructor(address guardian) {
+    _setInitialOwner(address(0));
+
     _guardians[guardian] = true;
   }
 
@@ -23,7 +25,7 @@ contract GuardedMock is Guarded {
 
   // external setters
 
-  function setGuardians(address[] calldata guardians) external {
-    _setGuardians(guardians);
+  function addGuardians(address[] calldata guardians) external {
+    _addGuardians(guardians);
   }
 }

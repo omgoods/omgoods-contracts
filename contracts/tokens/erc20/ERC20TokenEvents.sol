@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-interface IERC20TokenEvents {
+interface ERC20TokenEvents {
   // external setters
 
   function transfer(address from, address to, uint256 value) external;

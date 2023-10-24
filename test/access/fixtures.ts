@@ -1,19 +1,7 @@
 import { ethers } from 'hardhat';
-import { ZeroAddress, AddressLike } from 'ethers';
 import { getSigners } from '../common';
 
 const { deployContract } = ethers;
-
-export async function deployControlledMock() {
-  const signers = await getSigners('controller');
-
-  const controlled = await deployContract('ControlledMock');
-
-  return {
-    controlled,
-    signers,
-  };
-}
 
 export async function deployGuardedMock() {
   const signers = await getSigners('owner', 'guardian');
@@ -26,12 +14,10 @@ export async function deployGuardedMock() {
   };
 }
 
-export async function deployOwnableMock(options?: { owner: AddressLike }) {
+export async function deployOwnableMock() {
   const signers = await getSigners('owner');
 
-  const ownable = await deployContract('OwnableMock', [
-    options?.owner || ZeroAddress,
-  ]);
+  const ownable = await deployContract('OwnableMock');
 
   return {
     ownable,

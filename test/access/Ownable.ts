@@ -13,30 +13,6 @@ describe('access/Ownable // mocked', () => {
     });
   };
 
-  describe('# deployment', () => {
-    describe('constructor()', () => {
-      it('expect to deploy the contract with the msg.sender as the owner', async () => {
-        const { ownable, signers } = await deployOwnableMock();
-
-        const res = await ownable.getOwner();
-
-        expect(res).eq(signers.owner.address);
-      });
-
-      it('expect to deploy the contract with a custom owner', async () => {
-        const owner = randomAddress();
-
-        const { ownable } = await deployOwnableMock({
-          owner,
-        });
-
-        const res = await ownable.getOwner();
-
-        expect(res).eq(owner);
-      });
-    });
-  });
-
   describe('# getters', () => {
     createBeforeHook();
 

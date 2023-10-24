@@ -4,13 +4,13 @@ pragma solidity 0.8.21;
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {GatewayRecipient} from "../../gateway/GatewayRecipient.sol";
-import {Token} from "../Token.sol";
-import {IERC20TokenEvents} from "./IERC20TokenEvents.sol";
+import {Token} from "../common/Token.sol";
+import {ERC20TokenEvents} from "./ERC20TokenEvents.sol";
 
 abstract contract ERC20Token is ERC20, Token {
   // deployment
 
-  constructor(address owner) ERC20("", "") Token(owner) {
+  constructor() ERC20("", "") {
     //
   }
 
@@ -20,7 +20,7 @@ abstract contract ERC20Token is ERC20, Token {
     internal
     view
     virtual
-    override(Context, GatewayRecipient)
+    override(GatewayRecipient, Context)
     returns (address)
   {
     return GatewayRecipient._msgSender();
@@ -32,11 +32,11 @@ abstract contract ERC20Token is ERC20, Token {
     address from,
     address to,
     uint256 value
-  ) internal override whenUnlocked {
+  ) internal virtual override {
     super._update(from, to, value);
 
-    _tokenRegistry.emitTokenEvent(
-      abi.encodeCall(IERC20TokenEvents.transfer, (from, to, value))
+    _emitTokenRegistryEvent(
+      abi.encodeCall(ERC20TokenEvents.transfer, (from, to, value))
     );
   }
 
@@ -48,8 +48,8 @@ abstract contract ERC20Token is ERC20, Token {
   ) internal override {
     super._approve(owner, spender, value, true);
 
-    _tokenRegistry.emitTokenEvent(
-      abi.encodeCall(IERC20TokenEvents.approval, (owner, spender, value))
+    _emitTokenRegistryEvent(
+      abi.encodeCall(ERC20TokenEvents.approval, (owner, spender, value))
     );
   }
 }

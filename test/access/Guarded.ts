@@ -175,13 +175,13 @@ describe('access/Guarded // mocked', () => {
       });
     });
 
-    describe('_setGuardians()', () => {
+    describe('_addGuardians()', () => {
       createBeforeHook();
 
       it('expect to revert when one of the guardians is the zero address', async () => {
         const { guarded } = fixture;
 
-        const tx = guarded.setGuardians([ZeroAddress, randomAddress()]);
+        const tx = guarded.addGuardians([ZeroAddress, randomAddress()]);
 
         await expect(tx).revertedWithCustomError(
           guarded,
@@ -192,7 +192,7 @@ describe('access/Guarded // mocked', () => {
       it('expect to revert when one of the guardians already exists', async () => {
         const { guarded, signers } = fixture;
 
-        const tx = guarded.setGuardians([randomAddress(), signers.guardian]);
+        const tx = guarded.addGuardians([randomAddress(), signers.guardian]);
 
         await expect(tx).revertedWithCustomError(
           guarded,
@@ -205,7 +205,7 @@ describe('access/Guarded // mocked', () => {
 
         const guardians = [randomAddress(), randomAddress()];
 
-        await guarded.setGuardians(guardians);
+        await guarded.addGuardians(guardians);
 
         for (const guardian of guardians) {
           expect(await guarded.hasGuardian(guardian)).true;

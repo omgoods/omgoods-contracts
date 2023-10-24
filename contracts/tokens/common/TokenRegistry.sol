@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Guarded} from "../access/Guarded.sol";
+import {Guarded} from "../../access/Guarded.sol";
 
 contract TokenRegistry is EIP712, Guarded {
   bytes32 private constant TOKEN_TYPEHASH =
@@ -59,11 +59,8 @@ contract TokenRegistry is EIP712, Guarded {
 
   // deployment
 
-  constructor(
-    address owner,
-    string memory name
-  ) Guarded(owner) EIP712(name, "1") {
-    //
+  constructor(address owner, string memory name) EIP712(name, "1") {
+    _setInitialOwner(owner);
   }
 
   // external getters

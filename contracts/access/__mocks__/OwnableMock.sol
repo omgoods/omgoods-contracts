@@ -6,7 +6,13 @@ import {Ownable} from "../Ownable.sol";
 contract OwnableMock is Ownable {
   // deployment
 
-  constructor(address owner) Ownable(owner) {
-    //
+  constructor() {
+    _setInitialOwner(address(0));
+  }
+
+  // external setters
+
+  function setInitialOwner(address initialOwner) external {
+    _setInitialOwner(initialOwner);
   }
 }

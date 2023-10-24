@@ -2,8 +2,8 @@
 pragma solidity 0.8.21;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Ownable} from "../access/Ownable.sol";
-import {Initializable} from "../utils/Initializable.sol";
+import {Ownable} from "../../access/Ownable.sol";
+import {Initializable} from "../../utils/Initializable.sol";
 import {TokenRegistry} from "./TokenRegistry.sol";
 
 abstract contract TokenFactory is Ownable, Initializable {
@@ -13,11 +13,7 @@ abstract contract TokenFactory is Ownable, Initializable {
 
   TokenRegistry private _tokenRegistry;
 
-  mapping(address => bool) internal _tokens;
-
   // errors
-
-  error MsgSenderIsNotTheToken();
 
   error TokenImplIsTheZeroAddress();
 
@@ -25,8 +21,8 @@ abstract contract TokenFactory is Ownable, Initializable {
 
   // deployment
 
-  constructor(address owner) Ownable(owner) {
-    //
+  constructor(address owner) {
+    _setInitialOwner(owner);
   }
 
   function _initialize(
@@ -39,7 +35,7 @@ abstract contract TokenFactory is Ownable, Initializable {
     }
 
     if (tokenRegistry == address(0)) {
-      revert TokenImplIsTheZeroAddress();
+      revert TokenRegistryIsTheZeroAddress();
     }
 
     _gateway = gateway;
@@ -57,10 +53,6 @@ abstract contract TokenFactory is Ownable, Initializable {
 
   function getTokenRegistry() external view returns (address) {
     return address(_tokenRegistry);
-  }
-
-  function hasToken(address token) external view returns (bool) {
-    return _tokens[token];
   }
 
   // internal getters

@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
-contract WrappedTokenImpl is TokenImpl {
+abstract contract WrappedTokenImpl is TokenImpl {
   // storage
 
   address internal _underlyingToken;

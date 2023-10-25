@@ -25,11 +25,11 @@ abstract contract TokenFactory is Ownable, Initializable {
     _setInitialOwner(owner);
   }
 
-  function _initialize(
+  function initialize(
     address gateway,
     address tokenImpl,
     address tokenRegistry
-  ) internal initializeOnce onlyOwner {
+  ) external initializeOnce onlyOwner {
     if (tokenImpl == address(0)) {
       revert TokenImplIsTheZeroAddress();
     }

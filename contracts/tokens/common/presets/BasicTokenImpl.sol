@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
-contract BasicTokenImpl is TokenImpl {
+abstract contract BasicTokenImpl is TokenImpl {
   // storage
 
   string private _name;

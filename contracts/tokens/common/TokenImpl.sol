@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import {Token} from "./Token.sol";
 
-contract TokenImpl is Token {
+abstract contract TokenImpl is Token {
   // deployment
 
   constructor() {

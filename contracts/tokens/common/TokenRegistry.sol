@@ -70,6 +70,15 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
     _setInitialOwner(owner);
   }
 
+  function initialize(
+    address gateway,
+    address[] calldata guardians
+  ) external initializeOnce onlyOwner {
+    _gateway = gateway;
+
+    _setInitialGuardians(guardians);
+  }
+
   // external getters
 
   function hashToken(

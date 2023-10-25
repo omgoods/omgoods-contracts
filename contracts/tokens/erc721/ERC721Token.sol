@@ -6,7 +6,7 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {GatewayRecipient} from "../../gateway/GatewayRecipient.sol";
 import {Token} from "../common/Token.sol";
 
-contract ERC721Token is ERC721, Token {
+abstract contract ERC721Token is ERC721, Token {
   // deployment
 
   constructor() ERC721("", "") {

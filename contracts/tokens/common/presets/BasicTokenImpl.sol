@@ -12,7 +12,7 @@ contract BasicTokenImpl is TokenImpl {
 
   address private _controller;
 
-  bool private _unlocked;
+  bool private _locked;
 
   // events
 
@@ -22,32 +22,27 @@ contract BasicTokenImpl is TokenImpl {
 
   error MsgSenderIsNotTheController();
 
-  error ExpectedUnlocked();
-
   error ExpectedLocked();
-
-  error AlreadyUnlocked();
 
   // modifiers
 
-  modifier whenUnlocked() {
-    if (!_unlocked) {
-      revert ExpectedUnlocked();
-    }
+  modifier whenLocked() {
+    _requireLocked();
 
     _;
   }
 
-  modifier whenLocked() {
-    if (_unlocked) {
-      revert ExpectedLocked();
+  modifier onlyOwnerWhenLocked() {
+    if (_locked) {
+      _checkOwner();
     }
 
     _;
   }
 
   modifier onlyController() {
-    _checkController(_msgSender());
+    _checkController();
+
     _;
   }
 
@@ -63,7 +58,7 @@ contract BasicTokenImpl is TokenImpl {
     string calldata symbol_,
     address owner,
     address controller,
-    bool unlocked_
+    bool locked_
   ) external {
     _initialize(gateway);
 
@@ -71,7 +66,7 @@ contract BasicTokenImpl is TokenImpl {
     _symbol = symbol_;
     _owner = owner;
     _controller = controller;
-    _unlocked = unlocked_;
+    _locked = locked_;
   }
 
   // public getters
@@ -90,32 +85,36 @@ contract BasicTokenImpl is TokenImpl {
     return _controller;
   }
 
-  function unlocked() external view returns (bool) {
-    return _unlocked;
+  function locked() external view returns (bool) {
+    return _locked;
   }
 
   // external setters
 
-  function unlock() external onlyOwner {
-    if (_unlocked) {
-      revert AlreadyUnlocked();
-    }
-
-    _unlocked = true;
+  function unlock() external onlyOwner whenLocked {
+    _locked = false;
 
     emit Unlocked();
 
-    _emitTokenRegistryEvent(0x10);
+    _notifyTokenRegistry(0x10);
   }
 
   // private getters
 
-  function _checkController(address msgSender) private view {
+  function _requireLocked() private view {
+    if (!_locked) {
+      revert ExpectedLocked();
+    }
+  }
+
+  function _checkController() private view {
+    address msgSender = _msgSender();
+
     if (msgSender != _controller) {
-      if (_unlocked) {
-        revert MsgSenderIsNotTheController();
-      } else {
+      if (_locked) {
         _checkOwner(msgSender);
+      } else {
+        revert MsgSenderIsNotTheController();
       }
     }
   }

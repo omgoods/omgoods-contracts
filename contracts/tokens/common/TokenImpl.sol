@@ -12,7 +12,6 @@ contract TokenImpl is Token {
 
   function _initialize(address gateway) internal initializeOnce {
     _gateway = gateway;
-
     _tokenRegistry = msg.sender;
   }
 }

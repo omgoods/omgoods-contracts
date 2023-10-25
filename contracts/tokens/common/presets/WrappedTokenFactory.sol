@@ -2,9 +2,9 @@
 pragma solidity 0.8.21;
 
 import {TokenFactory} from "../TokenFactory.sol";
-import {BasicTokenImpl} from "./BasicTokenImpl.sol";
+import {WrappedTokenImpl} from "./WrappedTokenImpl.sol";
 
-contract BasicTokenFactory is TokenFactory {
+contract WrappedTokenFactory is TokenFactory {
   // deployment
 
   constructor(address owner) TokenFactory(owner) {
@@ -14,32 +14,24 @@ contract BasicTokenFactory is TokenFactory {
   // external getters
 
   function computeToken(
-    string calldata symbol
+    address underlyingToken
   ) external view returns (address) {
-    return _computeToken(keccak256(abi.encodePacked(symbol)));
+    return _computeToken(keccak256(abi.encodePacked(underlyingToken)));
   }
 
   // external setters
 
   function createToken(
-    string calldata name,
-    string calldata symbol,
-    address owner,
-    address controller,
-    bool locked,
+    address underlyingToken,
     bytes calldata guardianSignature
   ) external {
     _createToken(
-      keccak256(abi.encodePacked(symbol)),
+      keccak256(abi.encodePacked(underlyingToken)),
       abi.encodeCall(
-        BasicTokenImpl.initialize,
+        WrappedTokenImpl.initialize,
         (
           _gateway, //
-          name,
-          symbol,
-          owner,
-          controller,
-          locked
+          underlyingToken
         )
       ),
       guardianSignature

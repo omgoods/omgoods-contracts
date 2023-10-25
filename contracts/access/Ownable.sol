@@ -21,7 +21,8 @@ abstract contract Ownable is GatewayRecipient {
   // modifiers
 
   modifier onlyOwner() {
-    _checkOwner(_msgSender());
+    _checkOwner();
+
     _;
   }
 
@@ -38,6 +39,10 @@ abstract contract Ownable is GatewayRecipient {
   }
 
   // internal getters
+
+  function _checkOwner() internal view {
+    _checkOwner(_msgSender());
+  }
 
   function _checkOwner(address msgSender) internal view {
     if (msgSender != _owner) {

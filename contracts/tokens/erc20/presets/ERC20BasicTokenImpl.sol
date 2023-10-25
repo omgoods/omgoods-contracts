@@ -54,4 +54,14 @@ contract ERC20BasicTokenImpl is ERC20Token, BasicTokenImpl {
   {
     return GatewayRecipient._msgSender();
   }
+
+  // internal setters
+
+  function _update(
+    address from,
+    address to,
+    uint256 value
+  ) internal override onlyOwnerWhenLocked {
+    super._update(from, to, value);
+  }
 }

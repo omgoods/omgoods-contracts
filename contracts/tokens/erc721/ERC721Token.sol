@@ -31,10 +31,10 @@ contract ERC721Token is ERC721, Token {
     address to,
     uint256 tokenId,
     address auth
-  ) internal override returns (address from) {
+  ) internal virtual override returns (address from) {
     from = super._update(to, tokenId, auth);
 
-    _emitTokenRegistryEvent(0x60, abi.encode(from, to, tokenId));
+    _notifyTokenRegistry(0x60, abi.encode(from, to, tokenId));
 
     return from;
   }
@@ -48,7 +48,7 @@ contract ERC721Token is ERC721, Token {
     super._approve(to, tokenId, auth, emitEvent);
 
     if (emitEvent) {
-      _emitTokenRegistryEvent(0x61, abi.encode(_ownerOf(tokenId), to, tokenId));
+      _notifyTokenRegistry(0x61, abi.encode(_ownerOf(tokenId), to, tokenId));
     }
   }
 
@@ -59,6 +59,6 @@ contract ERC721Token is ERC721, Token {
   ) internal override {
     super._setApprovalForAll(owner, operator, approved);
 
-    _emitTokenRegistryEvent(0x62, abi.encode(owner, operator, approved));
+    _notifyTokenRegistry(0x62, abi.encode(owner, operator, approved));
   }
 }

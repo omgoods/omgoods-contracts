@@ -34,7 +34,7 @@ abstract contract ERC20Token is ERC20, Token {
   ) internal virtual override {
     super._update(from, to, value);
 
-    _emitTokenRegistryEvent(0x50, abi.encode(from, to, value));
+    _notifyTokenRegistry(0x50, abi.encode(from, to, value));
   }
 
   function _approve(
@@ -45,6 +45,6 @@ abstract contract ERC20Token is ERC20, Token {
   ) internal override {
     super._approve(owner, spender, value, true);
 
-    _emitTokenRegistryEvent(0x51, abi.encode(owner, spender, value));
+    _notifyTokenRegistry(0x51, abi.encode(owner, spender, value));
   }
 }

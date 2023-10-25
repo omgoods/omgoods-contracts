@@ -1,5 +1,5 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { hashMessage, ZeroAddress, randomBytes } from 'ethers';
+import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
 import { randomAddress } from '../common';
 import { deployGuardedMock } from './fixtures';
@@ -39,39 +39,6 @@ describe('access/Guarded // mocked', () => {
         const res = await guarded.hasGuardian(signers.owner);
 
         expect(res).true;
-      });
-    });
-
-    describe('_verifyGuardianSignature()', () => {
-      const message = randomBytes(32);
-      const hash = hashMessage(message);
-
-      it('expect to revert when the signer is not a guardian', async () => {
-        const { guarded, signers } = fixture;
-
-        const tx = guarded.verifyGuardianSignature(
-          hash,
-          await signers.unknown.at(0).signMessage(message),
-        );
-
-        await expect(tx).revertedWithCustomError(
-          guarded,
-          'InvalidGuardianSignature',
-        );
-      });
-
-      it('expect not to revert when the signer is a guardian', async () => {
-        const { guarded, signers } = fixture;
-
-        const tx = guarded.verifyGuardianSignature(
-          hash,
-          await signers.guardian.signMessage(message),
-        );
-
-        await expect(tx).not.revertedWithCustomError(
-          guarded,
-          'InvalidGuardianSignature',
-        );
       });
     });
   });
@@ -175,37 +142,15 @@ describe('access/Guarded // mocked', () => {
       });
     });
 
-    describe('_addGuardians()', () => {
+    describe('_setInitialGuardians()', () => {
       createBeforeHook();
 
-      it('expect to revert when one of the guardians is the zero address', async () => {
-        const { guarded } = fixture;
-
-        const tx = guarded.addGuardians([ZeroAddress, randomAddress()]);
-
-        await expect(tx).revertedWithCustomError(
-          guarded,
-          'GuardianIsTheZeroAddress',
-        );
-      });
-
-      it('expect to revert when one of the guardians already exists', async () => {
-        const { guarded, signers } = fixture;
-
-        const tx = guarded.addGuardians([randomAddress(), signers.guardian]);
-
-        await expect(tx).revertedWithCustomError(
-          guarded,
-          'GuardianAlreadyExists',
-        );
-      });
-
-      it('expect to add many guardians', async () => {
+      it('expect to set initial guardians', async () => {
         const { guarded } = fixture;
 
         const guardians = [randomAddress(), randomAddress()];
 
-        await guarded.addGuardians(guardians);
+        await guarded.setInitialGuardians(guardians);
 
         for (const guardian of guardians) {
           expect(await guarded.hasGuardian(guardian)).true;

@@ -39,9 +39,7 @@ abstract contract TokenFactory is Ownable, Initializable {
     }
 
     _gateway = gateway;
-
     _tokenImpl = tokenImpl;
-
     _tokenRegistry = TokenRegistry(tokenRegistry);
   }
 

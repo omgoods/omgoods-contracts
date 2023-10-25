@@ -35,17 +35,17 @@ abstract contract Token is Ownable, Initializable {
 
   // internal setters
 
-  function _emitTokenRegistryEvent(uint8 kind) internal {
-    _emitTokenRegistryEvent(kind, new bytes(0));
+  function _notifyTokenRegistry(uint8 kind) internal {
+    _notifyTokenRegistry(kind, new bytes(0));
   }
 
-  function _emitTokenRegistryEvent(uint8 kind, bytes memory encoded) internal {
-    TokenRegistry(_tokenRegistry).emitTokenEvent(kind, encoded);
+  function _notifyTokenRegistry(uint8 kind, bytes memory encodedData) internal {
+    TokenRegistry(_tokenRegistry).sendTokenNotification(kind, encodedData);
   }
 
   function _setOwner(address owner) internal override {
     super._setOwner(owner);
 
-    _emitTokenRegistryEvent(0x00, abi.encode(owner));
+    _notifyTokenRegistry(0x00, abi.encode(owner));
   }
 }

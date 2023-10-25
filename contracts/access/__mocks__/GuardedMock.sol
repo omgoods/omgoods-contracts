@@ -9,23 +9,12 @@ contract GuardedMock is Guarded {
   constructor(address guardian) {
     _setInitialOwner(address(0));
 
-    _guardians[guardian] = true;
-  }
-
-  // external getters
-
-  function verifyGuardianSignature(
-    bytes32 hash,
-    bytes calldata signature
-  ) external view returns (bool) {
-    _verifyGuardianSignature(hash, signature);
-
-    return true;
+    _addGuardian(guardian);
   }
 
   // external setters
 
-  function addGuardians(address[] calldata guardians) external {
-    _addGuardians(guardians);
+  function setInitialGuardians(address[] calldata guardians) external {
+    _setInitialGuardians(guardians);
   }
 }

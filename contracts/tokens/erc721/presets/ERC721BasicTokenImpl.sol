@@ -54,4 +54,14 @@ contract ERC721BasicTokenImpl is ERC721Token, BasicTokenImpl {
   {
     return GatewayRecipient._msgSender();
   }
+
+  // internal setters
+
+  function _update(
+    address to,
+    uint256 tokenId,
+    address auth
+  ) internal override onlyOwnerWhenLocked returns (address) {
+    return super._update(to, tokenId, auth);
+  }
 }

@@ -1,13 +1,22 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Guarded} from "../../access/Guarded.sol";
+import {Initializable} from "../../utils/Initializable.sol";
 
-contract TokenRegistry is EIP712, Guarded {
+contract TokenRegistry is EIP712, Guarded, Initializable {
+  using ECDSA for bytes32;
+
+  struct TokenData {
+    address tokenImpl;
+    bytes initCode;
+  }
+
   bytes32 private constant TOKEN_TYPEHASH =
-    keccak256("Token(address tokenImpl,bytes32 salt,bytes initCode)");
+    keccak256("Token(address tokenImpl,bytes initCode)");
 
   // storage
 
@@ -25,7 +34,7 @@ contract TokenRegistry is EIP712, Guarded {
 
   event TokenFactoryRemoved(address tokenFactory);
 
-  event TokenEvent(address token, uint8 kind, bytes encoded);
+  event TokenNotificationSent(address token, uint8 kind, bytes encodedData);
 
   // errors
 
@@ -39,20 +48,18 @@ contract TokenRegistry is EIP712, Guarded {
 
   error MsgSenderIsNotTheTokenFactory();
 
+  error InvalidGuardianSignature();
+
   // modifiers
 
   modifier onlyToken() {
-    if (!_tokens[msg.sender]) {
-      revert MsgSenderIsNotTheToken();
-    }
+    _checkToken();
 
     _;
   }
 
   modifier onlyTokenFactory() {
-    if (!_tokenFactories[msg.sender]) {
-      revert MsgSenderIsNotTheTokenFactory();
-    }
+    _checkTokenFactory();
 
     _;
   }
@@ -66,11 +73,9 @@ contract TokenRegistry is EIP712, Guarded {
   // external getters
 
   function hashToken(
-    address tokenImpl,
-    bytes32 salt,
-    bytes calldata initCode
+    TokenData calldata tokenData
   ) external view returns (bytes32) {
-    return _hashToken(tokenImpl, salt, initCode);
+    return _hashToken(tokenData.tokenImpl, tokenData.initCode);
   }
 
   function hasToken(address token) external view returns (bool) {
@@ -97,10 +102,11 @@ contract TokenRegistry is EIP712, Guarded {
     bytes calldata initCode,
     bytes calldata guardianSignature
   ) external onlyTokenFactory {
-    _verifyGuardianSignature(
-      _hashToken(tokenImpl, salt, initCode),
-      guardianSignature
-    );
+    if (
+      !_hasGuardian(_hashToken(tokenImpl, initCode).recover(guardianSignature))
+    ) {
+      revert InvalidGuardianSignature();
+    }
 
     _createToken(tokenImpl, salt, initCode);
   }
@@ -135,18 +141,29 @@ contract TokenRegistry is EIP712, Guarded {
     emit TokenFactoryRemoved(tokenFactory);
   }
 
-  function emitTokenEvent(
+  function sendTokenNotification(
     uint8 kind,
-    bytes calldata encoded
+    bytes calldata encodedData
   ) external onlyToken {
-    emit TokenEvent(msg.sender, kind, encoded);
+    emit TokenNotificationSent(msg.sender, kind, encodedData);
   }
 
   // private getters
 
+  function _checkToken() private view {
+    if (!_tokens[msg.sender]) {
+      revert MsgSenderIsNotTheToken();
+    }
+  }
+
+  function _checkTokenFactory() private view {
+    if (!_tokenFactories[msg.sender]) {
+      revert MsgSenderIsNotTheTokenFactory();
+    }
+  }
+
   function _hashToken(
     address tokenImpl,
-    bytes32 salt,
     bytes calldata initCode
   ) private view returns (bytes32) {
     return
@@ -155,7 +172,6 @@ contract TokenRegistry is EIP712, Guarded {
           abi.encode(
             TOKEN_TYPEHASH,
             keccak256(abi.encodePacked(tokenImpl)),
-            salt,
             keccak256(initCode)
           )
         )

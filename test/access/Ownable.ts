@@ -7,15 +7,11 @@ import { deployOwnableMock } from './fixtures';
 describe('access/Ownable // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployOwnableMock>>;
 
-  const createBeforeHook = () => {
-    before(async () => {
-      fixture = await loadFixture(deployOwnableMock);
-    });
-  };
+  beforeEach(async () => {
+    fixture = await loadFixture(deployOwnableMock);
+  });
 
   describe('# getters', () => {
-    createBeforeHook();
-
     describe('getOwner()', () => {
       it('expect to return the owner', async () => {
         const { ownable, signers } = fixture;
@@ -29,8 +25,6 @@ describe('access/Ownable // mocked', () => {
 
   describe('# setters', () => {
     describe('setOwner()', () => {
-      createBeforeHook();
-
       it('expect to revert when the msg.sender is not the owner', async () => {
         const { ownable, signers } = fixture;
 
@@ -65,8 +59,26 @@ describe('access/Ownable // mocked', () => {
         await expect(tx)
           .emit(ownable, 'OwnerUpdated')
           .withArgs(newOwner.address);
+      });
+    });
 
-        fixture.ownable = ownable.connect(newOwner);
+    describe('_setInitialOwner()', () => {
+      it('expect to use msg.sender as the initial owner', async () => {
+        const { ownable, signers } = fixture;
+
+        await ownable.setInitialOwner(ZeroAddress);
+
+        expect(await ownable.getOwner()).eq(signers.owner.address);
+      });
+
+      it('expect to set the initial owner', async () => {
+        const { ownable, signers } = fixture;
+
+        const newOwner = signers.unknown.at(1);
+
+        await ownable.setInitialOwner(newOwner);
+
+        expect(await ownable.getOwner()).eq(newOwner.address);
       });
     });
   });

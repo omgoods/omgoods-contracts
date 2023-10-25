@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {GatewayRecipient} from "../../../gateway/GatewayRecipient.sol";
 import {WrappedTokenImpl} from "../../common/presets/WrappedTokenImpl.sol";
 import {ERC20Token} from "../ERC20Token.sol";

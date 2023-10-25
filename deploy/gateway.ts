@@ -1,5 +1,7 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
+const TAG = 'gateway';
+
 const func: DeployFunction = async (hre) => {
   const {
     deployments: { log, deploy },
@@ -7,7 +9,7 @@ const func: DeployFunction = async (hre) => {
   } = hre;
 
   log();
-  log('# gateway');
+  log(`# ${TAG}`);
 
   const { deployer } = await getNamedAccounts();
 
@@ -20,6 +22,6 @@ const func: DeployFunction = async (hre) => {
   });
 };
 
-func.tags = ['gateway'];
+func.tags = [TAG];
 
 module.exports = func;

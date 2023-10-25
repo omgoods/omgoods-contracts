@@ -4,8 +4,8 @@ pragma solidity 0.8.21;
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Guarded} from "../../access/Guarded.sol";
-import {Initializable} from "../../utils/Initializable.sol";
+import {Guarded} from "../access/Guarded.sol";
+import {Initializable} from "../utils/Initializable.sol";
 
 contract TokenRegistry is EIP712, Guarded, Initializable {
   using ECDSA for bytes32;

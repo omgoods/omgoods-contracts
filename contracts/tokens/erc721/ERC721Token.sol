@@ -4,7 +4,7 @@ pragma solidity 0.8.21;
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {GatewayRecipient} from "../../gateway/GatewayRecipient.sol";
-import {Token} from "../common/Token.sol";
+import {Token} from "../Token.sol";
 
 abstract contract ERC721Token is ERC721, Token {
   // deployment

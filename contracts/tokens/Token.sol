@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {Ownable} from "../../access/Ownable.sol";
-import {Initializable} from "../../utils/Initializable.sol";
+import {Ownable} from "../access/Ownable.sol";
+import {Initializable} from "../utils/Initializable.sol";
 import {TokenRegistry} from "./TokenRegistry.sol";
 
 abstract contract Token is Ownable, Initializable {

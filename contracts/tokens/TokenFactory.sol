@@ -2,8 +2,8 @@
 pragma solidity 0.8.21;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Ownable} from "../../access/Ownable.sol";
-import {Initializable} from "../../utils/Initializable.sol";
+import {Ownable} from "../access/Ownable.sol";
+import {Initializable} from "../utils/Initializable.sol";
 import {TokenRegistry} from "./TokenRegistry.sol";
 
 abstract contract TokenFactory is Ownable, Initializable {

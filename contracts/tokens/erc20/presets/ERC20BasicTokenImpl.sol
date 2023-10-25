@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {GatewayRecipient} from "../../../gateway/GatewayRecipient.sol";
-import {BasicTokenImpl} from "../../common/presets/BasicTokenImpl.sol";
+import {BasicTokenImpl} from "../../presets/BasicTokenImpl.sol";
 import {ERC20Token} from "../ERC20Token.sol";
 
 contract ERC20BasicTokenImpl is ERC20Token, BasicTokenImpl {

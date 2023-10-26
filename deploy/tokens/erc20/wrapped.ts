@@ -17,13 +17,13 @@ const func: DeployFunction = async (hre) => {
   const { address: tokenRegistry } = await get('TokenRegistry');
 
   const { address: tokenImpl } = await deploy('ERC20WrappedTokenImpl', {
-    from: deployer, // nonce 1
+    from: deployer,
     log: true,
   });
 
   await deploy('ERC20WrappedTokenFactory', {
     contract: 'WrappedTokenFactory',
-    from: deployer, // nonce 2
+    from: deployer,
     log: true,
     args: [owner],
   });

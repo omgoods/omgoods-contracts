@@ -28,23 +28,24 @@ export async function deployGatewayRecipientMock(options?: {
   ]);
 
   return {
-    gatewayRecipient,
     signers,
+    gatewayRecipient,
   };
 }
 
 export async function deployGateway() {
+  const signers = await getSigners('owner', 'forwarder');
+
   const gateway = await deployContract('Gateway', [TYPED_DATA_DOMAIN_NAME]);
 
   return {
+    signers,
     gateway,
   };
 }
 
 export async function setupGateway() {
-  const signers = await getSigners('owner', 'forwarder');
-
-  const { gateway } = await deployGateway();
+  const { gateway, signers } = await deployGateway();
 
   const { account } = await deployERC1271AccountMock({
     gateway,
@@ -107,9 +108,9 @@ export async function setupGateway() {
   });
 
   return {
+    signers,
     gateway,
     gatewayRecipient,
-    signers,
     account,
     typedDataHelper,
   };

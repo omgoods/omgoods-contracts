@@ -13,6 +13,10 @@ abstract contract TokenFactory is Ownable, Initializable {
 
   TokenRegistry private _tokenRegistry;
 
+  // events
+
+  event Initialized(address gateway, address tokenImpl, address tokenRegistry);
+
   // errors
 
   error TokenImplIsTheZeroAddress();
@@ -41,6 +45,8 @@ abstract contract TokenFactory is Ownable, Initializable {
     _gateway = gateway;
     _tokenImpl = tokenImpl;
     _tokenRegistry = TokenRegistry(tokenRegistry);
+
+    emit Initialized(gateway, tokenImpl, tokenRegistry);
   }
 
   // external getters

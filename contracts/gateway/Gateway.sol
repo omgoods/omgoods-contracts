@@ -155,7 +155,13 @@ contract Gateway is EIP712 {
     return
       _hashTypedDataV4(
         keccak256(
-          abi.encode(REQUEST_TYPEHASH, account, nonce, to, keccak256(data))
+          abi.encode(
+            REQUEST_TYPEHASH, //
+            account,
+            nonce,
+            to,
+            keccak256(data)
+          )
         )
       );
   }

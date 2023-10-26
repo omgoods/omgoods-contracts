@@ -19,7 +19,7 @@ const func: DeployFunction = async (hre) => {
   const guardians = processEnvs.getAddresses('GUARDIANS');
 
   await deploy('TokenRegistry', {
-    from: deployer, // nonce 1
+    from: deployer,
     log: true,
     args: [
       owner,

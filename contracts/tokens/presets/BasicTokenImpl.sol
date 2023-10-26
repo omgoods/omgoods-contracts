@@ -96,7 +96,7 @@ abstract contract BasicTokenImpl is TokenImpl {
 
     emit Unlocked();
 
-    _notifyTokenRegistry(0x10);
+    _notifyTokenRegistry(0x10, new bytes(0));
   }
 
   // private getters

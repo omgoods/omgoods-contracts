@@ -4,13 +4,19 @@ pragma solidity 0.8.21;
 import {Token} from "../Token.sol";
 
 contract TokenMock is Token {
-  // external setters
+  // deployment
 
-  function notifyTokenRegistry(uint8 kind) internal {
-    _notifyTokenRegistry(kind);
+  constructor() {
+    _setInitialOwner(address(0));
   }
 
-  function notifyTokenRegistry(uint8 kind, bytes memory encodedData) internal {
+  function initialize(address gateway, address tokenRegistry) external {
+    _initialize(gateway, tokenRegistry);
+  }
+
+  // external setters
+
+  function notifyTokenRegistry(uint8 kind, bytes memory encodedData) external {
     _notifyTokenRegistry(kind, encodedData);
   }
 }

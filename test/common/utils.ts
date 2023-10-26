@@ -87,24 +87,20 @@ export async function createTypedDataHelper<
   };
 }
 
-export async function createProxyCloneAddressFactory<T = string>(
-  proxyFactory: AddressLike,
-  proxyImpl: AddressLike,
-  prepareSalt: (salt: T) => BytesLike = null,
-): Promise<(salt: T) => string> {
-  const deployer = await resolveAddress(proxyFactory);
-  const initCodeHash = keccak256(
-    concat([
-      '0x3d602d80600a3d3981f3363d3d373d3d3d363d73',
-      (await resolveAddress(proxyImpl)).toLowerCase(),
-      '0x5af43d82803e903d91602b57fd5bf3',
-    ]),
+export async function computeProxyCloneAddress(
+  deployer: AddressLike,
+  impl: AddressLike,
+  salt: BytesLike,
+): Promise<string> {
+  return getCreate2Address(
+    await resolveAddress(deployer),
+    salt,
+    keccak256(
+      concat([
+        '0x3d602d80600a3d3981f3363d3d373d3d3d363d73',
+        (await resolveAddress(impl)).toLowerCase(),
+        '0x5af43d82803e903d91602b57fd5bf3',
+      ]),
+    ),
   );
-
-  return (salt) =>
-    getCreate2Address(
-      deployer,
-      prepareSalt ? prepareSalt(salt) : (salt as BytesLike),
-      initCodeHash,
-    );
 }

@@ -14,7 +14,7 @@ const func: DeployFunction = async (hre) => {
   const { deployer } = await getNamedAccounts();
 
   await deploy('Gateway', {
-    from: deployer, // nonce 0
+    from: deployer,
     log: true,
     args: [
       'OM!goods Gateway', // name

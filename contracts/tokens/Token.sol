@@ -29,15 +29,13 @@ abstract contract Token is Ownable, Initializable {
     _tokenRegistry = tokenRegistry;
   }
 
+  // external getters
+
   function getTokenRegistry() external view virtual returns (address) {
     return _tokenRegistry;
   }
 
   // internal setters
-
-  function _notifyTokenRegistry(uint8 kind) internal {
-    _notifyTokenRegistry(kind, new bytes(0));
-  }
 
   function _notifyTokenRegistry(uint8 kind, bytes memory encodedData) internal {
     TokenRegistry(_tokenRegistry).sendTokenNotification(kind, encodedData);

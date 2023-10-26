@@ -16,7 +16,9 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
   }
 
   bytes32 private constant TOKEN_TYPEHASH =
-    keccak256("Token(address tokenImpl,bytes initCode)");
+    keccak256(
+      "Token(address tokenImpl,bytes initCode)" //
+    );
 
   // storage
 
@@ -25,6 +27,8 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
   mapping(address => bool) internal _tokenFactories;
 
   // events
+
+  event Initialized(address gateway, address[] guardians);
 
   event TokenCreated(address token, address tokenImpl, bytes initCode);
 
@@ -38,7 +42,11 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
 
   // errors
 
+  error TokenIsTheZeroAddress();
+
   error TokenAlreadyExists();
+
+  error TokenFactoryIsTheZeroAddress();
 
   error TokenFactoryAlreadyExists();
 
@@ -77,6 +85,8 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
     _gateway = gateway;
 
     _setInitialGuardians(guardians);
+
+    emit Initialized(gateway, guardians);
   }
 
   // external getters
@@ -101,7 +111,7 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
     address tokenImpl,
     bytes32 salt,
     bytes calldata initCode
-  ) external onlyTokenFactory {
+  ) external {
     _createToken(tokenImpl, salt, initCode);
   }
 
@@ -110,7 +120,7 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
     bytes32 salt,
     bytes calldata initCode,
     bytes calldata guardianSignature
-  ) external onlyTokenFactory {
+  ) external {
     if (
       !_hasGuardian(_hashToken(tokenImpl, initCode).recover(guardianSignature))
     ) {
@@ -121,6 +131,10 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
   }
 
   function addToken(address token) external onlyOwner {
+    if (token == address(0)) {
+      revert TokenIsTheZeroAddress();
+    }
+
     if (_tokens[token]) {
       revert TokenAlreadyExists();
     }
@@ -131,6 +145,10 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
   }
 
   function addTokenFactory(address tokenFactory) external onlyOwner {
+    if (tokenFactory == address(0)) {
+      revert TokenFactoryIsTheZeroAddress();
+    }
+
     if (_tokenFactories[tokenFactory]) {
       revert TokenFactoryAlreadyExists();
     }
@@ -141,6 +159,10 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
   }
 
   function removeTokenFactory(address tokenFactory) external onlyOwner {
+    if (tokenFactory == address(0)) {
+      revert TokenFactoryIsTheZeroAddress();
+    }
+
     if (!_tokenFactories[tokenFactory]) {
       revert TokenFactoryDoesntExist();
     }
@@ -179,8 +201,8 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
       _hashTypedDataV4(
         keccak256(
           abi.encode(
-            TOKEN_TYPEHASH,
-            keccak256(abi.encodePacked(tokenImpl)),
+            TOKEN_TYPEHASH, //
+            tokenImpl,
             keccak256(initCode)
           )
         )
@@ -193,7 +215,7 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
     address tokenImpl,
     bytes32 salt,
     bytes calldata initCode
-  ) private {
+  ) private onlyTokenFactory {
     address token = Clones.cloneDeterministic(tokenImpl, salt);
 
     _tokens[token] = true;

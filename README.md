@@ -28,7 +28,6 @@ npm run deployments:export  # exports all deployments into ./deployments.ts
 npm run deployments:verify  # verifies all deployments on etherscan
 
 npm run events:generate     # generates sample events (localhost network only)
-npm run tokens:create       # creates a token
 
 npm run hardhat             # hardhat cli wrapper
 ```

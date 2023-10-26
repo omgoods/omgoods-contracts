@@ -6,6 +6,8 @@ const { getAddress } = deployments;
 
 const { getContractAt } = ethers;
 
+const TOKEN_SYMBOL = 'BASIC';
+
 const BURN_IDS = [2001, 5002];
 const APPROVE_IDS = [2002, 100];
 const TRANSFER_IDS = [1, 2, 1000, 2000];
@@ -14,30 +16,34 @@ const APPROVE_FOR_ALL_APPROVALS = [true, false, false];
 const TOKEN_ID_BASE = BigInt(Date.now()) * 1_000_000n;
 
 export async function generateERC721Events(owner: AddressLike): Promise<void> {
-  const tokenFactoryName = 'ERC721ControlledTokenFactory' as const;
-
-  const tokenFactory = await getContractAt(
-    tokenFactoryName,
-    await getAddress(tokenFactoryName),
+  const tokenRegistry = await getContractAt(
+    'TokenRegistry',
+    await getAddress('TokenRegistry'),
   );
 
-  const tokenData = {
-    name: 'Controlled',
-    symbol: 'CONTROLLED',
-    controllers: [owner],
-  };
+  const tokenFactory = await getContractAt(
+    'BasicTokenFactory',
+    await getAddress('ERC721BasicTokenFactory'),
+  );
 
-  const tokenAddress = await tokenFactory.computeToken(tokenData.symbol);
+  const tokenAddress = await tokenFactory.computeToken(TOKEN_SYMBOL);
 
-  const token = await getContractAt('ERC721ControlledTokenImpl', tokenAddress);
+  const token = await getContractAt('ERC721BasicTokenImpl', tokenAddress);
 
-  console.log(`# ${tokenFactoryName} (${tokenAddress}})`);
+  console.log(`# ERC721BasicToken (${tokenAddress})`);
   console.log();
 
-  if (!(await tokenFactory.hasToken(token))) {
+  if (!(await tokenRegistry.hasToken(token))) {
     await logTx(
       'creating token contract',
-      tokenFactory.createToken(tokenData, '0x'),
+      tokenFactory.createToken(
+        'Basic',
+        TOKEN_SYMBOL,
+        owner,
+        owner, // controller
+        false,
+        '0x',
+      ),
     );
   }
 

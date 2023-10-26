@@ -21,7 +21,7 @@ const func: DeployFunction = async (hre) => {
     log: true,
   });
 
-  await deploy('ERC20BasicTokenFactory', {
+  const { address: tokenFactory } = await deploy('ERC20BasicTokenFactory', {
     contract: 'BasicTokenFactory',
     from: deployer,
     log: true,
@@ -41,6 +41,20 @@ const func: DeployFunction = async (hre) => {
       gateway,
       tokenImpl,
       tokenRegistry,
+    );
+  }
+
+  if (await read('TokenRegistry', 'hasTokenFactory', tokenFactory)) {
+    log('ERC20BasicTokenFactory already in TokenRegistry');
+  } else {
+    await execute(
+      'TokenRegistry',
+      {
+        from: owner,
+        log: true,
+      },
+      'addTokenFactory',
+      tokenFactory,
     );
   }
 };

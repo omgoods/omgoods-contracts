@@ -6,17 +6,20 @@ import {ERC721Token} from "../ERC721Token.sol";
 contract ERC721TokenMock is ERC721Token {
   // deployment
 
-  constructor() ERC721Token() {
-    //
-  }
+  function initialize(
+    address tokenRegistry,
+    uint256[] calldata tokenIds
+  ) external {
+    _initialize(address(0), tokenRegistry);
 
-  // external setters
+    uint256 len = tokenIds.length;
 
-  function mint(address to, uint256 tokenId) external {
-    _mint(to, tokenId);
-  }
+    for (uint256 index; index < len; ) {
+      _mint(msg.sender, tokenIds[index]);
 
-  function burn(uint256 tokenId) external {
-    _burn(tokenId);
+      unchecked {
+        index += 1;
+      }
+    }
   }
 }

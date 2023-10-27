@@ -5,7 +5,7 @@ import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Ownable} from "../../access/Ownable.sol";
 
-contract ERC1271AccountExample is IERC1271, Ownable {
+contract AccountMock is IERC1271, Ownable {
   using ECDSA for bytes32;
 
   // events

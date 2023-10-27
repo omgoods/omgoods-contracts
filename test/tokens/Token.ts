@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ZeroAddress, randomBytes, AbiCoder } from 'ethers';
+import { ZeroAddress, randomBytes } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../common';
+import { abiCoder, randomAddress } from '../common';
 import { deployTokenMock, setupTokenMock } from './fixtures';
 import { TokenNotificationsKinds } from './constants';
 
@@ -110,7 +110,7 @@ describe('tokens/Token // mocked', () => {
           .withArgs(
             await token.getAddress(),
             TokenNotificationsKinds.OwnerUpdated,
-            AbiCoder.defaultAbiCoder().encode(['address'], [owner]),
+            abiCoder.encode(['address'], [owner]),
           );
       });
     });

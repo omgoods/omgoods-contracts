@@ -7,9 +7,9 @@ import {
   ZeroAddress,
 } from 'ethers';
 import { getSigners, computeProxyCloneAddress } from '../../common';
-import { deployERC20TokenExample } from '../erc20/fixtures';
+import { deployERC20ExternalToken } from '../erc20/fixtures';
 import { setupTokenRegistry } from '../fixtures';
-import { EXAMPLE_TOKEN } from '../constants';
+import { TOKEN } from '../constants';
 
 const { deployContract, getContractAt } = ethers;
 
@@ -67,7 +67,7 @@ export async function setupDefaultTokenImpl() {
   const computeToken = async (symbol: string) =>
     getContractAt('DefaultTokenImplMock', await computeTokenAddress(symbol));
 
-  const token = await computeToken(EXAMPLE_TOKEN.symbol);
+  const token = await computeToken(TOKEN.symbol);
 
   return {
     token,
@@ -95,8 +95,8 @@ export async function setupDefaultTokenFactory(options: {
 
   await tokenFactory.createToken(
     signers.owner,
-    EXAMPLE_TOKEN.name,
-    EXAMPLE_TOKEN.symbol,
+    TOKEN.name,
+    TOKEN.symbol,
     signers.controller,
     true,
     '0x',
@@ -111,7 +111,7 @@ export async function setupDefaultTokenFactory(options: {
 }
 
 export async function setupWrappedTokenImpl() {
-  const { token: underlyingToken } = await deployERC20TokenExample();
+  const { externalToken: underlyingToken } = await deployERC20ExternalToken();
 
   const { tokenImpl } = await deployWrappedTokenImplMock();
 

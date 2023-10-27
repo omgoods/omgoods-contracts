@@ -36,6 +36,10 @@ contract ERC20WrappedTokenImpl is ERC20Token, WrappedTokenImpl {
     return WrappedTokenImpl.symbol();
   }
 
+  function decimals() public view override returns (uint8) {
+    return ERC20Token(_underlyingToken).decimals();
+  }
+
   // external setters
 
   function deposit(uint256 value) external {

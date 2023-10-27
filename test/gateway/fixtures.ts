@@ -8,12 +8,8 @@ import {
 
 const { deployContract } = ethers;
 
-export async function deployERC1271AccountExample(options: {
-  gateway: AddressLike;
-}) {
-  const account = await deployContract('ERC1271AccountExample', [
-    options.gateway,
-  ]);
+export async function deployAccountMock(options: { gateway: AddressLike }) {
+  const account = await deployContract('AccountMock', [options.gateway]);
 
   return {
     account,
@@ -49,7 +45,7 @@ export async function deployGateway() {
 export async function setupGateway() {
   const { gateway, signers } = await deployGateway();
 
-  const { account } = await deployERC1271AccountExample({
+  const { account } = await deployAccountMock({
     gateway,
   });
 

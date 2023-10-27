@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 
-contract ERC721TokenExample is ERC721 {
+contract ERC721ExternalToken is ERC721 {
   // deployment
 
   constructor(

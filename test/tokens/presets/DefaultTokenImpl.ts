@@ -3,7 +3,7 @@ import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
 import { randomAddress } from '../../common';
 import { setupDefaultTokenImpl } from './fixtures';
-import { EXAMPLE_TOKEN, TokenNotificationsKinds } from '../constants';
+import { TOKEN, TokenNotificationsKinds } from '../constants';
 
 describe('tokens/presets/DefaultTokenImpl // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupDefaultTokenImpl>>;
@@ -22,19 +22,21 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
 
   describe('# modifiers', () => {
     describe('onlyOwnerWhenLocked()', () => {
-      createBeforeHook();
+      describe('# before unlocking', () => {
+        createBeforeHook();
 
-      it('expect to check the owner when contract is locked', async () => {
-        const { token, signers } = fixture;
+        it('expect to check the owner when contract is locked', async () => {
+          const { token, signers } = fixture;
 
-        const tx = token
-          .connect(signers.unknown.at(0))
-          .triggerOnlyOwnerWhenLocked();
+          const tx = token
+            .connect(signers.unknown.at(0))
+            .triggerOnlyOwnerWhenLocked();
 
-        await expect(tx).revertedWithCustomError(
-          token,
-          'MsgSenderIsNotTheOwner',
-        );
+          await expect(tx).revertedWithCustomError(
+            token,
+            'MsgSenderIsNotTheOwner',
+          );
+        });
       });
 
       describe('# after unlocking', () => {
@@ -53,24 +55,26 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
     });
 
     describe('onlyController()', () => {
-      createBeforeHook();
+      describe('# before unlocking', () => {
+        createBeforeHook();
 
-      it('expect not to revert if the sender is the controller', async () => {
-        const { token, signers } = fixture;
+        it('expect not to revert if the sender is the controller', async () => {
+          const { token, signers } = fixture;
 
-        const res = await token
-          .connect(signers.controller)
-          .triggerOnlyController.staticCall();
+          const res = await token
+            .connect(signers.controller)
+            .triggerOnlyController.staticCall();
 
-        expect(res).true;
-      });
+          expect(res).true;
+        });
 
-      it('expect to use the owner as the controller before unlocking', async () => {
-        const { token } = fixture;
+        it('expect to use the owner as the controller before unlocking', async () => {
+          const { token } = fixture;
 
-        const res = await token.triggerOnlyController.staticCall();
+          const res = await token.triggerOnlyController.staticCall();
 
-        expect(res).true;
+          expect(res).true;
+        });
       });
 
       describe('# after unlocking', () => {
@@ -174,7 +178,7 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
 
         const res = await token.name();
 
-        expect(res).eq(EXAMPLE_TOKEN.name);
+        expect(res).eq(TOKEN.name);
       });
     });
 
@@ -184,7 +188,7 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
 
         const res = await token.symbol();
 
-        expect(res).eq(EXAMPLE_TOKEN.symbol);
+        expect(res).eq(TOKEN.symbol);
       });
     });
 
@@ -199,18 +203,22 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
     });
 
     describe('locked()', () => {
-      it('expect to return true if the contract is locked', async () => {
-        const { token } = fixture;
+      describe('# before unlocking', () => {
+        createBeforeHook();
 
-        const res = await token.locked();
+        it('expect to return true', async () => {
+          const { token } = fixture;
 
-        expect(res).true;
+          const res = await token.locked();
+
+          expect(res).true;
+        });
       });
 
       describe('# after unlocking', () => {
         createBeforeHook(true);
 
-        it('expect to return false if the contract is unlocked', async () => {
+        it('expect to return false', async () => {
           const { token } = fixture;
 
           const res = await token.locked();
@@ -222,36 +230,36 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
   });
 
   describe('# setters', () => {
-    createBeforeHook();
-
     describe('unlock()', () => {
-      createBeforeHook();
+      describe('# after unlocking', () => {
+        createBeforeHook();
 
-      it('expect to revert when the sender is not the owner', async () => {
-        const { token, signers } = fixture;
+        it('expect to revert when the sender is not the owner', async () => {
+          const { token, signers } = fixture;
 
-        const tx = token.connect(signers.unknown.at(0)).unlock();
+          const tx = token.connect(signers.unknown.at(0)).unlock();
 
-        await expect(tx).revertedWithCustomError(
-          token,
-          'MsgSenderIsNotTheOwner',
-        );
-      });
-
-      it('expect to unlock the token', async () => {
-        const { token, tokenRegistry } = fixture;
-
-        const tx = token.unlock();
-
-        await expect(tx).emit(token, 'Unlocked');
-
-        await expect(tx)
-          .emit(tokenRegistry, 'TokenNotificationSent')
-          .withArgs(
-            await token.getAddress(),
-            TokenNotificationsKinds.Unlocked,
-            '0x',
+          await expect(tx).revertedWithCustomError(
+            token,
+            'MsgSenderIsNotTheOwner',
           );
+        });
+
+        it('expect to unlock the token', async () => {
+          const { token, tokenRegistry } = fixture;
+
+          const tx = token.unlock();
+
+          await expect(tx).emit(token, 'Unlocked');
+
+          await expect(tx)
+            .emit(tokenRegistry, 'TokenNotificationSent')
+            .withArgs(
+              await token.getAddress(),
+              TokenNotificationsKinds.Unlocked,
+              '0x',
+            );
+        });
       });
 
       describe('# after unlocking', () => {

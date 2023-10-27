@@ -8,7 +8,7 @@ export enum TokenNotificationsKinds {
   ERC721ApproveForAll = 0x62,
 }
 
-export const EXAMPLE_TOKEN = {
+export const TOKEN = {
   name: 'Example',
   symbol: 'Example',
 };

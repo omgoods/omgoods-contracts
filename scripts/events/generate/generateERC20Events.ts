@@ -35,9 +35,9 @@ export async function generateERC20Events(owner: AddressLike): Promise<void> {
     await logTx(
       'creating token contract',
       tokenFactory.createToken(
+        owner,
         'Default',
         TOKEN_SYMBOL,
-        owner,
         owner, // controller
         false,
         '0x',

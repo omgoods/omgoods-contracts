@@ -8,6 +8,10 @@ abstract contract WrappedTokenImpl is TokenImpl {
 
   address internal _underlyingToken;
 
+  // errors
+
+  error UnderlyingTokenIsTheZeroAddress();
+
   // deployment
 
   constructor() TokenImpl() {
@@ -15,6 +19,10 @@ abstract contract WrappedTokenImpl is TokenImpl {
   }
 
   function initialize(address gateway, address underlyingToken) external {
+    if (underlyingToken == address(0)) {
+      revert UnderlyingTokenIsTheZeroAddress();
+    }
+
     _initialize(gateway);
 
     _underlyingToken = underlyingToken;

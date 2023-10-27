@@ -22,22 +22,22 @@ export async function generateERC721Events(owner: AddressLike): Promise<void> {
   );
 
   const tokenFactory = await getContractAt(
-    'BasicTokenFactory',
-    await getAddress('ERC721BasicTokenFactory'),
+    'DefaultTokenFactory',
+    await getAddress('ERC721DefaultTokenFactory'),
   );
 
   const tokenAddress = await tokenFactory.computeToken(TOKEN_SYMBOL);
 
-  const token = await getContractAt('ERC721BasicTokenImpl', tokenAddress);
+  const token = await getContractAt('ERC721DefaultTokenImpl', tokenAddress);
 
-  console.log(`# ERC721BasicToken (${tokenAddress})`);
+  console.log(`# ERC721DefaultToken (${tokenAddress})`);
   console.log();
 
   if (!(await tokenRegistry.hasToken(token))) {
     await logTx(
       'creating token contract',
       tokenFactory.createToken(
-        'Basic',
+        'Default',
         TOKEN_SYMBOL,
         owner,
         owner, // controller

@@ -5,8 +5,8 @@ import {
   createTypedDataHelper,
   computeProxyCloneAddress,
   TYPED_DATA_DOMAIN_NAME,
+  randomHex,
 } from '../common';
-import { TOKEN } from './constants';
 
 const { deployContract, getContractAt } = ethers;
 
@@ -87,13 +87,15 @@ export async function setupTokenFactoryMock() {
 
   await tokenFactory.initialize(ZeroAddress, tokenImpl, tokenRegistry);
 
+  const salt = randomHex();
+
   await tokenFactory.createToken(
-    TOKEN.salt,
+    salt,
     tokenImpl.interface.encodeFunctionData('initialize', [ZeroAddress]),
     '0x',
   );
 
-  const token = await computeToken(TOKEN.salt);
+  const token = await computeToken(salt);
 
   return {
     signers,

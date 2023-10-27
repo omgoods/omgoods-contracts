@@ -3,7 +3,7 @@ pragma solidity 0.8.21;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
-abstract contract BasicTokenImpl is TokenImpl {
+abstract contract DefaultTokenImpl is TokenImpl {
   // storage
 
   string private _name;
@@ -54,17 +54,19 @@ abstract contract BasicTokenImpl is TokenImpl {
 
   function initialize(
     address gateway,
+    address owner,
     string calldata name_,
     string calldata symbol_,
-    address owner,
     address controller,
     bool locked_
   ) external {
     _initialize(gateway);
 
+    _setOwner(owner, false);
+
     _name = name_;
     _symbol = symbol_;
-    _owner = owner;
+
     _controller = controller;
     _locked = locked_;
   }

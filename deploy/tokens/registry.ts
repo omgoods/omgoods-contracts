@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'tokens';
+const TAG = 'tokens/registry';
 
 const func: DeployFunction = async (hre) => {
   const {

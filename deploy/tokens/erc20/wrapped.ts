@@ -60,6 +60,6 @@ const func: DeployFunction = async (hre) => {
 };
 
 func.tags = [TAG];
-func.dependencies = ['tokens/erc20/basic'];
+func.dependencies = ['tokens/erc20/default'];
 
 module.exports = func;

@@ -1,5 +1,3 @@
-import { randomHex } from '../common';
-
 export enum TokenNotificationsKinds {
   OwnerUpdated = 0x00,
   Unlocked = 0x10,
@@ -10,6 +8,7 @@ export enum TokenNotificationsKinds {
   ERC721ApproveForAll = 0x62,
 }
 
-export const TOKEN = {
-  salt: randomHex(),
+export const EXAMPLE_TOKEN = {
+  name: 'Example',
+  symbol: 'Example',
 };

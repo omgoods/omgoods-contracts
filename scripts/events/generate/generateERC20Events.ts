@@ -20,22 +20,22 @@ export async function generateERC20Events(owner: AddressLike): Promise<void> {
   );
 
   const tokenFactory = await getContractAt(
-    'BasicTokenFactory',
-    await getAddress('ERC20BasicTokenFactory'),
+    'DefaultTokenFactory',
+    await getAddress('ERC20DefaultTokenFactory'),
   );
 
   const tokenAddress = await tokenFactory.computeToken(TOKEN_SYMBOL);
 
-  const token = await getContractAt('ERC20BasicTokenImpl', tokenAddress);
+  const token = await getContractAt('ERC20DefaultTokenImpl', tokenAddress);
 
-  console.log(`# ERC20BasicToken (${tokenAddress})`);
+  console.log(`# ERC20DefaultToken (${tokenAddress})`);
   console.log();
 
   if (!(await tokenRegistry.hasToken(token))) {
     await logTx(
       'creating token contract',
       tokenFactory.createToken(
-        'Basic',
+        'Default',
         TOKEN_SYMBOL,
         owner,
         owner, // controller

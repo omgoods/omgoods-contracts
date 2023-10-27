@@ -35,7 +35,7 @@ abstract contract Ownable is GatewayRecipient {
   // external setters
 
   function setOwner(address owner) external onlyOwner {
-    _setOwner(owner);
+    _setOwner(owner, true);
   }
 
   // internal getters
@@ -56,13 +56,15 @@ abstract contract Ownable is GatewayRecipient {
     _owner = initialOwner == address(0) ? msg.sender : initialOwner;
   }
 
-  function _setOwner(address owner) internal virtual {
+  function _setOwner(address owner, bool emitEvent) internal virtual {
     if (owner == address(0)) {
       revert OwnerIsTheZeroAddress();
     }
 
     _owner = owner;
 
-    emit OwnerUpdated(owner);
+    if (emitEvent) {
+      emit OwnerUpdated(owner);
+    }
   }
 }

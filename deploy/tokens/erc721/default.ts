@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'tokens/erc721/basic';
+const TAG = 'tokens/erc721/default';
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -16,23 +16,23 @@ const func: DeployFunction = async (hre) => {
   const { address: gateway } = await get('Gateway');
   const { address: tokenRegistry } = await get('TokenRegistry');
 
-  const { address: tokenImpl } = await deploy('ERC721BasicTokenImpl', {
+  const { address: tokenImpl } = await deploy('ERC721DefaultTokenImpl', {
     from: deployer,
     log: true,
   });
 
-  const { address: tokenFactory } = await deploy('ERC721BasicTokenFactory', {
-    contract: 'BasicTokenFactory',
+  const { address: tokenFactory } = await deploy('ERC721DefaultTokenFactory', {
+    contract: 'DefaultTokenFactory',
     from: deployer,
     log: true,
     args: [owner],
   });
 
-  if (await read('ERC721BasicTokenFactory', 'initialized')) {
-    log('ERC721BasicTokenFactory already initialized');
+  if (await read('ERC721DefaultTokenFactory', 'initialized')) {
+    log('ERC721DefaultTokenFactory already initialized');
   } else {
     await execute(
-      'ERC721BasicTokenFactory',
+      'ERC721DefaultTokenFactory',
       {
         from: owner,
         log: true,
@@ -45,7 +45,7 @@ const func: DeployFunction = async (hre) => {
   }
 
   if (await read('TokenRegistry', 'hasTokenFactory', tokenFactory)) {
-    log('ERC721BasicTokenFactory already in TokenRegistry');
+    log('ERC721DefaultTokenFactory already in TokenRegistry');
   } else {
     await execute(
       'TokenRegistry',

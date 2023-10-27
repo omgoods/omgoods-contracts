@@ -6,7 +6,11 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract ERC721TokenExample is ERC721 {
   // deployment
 
-  constructor(uint256[] memory tokenIds) ERC721("Example", "EXAMPLE") {
+  constructor(
+    string memory name_,
+    string memory symbol_,
+    uint256[] memory tokenIds
+  ) ERC721(name_, symbol_) {
     uint256 len = tokenIds.length;
 
     for (uint256 index; index < len; ) {

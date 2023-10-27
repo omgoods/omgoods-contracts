@@ -1,8 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
+import { randomAddress, randomHex } from '../common';
 import { setupTokenFactoryMock } from './fixtures';
-import { randomHex } from '../common';
 
 describe('tokens/TokenImpl // mocked', () => {
   describe('# deployment', () => {
@@ -31,16 +31,17 @@ describe('tokens/TokenImpl // mocked', () => {
           const { tokenRegistry, tokenFactory, computeToken } = fixture;
 
           const salt = randomHex();
+          const gateway = randomAddress();
 
           const token = await computeToken(salt);
 
           await tokenFactory.createToken(
             salt,
-            token.interface.encodeFunctionData('initialize', [ZeroAddress]),
+            token.interface.encodeFunctionData('initialize', [gateway]),
             '0x',
           );
 
-          expect(await token.getGateway()).eq(ZeroAddress);
+          expect(await token.getGateway()).eq(gateway);
           expect(await token.getTokenRegistry()).eq(
             await tokenRegistry.getAddress(),
           );

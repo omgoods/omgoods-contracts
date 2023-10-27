@@ -3,13 +3,13 @@ pragma solidity 0.8.21;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {GatewayRecipient} from "../../../gateway/GatewayRecipient.sol";
-import {BasicTokenImpl} from "../../presets/BasicTokenImpl.sol";
+import {DefaultTokenImpl} from "../../presets/DefaultTokenImpl.sol";
 import {ERC20Token} from "../ERC20Token.sol";
 
-contract ERC20BasicTokenImpl is ERC20Token, BasicTokenImpl {
+contract ERC20DefaultTokenImpl is ERC20Token, DefaultTokenImpl {
   // deployment
 
-  constructor() BasicTokenImpl() {
+  constructor() DefaultTokenImpl() {
     //
   }
 
@@ -18,19 +18,19 @@ contract ERC20BasicTokenImpl is ERC20Token, BasicTokenImpl {
   function name()
     public
     view
-    override(ERC20, BasicTokenImpl)
+    override(ERC20, DefaultTokenImpl)
     returns (string memory)
   {
-    return BasicTokenImpl.name();
+    return DefaultTokenImpl.name();
   }
 
   function symbol()
     public
     view
-    override(ERC20, BasicTokenImpl)
+    override(ERC20, DefaultTokenImpl)
     returns (string memory)
   {
-    return BasicTokenImpl.symbol();
+    return DefaultTokenImpl.symbol();
   }
 
   // external setters

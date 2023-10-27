@@ -1,59 +1,64 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { TOKEN } from './constants';
+import { randomAddress, randomHex } from '../common';
 import { setupTokenFactoryMock } from './fixtures';
 
 describe('tokens/TokenImpl // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof setupTokenFactoryMock>>;
-
-  before(async () => {
-    fixture = await loadFixture(setupTokenFactoryMock);
-  });
-
   describe('# deployment', () => {
+    let fixture: Awaited<ReturnType<typeof setupTokenFactoryMock>>;
+
+    before(async () => {
+      fixture = await loadFixture(setupTokenFactoryMock);
+    });
+
     describe('initialize()', () => {
-      it('expect to revert', async () => {
-        const { tokenImpl } = fixture;
+      describe('# using direct deployment', () => {
+        it('expect to revert', async () => {
+          const { tokenImpl } = fixture;
 
-        const tx = tokenImpl.initialize(ZeroAddress, '', '');
+          const tx = tokenImpl.initialize(ZeroAddress);
 
-        await expect(tx).revertedWithCustomError(
-          tokenImpl,
-          'AlreadyInitialized',
-        );
+          await expect(tx).revertedWithCustomError(
+            tokenImpl,
+            'AlreadyInitialized',
+          );
+        });
       });
-    });
-  });
 
-  describe('# getters', () => {
-    describe('name()', () => {
-      it('expect to return the name', async () => {
-        const { token } = fixture;
+      describe('# using token factory', () => {
+        it('expect to initialize the contract', async () => {
+          const { tokenRegistry, tokenFactory, computeToken } = fixture;
 
-        const res = await token.name();
+          const salt = randomHex();
+          const gateway = randomAddress();
 
-        expect(res).eq(TOKEN.name);
-      });
-    });
+          const token = await computeToken(salt);
 
-    describe('name()', () => {
-      it('expect to return the symbol', async () => {
-        const { token } = fixture;
+          await tokenFactory.createToken(
+            salt,
+            token.interface.encodeFunctionData('initialize', [gateway]),
+            '0x',
+          );
 
-        const res = await token.symbol();
+          expect(await token.getGateway()).eq(gateway);
+          expect(await token.getTokenRegistry()).eq(
+            await tokenRegistry.getAddress(),
+          );
+        });
 
-        expect(res).eq(TOKEN.symbol);
-      });
-    });
+        describe('# after initialization', () => {
+          it('expect to revert', async () => {
+            const { token } = fixture;
 
-    describe('getTokenFactory()', () => {
-      it('expect to return the factory address', async () => {
-        const { token, tokenFactory } = fixture;
+            const tx = token.initialize(ZeroAddress);
 
-        const res = await token.getTokenFactory();
-
-        expect(res).eq(await tokenFactory.getAddress());
+            await expect(tx).revertedWithCustomError(
+              token,
+              'AlreadyInitialized',
+            );
+          });
+        });
       });
     });
   });

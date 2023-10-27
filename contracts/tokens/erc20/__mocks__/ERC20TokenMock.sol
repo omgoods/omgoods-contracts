@@ -1,39 +1,14 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Token} from "../ERC20Token.sol";
 
-contract ERC20TokenMock is ERC20 {
-  // storage
-
-  uint8 private _decimals;
-
+contract ERC20TokenMock is ERC20Token {
   // deployment
 
-  constructor(
-    string memory name_,
-    string memory symbol_,
-    uint8 decimals_,
-    uint256 initialSupply
-  ) ERC20(name_, symbol_) {
-    _decimals = decimals_;
+  function initialize(address tokenRegistry, uint256 totalSupply_) external {
+    _initialize(address(0), tokenRegistry);
 
-    _mint(_msgSender(), initialSupply);
-  }
-
-  // public getters
-
-  function decimals() public view override returns (uint8) {
-    return _decimals;
-  }
-
-  // external setters
-
-  function mint(address to, uint256 amount) external {
-    _mint(to, amount);
-  }
-
-  function burn(address from, uint256 amount) external {
-    _burn(from, amount);
+    _mint(msg.sender, totalSupply_);
   }
 }

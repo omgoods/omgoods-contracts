@@ -2,27 +2,12 @@
 pragma solidity 0.8.21;
 
 import {TokenFactory} from "../TokenFactory.sol";
-import {TokenImplMock} from "./TokenImplMock.sol";
 
 contract TokenFactoryMock is TokenFactory {
-  // events
-
-  event Initialized(address gateway, address[] guardians, address tokenImpl);
-
   // deployment
 
-  constructor() TokenFactory(address(0), "") {
+  constructor() TokenFactory(address(0)) {
     //
-  }
-
-  function initialize(
-    address gateway,
-    address[] calldata guardians,
-    address tokenImpl
-  ) external {
-    _initialize(gateway, guardians, tokenImpl);
-
-    emit Initialized(gateway, guardians, tokenImpl);
   }
 
   // external getters
@@ -31,28 +16,13 @@ contract TokenFactoryMock is TokenFactory {
     return _computeToken(salt);
   }
 
-  function verifyGuardianSignature(
-    bytes32 hash,
-    bytes calldata signature
-  ) external view {
-    _verifyGuardianSignature(hash, signature);
-  }
-
   // external setters
-
-  function addToken(address token) external {
-    _tokens[token] = true;
-  }
 
   function createToken(
     bytes32 salt,
-    string calldata name,
-    string calldata symbol
-  ) external returns (address token) {
-    token = _createToken(salt);
-
-    TokenImplMock(token).initialize(_gateway, name, symbol);
-
-    return token;
+    bytes memory initCode,
+    bytes calldata guardianSignature
+  ) external {
+    _createToken(salt, initCode, guardianSignature);
   }
 }

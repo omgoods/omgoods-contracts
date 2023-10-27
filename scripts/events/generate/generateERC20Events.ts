@@ -6,36 +6,42 @@ const { getAddress } = deployments;
 
 const { getContractAt } = ethers;
 
+const TOKEN_SYMBOL = 'BASIC';
+
 const MINT_AMOUNT = parseEther('2000000000');
 const BURN_AMOUNT = parseEther('500000000');
 const APPROVE_AMOUNTS = [12, parseEther('10'), MaxUint256, 0];
 const TRANSFER_AMOUNTS = [5, parseEther('100'), 10000];
 
 export async function generateERC20Events(owner: AddressLike): Promise<void> {
-  const tokenFactoryName = 'ERC20ControlledTokenFactory' as const;
-
-  const tokenFactory = await getContractAt(
-    tokenFactoryName,
-    await getAddress(tokenFactoryName),
+  const tokenRegistry = await getContractAt(
+    'TokenRegistry',
+    await getAddress('TokenRegistry'),
   );
 
-  const tokenData = {
-    name: 'Controlled',
-    symbol: 'CONTROLLED',
-    controllers: [owner],
-  };
+  const tokenFactory = await getContractAt(
+    'DefaultTokenFactory',
+    await getAddress('ERC20DefaultTokenFactory'),
+  );
 
-  const tokenAddress = await tokenFactory.computeToken(tokenData.symbol);
+  const tokenAddress = await tokenFactory.computeToken(TOKEN_SYMBOL);
 
-  const token = await getContractAt('ERC20ControlledTokenImpl', tokenAddress);
+  const token = await getContractAt('ERC20DefaultTokenImpl', tokenAddress);
 
-  console.log(`# ${tokenFactoryName} (${tokenAddress})`);
+  console.log(`# ERC20DefaultToken (${tokenAddress})`);
   console.log();
 
-  if (!(await tokenFactory.hasToken(token))) {
+  if (!(await tokenRegistry.hasToken(token))) {
     await logTx(
       'creating token contract',
-      tokenFactory.createToken(tokenData, '0x'),
+      tokenFactory.createToken(
+        owner,
+        'Default',
+        TOKEN_SYMBOL,
+        owner, // controller
+        false,
+        '0x',
+      ),
     );
   }
 

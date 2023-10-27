@@ -1,66 +1,41 @@
 import { ethers } from 'hardhat';
-import { AddressLike, resolveAddress, getBigInt, BigNumberish } from 'ethers';
-import { getSigners } from '../../common';
-import { TOKEN } from '../constants';
-import { TOKEN_BASE_URL } from './constants';
+import { ERC721_TOKEN } from './constants';
+import { setupTokenRegistry } from '../fixtures';
 
-const { deployContract, provider } = ethers;
+const { deployContract } = ethers;
 
-export async function deployERC721TokenImplMock(options: {
-  gateway: AddressLike;
-  tokenFactory: AddressLike;
-}) {
-  const tokenImpl = await deployContract('ERC721TokenImplMock', [
-    options.gateway,
-    options.tokenFactory,
-    TOKEN.name,
-    TOKEN.symbol,
+export async function deployERC721ExternalToken() {
+  const externalToken = await deployContract('ERC721ExternalToken', [
+    ERC721_TOKEN.name,
+    ERC721_TOKEN.symbol,
+    ERC721_TOKEN.tokenIds,
   ]);
 
   return {
-    tokenImpl,
+    externalToken,
   };
 }
 
-export async function deployERC721TokenFactoryMock() {
-  const signers = await getSigners('owner', 'gateway', 'token');
-
-  const tokenFactory = await deployContract('ERC721TokenFactoryMock');
+export async function deployERC721TokenMock() {
+  const token = await deployContract('ERC721TokenMock');
 
   return {
-    signers,
-    tokenFactory,
+    token,
   };
 }
 
-export async function setupERC721TokenFactoryMock() {
-  const { tokenFactory, signers } = await deployERC721TokenFactoryMock();
+export async function setupERC721TokenMock() {
+  const { token } = await deployERC721TokenMock();
 
-  const { tokenImpl } = await deployERC721TokenImplMock({
-    tokenFactory,
-    gateway: signers.gateway,
+  const { signers, tokenRegistry } = await setupTokenRegistry({
+    token,
   });
 
-  await tokenFactory.initialize(signers.gateway, [], tokenImpl, TOKEN_BASE_URL);
-
-  await tokenFactory.addToken(tokenImpl);
-
-  await tokenFactory.addToken(signers.token);
-
-  const getTokenUrl = async (token: AddressLike, tokenId: BigNumberish) => {
-    const { chainId } = await provider.getNetwork();
-
-    const tokenAddress = await resolveAddress(token);
-
-    return `${TOKEN_BASE_URL}${getBigInt(
-      chainId,
-    )}/${tokenAddress.toLowerCase()}/${getBigInt(tokenId)}`;
-  };
+  await token.initialize(tokenRegistry, ERC721_TOKEN.tokenIds);
 
   return {
-    tokenFactory,
-    tokenImpl,
     signers,
-    getTokenUrl,
+    token,
+    tokenRegistry,
   };
 }

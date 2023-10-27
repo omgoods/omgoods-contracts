@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { concat, AbiCoder } from 'ethers';
+import { concat } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../common';
+import { abiCoder, randomAddress } from '../common';
 import { deployGatewayRecipientMock } from './fixtures';
 
 describe('gateway/GatewayRecipient // mocked', () => {
@@ -36,9 +36,7 @@ describe('gateway/GatewayRecipient // mocked', () => {
           ]),
         });
 
-        expect(res).eq(
-          AbiCoder.defaultAbiCoder().encode(['address'], [sender]),
-        );
+        expect(res).eq(abiCoder.encode(['address'], [sender]));
       });
 
       it('expect it to return the correct address for calls from outside the gateway', async () => {

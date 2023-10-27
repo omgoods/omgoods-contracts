@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: None
 pragma solidity ^0.8.21;
 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Ownable} from "./Ownable.sol";
 
 abstract contract Guarded is Ownable {
-  using ECDSA for bytes32;
-
   // storage
 
-  mapping(address => bool) internal _guardians;
+  mapping(address => bool) private _guardians;
 
   // events
 
@@ -19,21 +16,11 @@ abstract contract Guarded is Ownable {
 
   // errors
 
-  error MsgSenderIsNotTheGuardian();
-
   error GuardianIsTheZeroAddress();
 
   error GuardianAlreadyExists();
 
   error GuardianDoesntExist();
-
-  error InvalidGuardianSignature();
-
-  // deployment
-
-  constructor(address owner) Ownable(owner) {
-    //
-  }
 
   // external getters
 
@@ -44,15 +31,7 @@ abstract contract Guarded is Ownable {
   // external setters
 
   function addGuardian(address guardian) external onlyOwner {
-    if (guardian == address(0)) {
-      revert GuardianIsTheZeroAddress();
-    }
-
-    if (_guardians[guardian]) {
-      revert GuardianAlreadyExists();
-    }
-
-    _guardians[guardian] = true;
+    _addGuardian(guardian);
 
     emit GuardianAdded(guardian);
   }
@@ -66,21 +45,12 @@ abstract contract Guarded is Ownable {
       revert GuardianDoesntExist();
     }
 
-    delete _guardians[guardian];
+    _guardians[guardian] = false;
 
     emit GuardianRemoved(guardian);
   }
 
   // internal getters
-
-  function _verifyGuardianSignature(
-    bytes32 hash,
-    bytes calldata signature
-  ) internal view virtual {
-    if (!_hasGuardian(hash.recover(signature))) {
-      revert InvalidGuardianSignature();
-    }
-  }
 
   function _hasGuardian(address guardian) internal view returns (bool) {
     return guardian == _owner || _guardians[guardian];
@@ -88,25 +58,27 @@ abstract contract Guarded is Ownable {
 
   // internal setters
 
-  function _setGuardians(address[] calldata guardians) internal {
+  function _setInitialGuardians(address[] calldata guardians) internal {
     uint256 len = guardians.length;
 
     for (uint256 index; index < len; ) {
-      address guardian = guardians[index];
-
-      if (guardian == address(0)) {
-        revert GuardianIsTheZeroAddress();
-      }
-
-      if (_guardians[guardian]) {
-        revert GuardianAlreadyExists();
-      }
-
-      _guardians[guardian] = true;
+      _addGuardian(guardians[index]);
 
       unchecked {
         index += 1;
       }
     }
+  }
+
+  function _addGuardian(address guardian) internal {
+    if (guardian == address(0)) {
+      revert GuardianIsTheZeroAddress();
+    }
+
+    if (_guardians[guardian]) {
+      revert GuardianAlreadyExists();
+    }
+
+    _guardians[guardian] = true;
   }
 }

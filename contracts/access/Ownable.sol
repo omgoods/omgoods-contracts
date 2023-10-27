@@ -21,17 +21,9 @@ abstract contract Ownable is GatewayRecipient {
   // modifiers
 
   modifier onlyOwner() {
-    if (_msgSender() != _owner) {
-      revert MsgSenderIsNotTheOwner();
-    }
+    _checkOwner();
 
     _;
-  }
-
-  // deployment
-
-  constructor(address owner) {
-    _owner = owner == address(0) ? msg.sender : owner;
   }
 
   // external getters
@@ -43,12 +35,36 @@ abstract contract Ownable is GatewayRecipient {
   // external setters
 
   function setOwner(address owner) external onlyOwner {
+    _setOwner(owner, true);
+  }
+
+  // internal getters
+
+  function _checkOwner() internal view {
+    _checkOwner(_msgSender());
+  }
+
+  function _checkOwner(address msgSender) internal view {
+    if (msgSender != _owner) {
+      revert MsgSenderIsNotTheOwner();
+    }
+  }
+
+  // internal setters
+
+  function _setInitialOwner(address initialOwner) internal {
+    _owner = initialOwner == address(0) ? msg.sender : initialOwner;
+  }
+
+  function _setOwner(address owner, bool emitEvent) internal virtual {
     if (owner == address(0)) {
       revert OwnerIsTheZeroAddress();
     }
 
     _owner = owner;
 
-    emit OwnerUpdated(owner);
+    if (emitEvent) {
+      emit OwnerUpdated(owner);
+    }
   }
 }

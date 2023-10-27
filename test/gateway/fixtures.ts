@@ -8,10 +8,8 @@ import {
 
 const { deployContract } = ethers;
 
-export async function deployERC1271AccountMock(options: {
-  gateway: AddressLike;
-}) {
-  const account = await deployContract('ERC1271AccountMock', [options.gateway]);
+export async function deployAccountMock(options: { gateway: AddressLike }) {
+  const account = await deployContract('AccountMock', [options.gateway]);
 
   return {
     account,
@@ -28,25 +26,26 @@ export async function deployGatewayRecipientMock(options?: {
   ]);
 
   return {
-    gatewayRecipient,
     signers,
+    gatewayRecipient,
   };
 }
 
 export async function deployGateway() {
+  const signers = await getSigners('owner', 'forwarder');
+
   const gateway = await deployContract('Gateway', [TYPED_DATA_DOMAIN_NAME]);
 
   return {
+    signers,
     gateway,
   };
 }
 
 export async function setupGateway() {
-  const signers = await getSigners('owner', 'forwarder');
+  const { gateway, signers } = await deployGateway();
 
-  const { gateway } = await deployGateway();
-
-  const { account } = await deployERC1271AccountMock({
+  const { account } = await deployAccountMock({
     gateway,
   });
 
@@ -107,9 +106,9 @@ export async function setupGateway() {
   });
 
   return {
+    signers,
     gateway,
     gatewayRecipient,
-    signers,
     account,
     typedDataHelper,
   };

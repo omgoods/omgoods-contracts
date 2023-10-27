@@ -1,51 +1,51 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ERC20TokenImpl} from "../ERC20TokenImpl.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {GatewayRecipient} from "../../../gateway/GatewayRecipient.sol";
+import {WrappedTokenImpl} from "../../presets/WrappedTokenImpl.sol";
+import {ERC20Token} from "../ERC20Token.sol";
 
-contract ERC20WrappedTokenImpl is ERC20TokenImpl {
-  using SafeERC20 for IERC20Metadata;
-
-  // storage
-
-  IERC20Metadata private _underlyingToken;
+contract ERC20WrappedTokenImpl is ERC20Token, WrappedTokenImpl {
+  using SafeERC20 for ERC20;
 
   // deployment
 
-  constructor() ERC20TokenImpl() {
+  constructor() WrappedTokenImpl() {
     //
-  }
-
-  function initialize(address gateway, address underlyingToken) external {
-    _initialize(gateway);
-
-    _underlyingToken = IERC20Metadata(underlyingToken);
   }
 
   // public getters
 
-  function name() public view override returns (string memory) {
-    return _underlyingToken.name();
+  function name()
+    public
+    view
+    override(ERC20, WrappedTokenImpl)
+    returns (string memory)
+  {
+    return WrappedTokenImpl.name();
   }
 
-  function symbol() public view override returns (string memory) {
-    return _underlyingToken.symbol();
+  function symbol()
+    public
+    view
+    override(ERC20, WrappedTokenImpl)
+    returns (string memory)
+  {
+    return WrappedTokenImpl.symbol();
   }
 
-  // external getters
-
-  function getUnderlyingToken() external view returns (address) {
-    return address(_underlyingToken);
+  function decimals() public view override returns (uint8) {
+    return ERC20Token(_underlyingToken).decimals();
   }
 
   // external setters
 
   function deposit(uint256 value) external {
-    address sender = _msgSender();
+    address msgSender = _msgSender();
 
-    _deposit(sender, sender, value);
+    _deposit(msgSender, msgSender, value);
   }
 
   function depositTo(address to, uint256 value) external {
@@ -53,19 +53,31 @@ contract ERC20WrappedTokenImpl is ERC20TokenImpl {
   }
 
   function withdraw(uint256 value) external {
-    address sender = _msgSender();
+    address msgSender = _msgSender();
 
-    _withdraw(sender, sender, value);
+    _withdraw(msgSender, msgSender, value);
   }
 
   function withdrawTo(address to, uint256 value) external {
     _withdraw(_msgSender(), to, value);
   }
 
+  // internal getters
+
+  function _msgSender()
+    internal
+    view
+    virtual
+    override(ERC20Token, GatewayRecipient)
+    returns (address)
+  {
+    return GatewayRecipient._msgSender();
+  }
+
   // private setters
 
   function _deposit(address from, address to, uint256 value) private {
-    _underlyingToken.safeTransferFrom(from, address(this), value);
+    ERC20(_underlyingToken).safeTransferFrom(from, address(this), value);
 
     _mint(to, value);
   }
@@ -73,6 +85,6 @@ contract ERC20WrappedTokenImpl is ERC20TokenImpl {
   function _withdraw(address from, address to, uint256 value) private {
     _burn(from, value);
 
-    _underlyingToken.safeTransfer(to, value);
+    ERC20(_underlyingToken).safeTransfer(to, value);
   }
 }

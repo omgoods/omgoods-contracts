@@ -6,11 +6,11 @@ import {TokenImpl} from "../TokenImpl.sol";
 contract TokenImplMock is TokenImpl {
   // deployment
 
-  function initialize(
-    address gateway,
-    string calldata name_,
-    string calldata symbol_
-  ) external {
-    _initialize(gateway, name_, symbol_);
+  constructor() TokenImpl() {
+    //
+  }
+
+  function initialize(address gateway) external {
+    _initialize(gateway);
   }
 }

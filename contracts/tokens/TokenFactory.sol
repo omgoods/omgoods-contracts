@@ -1,87 +1,86 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.21;
 
-import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Guarded} from "../access/Guarded.sol";
+import {Ownable} from "../access/Ownable.sol";
 import {Initializable} from "../utils/Initializable.sol";
+import {TokenRegistry} from "./TokenRegistry.sol";
 
-abstract contract TokenFactory is EIP712, Guarded, Initializable {
+abstract contract TokenFactory is Ownable, Initializable {
   // storage
 
   address private _tokenImpl;
 
-  mapping(address => bool) internal _tokens;
+  TokenRegistry private _tokenRegistry;
+
+  // events
+
+  event Initialized(address gateway, address tokenImpl, address tokenRegistry);
 
   // errors
 
-  error MsgSenderIsNotTheToken();
-
   error TokenImplIsTheZeroAddress();
 
-  // modifiers
-
-  modifier onlyToken() {
-    if (!_tokens[msg.sender]) {
-      revert MsgSenderIsNotTheToken();
-    }
-
-    _;
-  }
+  error TokenRegistryIsTheZeroAddress();
 
   // deployment
 
-  constructor(
-    address owner,
-    string memory name
-  ) Guarded(owner) EIP712(name, "1") {
-    //
+  constructor(address owner) {
+    _setInitialOwner(owner);
   }
 
-  function _initialize(
+  function initialize(
     address gateway,
-    address[] calldata guardians,
-    address tokenImpl
-  ) internal initializeOnce onlyOwner {
+    address tokenImpl,
+    address tokenRegistry
+  ) external initializeOnce onlyOwner {
     if (tokenImpl == address(0)) {
       revert TokenImplIsTheZeroAddress();
     }
 
+    if (tokenRegistry == address(0)) {
+      revert TokenRegistryIsTheZeroAddress();
+    }
+
     _gateway = gateway;
-
-    _setGuardians(guardians);
-
     _tokenImpl = tokenImpl;
+    _tokenRegistry = TokenRegistry(tokenRegistry);
+
+    emit Initialized(gateway, tokenImpl, tokenRegistry);
   }
 
   // external getters
 
-  function hasToken(address token) external view returns (bool) {
-    return _tokens[token];
+  function getTokenImpl() external view returns (address) {
+    return _tokenImpl;
+  }
+
+  function getTokenRegistry() external view returns (address) {
+    return address(_tokenRegistry);
   }
 
   // internal getters
 
   function _computeToken(bytes32 salt) internal view returns (address) {
-    return Clones.predictDeterministicAddress(_tokenImpl, salt);
-  }
-
-  function _verifyGuardianSignature(
-    bytes32 hash,
-    bytes calldata signature
-  ) internal view override {
-    if (_msgSender() != _owner) {
-      super._verifyGuardianSignature(hash, signature);
-    }
+    return
+      Clones.predictDeterministicAddress(
+        _tokenImpl,
+        salt,
+        address(_tokenRegistry)
+      );
   }
 
   // internal setters
 
-  function _createToken(bytes32 salt) internal returns (address token) {
-    token = Clones.cloneDeterministic(_tokenImpl, salt);
-
-    _tokens[token] = true;
-
-    return token;
+  function _createToken(
+    bytes32 salt,
+    bytes memory initCode,
+    bytes calldata guardianSignature
+  ) internal {
+    if (_msgSender() == _owner) {
+      _tokenRegistry.createToken(_tokenImpl, salt, initCode);
+    } else {
+      _tokenRegistry.createToken(_tokenImpl, salt, initCode, guardianSignature);
+    }
   }
 }

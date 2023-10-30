@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'gateway';
+const TAG = 'utils';
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -13,16 +13,12 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer } = await getNamedAccounts();
 
-  await deploy('Gateway', {
+  await deploy('StaticCaller', {
     from: deployer,
     log: true,
-    args: [
-      'OM!goods Gateway', // name
-    ],
   });
 };
 
 func.tags = [TAG];
-func.dependencies = ['utils'];
 
 module.exports = func;

@@ -6,7 +6,8 @@ const { getAddress } = deployments;
 
 const { getContractAt } = ethers;
 
-const TOKEN_SYMBOL = 'BASIC';
+const TOKEN_NAME = 'ERC721 Default';
+const TOKEN_SYMBOL = 'ERC721_DEFAULT';
 
 const BURN_IDS = [2001, 5002];
 const APPROVE_IDS = [2002, 100];
@@ -38,7 +39,7 @@ export async function generateERC721Events(owner: AddressLike): Promise<void> {
       'creating token contract',
       tokenFactory.createToken(
         owner,
-        'Default',
+        TOKEN_NAME,
         TOKEN_SYMBOL,
         owner, // controller
         false,

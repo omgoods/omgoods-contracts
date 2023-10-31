@@ -6,7 +6,8 @@ const { getAddress } = deployments;
 
 const { getContractAt } = ethers;
 
-const TOKEN_SYMBOL = 'BASIC';
+const TOKEN_NAME = 'ERC20 Default';
+const TOKEN_SYMBOL = 'ERC20_DEFAULT';
 
 const MINT_AMOUNT = parseEther('2000000000');
 const BURN_AMOUNT = parseEther('500000000');
@@ -36,7 +37,7 @@ export async function generateERC20Events(owner: AddressLike): Promise<void> {
       'creating token contract',
       tokenFactory.createToken(
         owner,
-        'Default',
+        TOKEN_NAME,
         TOKEN_SYMBOL,
         owner, // controller
         false,

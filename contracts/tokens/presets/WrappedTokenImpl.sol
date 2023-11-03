@@ -23,7 +23,7 @@ abstract contract WrappedTokenImpl is TokenImpl {
       revert UnderlyingTokenIsTheZeroAddress();
     }
 
-    _initialize(gateway);
+    _initialize(gateway, false);
 
     _underlyingToken = underlyingToken;
   }

@@ -12,33 +12,11 @@ abstract contract DefaultTokenImpl is TokenImpl {
 
   address private _controller;
 
-  bool private _locked;
-
-  // events
-
-  event Unlocked();
-
   // errors
 
   error MsgSenderIsNotTheController();
 
-  error ExpectedLocked();
-
   // modifiers
-
-  modifier whenLocked() {
-    _requireLocked();
-
-    _;
-  }
-
-  modifier onlyOwnerWhenLocked() {
-    if (_locked) {
-      _checkOwner();
-    }
-
-    _;
-  }
 
   modifier onlyController() {
     _checkController();
@@ -58,9 +36,9 @@ abstract contract DefaultTokenImpl is TokenImpl {
     string calldata name_,
     string calldata symbol_,
     address controller,
-    bool locked_
+    bool locked
   ) external {
-    _initialize(gateway);
+    _initialize(gateway, locked);
 
     _setOwner(owner, false);
 
@@ -68,7 +46,6 @@ abstract contract DefaultTokenImpl is TokenImpl {
     _symbol = symbol_;
 
     _controller = controller;
-    _locked = locked_;
   }
 
   // public getters
@@ -87,27 +64,7 @@ abstract contract DefaultTokenImpl is TokenImpl {
     return _controller;
   }
 
-  function locked() external view returns (bool) {
-    return _locked;
-  }
-
-  // external setters
-
-  function unlock() external onlyOwner whenLocked {
-    _locked = false;
-
-    emit Unlocked();
-
-    _notifyTokenRegistry(0x10, new bytes(0));
-  }
-
   // private getters
-
-  function _requireLocked() private view {
-    if (!_locked) {
-      revert ExpectedLocked();
-    }
-  }
 
   function _checkController() private view {
     address msgSender = _msgSender();

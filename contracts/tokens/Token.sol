@@ -10,15 +10,40 @@ abstract contract Token is Ownable, Initializable {
 
   address internal _tokenRegistry;
 
+  bool internal _locked;
+
+  // events
+
+  event Unlocked();
+
   // errors
 
   error TokenRegistryIsTheZeroAddress();
+
+  error ExpectedLocked();
+
+  // modifiers
+
+  modifier whenLocked() {
+    _requireLocked();
+
+    _;
+  }
+
+  modifier onlyOwnerWhenLocked() {
+    if (_locked) {
+      _checkOwner();
+    }
+
+    _;
+  }
 
   // deployment
 
   function _initialize(
     address gateway,
-    address tokenRegistry
+    address tokenRegistry,
+    bool locked_
   ) internal initializeOnce {
     if (tokenRegistry == address(0)) {
       revert TokenRegistryIsTheZeroAddress();
@@ -27,12 +52,28 @@ abstract contract Token is Ownable, Initializable {
     _gateway = gateway;
 
     _tokenRegistry = tokenRegistry;
+
+    _locked = locked_;
   }
 
   // external getters
 
-  function getTokenRegistry() external view virtual returns (address) {
+  function getTokenRegistry() external view returns (address) {
     return _tokenRegistry;
+  }
+
+  function locked() external view returns (bool) {
+    return _locked;
+  }
+
+  // external setters
+
+  function unlock() external onlyOwner whenLocked {
+    _locked = false;
+
+    emit Unlocked();
+
+    _notifyTokenRegistry(0x00, new bytes(0));
   }
 
   // internal setters
@@ -45,7 +86,15 @@ abstract contract Token is Ownable, Initializable {
     super._setOwner(owner, emitEvent);
 
     if (emitEvent) {
-      _notifyTokenRegistry(0x00, abi.encode(owner));
+      _notifyTokenRegistry(0x01, abi.encode(owner));
+    }
+  }
+
+  // private getters
+
+  function _requireLocked() private view {
+    if (!_locked) {
+      revert ExpectedLocked();
     }
   }
 }

@@ -10,8 +10,23 @@ contract TokenMock is Token {
     _setInitialOwner(address(0));
   }
 
-  function initialize(address gateway, address tokenRegistry) external {
-    _initialize(gateway, tokenRegistry);
+  function initialize(
+    address gateway,
+    address tokenRegistry,
+    bool locked
+  ) external {
+    _initialize(gateway, tokenRegistry, locked);
+  }
+
+  // external getters
+
+  function triggerOnlyOwnerWhenLocked()
+    external
+    view
+    onlyOwnerWhenLocked
+    returns (bool)
+  {
+    return true;
   }
 
   // external setters

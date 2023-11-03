@@ -21,39 +21,6 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
   };
 
   describe('# modifiers', () => {
-    describe('onlyOwnerWhenLocked()', () => {
-      describe('# before unlocking', () => {
-        createBeforeHook();
-
-        it('expect to check the owner when contract is locked', async () => {
-          const { token, signers } = fixture;
-
-          const tx = token
-            .connect(signers.unknown.at(0))
-            .triggerOnlyOwnerWhenLocked();
-
-          await expect(tx).revertedWithCustomError(
-            token,
-            'MsgSenderIsNotTheOwner',
-          );
-        });
-      });
-
-      describe('# after unlocking', () => {
-        createBeforeHook(true);
-
-        it('expect to omit the owner check', async () => {
-          const { token, signers } = fixture;
-
-          const res = await token
-            .connect(signers.unknown.at(0))
-            .triggerOnlyOwnerWhenLocked();
-
-          expect(res).true;
-        });
-      });
-    });
-
     describe('onlyController()', () => {
       describe('# before unlocking', () => {
         createBeforeHook();
@@ -199,32 +166,6 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
         const res = await token.getController();
 
         expect(res).eq(signers.controller.address);
-      });
-    });
-
-    describe('locked()', () => {
-      describe('# before unlocking', () => {
-        createBeforeHook();
-
-        it('expect to return true', async () => {
-          const { token } = fixture;
-
-          const res = await token.locked();
-
-          expect(res).true;
-        });
-      });
-
-      describe('# after unlocking', () => {
-        createBeforeHook(true);
-
-        it('expect to return false', async () => {
-          const { token } = fixture;
-
-          const res = await token.locked();
-
-          expect(res).false;
-        });
       });
     });
   });

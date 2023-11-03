@@ -31,7 +31,7 @@ export async function setupERC20TokenMock() {
     token,
   });
 
-  await token.initialize(tokenRegistry, ERC20_TOKEN.totalSupply);
+  await token.initialize(tokenRegistry, true, ERC20_TOKEN.totalSupply);
 
   return {
     signers,

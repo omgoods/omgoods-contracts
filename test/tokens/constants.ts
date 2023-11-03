@@ -1,6 +1,6 @@
 export enum TokenNotificationsKinds {
-  OwnerUpdated = 0x00,
-  Unlocked = 0x10,
+  Unlocked = 0x00,
+  OwnerUpdated = 0x01,
   ERC20Update = 0x50,
   ERC20Approve = 0x51,
   ERC721Update = 0x60,

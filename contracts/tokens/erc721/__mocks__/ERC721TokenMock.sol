@@ -8,9 +8,10 @@ contract ERC721TokenMock is ERC721Token {
 
   function initialize(
     address tokenRegistry,
+    bool locked,
     uint256[] calldata tokenIds
   ) external {
-    _initialize(address(0), tokenRegistry);
+    _initialize(address(0), tokenRegistry, locked);
 
     uint256 len = tokenIds.length;
 

@@ -190,6 +190,7 @@ describe('tokens/TokenRegistry // mocked', () => {
         const salt = randomHex();
         const initCode = tokenImpl.interface.encodeFunctionData('initialize', [
           randomAddress(),
+          true,
         ]);
 
         const tx = tokenRegistry

@@ -10,7 +10,7 @@ contract TokenImplMock is TokenImpl {
     //
   }
 
-  function initialize(address gateway) external {
-    _initialize(gateway);
+  function initialize(address gateway, bool locked) external {
+    _initialize(gateway, locked);
   }
 }

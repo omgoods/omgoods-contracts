@@ -12,15 +12,6 @@ contract DefaultTokenImplMock is DefaultTokenImpl {
 
   // external getters
 
-  function triggerOnlyOwnerWhenLocked()
-    external
-    view
-    onlyOwnerWhenLocked
-    returns (bool)
-  {
-    return true;
-  }
-
   function triggerOnlyController() external view onlyController returns (bool) {
     return true;
   }

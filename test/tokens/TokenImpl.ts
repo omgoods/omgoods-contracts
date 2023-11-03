@@ -17,7 +17,7 @@ describe('tokens/TokenImpl // mocked', () => {
         it('expect to revert', async () => {
           const { tokenImpl } = fixture;
 
-          const tx = tokenImpl.initialize(ZeroAddress);
+          const tx = tokenImpl.initialize(ZeroAddress, true);
 
           await expect(tx).revertedWithCustomError(
             tokenImpl,
@@ -32,12 +32,13 @@ describe('tokens/TokenImpl // mocked', () => {
 
           const salt = randomHex();
           const gateway = randomAddress();
+          const locked = true;
 
           const token = await computeToken(salt);
 
           await tokenFactory.createToken(
             salt,
-            token.interface.encodeFunctionData('initialize', [gateway]),
+            token.interface.encodeFunctionData('initialize', [gateway, locked]),
             '0x',
           );
 
@@ -45,13 +46,14 @@ describe('tokens/TokenImpl // mocked', () => {
           expect(await token.getTokenRegistry()).eq(
             await tokenRegistry.getAddress(),
           );
+          expect(await token.locked()).eq(locked);
         });
 
         describe('# after initialization', () => {
           it('expect to revert', async () => {
             const { token } = fixture;
 
-            const tx = token.initialize(ZeroAddress);
+            const tx = token.initialize(ZeroAddress, true);
 
             await expect(tx).revertedWithCustomError(
               token,

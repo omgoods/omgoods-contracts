@@ -31,7 +31,7 @@ export async function setupERC721TokenMock() {
     token,
   });
 
-  await token.initialize(tokenRegistry, ERC721_TOKEN.tokenIds);
+  await token.initialize(tokenRegistry, true, ERC721_TOKEN.tokenIds);
 
   return {
     signers,

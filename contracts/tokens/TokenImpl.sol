@@ -10,7 +10,7 @@ abstract contract TokenImpl is Token {
     _initialized = true;
   }
 
-  function _initialize(address gateway, bool locked) internal initializeOnce {
+  function _initialize(address gateway, bool locked) internal {
     _initialize(gateway, msg.sender, locked);
   }
 }

@@ -59,13 +59,14 @@ export async function deployTokenRegistry() {
 export async function setupTokenMock() {
   const { token } = await deployTokenMock();
 
-  const { tokenRegistry } = await setupTokenRegistry({
+  const { tokenRegistry, signers } = await setupTokenRegistry({
     token,
   });
 
-  await token.initialize(ZeroAddress, tokenRegistry);
+  await token.initialize(ZeroAddress, tokenRegistry, true);
 
   return {
+    signers,
     token,
     tokenRegistry,
   };
@@ -91,7 +92,7 @@ export async function setupTokenFactoryMock() {
 
   await tokenFactory.createToken(
     salt,
-    tokenImpl.interface.encodeFunctionData('initialize', [ZeroAddress]),
+    tokenImpl.interface.encodeFunctionData('initialize', [ZeroAddress, false]),
     '0x',
   );
 

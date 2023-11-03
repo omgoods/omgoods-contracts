@@ -154,6 +154,7 @@ describe('tokens/TokenFactory // mocked', () => {
         const salt = randomHex();
         const initCode = tokenImpl.interface.encodeFunctionData('initialize', [
           ZeroAddress,
+          true,
         ]);
 
         const tx = tokenFactory.createToken(salt, initCode, '0x');
@@ -180,6 +181,7 @@ describe('tokens/TokenFactory // mocked', () => {
         const salt = randomHex();
         const initCode = tokenImpl.interface.encodeFunctionData('initialize', [
           ZeroAddress,
+          true,
         ]);
 
         const tx = tokenFactory.connect(signers.unknown.at(0)).createToken(

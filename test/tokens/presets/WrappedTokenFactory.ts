@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../../common';
+import { isBlockTimestamp, randomAddress } from '../../common';
 import { setupWrappedTokenImpl } from './fixtures';
 
 describe('tokens/presets/WrappedTokenFactory', () => {
@@ -46,6 +46,7 @@ describe('tokens/presets/WrappedTokenFactory', () => {
             await computeTokenAddress(underlyingToken),
             await tokenImpl.getAddress(),
             initCode,
+            isBlockTimestamp,
           );
       });
     });

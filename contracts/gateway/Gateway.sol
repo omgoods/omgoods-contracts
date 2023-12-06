@@ -40,13 +40,20 @@ contract Gateway is EIP712 {
 
   // events
 
-  event RequestSent(address account, uint256 nonce, address to, bytes data);
+  event RequestSent(
+    address account,
+    uint256 nonce,
+    address to,
+    bytes data,
+    uint256 timestamp
+  );
 
   event RequestBatchSent(
     address account,
     uint256 nonce,
     address[] to,
-    bytes[] data
+    bytes[] data,
+    uint256 timestamp
   );
 
   // errors
@@ -221,7 +228,7 @@ contract Gateway is EIP712 {
 
     _executeRequestCall(account, to, data);
 
-    emit RequestSent(account, nonce, to, data);
+    emit RequestSent(account, nonce, to, data, block.timestamp);
   }
 
   function _sendRequestBatch(
@@ -236,7 +243,7 @@ contract Gateway is EIP712 {
 
     _executeRequestBatchCalls(account, to, data);
 
-    emit RequestBatchSent(account, nonce, to, data);
+    emit RequestBatchSent(account, nonce, to, data, block.timestamp);
   }
 
   function _executeRequestCall(

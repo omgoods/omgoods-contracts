@@ -30,15 +30,25 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
 
   event Initialized(address gateway, address[] guardians);
 
-  event TokenCreated(address token, address tokenImpl, bytes initCode);
+  event TokenCreated(
+    address token,
+    address tokenImpl,
+    bytes initCode,
+    uint256 timestamp
+  );
 
-  event TokenAdded(address token);
+  event TokenAdded(address token, uint256 timestamp);
 
   event TokenFactoryAdded(address tokenFactory);
 
   event TokenFactoryRemoved(address tokenFactory);
 
-  event TokenNotificationSent(address token, uint8 kind, bytes encodedData);
+  event TokenNotificationSent(
+    address token,
+    uint8 kind,
+    bytes encodedData,
+    uint256 timestamp
+  );
 
   // errors
 
@@ -141,7 +151,7 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
 
     _tokens[token] = true;
 
-    emit TokenAdded(token);
+    emit TokenAdded(token, block.timestamp);
   }
 
   function addTokenFactory(address tokenFactory) external onlyOwner {
@@ -176,7 +186,7 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
     uint8 kind,
     bytes calldata encodedData
   ) external onlyToken {
-    emit TokenNotificationSent(msg.sender, kind, encodedData);
+    emit TokenNotificationSent(msg.sender, kind, encodedData, block.timestamp);
   }
 
   // private getters
@@ -220,7 +230,7 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
 
     _tokens[token] = true;
 
-    emit TokenCreated(token, tokenImpl, initCode);
+    emit TokenCreated(token, tokenImpl, initCode, block.timestamp);
 
     // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory response) = token.call(initCode);

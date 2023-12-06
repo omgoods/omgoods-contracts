@@ -1,6 +1,6 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { abiCoder, randomAddress } from '../../common';
+import { abiCoder, isBlockTimestamp, randomAddress } from '../../common';
 import { TokenNotificationsKinds } from '../constants';
 import { setupERC721TokenMock } from './fixtures';
 import { ERC721_TOKEN } from './constants';
@@ -32,6 +32,7 @@ describe('tokens/erc721/ERC721Token // mocked', () => {
               ['address', 'address', 'uint256'],
               [from, to, tokenId],
             ),
+            isBlockTimestamp,
           );
       });
     });
@@ -54,6 +55,7 @@ describe('tokens/erc721/ERC721Token // mocked', () => {
               ['address', 'address', 'uint256'],
               [signers.owner.address, approved, tokenId],
             ),
+            isBlockTimestamp,
           );
       });
     });
@@ -76,6 +78,7 @@ describe('tokens/erc721/ERC721Token // mocked', () => {
               ['address', 'address', 'bool'],
               [signers.owner.address, operator, approved],
             ),
+            isBlockTimestamp,
           );
       });
     });

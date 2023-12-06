@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress, randomBytes } from 'ethers';
 import { expect } from 'chai';
-import { abiCoder, randomAddress } from '../common';
+import { abiCoder, isBlockTimestamp, randomAddress } from '../common';
 import { deployTokenMock, setupTokenMock } from './fixtures';
 import { TokenNotificationsKinds } from './constants';
 
@@ -168,6 +168,7 @@ describe('tokens/Token // mocked', () => {
             await token.getAddress(),
             TokenNotificationsKinds.Unlocked,
             encodedData,
+            isBlockTimestamp,
           );
       });
     });
@@ -186,6 +187,7 @@ describe('tokens/Token // mocked', () => {
             await token.getAddress(),
             TokenNotificationsKinds.OwnerUpdated,
             abiCoder.encode(['address'], [owner]),
+            isBlockTimestamp,
           );
       });
     });

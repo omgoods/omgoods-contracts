@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress, randomHex } from '../common';
+import { isBlockTimestamp, randomAddress, randomHex } from '../common';
 import { deployTokenFactoryMock, setupTokenFactoryMock } from './fixtures';
 
 describe('tokens/TokenFactory // mocked', () => {
@@ -165,6 +165,7 @@ describe('tokens/TokenFactory // mocked', () => {
             await computeTokenAddress(salt),
             await tokenImpl.getAddress(),
             initCode,
+            isBlockTimestamp,
           );
       });
 
@@ -199,6 +200,7 @@ describe('tokens/TokenFactory // mocked', () => {
             await computeTokenAddress(salt),
             await tokenImpl.getAddress(),
             initCode,
+            isBlockTimestamp,
           );
       });
     });

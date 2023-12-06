@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress, randomHex } from '../common';
+import { isBlockTimestamp, randomAddress, randomHex } from '../common';
 import { deployTokenRegistry, setupTokenRegistry } from './fixtures';
 import { TokenNotificationsKinds } from './constants';
 
@@ -203,6 +203,7 @@ describe('tokens/TokenRegistry // mocked', () => {
             await computeTokenAddress(tokenImpl, salt),
             await tokenImpl.getAddress(),
             initCode,
+            isBlockTimestamp,
           );
       });
     });
@@ -252,7 +253,9 @@ describe('tokens/TokenRegistry // mocked', () => {
 
         const tx = tokenRegistry.addToken(token);
 
-        await expect(tx).emit(tokenRegistry, 'TokenAdded').withArgs(token);
+        await expect(tx)
+          .emit(tokenRegistry, 'TokenAdded')
+          .withArgs(token, isBlockTimestamp);
       });
     });
 
@@ -384,7 +387,7 @@ describe('tokens/TokenRegistry // mocked', () => {
 
         await expect(tx)
           .emit(tokenRegistry, 'TokenNotificationSent')
-          .withArgs(signers.token.address, kind, encodedData);
+          .withArgs(signers.token.address, kind, encodedData, isBlockTimestamp);
       });
     });
   });

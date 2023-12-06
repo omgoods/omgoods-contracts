@@ -1,7 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../common';
+import { isBlockTimestamp, randomAddress } from '../common';
 import { setupGateway } from './fixtures';
 import { GATEWAY_REQUEST, GATEWAY_REQUEST_BATCH } from './constants';
 
@@ -91,7 +91,7 @@ describe('gateway/Gateway', () => {
 
         await expect(tx)
           .emit(gateway, 'RequestSent')
-          .withArgs(account.address, 0, to, data);
+          .withArgs(account.address, 0, to, data, isBlockTimestamp);
 
         await expect(tx)
           .emit(gatewayRecipient, 'MsgSender')
@@ -136,7 +136,7 @@ describe('gateway/Gateway', () => {
 
         await expect(tx)
           .emit(gateway, 'RequestBatchSent')
-          .withArgs(account.address, 0, to, data);
+          .withArgs(account.address, 0, to, data, isBlockTimestamp);
 
         await expect(tx)
           .emit(gatewayRecipient, 'MsgSender')
@@ -212,7 +212,13 @@ describe('gateway/Gateway', () => {
 
         await expect(tx)
           .emit(gateway, 'RequestSent')
-          .withArgs(request.account, request.nonce, request.to, request.data);
+          .withArgs(
+            request.account,
+            request.nonce,
+            request.to,
+            request.data,
+            isBlockTimestamp,
+          );
 
         await expect(tx)
           .emit(gatewayRecipient, 'MsgSender')
@@ -256,6 +262,7 @@ describe('gateway/Gateway', () => {
             requestBatch.nonce,
             requestBatch.to,
             requestBatch.data,
+            isBlockTimestamp,
           );
 
         await expect(tx)

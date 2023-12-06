@@ -1,9 +1,9 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../../common';
-import { setupDefaultTokenImpl } from './fixtures';
+import { isBlockTimestamp, randomAddress } from '../../common';
 import { TOKEN, TokenNotificationsKinds } from '../constants';
+import { setupDefaultTokenImpl } from './fixtures';
 
 describe('tokens/presets/DefaultTokenImpl // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupDefaultTokenImpl>>;
@@ -199,6 +199,7 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
               await token.getAddress(),
               TokenNotificationsKinds.Unlocked,
               '0x',
+              isBlockTimestamp,
             );
         });
       });

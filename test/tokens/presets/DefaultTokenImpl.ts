@@ -1,7 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { isBlockTimestamp, randomAddress } from '../../common';
+import { randomAddress } from '../../common';
 import { TOKEN, TokenNotificationsKinds } from '../constants';
 import { setupDefaultTokenImpl } from './fixtures';
 
@@ -199,7 +200,7 @@ describe('tokens/presets/DefaultTokenImpl // mocked', () => {
               await token.getAddress(),
               TokenNotificationsKinds.Unlocked,
               '0x',
-              isBlockTimestamp,
+              anyUint,
             );
         });
       });

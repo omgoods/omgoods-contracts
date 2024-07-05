@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
@@ -31,14 +31,14 @@ abstract contract DefaultTokenImpl is TokenImpl {
   }
 
   function initialize(
-    address gateway,
+    address forwarder,
     address owner,
     string calldata name_,
     string calldata symbol_,
     address controller,
     bool locked
   ) external {
-    _initialize(gateway, locked);
+    _initialize(forwarder, locked);
 
     _setOwner(owner, false);
 

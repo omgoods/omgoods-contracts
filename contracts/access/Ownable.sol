@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
-import {GatewayRecipient} from "../gateway/GatewayRecipient.sol";
+import {ForwarderContext} from "../metatx/ForwarderContext.sol";
 
-abstract contract Ownable is GatewayRecipient {
+abstract contract Ownable is ForwarderContext {
   // storage
 
   address internal _owner;

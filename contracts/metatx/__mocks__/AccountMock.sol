@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
@@ -14,10 +14,10 @@ contract AccountMock is IERC1271, Ownable {
 
   // deployment
 
-  constructor(address gateway) {
+  constructor(address forwarder) {
     _setInitialOwner(address(0));
 
-    _gateway = gateway;
+    _forwarder = forwarder;
   }
 
   // external getters

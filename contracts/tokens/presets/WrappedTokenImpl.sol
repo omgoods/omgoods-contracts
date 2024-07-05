@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
@@ -18,12 +18,12 @@ abstract contract WrappedTokenImpl is TokenImpl {
     //
   }
 
-  function initialize(address gateway, address underlyingToken) external {
+  function initialize(address forwarder, address underlyingToken) external {
     if (underlyingToken == address(0)) {
       revert UnderlyingTokenIsTheZeroAddress();
     }
 
-    _initialize(gateway, false);
+    _initialize(forwarder, false);
 
     _underlyingToken = underlyingToken;
   }

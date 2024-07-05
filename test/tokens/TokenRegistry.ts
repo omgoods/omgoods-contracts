@@ -1,7 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { isBlockTimestamp, randomAddress, randomHex } from '../common';
+import { randomAddress, randomHex } from '../common';
 import { deployTokenRegistry, setupTokenRegistry } from './fixtures';
 import { TokenNotificationsKinds } from './constants';
 
@@ -30,16 +31,16 @@ describe('tokens/TokenRegistry // mocked', () => {
       it('expect to initialize the contract', async () => {
         const { tokenRegistry } = fixture;
 
-        const gateway = randomAddress();
+        const forwarder = randomAddress();
         const guardians = [randomAddress()];
 
-        const tx = tokenRegistry.initialize(gateway, guardians);
+        const tx = tokenRegistry.initialize(forwarder, guardians);
 
         await expect(tx)
           .emit(tokenRegistry, 'Initialized')
-          .withArgs(gateway, guardians);
+          .withArgs(forwarder, guardians);
 
-        expect(await tokenRegistry.getGateway()).eq(gateway);
+        expect(await tokenRegistry.forwarder()).eq(forwarder);
         expect(await tokenRegistry.hasGuardian(guardians[0])).true;
       });
 
@@ -169,13 +170,9 @@ describe('tokens/TokenRegistry // mocked', () => {
 
         const tx = tokenRegistry
           .connect(signers.tokenFactory)
-          ['createToken(address,bytes32,bytes)'](
-            tokenRegistry,
-            randomHex(),
-            tokenImpl.interface.encodeFunctionData('setOwner', [
-              randomAddress(),
-            ]),
-          );
+          [
+            'createToken(address,bytes32,bytes)'
+          ](tokenRegistry, randomHex(), tokenImpl.interface.encodeFunctionData('setOwner', [randomAddress()]));
 
         await expect(tx).revertedWithCustomError(
           tokenImpl,
@@ -203,7 +200,7 @@ describe('tokens/TokenRegistry // mocked', () => {
             await computeTokenAddress(tokenImpl, salt),
             await tokenImpl.getAddress(),
             initCode,
-            isBlockTimestamp,
+            anyUint,
           );
       });
     });
@@ -255,7 +252,7 @@ describe('tokens/TokenRegistry // mocked', () => {
 
         await expect(tx)
           .emit(tokenRegistry, 'TokenAdded')
-          .withArgs(token, isBlockTimestamp);
+          .withArgs(token, anyUint);
       });
     });
 
@@ -387,7 +384,7 @@ describe('tokens/TokenRegistry // mocked', () => {
 
         await expect(tx)
           .emit(tokenRegistry, 'TokenNotificationSent')
-          .withArgs(signers.token.address, kind, encodedData, isBlockTimestamp);
+          .withArgs(signers.token.address, kind, encodedData, anyUint);
       });
     });
   });

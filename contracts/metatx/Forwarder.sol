@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Bytes} from "../utils/Bytes.sol";
 
-contract Gateway is EIP712 {
+contract Forwarder is EIP712 {
   using ECDSA for bytes32;
   using Bytes for bytes[];
 

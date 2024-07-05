@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {Ownable} from "../access/Ownable.sol";
 import {Initializable} from "../utils/Initializable.sol";
@@ -41,7 +41,7 @@ abstract contract Token is Ownable, Initializable {
   // deployment
 
   function _initialize(
-    address gateway,
+    address forwarder,
     address tokenRegistry,
     bool locked_
   ) internal initializeOnce {
@@ -49,7 +49,7 @@ abstract contract Token is Ownable, Initializable {
       revert TokenRegistryIsTheZeroAddress();
     }
 
-    _gateway = gateway;
+    _forwarder = forwarder;
 
     _tokenRegistry = tokenRegistry;
 
@@ -73,10 +73,14 @@ abstract contract Token is Ownable, Initializable {
 
     emit Unlocked();
 
-    _notifyTokenRegistry(0x00, new bytes(0));
+    _notifyTokenRegistry(0x00);
   }
 
   // internal setters
+
+  function _notifyTokenRegistry(uint8 kind) internal {
+    TokenRegistry(_tokenRegistry).sendTokenNotification(kind, new bytes(0));
+  }
 
   function _notifyTokenRegistry(uint8 kind, bytes memory encodedData) internal {
     TokenRegistry(_tokenRegistry).sendTokenNotification(kind, encodedData);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
 import {Ownable} from "../access/Ownable.sol";
@@ -15,7 +15,11 @@ abstract contract TokenFactory is Ownable, Initializable {
 
   // events
 
-  event Initialized(address gateway, address tokenImpl, address tokenRegistry);
+  event Initialized(
+    address forwarder,
+    address tokenImpl,
+    address tokenRegistry
+  );
 
   // errors
 
@@ -30,7 +34,7 @@ abstract contract TokenFactory is Ownable, Initializable {
   }
 
   function initialize(
-    address gateway,
+    address forwarder,
     address tokenImpl,
     address tokenRegistry
   ) external initializeOnce onlyOwner {
@@ -42,11 +46,11 @@ abstract contract TokenFactory is Ownable, Initializable {
       revert TokenRegistryIsTheZeroAddress();
     }
 
-    _gateway = gateway;
+    _forwarder = forwarder;
     _tokenImpl = tokenImpl;
     _tokenRegistry = TokenRegistry(tokenRegistry);
 
-    emit Initialized(gateway, tokenImpl, tokenRegistry);
+    emit Initialized(forwarder, tokenImpl, tokenRegistry);
   }
 
   // external getters

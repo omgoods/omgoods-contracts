@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {TokenFactory} from "../TokenFactory.sol";
 import {WrappedTokenImpl} from "./WrappedTokenImpl.sol";
@@ -30,7 +30,7 @@ contract WrappedTokenFactory is TokenFactory {
       abi.encodeCall(
         WrappedTokenImpl.initialize,
         (
-          _gateway, //
+          _forwarder, //
           underlyingToken
         )
       ),

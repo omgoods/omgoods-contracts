@@ -31,18 +31,21 @@ describe('tokens/TokenImpl // mocked', () => {
           const { tokenRegistry, tokenFactory, computeToken } = fixture;
 
           const salt = randomHex();
-          const gateway = randomAddress();
+          const forwarder = randomAddress();
           const locked = true;
 
           const token = await computeToken(salt);
 
           await tokenFactory.createToken(
             salt,
-            token.interface.encodeFunctionData('initialize', [gateway, locked]),
+            token.interface.encodeFunctionData('initialize', [
+              forwarder,
+              locked,
+            ]),
             '0x',
           );
 
-          expect(await token.getGateway()).eq(gateway);
+          expect(await token.forwarder()).eq(forwarder);
           expect(await token.getTokenRegistry()).eq(
             await tokenRegistry.getAddress(),
           );

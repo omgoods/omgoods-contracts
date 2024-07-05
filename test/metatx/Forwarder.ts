@@ -1,16 +1,17 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { isBlockTimestamp, randomAddress } from '../common';
-import { setupGateway } from './fixtures';
-import { GATEWAY_REQUEST, GATEWAY_REQUEST_BATCH } from './constants';
+import { randomAddress } from '../common';
+import { setupForwarder } from './fixtures';
+import { FORWARDER_REQUEST, FORWARDER_REQUEST_BATCH } from './constants';
 
-describe('gateway/Gateway', () => {
-  let fixture: Awaited<ReturnType<typeof setupGateway>>;
+describe('metatx/Forwarder', () => {
+  let fixture: Awaited<ReturnType<typeof setupForwarder>>;
 
   const createBeforeHook = () => {
     before(async () => {
-      fixture = await loadFixture(setupGateway);
+      fixture = await loadFixture(setupForwarder);
     });
   };
 
@@ -19,9 +20,9 @@ describe('gateway/Gateway', () => {
 
     describe('getNextNonce()', () => {
       it('expect to return the correct nonce', async () => {
-        const { gateway } = fixture;
+        const { forwarder } = fixture;
 
-        const res = await gateway.getNextNonce(randomAddress());
+        const res = await forwarder.getNextNonce(randomAddress());
 
         expect(res).eq(0);
       });
@@ -29,22 +30,22 @@ describe('gateway/Gateway', () => {
 
     describe('hashRequest()', () => {
       it('expect to return the correct hash', async () => {
-        const { gateway, typedDataHelper } = fixture;
+        const { forwarder, typedDataHelper } = fixture;
 
-        const res = await gateway.hashRequest(GATEWAY_REQUEST);
+        const res = await forwarder.hashRequest(FORWARDER_REQUEST);
 
-        expect(res).eq(typedDataHelper.hash('Request', GATEWAY_REQUEST));
+        expect(res).eq(typedDataHelper.hash('Request', FORWARDER_REQUEST));
       });
     });
 
     describe('hashRequestBatch()', () => {
       it('expect to return the correct hash', async () => {
-        const { gateway, typedDataHelper } = fixture;
+        const { forwarder, typedDataHelper } = fixture;
 
-        const res = await gateway.hashRequestBatch(GATEWAY_REQUEST_BATCH);
+        const res = await forwarder.hashRequestBatch(FORWARDER_REQUEST_BATCH);
 
         expect(res).eq(
-          typedDataHelper.hash('RequestBatch', GATEWAY_REQUEST_BATCH),
+          typedDataHelper.hash('RequestBatch', FORWARDER_REQUEST_BATCH),
         );
       });
     });
@@ -55,20 +56,20 @@ describe('gateway/Gateway', () => {
       createBeforeHook();
 
       it('expect to revert when sending to the zero address', async () => {
-        const { gateway } = fixture;
+        const { forwarder } = fixture;
 
-        const tx = gateway.sendRequest(ZeroAddress, '0x');
+        const tx = forwarder.sendRequest(ZeroAddress, '0x');
 
         await expect(tx).revertedWithCustomError(
-          gateway,
+          forwarder,
           'CallToTheZeroAddress',
         );
       });
 
       it('expect to revert due to the reverted call', async () => {
-        const { gateway, account } = fixture;
+        const { forwarder, account } = fixture;
 
-        const tx = gateway.sendRequest(
+        const tx = forwarder.sendRequest(
           await account.getAddress(),
           account.interface.encodeFunctionData('setOwner', [ZeroAddress]),
         );
@@ -80,21 +81,21 @@ describe('gateway/Gateway', () => {
       });
 
       it('expect request to be sent successfully', async () => {
-        const { gateway, gatewayRecipient, signers } = fixture;
+        const { forwarder, forwarderContext, signers } = fixture;
 
         const account = signers.unknown.at(0);
-        const to = await gatewayRecipient.getAddress();
+        const to = await forwarderContext.getAddress();
         const data =
-          gatewayRecipient.interface.encodeFunctionData('emitMsgSender');
+          forwarderContext.interface.encodeFunctionData('emitMsgSender');
 
-        const tx = gateway.connect(account).sendRequest(to, data);
-
-        await expect(tx)
-          .emit(gateway, 'RequestSent')
-          .withArgs(account.address, 0, to, data, isBlockTimestamp);
+        const tx = forwarder.connect(account).sendRequest(to, data);
 
         await expect(tx)
-          .emit(gatewayRecipient, 'MsgSender')
+          .emit(forwarder, 'RequestSent')
+          .withArgs(account.address, 0, to, data, anyUint);
+
+        await expect(tx)
+          .emit(forwarderContext, 'MsgSender')
           .withArgs(account.address);
       });
     });
@@ -103,43 +104,46 @@ describe('gateway/Gateway', () => {
       createBeforeHook();
 
       it('expect to revert when the request batch is empty', async () => {
-        const { gateway } = fixture;
+        const { forwarder } = fixture;
 
-        const tx = gateway.sendRequestBatch([], []);
+        const tx = forwarder.sendRequestBatch([], []);
 
-        await expect(tx).revertedWithCustomError(gateway, 'EmptyRequestBatch');
+        await expect(tx).revertedWithCustomError(
+          forwarder,
+          'EmptyRequestBatch',
+        );
       });
 
       it('expect to revert when the request batch size is invalid', async () => {
-        const { gateway } = fixture;
+        const { forwarder } = fixture;
 
-        const tx = gateway.sendRequestBatch([randomAddress()], []);
+        const tx = forwarder.sendRequestBatch([randomAddress()], []);
 
         await expect(tx).revertedWithCustomError(
-          gateway,
+          forwarder,
           'InvalidRequestBatchSize',
         );
       });
 
       it('expect request batch to be sent successfully', async () => {
-        const { gateway, gatewayRecipient, signers } = fixture;
+        const { forwarder, forwarderContext, signers } = fixture;
 
         const account = signers.unknown.at(0);
-        const to = [await gatewayRecipient.getAddress()];
+        const to = [await forwarderContext.getAddress()];
         const data = [
-          gatewayRecipient.interface.encodeFunctionData('emitMsgSender'),
+          forwarderContext.interface.encodeFunctionData('emitMsgSender'),
         ];
 
-        const tx = gateway.connect(account).sendRequestBatch(to, data);
+        const tx = forwarder.connect(account).sendRequestBatch(to, data);
 
-        await expect(tx).not.emit(gateway, 'RequestSent');
-
-        await expect(tx)
-          .emit(gateway, 'RequestBatchSent')
-          .withArgs(account.address, 0, to, data, isBlockTimestamp);
+        await expect(tx).not.emit(forwarder, 'RequestSent');
 
         await expect(tx)
-          .emit(gatewayRecipient, 'MsgSender')
+          .emit(forwarder, 'RequestBatchSent')
+          .withArgs(account.address, 0, to, data, anyUint);
+
+        await expect(tx)
+          .emit(forwarderContext, 'MsgSender')
           .withArgs(account.address);
       });
     });
@@ -148,60 +152,61 @@ describe('gateway/Gateway', () => {
       createBeforeHook();
 
       it('expect to revert when the account is the zero address', async () => {
-        const { gateway } = fixture;
+        const { forwarder } = fixture;
 
-        const tx = gateway.forwardRequest(
+        const tx = forwarder.forwardRequest(
           ZeroAddress,
-          GATEWAY_REQUEST.to,
-          GATEWAY_REQUEST.data,
-          GATEWAY_REQUEST.data,
+          FORWARDER_REQUEST.to,
+          FORWARDER_REQUEST.data,
+          FORWARDER_REQUEST.data,
         );
 
         await expect(tx).revertedWithCustomError(
-          gateway,
+          forwarder,
           'AccountIsTheZeroAddress',
         );
       });
 
       it('expect to revert when the request signature is invalid', async () => {
-        const { gateway, signers } = fixture;
+        const { forwarder, signers } = fixture;
 
-        const tx = gateway.forwardRequest(
-          GATEWAY_REQUEST.account,
-          GATEWAY_REQUEST.to,
-          GATEWAY_REQUEST.data,
+        const tx = forwarder.forwardRequest(
+          FORWARDER_REQUEST.account,
+          FORWARDER_REQUEST.to,
+          FORWARDER_REQUEST.data,
           await signers.owner.signMessage('aaa'),
         );
 
-        await expect(tx).revertedWithCustomError(gateway, 'InvalidSignature');
+        await expect(tx).revertedWithCustomError(forwarder, 'InvalidSignature');
       });
 
       it('expect to revert when the request signer is not the account owner', async () => {
-        const { gateway, signers, account } = fixture;
+        const { forwarder, signers, account } = fixture;
 
-        const tx = gateway.forwardRequest(
+        const tx = forwarder.forwardRequest(
           account,
-          GATEWAY_REQUEST.to,
-          GATEWAY_REQUEST.data,
+          FORWARDER_REQUEST.to,
+          FORWARDER_REQUEST.data,
           await signers.owner.signMessage('aaa'),
         );
 
-        await expect(tx).revertedWithCustomError(gateway, 'InvalidSignature');
+        await expect(tx).revertedWithCustomError(forwarder, 'InvalidSignature');
       });
 
       it('expect request to be sent successfully', async () => {
-        const { gateway, gatewayRecipient, typedDataHelper, signers } = fixture;
+        const { forwarder, forwarderContext, typedDataHelper, signers } =
+          fixture;
 
         const signer = signers.unknown.at(0);
 
         const request = {
-          ...GATEWAY_REQUEST,
+          ...FORWARDER_REQUEST,
           account: signer.address,
-          to: await gatewayRecipient.getAddress(),
-          data: gatewayRecipient.interface.encodeFunctionData('emitMsgSender'),
+          to: await forwarderContext.getAddress(),
+          data: forwarderContext.interface.encodeFunctionData('emitMsgSender'),
         };
 
-        const tx = gateway
+        const tx = forwarder
           .connect(signers.forwarder)
           .forwardRequest(
             request.account,
@@ -211,20 +216,20 @@ describe('gateway/Gateway', () => {
           );
 
         await expect(tx)
-          .emit(gateway, 'RequestSent')
+          .emit(forwarder, 'RequestSent')
           .withArgs(
             request.account,
             request.nonce,
             request.to,
             request.data,
-            isBlockTimestamp,
+            anyUint,
           );
 
         await expect(tx)
-          .emit(gatewayRecipient, 'MsgSender')
+          .emit(forwarderContext, 'MsgSender')
           .withArgs(request.account);
 
-        expect(await gateway.getNextNonce(request.account)).eq(
+        expect(await forwarder.getNextNonce(request.account)).eq(
           request.nonce + 1,
         );
       });
@@ -232,21 +237,26 @@ describe('gateway/Gateway', () => {
 
     describe('forwardRequestBatch()', () => {
       it('expect request batch to be sent successfully', async () => {
-        const { gateway, gatewayRecipient, account, typedDataHelper, signers } =
-          fixture;
+        const {
+          forwarder,
+          forwarderContext,
+          account,
+          typedDataHelper,
+          signers,
+        } = fixture;
 
         const signer = signers.owner;
 
         const requestBatch = {
-          ...GATEWAY_REQUEST_BATCH,
+          ...FORWARDER_REQUEST_BATCH,
           account: await account.getAddress(),
-          to: [await gatewayRecipient.getAddress()],
+          to: [await forwarderContext.getAddress()],
           data: [
-            gatewayRecipient.interface.encodeFunctionData('emitMsgSender'),
+            forwarderContext.interface.encodeFunctionData('emitMsgSender'),
           ],
         };
 
-        const tx = gateway
+        const tx = forwarder
           .connect(signers.forwarder)
           .forwardRequestBatch(
             requestBatch.account,
@@ -256,20 +266,20 @@ describe('gateway/Gateway', () => {
           );
 
         await expect(tx)
-          .emit(gateway, 'RequestBatchSent')
+          .emit(forwarder, 'RequestBatchSent')
           .withArgs(
             requestBatch.account,
             requestBatch.nonce,
             requestBatch.to,
             requestBatch.data,
-            isBlockTimestamp,
+            anyUint,
           );
 
         await expect(tx)
-          .emit(gatewayRecipient, 'MsgSender')
+          .emit(forwarderContext, 'MsgSender')
           .withArgs(requestBatch.account);
 
-        expect(await gateway.getNextNonce(requestBatch.account)).eq(
+        expect(await forwarder.getNextNonce(requestBatch.account)).eq(
           requestBatch.nonce + 1,
         );
       });

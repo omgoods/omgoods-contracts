@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {Token} from "../Token.sol";
 
@@ -11,11 +11,11 @@ contract TokenMock is Token {
   }
 
   function initialize(
-    address gateway,
+    address forwarder,
     address tokenRegistry,
     bool locked
   ) external {
-    _initialize(gateway, tokenRegistry, locked);
+    _initialize(forwarder, tokenRegistry, locked);
   }
 
   // external getters

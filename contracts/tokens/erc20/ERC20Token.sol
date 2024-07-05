@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {GatewayRecipient} from "../../gateway/GatewayRecipient.sol";
+import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
 import {Token} from "../Token.sol";
 
 abstract contract ERC20Token is ERC20, Token {
@@ -19,10 +19,10 @@ abstract contract ERC20Token is ERC20, Token {
     internal
     view
     virtual
-    override(GatewayRecipient, Context)
+    override(ForwarderContext, Context)
     returns (address)
   {
-    return GatewayRecipient._msgSender();
+    return ForwarderContext._msgSender();
   }
 
   // internal setters

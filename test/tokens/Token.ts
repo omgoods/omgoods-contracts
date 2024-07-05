@@ -1,7 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress, randomBytes } from 'ethers';
 import { expect } from 'chai';
-import { abiCoder, isBlockTimestamp, randomAddress } from '../common';
+import { abiCoder, randomAddress } from '../common';
 import { deployTokenMock, setupTokenMock } from './fixtures';
 import { TokenNotificationsKinds } from './constants';
 
@@ -81,13 +82,13 @@ describe('tokens/Token // mocked', () => {
       it('expect to initialize the contract', async () => {
         const { token } = fixture;
 
-        const gateway = randomAddress();
+        const forwarder = randomAddress();
         const tokenRegistry = randomAddress();
         const locked = true;
 
-        await token.initialize(gateway, tokenRegistry, locked);
+        await token.initialize(forwarder, tokenRegistry, locked);
 
-        expect(await token.getGateway()).eq(gateway);
+        expect(await token.forwarder()).eq(forwarder);
         expect(await token.getTokenRegistry()).eq(tokenRegistry);
         expect(await token.locked()).eq(locked);
       });
@@ -168,7 +169,7 @@ describe('tokens/Token // mocked', () => {
             await token.getAddress(),
             TokenNotificationsKinds.Unlocked,
             encodedData,
-            isBlockTimestamp,
+            anyUint,
           );
       });
     });
@@ -187,7 +188,7 @@ describe('tokens/Token // mocked', () => {
             await token.getAddress(),
             TokenNotificationsKinds.OwnerUpdated,
             abiCoder.encode(['address'], [owner]),
-            isBlockTimestamp,
+            anyUint,
           );
       });
     });

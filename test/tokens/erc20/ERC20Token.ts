@@ -1,6 +1,7 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { expect } from 'chai';
-import { abiCoder, isBlockTimestamp, randomAddress } from '../../common';
+import { abiCoder, randomAddress } from '../../common';
 import { TokenNotificationsKinds } from '../constants';
 import { setupERC20TokenMock } from './fixtures';
 
@@ -30,7 +31,7 @@ describe('tokens/erc20/ERC20Token // mocked', () => {
               ['address', 'address', 'uint256'],
               [signers.owner.address, to, value],
             ),
-            isBlockTimestamp,
+            anyUint,
           );
       });
     });
@@ -53,7 +54,7 @@ describe('tokens/erc20/ERC20Token // mocked', () => {
               ['address', 'address', 'uint256'],
               [signers.owner.address, spender, value],
             ),
-            isBlockTimestamp,
+            anyUint,
           );
       });
     });

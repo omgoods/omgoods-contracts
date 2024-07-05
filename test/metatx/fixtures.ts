@@ -8,49 +8,49 @@ import {
 
 const { deployContract } = ethers;
 
-export async function deployAccountMock(options: { gateway: AddressLike }) {
-  const account = await deployContract('AccountMock', [options.gateway]);
+export async function deployAccountMock(options: { forwarder: AddressLike }) {
+  const account = await deployContract('AccountMock', [options.forwarder]);
 
   return {
     account,
   };
 }
 
-export async function deployGatewayRecipientMock(options?: {
-  gateway?: AddressLike;
+export async function deployForwarderContextMock(options?: {
+  forwarder?: AddressLike;
 }) {
-  const signers = await getSigners('gateway');
+  const signers = await getSigners('forwarder');
 
-  const gatewayRecipient = await deployContract('GatewayRecipientMock', [
-    options?.gateway || signers.gateway,
+  const forwarderContext = await deployContract('ForwarderContextMock', [
+    options?.forwarder || signers.forwarder,
   ]);
 
   return {
     signers,
-    gatewayRecipient,
+    forwarderContext,
   };
 }
 
-export async function deployGateway() {
+export async function deployForwarder() {
   const signers = await getSigners('owner', 'forwarder');
 
-  const gateway = await deployContract('Gateway', [TYPED_DATA_DOMAIN_NAME]);
+  const forwarder = await deployContract('Forwarder', [TYPED_DATA_DOMAIN_NAME]);
 
   return {
     signers,
-    gateway,
+    forwarder,
   };
 }
 
-export async function setupGateway() {
-  const { gateway, signers } = await deployGateway();
+export async function setupForwarder() {
+  const { forwarder, signers } = await deployForwarder();
 
   const { account } = await deployAccountMock({
-    gateway,
+    forwarder,
   });
 
-  const { gatewayRecipient } = await deployGatewayRecipientMock({
-    gateway,
+  const { forwarderContext } = await deployForwarderContextMock({
+    forwarder,
   });
 
   const typedDataHelper = await createTypedDataHelper<{
@@ -66,7 +66,7 @@ export async function setupGateway() {
       to: Array<string>;
       data: Array<BytesLike>;
     };
-  }>(gateway, {
+  }>(forwarder, {
     Request: [
       {
         name: 'account',
@@ -107,8 +107,8 @@ export async function setupGateway() {
 
   return {
     signers,
-    gateway,
-    gatewayRecipient,
+    forwarder,
+    forwarderContext,
     account,
     typedDataHelper,
   };

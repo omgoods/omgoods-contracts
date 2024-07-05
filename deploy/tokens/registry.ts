@@ -14,7 +14,7 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer, owner } = await getNamedAccounts();
 
-  const { address: gateway } = await get('Gateway');
+  const { address: forwarder } = await get('Forwarder');
 
   const guardians = processEnvs.getAddresses('GUARDIANS');
 
@@ -37,13 +37,13 @@ const func: DeployFunction = async (hre) => {
         log: true,
       },
       'initialize',
-      gateway,
+      forwarder,
       guardians,
     );
   }
 };
 
 func.tags = [TAG];
-func.dependencies = ['gateway'];
+func.dependencies = ['forwarder'];
 
 module.exports = func;

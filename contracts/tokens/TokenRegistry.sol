@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
@@ -28,7 +28,7 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
 
   // events
 
-  event Initialized(address gateway, address[] guardians);
+  event Initialized(address forwarder, address[] guardians);
 
   event TokenCreated(
     address token,
@@ -89,14 +89,14 @@ contract TokenRegistry is EIP712, Guarded, Initializable {
   }
 
   function initialize(
-    address gateway,
+    address forwarder_,
     address[] calldata guardians
   ) external initializeOnce onlyOwner {
-    _gateway = gateway;
+    _forwarder = forwarder_;
 
     _setInitialGuardians(guardians);
 
-    emit Initialized(gateway, guardians);
+    emit Initialized(forwarder_, guardians);
   }
 
   // external getters

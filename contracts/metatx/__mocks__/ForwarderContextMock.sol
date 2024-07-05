@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
-import {GatewayRecipient} from "../GatewayRecipient.sol";
+import {ForwarderContext} from "../ForwarderContext.sol";
 
-contract GatewayRecipientMock is GatewayRecipient {
+contract ForwarderContextMock is ForwarderContext {
   // events
 
   event MsgSender(address sender);
 
   // deployment
 
-  constructor(address gateway) {
-    _gateway = gateway;
+  constructor(address forwarder) {
+    _forwarder = forwarder;
   }
 
   // external getters

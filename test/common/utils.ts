@@ -13,10 +13,8 @@ import {
   concat,
   BytesLike,
   getCreate2Address,
-  BigNumberish,
 } from 'ethers';
 import { TYPED_DATA_DOMAIN_NAME } from './constants';
-import { time } from '@nomicfoundation/hardhat-network-helpers';
 
 export function randomHex(bytesSize = 32): string {
   return hexlify(randomBytes(bytesSize));
@@ -105,8 +103,4 @@ export async function computeProxyCloneAddress(
       ]),
     ),
   );
-}
-
-export async function isBlockTimestamp(value: BigNumberish): Promise<boolean> {
-  return BigInt(await time.latest()) === BigInt(value);
 }

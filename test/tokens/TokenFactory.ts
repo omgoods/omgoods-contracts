@@ -1,7 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { isBlockTimestamp, randomAddress, randomHex } from '../common';
+import { randomAddress, randomHex } from '../common';
 import { deployTokenFactoryMock, setupTokenFactoryMock } from './fixtures';
 
 describe('tokens/TokenFactory // mocked', () => {
@@ -59,17 +60,17 @@ describe('tokens/TokenFactory // mocked', () => {
       it('expect to initialize the contract', async () => {
         const { tokenFactory } = fixture;
 
-        const gateway = randomAddress();
+        const forwarder = randomAddress();
         const tokenImpl = randomAddress();
         const tokenRegistry = randomAddress();
 
-        const tx = tokenFactory.initialize(gateway, tokenImpl, tokenRegistry);
+        const tx = tokenFactory.initialize(forwarder, tokenImpl, tokenRegistry);
 
         await expect(tx)
           .emit(tokenFactory, 'Initialized')
-          .withArgs(gateway, tokenImpl, tokenRegistry);
+          .withArgs(forwarder, tokenImpl, tokenRegistry);
 
-        expect(await tokenFactory.getGateway()).eq(gateway);
+        expect(await tokenFactory.forwarder()).eq(forwarder);
         expect(await tokenFactory.getTokenImpl()).eq(tokenImpl);
         expect(await tokenFactory.getTokenRegistry()).eq(tokenRegistry);
       });
@@ -165,7 +166,7 @@ describe('tokens/TokenFactory // mocked', () => {
             await computeTokenAddress(salt),
             await tokenImpl.getAddress(),
             initCode,
-            isBlockTimestamp,
+            anyUint,
           );
       });
 
@@ -200,7 +201,7 @@ describe('tokens/TokenFactory // mocked', () => {
             await computeTokenAddress(salt),
             await tokenImpl.getAddress(),
             initCode,
-            isBlockTimestamp,
+            anyUint,
           );
       });
     });

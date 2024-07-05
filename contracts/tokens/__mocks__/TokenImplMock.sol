@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
@@ -10,7 +10,7 @@ contract TokenImplMock is TokenImpl {
     //
   }
 
-  function initialize(address gateway, bool locked) external {
-    _initialize(gateway, locked);
+  function initialize(address forwarder, bool locked) external {
+    _initialize(forwarder, locked);
   }
 }

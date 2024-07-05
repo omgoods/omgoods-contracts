@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
-import {GatewayRecipient} from "../../gateway/GatewayRecipient.sol";
+import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
 import {Token} from "../Token.sol";
 
 abstract contract ERC721Token is ERC721, Token {
@@ -19,10 +19,10 @@ abstract contract ERC721Token is ERC721, Token {
     internal
     view
     virtual
-    override(Context, GatewayRecipient)
+    override(Context, ForwarderContext)
     returns (address)
   {
-    return GatewayRecipient._msgSender();
+    return ForwarderContext._msgSender();
   }
 
   // internal setters

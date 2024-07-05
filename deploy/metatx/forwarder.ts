@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'gateway';
+const TAG = 'metatx/forwarder';
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -13,11 +13,11 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer } = await getNamedAccounts();
 
-  await deploy('Gateway', {
+  await deploy('Forwarder', {
     from: deployer,
     log: true,
     args: [
-      'OM!goods Gateway', // name
+      'OM!goods Forwarder', // name
     ],
   });
 };

@@ -1,7 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
+import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { isBlockTimestamp, randomAddress } from '../../common';
+import { randomAddress } from '../../common';
 import { setupDefaultTokenImpl } from './fixtures';
 
 describe('tokens/presets/DefaultTokenFactory', () => {
@@ -61,7 +62,7 @@ describe('tokens/presets/DefaultTokenFactory', () => {
             await computeTokenAddress(symbol),
             await tokenImpl.getAddress(),
             initCode,
-            isBlockTimestamp,
+            anyUint,
           );
       });
     });

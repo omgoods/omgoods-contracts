@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {TokenFactory} from "../TokenFactory.sol";
 import {DefaultTokenImpl} from "./DefaultTokenImpl.sol";
@@ -34,7 +34,7 @@ contract DefaultTokenFactory is TokenFactory {
       abi.encodeCall(
         DefaultTokenImpl.initialize,
         (
-          _gateway, //
+          _forwarder, //
           owner,
           name,
           symbol,

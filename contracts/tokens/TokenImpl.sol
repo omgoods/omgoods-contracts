@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.21;
+pragma solidity 0.8.24;
 
 import {Token} from "./Token.sol";
 
@@ -10,7 +10,7 @@ abstract contract TokenImpl is Token {
     _initialized = true;
   }
 
-  function _initialize(address gateway, bool locked) internal {
-    _initialize(gateway, msg.sender, locked);
+  function _initialize(address forwarder, bool locked) internal {
+    _initialize(forwarder, msg.sender, locked);
   }
 }

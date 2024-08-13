@@ -18,6 +18,7 @@ task(
         {
           address: string;
           abi: unknown;
+          receipt: unknown;
         }
       >
     > = {};
@@ -39,10 +40,16 @@ task(
           );
 
           for (const fileName of fileNames) {
-            const { address, abi }: { address: string; abi: any } =
-              await readJson(join(rootPath, fileName), {
+            const {
+              address,
+              abi,
+              receipt,
+            }: { address: string; abi: any; receipt: any } = await readJson(
+              join(rootPath, fileName),
+              {
                 encoding: 'utf8',
-              });
+              },
+            );
 
             const name = fileName.slice(0, -5);
 
@@ -53,6 +60,7 @@ task(
             deployments[chainId][name] = {
               address,
               abi,
+              receipt,
             };
           }
         }

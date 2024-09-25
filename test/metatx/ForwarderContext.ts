@@ -1,8 +1,10 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { concat } from 'ethers';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { abiCoder, randomAddress } from '../common';
 import { deployForwarderContextMock } from './fixtures';
+
+const { randomAddress, abiCoder } = utils;
 
 describe('metatx/ForwarderContext // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployForwarderContextMock>>;

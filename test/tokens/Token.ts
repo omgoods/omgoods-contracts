@@ -1,10 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress, randomBytes } from 'ethers';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { abiCoder, randomAddress } from '../common';
 import { deployTokenMock, setupTokenMock } from './fixtures';
 import { TokenNotificationsKinds } from './constants';
+
+const { abiCoder, randomAddress } = utils;
 
 describe('tokens/Token // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupTokenMock>>;

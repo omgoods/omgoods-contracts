@@ -2,9 +2,10 @@ import { readdir, stat, readJson, writeFile } from 'fs-extra';
 import { format } from 'prettier';
 import { join } from 'path';
 import { task } from 'hardhat/config';
+import { TaskNames } from './constants';
 
 task(
-  'deployments:export',
+  TaskNames.Export,
   'Exports deployed contracts into ./deployments.ts',
   async (_, hre) => {
     const {

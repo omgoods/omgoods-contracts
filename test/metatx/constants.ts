@@ -1,4 +1,6 @@
-import { randomAddress, randomHex } from '../common';
+import { utils } from 'hardhat';
+
+const { randomAddress, randomHex } = utils;
 
 export const FORWARDER_REQUEST = {
   account: randomAddress(),

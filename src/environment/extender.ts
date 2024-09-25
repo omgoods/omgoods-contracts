@@ -1,5 +1,6 @@
 import { extendEnvironment } from 'hardhat/config';
 import { ProcessEnvs } from '../common';
+import { Utils } from './Utils';
 
 extendEnvironment((hre) => {
   const { deployments, network } = hre;
@@ -13,4 +14,6 @@ extendEnvironment((hre) => {
   };
 
   hre.processEnvs = new ProcessEnvs(network?.config?.type);
+
+  hre.utils = new Utils(hre);
 });

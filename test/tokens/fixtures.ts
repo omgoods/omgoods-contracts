@@ -1,12 +1,8 @@
-import { ethers } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { AddressLike, BytesLike, ZeroAddress } from 'ethers';
-import {
-  getSigners,
-  createTypedDataHelper,
-  computeProxyCloneAddress,
-  TYPED_DATA_DOMAIN_NAME,
-  randomHex,
-} from '../common';
+import { createTypedDataHelper, TYPED_DATA_DOMAIN_NAME } from '../common';
+
+const { randomHex, computeProxyCloneAddress, getSigners } = utils;
 
 const { deployContract, getContractAt } = ethers;
 

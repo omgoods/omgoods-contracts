@@ -1,5 +1,6 @@
-import { ethers } from 'hardhat';
-import { getSigners } from '../common';
+import { ethers, utils } from 'hardhat';
+
+const { getSigners } = utils;
 
 const { deployContract } = ethers;
 

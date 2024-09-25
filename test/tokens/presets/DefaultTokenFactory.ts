@@ -1,9 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import { utils } from 'hardhat';
 import { ZeroAddress } from 'ethers';
 import { expect } from 'chai';
-import { randomAddress } from '../../common';
 import { setupDefaultTokenImpl } from './fixtures';
+
+const { randomAddress } = utils;
 
 describe('tokens/presets/DefaultTokenFactory', () => {
   let fixture: Awaited<ReturnType<typeof setupDefaultTokenImpl>>;

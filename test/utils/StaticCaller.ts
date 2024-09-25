@@ -1,8 +1,10 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { randomHex, abiCoder } from '../common';
 import { deployStaticCaller } from './fixtures';
+
+const { randomHex, abiCoder } = utils;
 
 describe('utils/StaticCaller', () => {
   let fixture: Awaited<ReturnType<typeof deployStaticCaller>>;

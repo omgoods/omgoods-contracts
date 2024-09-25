@@ -1,9 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress } from 'ethers';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { randomAddress } from '../../common';
 import { setupWrappedTokenImpl } from './fixtures';
+
+const { randomAddress } = utils;
 
 describe('tokens/presets/WrappedTokenFactory', () => {
   let fixture: Awaited<ReturnType<typeof setupWrappedTokenImpl>>;

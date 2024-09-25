@@ -1,4 +1,4 @@
-import { ethers } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import {
   AddressLike,
   id,
@@ -6,10 +6,11 @@ import {
   resolveAddress,
   ZeroAddress,
 } from 'ethers';
-import { getSigners, computeProxyCloneAddress } from '../../common';
 import { deployERC20ExternalToken } from '../erc20/fixtures';
 import { setupTokenRegistry } from '../fixtures';
 import { TOKEN } from '../constants';
+
+const { computeProxyCloneAddress, getSigners } = utils;
 
 const { deployContract, getContractAt } = ethers;
 

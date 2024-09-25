@@ -4,7 +4,7 @@ const TAG = 'tokens/registry';
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy, get, read, execute },
+    deployments: { log, deploy, read, execute, getAddress },
     getNamedAccounts,
     processEnvs,
   } = hre;
@@ -14,7 +14,7 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer, owner } = await getNamedAccounts();
 
-  const { address: forwarder } = await get('Forwarder');
+  const forwarder = await getAddress('Forwarder');
 
   const guardians = processEnvs.getAddresses('GUARDIANS');
 

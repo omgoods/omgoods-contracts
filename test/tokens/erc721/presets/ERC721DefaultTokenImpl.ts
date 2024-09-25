@@ -1,9 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { randomAddress } from '../../../common';
 import { setupERC721DefaultTokenImpl } from './fixtures';
 import { ERC721_TOKEN } from '../constants';
+
+const { randomAddress } = utils;
 
 describe('tokens/erc721/presets/ERC721DefaultTokenImpl', () => {
   let fixture: Awaited<ReturnType<typeof setupERC721DefaultTokenImpl>>;

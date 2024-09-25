@@ -1,10 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { ZeroAddress } from 'ethers';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { randomAddress } from '../common';
 import { setupForwarder } from './fixtures';
 import { FORWARDER_REQUEST, FORWARDER_REQUEST_BATCH } from './constants';
+
+const { randomAddress } = utils;
 
 describe('metatx/Forwarder', () => {
   let fixture: Awaited<ReturnType<typeof setupForwarder>>;

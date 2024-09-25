@@ -1,10 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { abiCoder, randomAddress } from '../../common';
 import { TokenNotificationsKinds } from '../constants';
 import { setupERC721TokenMock } from './fixtures';
 import { ERC721_TOKEN } from './constants';
+
+const { abiCoder, randomAddress } = utils;
 
 describe('tokens/erc721/ERC721Token // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupERC721TokenMock>>;

@@ -4,7 +4,7 @@ const TAG = 'tokens/erc721/default';
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy, get, read, execute },
+    deployments: { log, deploy, read, execute, getAddress },
     getNamedAccounts,
   } = hre;
 
@@ -13,8 +13,8 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer, owner } = await getNamedAccounts();
 
-  const { address: forwarder } = await get('Forwarder');
-  const { address: tokenRegistry } = await get('TokenRegistry');
+  const forwarder = await getAddress('Forwarder');
+  const tokenRegistry = await getAddress('TokenRegistry');
 
   const { address: tokenImpl } = await deploy('ERC721DefaultTokenImpl', {
     from: deployer,

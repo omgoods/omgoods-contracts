@@ -1,10 +1,8 @@
-import { ethers } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { AddressLike, BigNumberish, BytesLike } from 'ethers';
-import {
-  getSigners,
-  createTypedDataHelper,
-  TYPED_DATA_DOMAIN_NAME,
-} from '../common';
+import { createTypedDataHelper, TYPED_DATA_DOMAIN_NAME } from '../common';
+
+const { getSigners } = utils;
 
 const { deployContract } = ethers;
 

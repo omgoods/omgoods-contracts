@@ -8,6 +8,7 @@ on:
       - "**.sol"
       - "**.ts"
       - "**.yml"
+      - "**.json"
 
 jobs:
   start:

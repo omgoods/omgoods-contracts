@@ -1,7 +1,12 @@
 import 'dotenv-pre/config';
+import '@nomicfoundation/hardhat-chai-matchers';
+import '@nomicfoundation/hardhat-ethers';
 import '@nomicfoundation/hardhat-ledger';
-import '@nomicfoundation/hardhat-toolbox';
+import '@nomicfoundation/hardhat-network-helpers';
+import '@typechain/hardhat';
 import 'hardhat-deploy';
+import 'hardhat-gas-reporter';
+import 'solidity-coverage';
 import { createConfig } from './src';
 
 export default createConfig({

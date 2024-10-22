@@ -2,6 +2,10 @@ import { DeployFunction } from 'hardhat-deploy/types';
 
 const TAG = 'tokens/erc721/default';
 
+const TOKEN_TYPE = 'ERC721';
+const TOKEN_FACTORY_TYPE = 'Default';
+const CONTRACT_PREFIX = `${TOKEN_TYPE}Token${TOKEN_FACTORY_TYPE}`;
+
 const func: DeployFunction = async (hre) => {
   const {
     deployments: { log, deploy, read, execute, getAddress },
@@ -16,23 +20,23 @@ const func: DeployFunction = async (hre) => {
   const forwarder = await getAddress('Forwarder');
   const tokenRegistry = await getAddress('TokenRegistry');
 
-  const { address: tokenImpl } = await deploy('ERC721DefaultTokenImpl', {
+  const { address: tokenImpl } = await deploy(`${CONTRACT_PREFIX}Impl`, {
     from: deployer,
     log: true,
   });
 
-  const { address: tokenFactory } = await deploy('ERC721DefaultTokenFactory', {
-    contract: 'DefaultTokenFactory',
+  const { address: tokenFactory } = await deploy(`${CONTRACT_PREFIX}Factory`, {
+    contract: `Token${TOKEN_FACTORY_TYPE}Factory`,
     from: deployer,
     log: true,
     args: [owner],
   });
 
-  if (await read('ERC721DefaultTokenFactory', 'initialized')) {
-    log('ERC721DefaultTokenFactory already initialized');
+  if (await read(`${CONTRACT_PREFIX}Factory`, 'initialized')) {
+    log(`${CONTRACT_PREFIX}Factory  already initialized`);
   } else {
     await execute(
-      'ERC721DefaultTokenFactory',
+      `${CONTRACT_PREFIX}Factory`,
       {
         from: owner,
         log: true,
@@ -45,7 +49,7 @@ const func: DeployFunction = async (hre) => {
   }
 
   if (await read('TokenRegistry', 'hasTokenFactory', tokenFactory)) {
-    log('ERC721DefaultTokenFactory already in TokenRegistry');
+    log(`${CONTRACT_PREFIX}Factory  already in TokenRegistry`);
   } else {
     await execute(
       'TokenRegistry',

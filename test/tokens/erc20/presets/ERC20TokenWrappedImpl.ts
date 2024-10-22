@@ -1,15 +1,15 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
 import { utils } from 'hardhat';
-import { setupERC20WrappedTokenImpl } from './fixtures';
+import { setupERC20TokenWrappedImpl } from './fixtures';
 
 const { randomAddress } = utils;
 
-describe('tokens/erc20/presets/ERC20WrappedTokenImpl', () => {
-  let fixture: Awaited<ReturnType<typeof setupERC20WrappedTokenImpl>>;
+describe('tokens/erc20/presets/ERC20TokenWrappedImpl', () => {
+  let fixture: Awaited<ReturnType<typeof setupERC20TokenWrappedImpl>>;
 
   before(async () => {
-    fixture = await loadFixture(setupERC20WrappedTokenImpl);
+    fixture = await loadFixture(setupERC20TokenWrappedImpl);
   });
 
   describe('# getters', () => {

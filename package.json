@@ -7,7 +7,7 @@
     "format": "prettier --write \"{contracts,deploy,scripts,src,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "coverage": "SOLIDITY_COVERAGE=false hardhat coverage",
+    "coverage": "SOLIDITY_COVERAGE=1 hardhat coverage",
     "deploy": "hardhat deploy",
     "deployments:export": "hardhat deployments:export",
     "deployments:verify": "hardhat deployments:verify",

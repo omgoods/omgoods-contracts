@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.24;
+pragma solidity 0.8.27;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
-abstract contract DefaultTokenImpl is TokenImpl {
+abstract contract TokenDefaultImpl is TokenImpl {
   // storage
 
   string private _name;

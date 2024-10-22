@@ -4,16 +4,16 @@ import { ZeroAddress } from 'ethers';
 import { utils } from 'hardhat';
 import { expect } from 'chai';
 import { TOKEN, TokenNotificationsKinds } from '../constants';
-import { setupDefaultTokenImpl } from './fixtures';
+import { setupTokenDefaultImpl } from './fixtures';
 
 const { randomAddress } = utils;
 
-describe('tokens/presets/DefaultTokenImpl // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof setupDefaultTokenImpl>>;
+describe('tokens/presets/TokenDefaultImpl // mocked', () => {
+  let fixture: Awaited<ReturnType<typeof setupTokenDefaultImpl>>;
 
   const createBeforeHook = (unlock = false) => {
     before(async () => {
-      fixture = await loadFixture(setupDefaultTokenImpl);
+      fixture = await loadFixture(setupTokenDefaultImpl);
 
       if (unlock) {
         const { token } = fixture;

@@ -6,7 +6,7 @@ import { createConfig } from './src';
 
 export default createConfig({
   solidity: {
-    version: '0.8.24',
+    version: '0.8.27',
     settings: {
       metadata: { bytecodeHash: 'none' },
       optimizer: { enabled: true, runs: 10_000 },

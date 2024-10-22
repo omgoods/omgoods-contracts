@@ -2,15 +2,15 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { setupWrappedTokenImpl } from './fixtures';
+import { setupTokenWrappedImpl } from './fixtures';
 
 const { randomAddress } = utils;
 
-describe('tokens/presets/WrappedTokenImpl // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof setupWrappedTokenImpl>>;
+describe('tokens/presets/TokenWrappedImpl // mocked', () => {
+  let fixture: Awaited<ReturnType<typeof setupTokenWrappedImpl>>;
 
   before(async () => {
-    fixture = await loadFixture(setupWrappedTokenImpl);
+    fixture = await loadFixture(setupTokenWrappedImpl);
   });
 
   describe('# deployment', () => {

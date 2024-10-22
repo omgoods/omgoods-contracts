@@ -1,17 +1,17 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { utils } from 'hardhat';
 import { ZeroAddress } from 'ethers';
+import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { setupDefaultTokenImpl } from './fixtures';
+import { setupTokenWrappedImpl } from './fixtures';
 
 const { randomAddress } = utils;
 
-describe('tokens/presets/DefaultTokenFactory', () => {
-  let fixture: Awaited<ReturnType<typeof setupDefaultTokenImpl>>;
+describe('tokens/presets/TokenWrappedFactory', () => {
+  let fixture: Awaited<ReturnType<typeof setupTokenWrappedImpl>>;
 
   before(async () => {
-    fixture = await loadFixture(setupDefaultTokenImpl);
+    fixture = await loadFixture(setupTokenWrappedImpl);
   });
 
   describe('# getters', () => {
@@ -19,11 +19,11 @@ describe('tokens/presets/DefaultTokenFactory', () => {
       it('expect to compute the token address', async () => {
         const { tokenFactory, computeTokenAddress } = fixture;
 
-        const symbol = 'TEST';
+        const underlyingToken = randomAddress();
 
-        const res = await tokenFactory.computeToken(symbol);
+        const res = await tokenFactory.computeToken(underlyingToken);
 
-        expect(res).eq(await computeTokenAddress(symbol));
+        expect(res).eq(await computeTokenAddress(underlyingToken));
       });
     });
   });
@@ -34,34 +34,19 @@ describe('tokens/presets/DefaultTokenFactory', () => {
         const { tokenImpl, tokenFactory, tokenRegistry, computeTokenAddress } =
           fixture;
 
-        const owner = randomAddress();
-        const name = 'Test';
-        const symbol = 'TEST';
-        const controller = randomAddress();
-        const locked = true;
+        const underlyingToken = randomAddress();
 
         const initCode = tokenImpl.interface.encodeFunctionData('initialize', [
           ZeroAddress,
-          owner,
-          name,
-          symbol,
-          controller,
-          locked,
+          underlyingToken,
         ]);
 
-        const tx = tokenFactory.createToken(
-          owner,
-          name,
-          symbol,
-          controller,
-          locked,
-          '0x',
-        );
+        const tx = tokenFactory.createToken(underlyingToken, '0x');
 
         await expect(tx)
           .emit(tokenRegistry, 'TokenCreated')
           .withArgs(
-            await computeTokenAddress(symbol),
+            await computeTokenAddress(underlyingToken),
             await tokenImpl.getAddress(),
             initCode,
             anyUint,

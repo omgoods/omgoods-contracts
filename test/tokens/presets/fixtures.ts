@@ -14,18 +14,18 @@ const { computeProxyCloneAddress, getSigners } = utils;
 
 const { deployContract, getContractAt } = ethers;
 
-export async function deployDefaultTokenImplMock() {
-  const tokenImpl = await deployContract('DefaultTokenImplMock');
+export async function deployTokenDefaultImplMock() {
+  const tokenImpl = await deployContract('TokenDefaultImplMock');
 
   return {
     tokenImpl,
   };
 }
 
-export async function deployDefaultTokenFactory() {
+export async function deployTokenDefaultFactory() {
   const signers = await getSigners('owner', 'controller');
 
-  const tokenFactory = await deployContract('DefaultTokenFactory', [
+  const tokenFactory = await deployContract('TokenDefaultFactory', [
     ZeroAddress,
   ]);
 
@@ -35,18 +35,18 @@ export async function deployDefaultTokenFactory() {
   };
 }
 
-export async function deployWrappedTokenImplMock() {
-  const tokenImpl = await deployContract('WrappedTokenImplMock');
+export async function deployTokenWrappedImplMock() {
+  const tokenImpl = await deployContract('TokenWrappedImplMock');
 
   return {
     tokenImpl,
   };
 }
 
-export async function deployWrappedTokenFactory() {
+export async function deployTokenWrappedFactory() {
   const signers = await getSigners('owner');
 
-  const tokenFactory = await deployContract('WrappedTokenFactory', [
+  const tokenFactory = await deployContract('TokenWrappedFactory', [
     ZeroAddress,
   ]);
 
@@ -56,17 +56,17 @@ export async function deployWrappedTokenFactory() {
   };
 }
 
-export async function setupDefaultTokenImpl() {
-  const { tokenImpl } = await deployDefaultTokenImplMock();
+export async function setupTokenDefaultImpl() {
+  const { tokenImpl } = await deployTokenDefaultImplMock();
 
-  const result = await setupDefaultTokenFactory({
+  const result = await setupTokenDefaultFactory({
     tokenImpl,
   });
 
   const { computeTokenAddress } = result;
 
   const computeToken = async (symbol: string) =>
-    getContractAt('DefaultTokenImplMock', await computeTokenAddress(symbol));
+    getContractAt('TokenDefaultImplMock', await computeTokenAddress(symbol));
 
   const token = await computeToken(TOKEN.symbol);
 
@@ -78,12 +78,12 @@ export async function setupDefaultTokenImpl() {
   };
 }
 
-export async function setupDefaultTokenFactory(options: {
+export async function setupTokenDefaultFactory(options: {
   tokenImpl: AddressLike;
 }) {
   const { tokenImpl } = options;
 
-  const { tokenFactory, signers } = await deployDefaultTokenFactory();
+  const { tokenFactory, signers } = await deployTokenDefaultFactory();
 
   const { tokenRegistry } = await setupTokenRegistry({
     tokenFactory,
@@ -111,12 +111,12 @@ export async function setupDefaultTokenFactory(options: {
   };
 }
 
-export async function setupWrappedTokenImpl() {
+export async function setupTokenWrappedImpl() {
   const { externalToken: underlyingToken } = await deployERC20ExternalToken();
 
-  const { tokenImpl } = await deployWrappedTokenImplMock();
+  const { tokenImpl } = await deployTokenWrappedImplMock();
 
-  const result = await setupWrappedTokenFactory({
+  const result = await setupTokenWrappedFactory({
     tokenImpl,
     underlyingToken,
   });
@@ -125,7 +125,7 @@ export async function setupWrappedTokenImpl() {
 
   const computeToken = async (underlyingToken: AddressLike) =>
     getContractAt(
-      'WrappedTokenImplMock',
+      'TokenWrappedImplMock',
       await computeTokenAddress(underlyingToken),
     );
 
@@ -140,13 +140,13 @@ export async function setupWrappedTokenImpl() {
   };
 }
 
-export async function setupWrappedTokenFactory(options: {
+export async function setupTokenWrappedFactory(options: {
   tokenImpl: AddressLike;
   underlyingToken: AddressLike;
 }) {
   const { tokenImpl, underlyingToken } = options;
 
-  const { tokenFactory, signers } = await deployWrappedTokenFactory();
+  const { tokenFactory, signers } = await deployTokenWrappedFactory();
 
   const { tokenRegistry } = await setupTokenRegistry({
     tokenFactory,

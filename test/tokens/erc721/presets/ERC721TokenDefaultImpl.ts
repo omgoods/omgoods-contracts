@@ -2,17 +2,17 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
 import { utils } from 'hardhat';
 import { expect } from 'chai';
-import { setupERC20DefaultTokenImpl } from './fixtures';
-import { ERC20_TOKEN } from '../constants';
+import { setupERC721TokenDefaultImpl } from './fixtures';
+import { ERC721_TOKEN } from '../constants';
 
 const { randomAddress } = utils;
 
-describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
-  let fixture: Awaited<ReturnType<typeof setupERC20DefaultTokenImpl>>;
+describe('tokens/erc721/presets/ERC721TokenDefaultImpl', () => {
+  let fixture: Awaited<ReturnType<typeof setupERC721TokenDefaultImpl>>;
 
   const createBeforeHook = (unlock = false) => {
     before(async () => {
-      fixture = await loadFixture(setupERC20DefaultTokenImpl);
+      fixture = await loadFixture(setupERC721TokenDefaultImpl);
 
       if (unlock) {
         const { token } = fixture;
@@ -31,7 +31,7 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
 
         const res = await token.name();
 
-        expect(res).eq(ERC20_TOKEN.name);
+        expect(res).eq(ERC721_TOKEN.name);
       });
     });
 
@@ -41,7 +41,7 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
 
         const res = await token.symbol();
 
-        expect(res).eq(ERC20_TOKEN.symbol);
+        expect(res).eq(ERC721_TOKEN.symbol);
       });
     });
   });
@@ -53,7 +53,7 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
       it('expect to revert when the sender is not the controller', async () => {
         const { token } = fixture;
 
-        const tx = token.mint(randomAddress(), 10);
+        const tx = token.mint(randomAddress(), 50001);
 
         await expect(tx).revertedWithCustomError(
           token,
@@ -61,17 +61,17 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
         );
       });
 
-      it('expect to mint the tokens', async () => {
+      it('expect to mint the token', async () => {
         const { token, signers } = fixture;
 
         const to = randomAddress();
-        const value = 10;
+        const tokenId = 50001;
 
-        const tx = token.connect(signers.controller).mint(to, value);
+        const tx = token.connect(signers.controller).mint(to, tokenId);
 
         await expect(tx)
           .emit(token, 'Transfer')
-          .withArgs(ZeroAddress, to, value);
+          .withArgs(ZeroAddress, to, tokenId);
       });
     });
 
@@ -79,18 +79,18 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
       createBeforeHook(true);
 
       const from = randomAddress();
-      const value = 10;
+      const tokenId = 5000;
 
       before(async () => {
         const { token, signers } = fixture;
 
-        await token.connect(signers.controller).mint(from, value);
+        await token.connect(signers.controller).mint(from, tokenId);
       });
 
       it('expect to revert when the sender is not the controller', async () => {
         const { token } = fixture;
 
-        const tx = token.burn(randomAddress(), 10);
+        const tx = token.burn(from);
 
         await expect(tx).revertedWithCustomError(
           token,
@@ -98,14 +98,14 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
         );
       });
 
-      it('expect to burn the tokens', async () => {
+      it('expect to burn the token', async () => {
         const { token, signers } = fixture;
 
-        const tx = token.connect(signers.controller).burn(from, value);
+        const tx = token.connect(signers.controller).burn(tokenId);
 
         await expect(tx)
           .emit(token, 'Transfer')
-          .withArgs(from, ZeroAddress, value);
+          .withArgs(from, ZeroAddress, tokenId);
       });
     });
 
@@ -118,7 +118,7 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
 
           const tx = token
             .connect(signers.unknown.at(0))
-            .transfer(randomAddress(), 10);
+            .transferFrom(randomAddress(), randomAddress(), 10);
 
           await expect(tx).revertedWithCustomError(
             token,
@@ -129,7 +129,7 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
         it('expect to process when the sender is the owner', async () => {
           const { token } = fixture;
 
-          const tx = token.mint(randomAddress(), 10);
+          const tx = token.mint(randomAddress(), 50002);
 
           await expect(tx).emit(token, 'Transfer');
         });
@@ -138,15 +138,24 @@ describe('tokens/erc20/presets/ERC20DefaultTokenImpl', () => {
       describe('# after unlocking', () => {
         createBeforeHook(true);
 
+        const tokenId = 5001;
+
+        before(async () => {
+          const { token, signers } = fixture;
+
+          await token.connect(signers.controller).mint(signers.owner, tokenId);
+        });
+
         it('expect to work as usual', async () => {
-          const { token } = fixture;
+          const { token, signers } = fixture;
 
-          const tx = token.transfer(randomAddress(), 10);
-
-          await expect(tx).revertedWithCustomError(
-            token,
-            'ERC20InsufficientBalance',
+          const tx = token.transferFrom(
+            signers.owner,
+            randomAddress(),
+            tokenId,
           );
+
+          await expect(tx).emit(token, 'Transfer');
         });
       });
     });

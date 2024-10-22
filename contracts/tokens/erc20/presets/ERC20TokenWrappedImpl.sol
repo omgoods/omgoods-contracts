@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.24;
+pragma solidity 0.8.27;
 
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ForwarderContext} from "../../../metatx/ForwarderContext.sol";
-import {WrappedTokenImpl} from "../../presets/WrappedTokenImpl.sol";
+import {TokenWrappedImpl} from "../../presets/TokenWrappedImpl.sol";
 import {ERC20Token} from "../ERC20Token.sol";
 
-contract ERC20WrappedTokenImpl is ERC20Token, WrappedTokenImpl {
+contract ERC20TokenWrappedImpl is ERC20Token, TokenWrappedImpl {
   using SafeERC20 for ERC20;
 
   // deployment
 
-  constructor() WrappedTokenImpl() {
+  constructor() TokenWrappedImpl() {
     //
   }
 
@@ -21,19 +21,19 @@ contract ERC20WrappedTokenImpl is ERC20Token, WrappedTokenImpl {
   function name()
     public
     view
-    override(ERC20, WrappedTokenImpl)
+    override(ERC20, TokenWrappedImpl)
     returns (string memory)
   {
-    return WrappedTokenImpl.name();
+    return TokenWrappedImpl.name();
   }
 
   function symbol()
     public
     view
-    override(ERC20, WrappedTokenImpl)
+    override(ERC20, TokenWrappedImpl)
     returns (string memory)
   {
-    return WrappedTokenImpl.symbol();
+    return TokenWrappedImpl.symbol();
   }
 
   function decimals() public view override returns (uint8) {

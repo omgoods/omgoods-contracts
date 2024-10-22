@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.24;
+pragma solidity 0.8.27;
 
-import {DefaultTokenImpl} from "../DefaultTokenImpl.sol";
+import {TokenDefaultImpl} from "../TokenDefaultImpl.sol";
 
-contract DefaultTokenImplMock is DefaultTokenImpl {
+contract TokenDefaultImplMock is TokenDefaultImpl {
   // deployment
 
-  constructor() DefaultTokenImpl() {
+  constructor() TokenDefaultImpl() {
     //
   }
 

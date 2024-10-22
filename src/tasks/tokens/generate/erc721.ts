@@ -22,13 +22,13 @@ subtask(SubTaskNames.ERC721)
     );
 
     const tokenFactory = await getContractAt(
-      'DefaultTokenFactory',
-      await getAddress('ERC721DefaultTokenFactory'),
+      'TokenDefaultFactory',
+      await getAddress('ERC721TokenDefaultFactory'),
     );
 
     const tokenAddress = await tokenFactory.computeToken(symbol);
 
-    const token = await getContractAt('ERC721DefaultTokenImpl', tokenAddress);
+    const token = await getContractAt('ERC721TokenDefaultImpl', tokenAddress);
 
     console.log(`## ${name} Token (${tokenAddress})`);
     console.log();

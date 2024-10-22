@@ -36,13 +36,13 @@ subtask(SubTaskNames.ERC20)
     );
 
     const tokenFactory = await getContractAt(
-      'DefaultTokenFactory',
-      await getAddress('ERC20DefaultTokenFactory'),
+      'TokenDefaultFactory',
+      await getAddress('ERC20TokenDefaultFactory'),
     );
 
     const tokenAddress = await tokenFactory.computeToken(symbol);
 
-    const token = await getContractAt('ERC20DefaultTokenImpl', tokenAddress);
+    const token = await getContractAt('ERC20TokenDefaultImpl', tokenAddress);
 
     console.log(`## ${name} Token (${tokenAddress})`);
     console.log();

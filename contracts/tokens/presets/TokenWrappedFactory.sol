@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.24;
+pragma solidity 0.8.27;
 
 import {TokenFactory} from "../TokenFactory.sol";
-import {WrappedTokenImpl} from "./WrappedTokenImpl.sol";
+import {TokenWrappedImpl} from "./TokenWrappedImpl.sol";
 
-contract WrappedTokenFactory is TokenFactory {
+contract TokenWrappedFactory is TokenFactory {
   // deployment
 
   constructor(address owner) TokenFactory(owner) {
@@ -28,7 +28,7 @@ contract WrappedTokenFactory is TokenFactory {
     _createToken(
       keccak256(abi.encodePacked(underlyingToken)),
       abi.encodeCall(
-        WrappedTokenImpl.initialize,
+        TokenWrappedImpl.initialize,
         (
           _forwarder, //
           underlyingToken

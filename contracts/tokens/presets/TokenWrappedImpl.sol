@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.24;
+pragma solidity 0.8.27;
 
 import {TokenImpl} from "../TokenImpl.sol";
 
-abstract contract WrappedTokenImpl is TokenImpl {
+abstract contract TokenWrappedImpl is TokenImpl {
   // storage
 
   address internal _underlyingToken;
@@ -31,11 +31,11 @@ abstract contract WrappedTokenImpl is TokenImpl {
   // public getters
 
   function name() public view virtual returns (string memory) {
-    return WrappedTokenImpl(_underlyingToken).name();
+    return TokenWrappedImpl(_underlyingToken).name();
   }
 
   function symbol() public view virtual returns (string memory) {
-    return WrappedTokenImpl(_underlyingToken).symbol();
+    return TokenWrappedImpl(_underlyingToken).symbol();
   }
 
   // external getters

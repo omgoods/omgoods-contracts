@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: None
-pragma solidity 0.8.24;
+pragma solidity 0.8.27;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ForwarderContext} from "../../../metatx/ForwarderContext.sol";
-import {DefaultTokenImpl} from "../../presets/DefaultTokenImpl.sol";
+import {TokenDefaultImpl} from "../../presets/TokenDefaultImpl.sol";
 import {ERC20Token} from "../ERC20Token.sol";
 
-contract ERC20DefaultTokenImpl is ERC20Token, DefaultTokenImpl {
+contract ERC20TokenDefaultImpl is ERC20Token, TokenDefaultImpl {
   // deployment
 
-  constructor() DefaultTokenImpl() {
+  constructor() TokenDefaultImpl() {
     //
   }
 
@@ -18,19 +18,19 @@ contract ERC20DefaultTokenImpl is ERC20Token, DefaultTokenImpl {
   function name()
     public
     view
-    override(ERC20, DefaultTokenImpl)
+    override(ERC20, TokenDefaultImpl)
     returns (string memory)
   {
-    return DefaultTokenImpl.name();
+    return TokenDefaultImpl.name();
   }
 
   function symbol()
     public
     view
-    override(ERC20, DefaultTokenImpl)
+    override(ERC20, TokenDefaultImpl)
     returns (string memory)
   {
-    return DefaultTokenImpl.symbol();
+    return TokenDefaultImpl.symbol();
   }
 
   // external setters

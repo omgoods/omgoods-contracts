@@ -1,7 +1,7 @@
 import { ethers } from 'hardhat';
 import {
-  setupDefaultTokenFactory,
-  setupWrappedTokenFactory,
+  setupTokenDefaultFactory,
+  setupTokenWrappedFactory,
 } from '../../presets/fixtures';
 import { deployERC20ExternalToken } from '../fixtures';
 import { ERC20_TOKEN } from '../constants';
@@ -9,33 +9,33 @@ import { MaxUint256 } from 'ethers';
 
 const { deployContract, getContractAt } = ethers;
 
-export async function deployERC20DefaultTokenImpl() {
-  const tokenImpl = await deployContract('ERC20DefaultTokenImpl');
+export async function deployERC20TokenDefaultImpl() {
+  const tokenImpl = await deployContract('ERC20TokenDefaultImpl');
 
   return {
     tokenImpl,
   };
 }
 
-export async function deployERC20WrappedTokenImpl() {
-  const tokenImpl = await deployContract('ERC20WrappedTokenImpl');
+export async function deployERC20TokenWrappedImpl() {
+  const tokenImpl = await deployContract('ERC20TokenWrappedImpl');
 
   return {
     tokenImpl,
   };
 }
 
-export async function setupERC20DefaultTokenImpl() {
-  const { tokenImpl } = await deployERC20DefaultTokenImpl();
+export async function setupERC20TokenDefaultImpl() {
+  const { tokenImpl } = await deployERC20TokenDefaultImpl();
 
-  const result = await setupDefaultTokenFactory({
+  const result = await setupTokenDefaultFactory({
     tokenImpl,
   });
 
   const { computeTokenAddress } = result;
 
   const token = await getContractAt(
-    'ERC20DefaultTokenImpl',
+    'ERC20TokenDefaultImpl',
     await computeTokenAddress(ERC20_TOKEN.symbol),
   );
 
@@ -46,12 +46,12 @@ export async function setupERC20DefaultTokenImpl() {
   };
 }
 
-export async function setupERC20WrappedTokenImpl() {
+export async function setupERC20TokenWrappedImpl() {
   const { externalToken: underlyingToken } = await deployERC20ExternalToken();
 
-  const { tokenImpl } = await deployERC20WrappedTokenImpl();
+  const { tokenImpl } = await deployERC20TokenWrappedImpl();
 
-  const result = await setupWrappedTokenFactory({
+  const result = await setupTokenWrappedFactory({
     tokenImpl,
     underlyingToken,
   });
@@ -59,7 +59,7 @@ export async function setupERC20WrappedTokenImpl() {
   const { computeTokenAddress } = result;
 
   const token = await getContractAt(
-    'ERC20WrappedTokenImpl',
+    'ERC20TokenWrappedImpl',
     await computeTokenAddress(underlyingToken),
   );
 

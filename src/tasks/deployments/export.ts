@@ -96,35 +96,40 @@ task(
         //
       }
 
-      let data: [any, any][];
+      let dataFields: [any, any][];
+      let dataType: string;
 
       switch (type) {
         case 'backend':
-          data = Object.entries(deployments);
+          dataFields = Object.entries(deployments);
+          dataType = 'Record<string, Record<string, any>>';
           break;
 
         case 'frontend':
-          data = Object.entries(deployments).map(([chainId, deployments]) => [
-            chainId,
-            Object.entries(deployments)
-              .map(([key, { address }]) => [key, address])
-              .reduce(
-                (result, [key, address]) => ({
-                  ...result,
-                  [key]: address,
-                }),
-                {},
-              ),
-          ]);
+          dataFields = Object.entries(deployments).map(
+            ([chainId, deployments]) => [
+              chainId,
+              Object.entries(deployments)
+                .map(([key, { address }]) => [key, address])
+                .reduce(
+                  (result, [key, address]) => ({
+                    ...result,
+                    [key]: address,
+                  }),
+                  {},
+                ),
+            ],
+          );
+          dataType = 'Record<string, Record<string, string>>';
           break;
       }
 
-      if (!data) {
+      if (!dataFields) {
         continue;
       }
 
       const content = await (format(
-        `export default {${data.map(([key, value]) => `[${key}]: ${JSON.stringify(value)},`).join(',')}} as const;`,
+        `export default {${dataFields.map(([key, value]) => `['${key}']: ${JSON.stringify(value)},`).join(',')}} as ${dataType}`,
         {
           parser: 'typescript',
           singleQuote: true,

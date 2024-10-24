@@ -24,7 +24,7 @@ npm run compile             # compiles contracts
 npm run test                # runs unit tests
 npm run coverage            # runs coverage tests
 npm run deploy              # deploys contracts
-npm run deployments:export  # exports all deployed contracts into ./deployments/export/*.ts
+npm run deployments:export  # exports all deployed contracts into ./deployments/exported/*.ts
 npm run deployments:verify  # verifies all deployed contracts on etherscan
 npm run faucet              # top-ups account
 npm run tokens:generate     # generates tokens

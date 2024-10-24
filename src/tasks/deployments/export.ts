@@ -7,7 +7,7 @@ import { DeploymentsTaskNames } from './constants';
 
 task(
   DeploymentsTaskNames.Export,
-  'Exports all deployed contracts into ./deployments/export/*.ts',
+  'Exports all deployed contracts into ./deployments/exported/*.ts',
 )
   .addFlag('silent', 'Turn off logging')
   .setAction(async (args: TaskArgsWithSilent, hre) => {

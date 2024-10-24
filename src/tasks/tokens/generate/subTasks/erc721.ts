@@ -1,20 +1,23 @@
 import { subtask, types } from 'hardhat/config';
+import { Logger } from '../../../common';
 import { SubTaskNames } from './constants';
 import { ERC721SubTaskArgs } from './interfaces';
 
 subtask(SubTaskNames.ERC721)
   .addParam('name', null, null, types.string)
   .addParam('symbol', null, null, types.string)
+  .addFlag('silent', 'Turn off logging')
   .setAction(async (args: ERC721SubTaskArgs, hre) => {
     const {
-      utils: { logTx },
       ethers: { getSigners, getContractAt },
       deployments: { getAddress },
     } = hre;
 
-    const [owner] = await getSigners();
+    const { name, symbol, silent } = args;
 
-    const { name, symbol } = args;
+    const logger = new Logger(!silent);
+
+    const [owner] = await getSigners();
 
     const tokenRegistry = await getContractAt(
       'TokenRegistry',
@@ -30,11 +33,11 @@ subtask(SubTaskNames.ERC721)
 
     const token = await getContractAt('ERC721TokenDefaultImpl', tokenAddress);
 
-    console.log(`## ${name} Token (${tokenAddress})`);
-    console.log();
+    logger.log(`## ${name} Token (${tokenAddress})`);
+    logger.log();
 
     if (!(await tokenRegistry.hasToken(token))) {
-      await logTx(
+      await logger.logTx(
         'creating',
         tokenFactory.createToken(
           owner,
@@ -46,6 +49,6 @@ subtask(SubTaskNames.ERC721)
         ),
       );
 
-      console.log();
+      logger.log();
     }
   });

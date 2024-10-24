@@ -11,7 +11,8 @@
     "deploy": "hardhat deploy",
     "deployments:export": "hardhat deployments:export",
     "deployments:verify": "hardhat deployments:verify",
-    "tokens:generate": "hardhat --network localhost tokens:generate",
+    "faucet": "hardhat faucet",
+    "tokens:generate": "hardhat tokens:generate",
     "hardhat": "hardhat"
   },
   "dependencies": {

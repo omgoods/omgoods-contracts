@@ -1,13 +1,16 @@
-import { readdir, stat, readJson, writeFile } from 'fs-extra';
+import { readdir, stat, readJson, writeFile, unlink } from 'fs-extra';
 import { format } from 'prettier';
-import { join } from 'path';
+import { join, resolve } from 'path';
 import { task } from 'hardhat/config';
-import { TaskNames } from './constants';
+import { Logger, TaskArgsWithSilent } from '../common';
+import { DeploymentsTaskNames } from './constants';
 
 task(
-  TaskNames.Export,
-  'Exports deployed contracts into ./deployments.ts',
-  async (_, hre) => {
+  DeploymentsTaskNames.Export,
+  'Exports all deployed contracts into ./deployments/export/*.ts',
+)
+  .addFlag('silent', 'Turn off logging')
+  .setAction(async (args: TaskArgsWithSilent, hre) => {
     const {
       config: { paths, networks },
     } = hre;
@@ -24,65 +27,119 @@ task(
       >
     > = {};
 
+    const { silent } = args;
+
+    const logger = new Logger(!silent);
+
     const dirNames = await readdir(paths.deployments);
 
     for (const dirName of dirNames) {
       const rootPath = join(paths.deployments, dirName);
       const rootStats = await stat(rootPath);
 
-      if (rootStats.isDirectory()) {
-        const network = networks[dirName];
+      if (!rootStats.isDirectory()) {
+        continue;
+      }
 
-        if (network) {
-          const { chainId } = network;
+      const network = networks[dirName];
 
-          const fileNames = (await readdir(rootPath)).filter((fileName) =>
-            fileName.endsWith('.json'),
-          );
+      if (!network) {
+        continue;
+      }
 
-          for (const fileName of fileNames) {
-            const {
-              address,
-              abi,
-              receipt,
-            }: { address: string; abi: any; receipt: any } = await readJson(
-              join(rootPath, fileName),
-              {
-                encoding: 'utf8',
-              },
-            );
+      const { chainId } = network;
 
-            const name = fileName.slice(0, -5);
+      const fileNames = (await readdir(rootPath)).filter((fileName) =>
+        fileName.endsWith('.json'),
+      );
 
-            if (!deployments[chainId]) {
-              deployments[chainId] = {};
-            }
-
-            deployments[chainId][name] = {
-              address,
-              abi,
-              receipt,
-            };
-          }
+      for (const fileName of fileNames) {
+        if (fileName.includes('External')) {
+          continue;
         }
+
+        const {
+          address,
+          abi,
+          receipt,
+        }: { address: string; abi: any; receipt: any } = await readJson(
+          join(rootPath, fileName),
+          {
+            encoding: 'utf8',
+          },
+        );
+
+        const name = fileName.slice(0, -5);
+
+        if (!deployments[chainId]) {
+          deployments[chainId] = {};
+        }
+
+        deployments[chainId][name] = {
+          address,
+          abi,
+          receipt,
+        };
       }
     }
 
-    let content = `export default {${Object.entries(deployments)
-      .map(
-        ([chainId, deployment]) =>
-          `[${chainId}]: ${JSON.stringify(deployment)}`,
-      )
-      .join(',')}} as const;`;
+    for (const type of ['backend', 'frontend'] as const) {
+      const filePath = `${resolve(paths.deployments, `./../exported/${type}`)}.ts`;
 
-    content = await (format(content, {
-      parser: 'typescript',
-      singleQuote: true,
-      trailingComma: 'all',
-    }) as Promise<string>);
+      try {
+        const fileStats = await stat(filePath);
 
-    await writeFile(`${paths.deployments}.ts`, content, {
-      encoding: 'utf8',
-    });
-  },
-);
+        if (fileStats.isFile()) {
+          await unlink(filePath);
+        }
+      } catch (err) {
+        //
+      }
+
+      let data: [any, any][];
+
+      switch (type) {
+        case 'backend':
+          data = Object.entries(deployments);
+          break;
+
+        case 'frontend':
+          data = Object.entries(deployments).map(([chainId, deployments]) => [
+            chainId,
+            Object.entries(deployments)
+              .map(([key, { address }]) => [key, address])
+              .reduce(
+                (result, [key, address]) => ({
+                  ...result,
+                  [key]: address,
+                }),
+                {},
+              ),
+          ]);
+          break;
+      }
+
+      if (!data) {
+        continue;
+      }
+
+      const content = await (format(
+        `export default {${data.map(([key, value]) => `[${key}]: ${JSON.stringify(value)},`).join(',')}} as const;`,
+        {
+          parser: 'typescript',
+          singleQuote: true,
+          trailingComma: 'all',
+        },
+      ) as Promise<string>);
+
+      logger.print(`Exporting ${type.padEnd(8, ' ')} `);
+
+      await writeFile(filePath, content, {
+        encoding: 'utf8',
+      });
+
+      logger.printLn('[DONE]');
+    }
+
+    logger.log('Completed!');
+  });

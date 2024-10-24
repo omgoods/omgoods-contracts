@@ -21,6 +21,7 @@ node_modules
 # development
 /_bak
 /test.*
+/start.sh
 
 # hardhat
 .hardhat

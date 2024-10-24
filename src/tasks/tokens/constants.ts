@@ -1,5 +1,5 @@
-export const TASK_PREFIX = 'tokens';
+const TASK_PREFIX = 'tokens';
 
-export enum TaskNames {
+export enum TokensTaskNames {
   Generate = `${TASK_PREFIX}:generate`,
 }

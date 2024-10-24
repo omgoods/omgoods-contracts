@@ -1,14 +1,7 @@
-export interface ERC20SubTaskArgs {
-  name: string;
-  symbol: string;
-  account?: string;
-  initialSupply: number;
-  burnAmount: number;
-  maxTransfers: number;
-  totalApproves: number;
-}
+import { TaskArgsWithSilent } from '../../common';
 
-export interface ERC721SubTaskArgs {
-  name: string;
-  symbol: string;
+export interface TokensGenerateTaskArgs extends TaskArgsWithSilent {
+  customAccount: string;
+  totalErc20: number;
+  totalErc721: number;
 }

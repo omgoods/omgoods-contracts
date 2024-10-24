@@ -1,5 +1,5 @@
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { ContractTransactionResponse, AddressLike, BytesLike } from 'ethers';
+import { AddressLike, BytesLike } from 'ethers';
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
 
 export class Utils {
@@ -21,46 +21,9 @@ export class Utils {
     return getAddress(this.randomHex(20));
   };
 
-  resolveInt = (options: Parameters<typeof this.randomInt>[0] | number) => {
-    let result: number = null;
-
-    switch (typeof options) {
-      case 'number':
-        result = options;
-        break;
-
-      case 'object':
-        if (options) {
-          result = this.randomInt(options);
-        }
-        break;
-    }
-
-    return result;
-  };
-
   randomInt = (min = 1, max = 1_000_000) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
   };
-
-  randomBool(): boolean {
-    return Math.random() < 0.5;
-  }
-
-  async logTx(
-    message: string,
-    tx: Promise<ContractTransactionResponse>,
-  ): Promise<void> {
-    const { stdout } = process;
-
-    const res = await tx;
-
-    stdout.write(`${message} →`);
-
-    const { gasUsed } = await res.wait();
-
-    stdout.write(` performed with ${gasUsed} gas\n`);
-  }
 
   computeProxyCloneAddress = async (
     deployer: AddressLike,

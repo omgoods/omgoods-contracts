@@ -1,10 +1,3 @@
-import { TaskNames } from '../constants';
-
-export enum SubTaskNames {
-  ERC20 = `${TaskNames.Generate}:erc20`,
-  ERC721 = `${TaskNames.Generate}:erc721`,
-}
-
 export const RANDOM_TOKEN_METADATA = Object.entries({
   AAIGI: 'CryptoFlow',
   AKS: 'HyperSphere',

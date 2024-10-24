@@ -15,18 +15,32 @@ function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
 
   let owner = processEnvs.getHex32(type, 'ACCOUNTS_OWNER');
   let deployer = processEnvs.getHex32(type, 'ACCOUNTS_DEPLOYER');
+  let faucet = processEnvs.getHex32(type, 'ACCOUNTS_FAUCET');
 
   if (owner && deployer) {
+    const accounts: string[] = [owner, deployer];
+
+    if (faucet) {
+      accounts.push(faucet);
+    }
+
     result = {
-      accounts: [owner, deployer],
+      accounts,
     };
   } else {
     owner = processEnvs.getAddress(type, 'ACCOUNTS_OWNER');
     deployer = processEnvs.getAddress(type, 'ACCOUNTS_DEPLOYER');
+    faucet = processEnvs.getAddress(type, 'ACCOUNTS_FAUCET');
 
     if (owner && deployer) {
+      const ledgerAccounts: string[] = [owner, deployer];
+
+      if (faucet) {
+        ledgerAccounts.push(faucet);
+      }
+
       result = {
-        ledgerAccounts: [owner, deployer],
+        ledgerAccounts,
       };
     }
   }
@@ -39,7 +53,7 @@ function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
         accounts: {
           mnemonic,
           initialIndex: processEnvs.getInt(type, 'ACCOUNTS_INITIAL_INDEX'),
-          count: 2,
+          count: 3,
         },
       };
     }
@@ -94,9 +108,13 @@ export function createNetworksConfig(
 export function createNamedAccountsConfig(
   networks: NetworksUserConfig,
 ): HardhatUserConfig['namedAccounts'] {
-  const result: Record<'owner' | 'deployer', Record<number, string>> = {
+  const result: Record<
+    'owner' | 'deployer' | 'faucet',
+    Record<number, string>
+  > = {
     owner: {},
     deployer: {},
+    faucet: {},
   };
 
   const networksValues = Object.values(networks);
@@ -121,7 +139,7 @@ export function createNamedAccountsConfig(
           ...accounts,
         };
 
-        const toIndex = initialIndex + 2;
+        const toIndex = initialIndex + 3;
 
         for (let index = initialIndex; index < toIndex; index++) {
           const { address } = HDNodeWallet.fromMnemonic(
@@ -133,9 +151,10 @@ export function createNamedAccountsConfig(
         }
       }
 
-      if (addresses.length === 2) {
+      if (addresses.length === 3) {
         result.owner[chainId] = addresses[0];
         result.deployer[chainId] = addresses[1];
+        result.faucet[chainId] = addresses[2];
       }
     }
   } catch (err) {

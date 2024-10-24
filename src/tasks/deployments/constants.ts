@@ -1,6 +1,6 @@
-export const TASK_PREFIX = 'deployments';
+const TASK_PREFIX = 'deployments';
 
-export enum TaskNames {
+export enum DeploymentsTaskNames {
   Export = `${TASK_PREFIX}:export`,
   Verify = `${TASK_PREFIX}:verify`,
 }

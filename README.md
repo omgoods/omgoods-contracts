@@ -24,11 +24,10 @@ npm run compile             # compiles contracts
 npm run test                # runs unit tests
 npm run coverage            # runs coverage tests
 npm run deploy              # deploys contracts
-npm run deployments:export  # exports all deployments into ./deployments.ts
-npm run deployments:verify  # verifies all deployments on etherscan
-
-npm run tokens:generate     # generates example tokens (localhost network only)
-
+npm run deployments:export  # exports all deployed contracts into ./deployments/export/*.ts
+npm run deployments:verify  # verifies all deployed contracts on etherscan
+npm run faucet              # top-ups account
+npm run tokens:generate     # generates tokens
 npm run hardhat             # hardhat cli wrapper
 ```
 

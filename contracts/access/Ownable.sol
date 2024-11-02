@@ -6,7 +6,7 @@ import {ForwarderContext} from "../metatx/ForwarderContext.sol";
 abstract contract Ownable is ForwarderContext {
   // storage
 
-  address internal _owner;
+  address private _owner;
 
   // events
 
@@ -29,7 +29,7 @@ abstract contract Ownable is ForwarderContext {
   // external getters
 
   function getOwner() external view returns (address) {
-    return _owner;
+    return _getOwner();
   }
 
   // external setters
@@ -39,6 +39,10 @@ abstract contract Ownable is ForwarderContext {
   }
 
   // internal getters
+
+  function _getOwner() internal view returns (address) {
+    return _owner;
+  }
 
   function _checkOwner() internal view {
     _checkOwner(_msgSender());
@@ -52,6 +56,9 @@ abstract contract Ownable is ForwarderContext {
 
   // internal setters
 
+  function _setInitialOwner() internal {
+    _setInitialOwner(msg.sender);
+  }
   function _setInitialOwner(address initialOwner) internal {
     _owner = initialOwner == address(0) ? msg.sender : initialOwner;
   }

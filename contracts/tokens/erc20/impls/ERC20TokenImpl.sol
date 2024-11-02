@@ -3,14 +3,38 @@ pragma solidity 0.8.27;
 
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
-import {Token} from "../Token.sol";
+import {ForwarderContext} from "../../../metatx/ForwarderContext.sol";
+import {TokenImpl} from "../../TokenImpl.sol";
 
-abstract contract ERC20Token is ERC20, Token {
+abstract contract ERC20TokenImpl is ERC20, TokenImpl {
   // deployment
 
-  constructor() ERC20("", "") {
+  constructor(string memory eip712Name) ERC20("", "") TokenImpl(eip712Name) {
     //
+  }
+
+  // public setters
+
+  function approve(
+    address spender,
+    uint256 value
+  ) public override onlyReadyOrManagement returns (bool) {
+    return super.approve(spender, value);
+  }
+
+  function transfer(
+    address to,
+    uint256 value
+  ) public override onlyReadyOrManagement returns (bool) {
+    return super.transfer(to, value);
+  }
+
+  function transferFrom(
+    address from,
+    address to,
+    uint256 value
+  ) public override onlyReadyOrManagement returns (bool) {
+    return super.transferFrom(from, to, value);
   }
 
   // internal getters

@@ -70,7 +70,7 @@ contract Forwarder is EIP712 {
 
   // deployment
 
-  constructor(string memory name) EIP712(name, "1") {
+  constructor(string memory eip712Name) EIP712(eip712Name, "1") {
     //
   }
 

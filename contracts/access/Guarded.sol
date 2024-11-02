@@ -24,8 +24,8 @@ abstract contract Guarded is Ownable {
 
   // external getters
 
-  function hasGuardian(address guardian) external view returns (bool) {
-    return _hasGuardian(guardian);
+  function isGuardian(address guardian) external view returns (bool) {
+    return _isGuardian(guardian);
   }
 
   // external setters
@@ -52,8 +52,8 @@ abstract contract Guarded is Ownable {
 
   // internal getters
 
-  function _hasGuardian(address guardian) internal view returns (bool) {
-    return guardian == _owner || _guardians[guardian];
+  function _isGuardian(address guardian) internal view returns (bool) {
+    return guardian == _getOwner() || _guardians[guardian];
   }
 
   // internal setters

@@ -11,7 +11,7 @@ contract ForwarderContextMock is ForwarderContext {
   // deployment
 
   constructor(address forwarder) {
-    _forwarder = forwarder;
+    _setForwarder(forwarder);
   }
 
   // external getters

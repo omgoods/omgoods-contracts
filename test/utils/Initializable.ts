@@ -49,11 +49,11 @@ describe('utils/Initializable // mocked', () => {
   describe('# getters', () => {
     createBeforeHook();
 
-    describe('initialized()', () => {
+    describe('isInitialized()', () => {
       it('expect to return false before initialization', async () => {
         const { initializable } = fixture;
 
-        const res = await initializable.initialized();
+        const res = await initializable.isInitialized();
 
         expect(res).false;
       });
@@ -64,7 +64,7 @@ describe('utils/Initializable // mocked', () => {
         it('expect to return true', async () => {
           const { initializable } = fixture;
 
-          const res = await initializable.initialized();
+          const res = await initializable.isInitialized();
 
           expect(res).true;
         });

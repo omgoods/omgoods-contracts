@@ -21,8 +21,8 @@ contract CloneFactoryMock is CloneFactory {
   function createClone(
     bytes32 salt,
     address impl,
-    bytes memory data
+    bytes memory initData
   ) external returns (address) {
-    return _createClone(salt, impl, data);
+    return _createClone(salt, impl, initData);
   }
 }

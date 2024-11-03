@@ -22,7 +22,7 @@ describe('access/Guarded // mocked', () => {
       it("expect to return false if the guardian doesn't exist", async () => {
         const { guarded } = fixture;
 
-        const res = await guarded.hasGuardian(randomAddress());
+        const res = await guarded.isGuardian(randomAddress());
 
         expect(res).false;
       });
@@ -30,7 +30,7 @@ describe('access/Guarded // mocked', () => {
       it('expect to return true if the guardian exists', async () => {
         const { guarded, signers } = fixture;
 
-        const res = await guarded.hasGuardian(signers.guardian);
+        const res = await guarded.isGuardian(signers.guardian);
 
         expect(res).true;
       });
@@ -38,7 +38,7 @@ describe('access/Guarded // mocked', () => {
       it('expect to return true for the owner', async () => {
         const { guarded, signers } = fixture;
 
-        const res = await guarded.hasGuardian(signers.owner);
+        const res = await guarded.isGuardian(signers.owner);
 
         expect(res).true;
       });
@@ -155,7 +155,7 @@ describe('access/Guarded // mocked', () => {
         await guarded.setInitialGuardians(guardians);
 
         for (const guardian of guardians) {
-          expect(await guarded.hasGuardian(guardian)).true;
+          expect(await guarded.isGuardian(guardian)).true;
         }
       });
     });

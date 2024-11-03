@@ -1,6 +1,4 @@
 import { ethers } from 'hardhat';
-import { deployERC20ExternalToken } from '../tokens/erc20/fixtures';
-import { deployERC721ExternalToken } from '../tokens/erc721/fixtures';
 
 const { deployContract } = ethers;
 
@@ -17,19 +15,5 @@ export async function deployInitializableMock() {
 
   return {
     initializable,
-  };
-}
-
-export async function deployStaticCaller() {
-  const staticCaller = await deployContract('StaticCaller');
-
-  const { externalToken: erc20Token } = await deployERC20ExternalToken();
-
-  const { externalToken: erc721Token } = await deployERC721ExternalToken();
-
-  return {
-    staticCaller,
-    erc20Token,
-    erc721Token,
   };
 }

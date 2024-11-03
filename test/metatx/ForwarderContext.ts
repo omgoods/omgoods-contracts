@@ -18,7 +18,7 @@ describe('metatx/ForwarderContext // mocked', () => {
       it('expect to return the forwarder', async () => {
         const { forwarderContext, signers } = fixture;
 
-        const res = await forwarderContext.forwarder();
+        const res = await forwarderContext.getForwarder();
 
         expect(res).eq(signers.forwarder.address);
       });

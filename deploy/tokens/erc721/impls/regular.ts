@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'tokens/erc721/regular';
+const TAG = 'tokens/erc721/impls/regular';
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -23,6 +23,6 @@ const func: DeployFunction = async (hre) => {
 };
 
 func.tags = [TAG];
-func.dependencies = ['tokens/erc20/wrapped'];
+func.dependencies = ['tokens/erc20/impls/wrapped'];
 
 module.exports = func;

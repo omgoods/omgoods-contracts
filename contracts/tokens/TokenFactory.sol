@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.27;
 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Guarded} from "../access/Guarded.sol";
 import {CloneFactory} from "../proxy/CloneFactory.sol";
 import {Initializable} from "../utils/Initializable.sol";
 
 contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
-  using ECDSA for bytes32;
-
   struct TokenData {
     bytes32 salt;
     address impl;
@@ -46,8 +43,6 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   // errors
 
   error MsgSenderIsNotTheToken();
-
-  error InvalidGuardianSignature();
 
   // modifiers
 
@@ -96,7 +91,7 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   function createToken(
     bytes32 salt,
     address impl,
-    bytes memory initData
+    bytes calldata initData
   ) external onlyOwner {
     _createToken(salt, impl, initData);
   }
@@ -104,15 +99,12 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   function createToken(
     bytes32 salt,
     address impl,
-    bytes memory initData,
-    bytes memory signature
+    bytes calldata initData,
+    bytes calldata signature
   ) external {
     bytes32 hash = _hashToken(salt, impl, initData);
-    address signer = hash.recover(signature);
 
-    if (!_isGuardian(signer)) {
-      revert InvalidGuardianSignature();
-    }
+    _verifyGuardianSignature(hash, signature);
 
     _createToken(salt, impl, initData);
   }
@@ -129,7 +121,7 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   function _hashToken(
     bytes32 salt,
     address impl,
-    bytes memory initData
+    bytes calldata initData
   ) private view returns (bytes32) {
     return
       _hashTypedDataV4(
@@ -149,7 +141,7 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   function _createToken(
     bytes32 salt,
     address impl,
-    bytes memory initData
+    bytes calldata initData
   ) internal {
     address token = _createClone(salt, impl, initData);
 

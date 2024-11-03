@@ -13,19 +13,33 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
     //
   }
 
+  // public getters
+
+  function name() public view override returns (string memory) {
+    return _getName();
+  }
+
+  function symbol() public view override returns (string memory) {
+    return _getSymbol();
+  }
+
+  function decimals() public view override returns (uint8) {
+    return _getDecimals();
+  }
+
   // public setters
 
   function approve(
     address spender,
     uint256 value
-  ) public override onlyReadyOrManagement returns (bool) {
+  ) public override onlyReadyOrAnyManager returns (bool) {
     return super.approve(spender, value);
   }
 
   function transfer(
     address to,
     uint256 value
-  ) public override onlyReadyOrManagement returns (bool) {
+  ) public override onlyReadyOrAnyManager returns (bool) {
     return super.transfer(to, value);
   }
 
@@ -33,11 +47,19 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
     address from,
     address to,
     uint256 value
-  ) public override onlyReadyOrManagement returns (bool) {
+  ) public override onlyReadyOrAnyManager returns (bool) {
     return super.transferFrom(from, to, value);
   }
 
   // internal getters
+
+  function _getName() internal view virtual returns (string memory);
+
+  function _getSymbol() internal view virtual returns (string memory);
+
+  function _getDecimals() internal view virtual returns (uint8) {
+    return 18;
+  }
 
   function _msgSender()
     internal
@@ -58,7 +80,15 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
   ) internal virtual override {
     super._update(from, to, value);
 
-    _notifyTokenRegistry(0x50, abi.encode(from, to, value));
+    _afterUpdate(from, to, value);
+  }
+
+  function _afterUpdate(
+    address from,
+    address to,
+    uint256 value
+  ) internal virtual {
+    _notifyTokenFactory(0x50, abi.encode(from, to, value));
   }
 
   function _approve(
@@ -66,9 +96,17 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
     address spender,
     uint256 value,
     bool
-  ) internal override {
+  ) internal virtual override {
     super._approve(owner, spender, value, true);
 
-    _notifyTokenRegistry(0x51, abi.encode(owner, spender, value));
+    _afterApprove(owner, spender, value);
+  }
+
+  function _afterApprove(
+    address owner,
+    address spender,
+    uint256 value
+  ) internal virtual {
+    _notifyTokenFactory(0x51, abi.encode(owner, spender, value));
   }
 }

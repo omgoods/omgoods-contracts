@@ -7,6 +7,8 @@ import {CloneImpl} from "../proxy/CloneImpl.sol";
 import {TokenFactory} from "./TokenFactory.sol";
 
 abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
+  // storage
+
   address private _controller;
 
   bool private _ready;
@@ -21,9 +23,9 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
 
   // modifiers
 
-  modifier onlyManagement() {
+  modifier onlyCurrentManager() {
     address sender = _msgSender();
-    if (!_isReady()) {
+    if (_isReady() == false) {
       _checkOwner(sender);
     } else if (sender != _getController()) {
       revert MsgSenderIsNotTheController();
@@ -33,8 +35,8 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   }
   // modifiers
 
-  modifier onlyReadyOrManagement() {
-    if (!_isReady()) {
+  modifier onlyReadyOrAnyManager() {
+    if (_isReady() == false) {
       address sender = _msgSender();
 
       if (sender != _getController() && sender != _getOwner()) {
@@ -81,6 +83,15 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
     return _ready;
   }
 
+  function _hashInitialization(
+    bytes32 structHash
+  ) internal view virtual returns (bytes32 result) {
+    if (_getFactory() == address(0)) {
+      result = _hashTypedDataV4(structHash);
+    }
+    return result;
+  }
+
   // internal setters
 
   function _setController(address controller) internal {
@@ -91,15 +102,15 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
     _ready = ready;
 
     if (emitEvent) {
-      _notifyTokenRegistry(0x00);
+      _notifyTokenFactory(0x00);
     }
   }
 
-  function _notifyTokenRegistry(uint8 kind) internal {
+  function _notifyTokenFactory(uint8 kind) internal {
     TokenFactory(_getFactory()).sendTokenNotification(kind, new bytes(0));
   }
 
-  function _notifyTokenRegistry(uint8 kind, bytes memory encodedData) internal {
+  function _notifyTokenFactory(uint8 kind, bytes memory encodedData) internal {
     TokenFactory(_getFactory()).sendTokenNotification(kind, encodedData);
   }
 
@@ -107,7 +118,7 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
     super._setOwner(owner, emitEvent);
 
     if (emitEvent) {
-      _notifyTokenRegistry(0x01, abi.encode(owner));
+      _notifyTokenFactory(0x01, abi.encode(owner));
     }
   }
 }

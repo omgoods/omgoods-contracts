@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'metatx/forwarder';
+const TAG = 'tokens/erc20/wrapped';
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -13,15 +13,16 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer } = await getNamedAccounts();
 
-  await deploy('Forwarder', {
+  await deploy('ERC20TokenWrappedImpl', {
     from: deployer,
     log: true,
     args: [
-      'OM!goods Forwarder', // name
+      'OM!goods Wrapped Coin', //
     ],
   });
 };
 
 func.tags = [TAG];
+func.dependencies = ['tokens/erc20/regular'];
 
 module.exports = func;

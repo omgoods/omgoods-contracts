@@ -13,4 +13,8 @@ contract InitializableMock is Initializable {
   function initialize() external initializeOnce {
     emit Initialized();
   }
+
+  function setInitialized(bool initialized) external {
+    _setInitialized(initialized);
+  }
 }

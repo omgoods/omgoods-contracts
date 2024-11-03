@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'tokens/registry';
+const TAG = 'tokens/factory';
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -18,20 +18,27 @@ const func: DeployFunction = async (hre) => {
 
   const guardians = processEnvs.getAddresses('GUARDIANS');
 
-  await deploy('TokenRegistry', {
+  const { address: target } = await deploy('TokenTarget', {
+    contract: 'CloneTarget',
+    from: deployer,
+    log: true,
+  });
+
+  await deploy('TokenFactory', {
     from: deployer,
     log: true,
     args: [
+      'OM!goods Token Factory', // name
       owner,
-      'OM!goods Token Registry', // name
+      target,
     ],
   });
 
-  if (await read('TokenRegistry', 'initialized')) {
-    log('TokenRegistry already initialized');
+  if (await read('TokenFactory', 'isInitialized')) {
+    log('TokenFactory already initialized');
   } else {
     await execute(
-      'TokenRegistry',
+      'TokenFactory',
       {
         from: owner,
         log: true,
@@ -44,6 +51,6 @@ const func: DeployFunction = async (hre) => {
 };
 
 func.tags = [TAG];
-func.dependencies = ['forwarder'];
+func.dependencies = ['tokens/helper'];
 
 module.exports = func;

@@ -32,7 +32,11 @@ abstract contract Initializable {
   // internal setters
 
   function _setInitialized() internal {
-    StorageSlot.getBooleanSlot(INITIALIZED_SLOT).value = true;
+    _setInitialized(true);
+  }
+
+  function _setInitialized(bool initialized) internal {
+    StorageSlot.getBooleanSlot(INITIALIZED_SLOT).value = initialized;
   }
 
   // internal getters

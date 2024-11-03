@@ -4,6 +4,8 @@ pragma solidity 0.8.27;
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
 
 abstract contract ForwarderContext is Context {
+  // storage
+
   address private _forwarder;
 
   // external getters

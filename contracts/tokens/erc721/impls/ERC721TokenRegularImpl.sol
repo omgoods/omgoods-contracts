@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.27;
 
-import {ERC20TokenImpl} from "./ERC20TokenImpl.sol";
+import {ERC721TokenImpl} from "./ERC721TokenImpl.sol";
 
-contract ERC20RegularTokenImpl is ERC20TokenImpl {
+contract ERC721TokenRegularImpl is ERC721TokenImpl {
   struct InitializationData {
     address forwarder;
     bool ready;
@@ -11,22 +11,19 @@ contract ERC20RegularTokenImpl is ERC20TokenImpl {
     address controller;
     string name;
     string symbol;
+    string uriPrefix;
   }
 
   bytes32 private constant INITIALIZATION_TYPEHASH =
     keccak256(
-      "Initialization(address forwarder,bool ready,address owner,address controller,string name,string symbol)"
+      "Initialization(address forwarder,bool ready,address owner,address controller,string name,string symbol,string uriPrefix)"
     );
 
   // storage
 
-  string private _name;
-
-  string private _symbol;
-
   // deployment
 
-  constructor(string memory eip712Name) ERC20TokenImpl(eip712Name) {
+  constructor(string memory eip712Name) ERC721TokenImpl(eip712Name) {
     //
   }
 
@@ -36,25 +33,16 @@ contract ERC20RegularTokenImpl is ERC20TokenImpl {
     address owner,
     address controller,
     string calldata name_,
-    string calldata symbol_
-  ) external {
+    string calldata symbol_,
+    string calldata uriPrefix
+  ) external onlyFactory {
     _setForwarder(forwarder);
     _setReady(ready, false);
     _setOwner(owner, false);
     _setController(controller);
-
-    _name = name_;
-    _symbol = symbol_;
-  }
-
-  // public getters
-
-  function name() public view override returns (string memory) {
-    return _name;
-  }
-
-  function symbol() public view override returns (string memory) {
-    return _symbol;
+    _setName(name_);
+    _setSymbol(symbol_);
+    _setUriPrefix(uriPrefix);
   }
 
   // external getters
@@ -63,7 +51,7 @@ contract ERC20RegularTokenImpl is ERC20TokenImpl {
     InitializationData calldata initializationData
   ) private view returns (bytes32) {
     return
-      _hashTypedDataV4(
+      _hashInitialization(
         keccak256(
           abi.encode(
             INITIALIZATION_TYPEHASH, //
@@ -72,7 +60,8 @@ contract ERC20RegularTokenImpl is ERC20TokenImpl {
             initializationData.owner,
             initializationData.controller,
             keccak256(abi.encodePacked(initializationData.name)),
-            keccak256(abi.encodePacked(initializationData.symbol))
+            keccak256(abi.encodePacked(initializationData.symbol)),
+            keccak256(abi.encodePacked(initializationData.uriPrefix))
           )
         )
       );
@@ -80,11 +69,11 @@ contract ERC20RegularTokenImpl is ERC20TokenImpl {
 
   // external setters
 
-  function mint(address to, uint256 value) external onlyManagement {
-    _mint(to, value);
+  function mint(address to, uint256 tokenId) external onlyCurrentManager {
+    _mint(to, tokenId);
   }
 
-  function burn(address from, uint256 value) external onlyManagement {
-    _burn(from, value);
+  function burn(uint256 tokenId) external onlyCurrentManager {
+    _burn(tokenId);
   }
 }

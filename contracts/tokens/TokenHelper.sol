@@ -4,18 +4,12 @@ pragma solidity 0.8.27;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 contract TokenHelper {
-  enum TokenKinds {
-    Unknown,
-    ERC20,
-    ERC721
-  }
-
   function getTokenMetadata(
     address token
   )
     external
     view
-    returns (string memory name, string memory symbol, TokenKinds kind)
+    returns (string memory name, string memory symbol, uint8 decimals)
   {
     bytes memory data = _callToken(token, IERC20Metadata.symbol.selector);
 
@@ -32,19 +26,12 @@ contract TokenHelper {
 
       data = _callToken(token, IERC20Metadata.decimals.selector);
 
-      if (data.length == 0) {
-        kind = TokenKinds.ERC721;
-      } else {
-        uint8 decimals;
+      if (data.length != 0) {
         (decimals) = abi.decode(data, (uint8));
-
-        if (decimals == 18) {
-          kind = TokenKinds.ERC721;
-        }
       }
     }
 
-    return (name, symbol, kind);
+    return (name, symbol, decimals);
   }
 
   // internal getters

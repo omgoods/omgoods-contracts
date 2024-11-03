@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.27;
 
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {Ownable} from "./Ownable.sol";
 
 abstract contract Guarded is Ownable {
+  using ECDSA for bytes32;
+
   // storage
 
   mapping(address => bool) private _guardians;
@@ -21,6 +24,8 @@ abstract contract Guarded is Ownable {
   error GuardianAlreadyExists();
 
   error GuardianDoesntExist();
+
+  error InvalidGuardianSignature();
 
   // external getters
 
@@ -54,6 +59,17 @@ abstract contract Guarded is Ownable {
 
   function _isGuardian(address guardian) internal view returns (bool) {
     return guardian == _getOwner() || _guardians[guardian];
+  }
+
+  function _verifyGuardianSignature(
+    bytes32 hash,
+    bytes calldata signature
+  ) internal view {
+    address signer = hash.recover(signature);
+
+    if (!_isGuardian(signer)) {
+      revert InvalidGuardianSignature();
+    }
   }
 
   // internal setters

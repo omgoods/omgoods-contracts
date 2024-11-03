@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'utils';
+const TAG = 'tokens/helper';
 
 const func: DeployFunction = async (hre) => {
   const {
@@ -13,12 +13,13 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer } = await getNamedAccounts();
 
-  await deploy('StaticCaller', {
+  await deploy('TokenHelper', {
     from: deployer,
     log: true,
   });
 };
 
 func.tags = [TAG];
+func.dependencies = ['metatx/forwarder'];
 
 module.exports = func;

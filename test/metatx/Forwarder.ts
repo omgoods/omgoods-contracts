@@ -1,11 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { ZeroAddress } from 'ethers';
-import { utils } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
 import { setupForwarder } from './fixtures';
 import { FORWARDER_REQUEST, FORWARDER_BATCH } from './constants';
 
+const { ZeroAddress } = ethers;
 const { randomAddress } = utils;
 
 describe('metatx/Forwarder', () => {
@@ -32,21 +32,21 @@ describe('metatx/Forwarder', () => {
 
     describe('hashRequest()', () => {
       it('expect to return the correct hash', async () => {
-        const { forwarder, typedDataHelper } = fixture;
+        const { forwarder, forwarderTypedData } = fixture;
 
         const res = await forwarder.hashRequest(FORWARDER_REQUEST);
 
-        expect(res).eq(typedDataHelper.hash('Request', FORWARDER_REQUEST));
+        expect(res).eq(forwarderTypedData.hash('Request', FORWARDER_REQUEST));
       });
     });
 
     describe('hashBatch()', () => {
       it('expect to return the correct hash', async () => {
-        const { forwarder, typedDataHelper } = fixture;
+        const { forwarder, forwarderTypedData } = fixture;
 
         const res = await forwarder.hashBatch(FORWARDER_BATCH);
 
-        expect(res).eq(typedDataHelper.hash('Batch', FORWARDER_BATCH));
+        expect(res).eq(forwarderTypedData.hash('Batch', FORWARDER_BATCH));
       });
     });
   });
@@ -188,7 +188,7 @@ describe('metatx/Forwarder', () => {
       });
 
       it('expect request to be sent successfully', async () => {
-        const { forwarder, forwarderContext, typedDataHelper, signers } =
+        const { forwarder, forwarderContext, forwarderTypedData, signers } =
           fixture;
 
         const signer = signers.unknown.at(0);
@@ -206,7 +206,7 @@ describe('metatx/Forwarder', () => {
             request.account,
             request.to,
             request.data,
-            await typedDataHelper.sign(signer, 'Request', request),
+            await forwarderTypedData.sign(signer, 'Request', request),
           );
 
         await expect(tx)
@@ -235,7 +235,7 @@ describe('metatx/Forwarder', () => {
           forwarder,
           forwarderContext,
           account,
-          typedDataHelper,
+          forwarderTypedData,
           signers,
         } = fixture;
 
@@ -256,7 +256,7 @@ describe('metatx/Forwarder', () => {
             requestBatch.account,
             requestBatch.to,
             requestBatch.data,
-            await typedDataHelper.sign(signer, 'Batch', requestBatch),
+            await forwarderTypedData.sign(signer, 'Batch', requestBatch),
           );
 
         await expect(tx)

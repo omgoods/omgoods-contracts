@@ -1,18 +1,17 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ZeroAddress } from 'ethers';
 import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
-import { deployGuardedMock } from './fixtures';
+import { setupGuardedMock } from './fixtures';
 
-const { hashMessage } = ethers;
+const { hashMessage, ZeroAddress } = ethers;
 const { randomAddress, randomHex } = utils;
 
 describe('access/Guarded // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployGuardedMock>>;
+  let fixture: Awaited<ReturnType<typeof setupGuardedMock>>;
 
   const createBeforeHook = () => {
     before(async () => {
-      fixture = await loadFixture(deployGuardedMock);
+      fixture = await loadFixture(setupGuardedMock);
     });
   };
 
@@ -46,7 +45,7 @@ describe('access/Guarded // mocked', () => {
     });
 
     describe('_verifyGuardianSignature()', () => {
-      it('expect to revert on invalid signature', async () => {
+      it('expect to revert for invalid signature', async () => {
         const { guarded, signers } = fixture;
 
         const signature = await signers.guardian.signMessage(randomHex());
@@ -59,7 +58,7 @@ describe('access/Guarded // mocked', () => {
         );
       });
 
-      it('expect not to revert on valid signature', async () => {
+      it('expect not to revert for valid signature', async () => {
         const { guarded, signers } = fixture;
 
         const message = randomHex();

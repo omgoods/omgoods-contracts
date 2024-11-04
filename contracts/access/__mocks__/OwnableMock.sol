@@ -10,15 +10,6 @@ contract OwnableMock is Ownable {
     _setInitialOwner();
   }
 
-  // external getters
-
-  function requireOnlyOwner(address msgSender) external view {
-    if (msgSender == address(0)) {
-      _requireOnlyOwner();
-    } else {
-      _requireOnlyOwner(msgSender);
-    }
-  }
   // external setters
 
   function setInitialOwner(address initialOwner) external {

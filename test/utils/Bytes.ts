@@ -1,16 +1,16 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { keccak256, concat } from 'ethers';
-import { utils } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
-import { deployBytesMock } from './fixtures';
+import { setupBytesMock } from './fixtures';
 
+const { keccak256, concat } = ethers;
 const { randomHex } = utils;
 
 describe('utils/Bytes // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployBytesMock>>;
+  let fixture: Awaited<ReturnType<typeof setupBytesMock>>;
 
   before(async () => {
-    fixture = await loadFixture(deployBytesMock);
+    fixture = await loadFixture(setupBytesMock);
   });
 
   describe('# getters', () => {

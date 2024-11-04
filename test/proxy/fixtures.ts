@@ -2,42 +2,14 @@ import { ethers, utils } from 'hardhat';
 import { BytesLike } from 'ethers';
 
 const { deployContract } = ethers;
-
 const { computeProxyCloneAddress, getSigners, randomHex } = utils;
 
-export async function deployCloneTarget() {
-  const cloneTarget = await deployContract('CloneTarget');
-
-  return {
-    cloneTarget,
-  };
-}
-
-export async function deployCloneImplMock() {
+export async function setupCloneFactoryMock() {
   const signers = await getSigners('factory');
 
   const cloneImpl = await deployContract('CloneImplMock', [signers.factory]);
-
-  return {
-    cloneImpl,
-    signers,
-  };
-}
-
-export async function deployCloneFactoryMock() {
-  const { cloneTarget } = await deployCloneTarget();
-
+  const cloneTarget = await deployContract('CloneTarget');
   const cloneFactory = await deployContract('CloneFactoryMock', [cloneTarget]);
-
-  return {
-    cloneTarget,
-    cloneFactory,
-  };
-}
-
-export async function setupCloneFactoryMock() {
-  const { cloneTarget, cloneFactory } = await deployCloneFactoryMock();
-  const { signers, cloneImpl } = await deployCloneImplMock();
 
   const computeCloneAddress = (salt: BytesLike) =>
     computeProxyCloneAddress(cloneFactory, cloneTarget, salt);
@@ -50,20 +22,6 @@ export async function setupCloneFactoryMock() {
     return cloneImpl.attach(cloneAddress) as typeof cloneImpl;
   };
 
-  return {
-    signers,
-    cloneFactory,
-    cloneImpl,
-    cloneTarget,
-    computeCloneAddress,
-    createClone,
-  };
-}
-
-export async function setupCloneMock() {
-  const { signers, cloneTarget, cloneImpl, createClone } =
-    await setupCloneFactoryMock();
-
   const clone = await createClone(
     randomHex(),
     cloneImpl.interface.encodeFunctionData('initialize', [0]),
@@ -72,7 +30,10 @@ export async function setupCloneMock() {
   return {
     signers,
     clone,
+    cloneFactory,
     cloneImpl,
     cloneTarget,
+    computeCloneAddress,
+    createClone,
   };
 }

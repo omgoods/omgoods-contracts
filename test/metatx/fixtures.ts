@@ -1,26 +1,15 @@
 import { ethers, utils } from 'hardhat';
-import { AddressLike, BigNumberish, BytesLike } from 'ethers';
+import { BigNumberish, BytesLike } from 'ethers';
 import { createTypedDataHelper, TYPED_DATA_DOMAIN_NAME } from '../common';
 
+const { deployContract } = ethers;
 const { getSigners } = utils;
 
-const { deployContract } = ethers;
-
-export async function deployAccountMock(options: { forwarder: AddressLike }) {
-  const account = await deployContract('AccountMock', [options.forwarder]);
-
-  return {
-    account,
-  };
-}
-
-export async function deployForwarderContextMock(options?: {
-  forwarder?: AddressLike;
-}) {
+export async function setupForwarderContextMock() {
   const signers = await getSigners('forwarder');
 
   const forwarderContext = await deployContract('ForwarderContextMock', [
-    options?.forwarder || signers.forwarder,
+    signers.forwarder,
   ]);
 
   return {
@@ -29,29 +18,16 @@ export async function deployForwarderContextMock(options?: {
   };
 }
 
-export async function deployForwarder() {
+export async function setupForwarder() {
   const signers = await getSigners('owner', 'forwarder');
 
   const forwarder = await deployContract('Forwarder', [TYPED_DATA_DOMAIN_NAME]);
-
-  return {
-    signers,
+  const forwarderContext = await deployContract('ForwarderContextMock', [
     forwarder,
-  };
-}
+  ]);
+  const account = await deployContract('AccountMock', [forwarder]);
 
-export async function setupForwarder() {
-  const { forwarder, signers } = await deployForwarder();
-
-  const { account } = await deployAccountMock({
-    forwarder,
-  });
-
-  const { forwarderContext } = await deployForwarderContextMock({
-    forwarder,
-  });
-
-  const typedDataHelper = await createTypedDataHelper<{
+  const forwarderTypedData = await createTypedDataHelper<{
     Request: {
       account: string;
       nonce: BigNumberish;
@@ -104,10 +80,10 @@ export async function setupForwarder() {
   });
 
   return {
-    signers,
+    account,
     forwarder,
     forwarderContext,
-    account,
-    typedDataHelper,
+    forwarderTypedData,
+    signers,
   };
 }

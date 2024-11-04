@@ -50,7 +50,7 @@ contract ERC20TokenRegularImpl is ERC20TokenImpl {
 
   function hashInitialization(
     InitializationData calldata initializationData
-  ) private view returns (bytes32) {
+  ) external view returns (bytes32) {
     return
       _hashInitialization(
         keccak256(

@@ -1,51 +1,30 @@
 import { ethers, utils } from 'hardhat';
 import { BaseContract, BytesLike } from 'ethers';
-import { deployCloneTarget } from '../proxy/fixtures';
 import { TYPED_DATA_DOMAIN_NAME, createTypedDataHelper } from '../common';
+import { TOKEN_METADATA } from './constants';
 
 const { deployContract } = ethers;
-
 const { computeProxyCloneAddress, getSigners, randomHex } = utils;
 
-export async function deployTokenImplMock() {
-  const signers = await getSigners('owner', 'controller', 'factory');
-
-  const tokenImpl = await deployContract('TokenImplMock', [
-    TYPED_DATA_DOMAIN_NAME,
-    signers.factory,
-  ]);
-
-  return {
-    tokenImpl,
-    signers,
-  };
-}
-
-export async function deployTokenFactory() {
-  const { cloneTarget } = await deployCloneTarget();
-
-  const { signers, tokenImpl } = await deployTokenImplMock();
-
-  const tokenFactory = await deployContract('TokenFactory', [
-    TYPED_DATA_DOMAIN_NAME,
-    signers.owner,
-    cloneTarget,
-  ]);
-
-  return {
-    signers,
-    cloneTarget,
-    tokenImpl,
-    tokenFactory,
-  };
+function deployTokenImplMock() {
+  return deployContract('TokenImplMock', [TYPED_DATA_DOMAIN_NAME]);
 }
 
 export async function setupTokenHelper() {
   const tokenHelper = await deployContract('TokenHelper');
 
-  const erc20Token = await deployContract('ERC20ExternalToken', ['', '', 0]);
+  const erc20Token = await deployContract('ERC20ExternalToken', [
+    TOKEN_METADATA.name,
+    TOKEN_METADATA.symbol,
+    TOKEN_METADATA.decimals,
+    1_000_000,
+  ]);
 
-  const erc721Token = await deployContract('ERC721ExternalToken', ['', '', []]);
+  const erc721Token = await deployContract('ERC721ExternalToken', [
+    TOKEN_METADATA.name,
+    TOKEN_METADATA.symbol,
+    [],
+  ]);
 
   return {
     tokenHelper,
@@ -54,40 +33,45 @@ export async function setupTokenHelper() {
   };
 }
 
-export async function setupTokenFactory() {
-  const { signers, cloneTarget, tokenImpl, tokenFactory } =
-    await deployTokenFactory();
+export async function setupTokenFactory<
+  T extends BaseContract = Awaited<ReturnType<typeof deployTokenImplMock>>,
+>(
+  options: {
+    tokenImpl?: T;
+  } = {},
+) {
+  let { tokenImpl } = options;
+
+  const signers = await getSigners('owner', 'controller');
+
+  const cloneTarget = await deployContract('CloneTarget');
+
+  if (!tokenImpl) {
+    tokenImpl = (await deployTokenImplMock()) as BaseContract as T;
+  }
+
+  const tokenFactory = await deployContract('TokenFactory', [
+    TYPED_DATA_DOMAIN_NAME,
+    signers.owner,
+    cloneTarget,
+  ]);
 
   const computeTokenAddress = (salt: BytesLike) =>
     computeProxyCloneAddress(tokenFactory, cloneTarget, salt);
 
-  const createToken = async <C extends BaseContract>(
-    salt: BytesLike,
-    impl: C,
-    initData: BytesLike,
-  ) => {
+  const createToken = async (salt: BytesLike, initData: BytesLike) => {
     const tokenAddress = await computeTokenAddress(salt);
 
     await tokenFactory['createToken(bytes32,address,bytes)'](
       salt,
-      impl,
+      tokenImpl,
       initData,
     );
 
-    return impl.attach(tokenAddress) as C;
+    return tokenImpl.attach(tokenAddress) as T;
   };
 
-  const token = await createToken(
-    randomHex(),
-    tokenImpl,
-    tokenImpl.interface.encodeFunctionData('initialize', [
-      signers.owner.address,
-      signers.controller.address,
-      false,
-    ]),
-  );
-
-  const typedDataHelper = await createTypedDataHelper<{
+  const tokenFactoryTypedData = await createTypedDataHelper<{
     Token: {
       salt: string;
       impl: string;
@@ -111,12 +95,55 @@ export async function setupTokenFactory() {
   });
 
   return {
-    signers,
-    typedDataHelper,
     computeTokenAddress,
     createToken,
+    signers,
     tokenFactory,
+    tokenFactoryTypedData,
     tokenImpl,
+  };
+}
+
+export async function setupTokenMock() {
+  const result = await setupTokenFactory();
+
+  const { signers, tokenImpl, createToken } = result;
+
+  const token = await createToken(
+    randomHex(),
+    tokenImpl.interface.encodeFunctionData('initialize', [
+      signers.owner.address,
+      signers.controller.address,
+      false,
+    ]),
+  );
+
+  const tokenImpTypedData = await createTypedDataHelper<{
+    Initialization: {
+      owner: string;
+      controller: string;
+      ready: boolean;
+    };
+  }>(tokenImpl, {
+    Initialization: [
+      {
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        name: 'controller',
+        type: 'address',
+      },
+      {
+        name: 'ready',
+        type: 'bool',
+      },
+    ],
+  });
+
+  return {
+    ...result,
     token,
+    tokenImpTypedData,
   };
 }

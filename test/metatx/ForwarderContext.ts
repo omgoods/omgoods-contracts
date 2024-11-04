@@ -1,16 +1,16 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { concat } from 'ethers';
-import { utils } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
-import { deployForwarderContextMock } from './fixtures';
+import { setupForwarderContextMock } from './fixtures';
 
+const { concat } = ethers;
 const { randomAddress, abiCoder } = utils;
 
 describe('metatx/ForwarderContext // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployForwarderContextMock>>;
+  let fixture: Awaited<ReturnType<typeof setupForwarderContextMock>>;
 
   before(async () => {
-    fixture = await loadFixture(deployForwarderContextMock);
+    fixture = await loadFixture(setupForwarderContextMock);
   });
 
   describe('# getters', () => {

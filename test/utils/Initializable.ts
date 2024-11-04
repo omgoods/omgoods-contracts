@@ -1,13 +1,13 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { deployInitializableMock } from './fixtures';
+import { setupInitializableMock } from './fixtures';
 
 describe('utils/Initializable // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployInitializableMock>>;
+  let fixture: Awaited<ReturnType<typeof setupInitializableMock>>;
 
   const createBeforeHook = (initialized = false) => {
     before(async () => {
-      fixture = await loadFixture(deployInitializableMock);
+      fixture = await loadFixture(setupInitializableMock);
 
       if (initialized) {
         const { initializable } = fixture;
@@ -29,7 +29,7 @@ describe('utils/Initializable // mocked', () => {
         await expect(tx).emit(initializable, 'Initialized');
       });
 
-      describe('# after initialization', () => {
+      describe('# when initialized', () => {
         createBeforeHook(true);
 
         it('expect to revert', async () => {
@@ -58,7 +58,7 @@ describe('utils/Initializable // mocked', () => {
         expect(res).false;
       });
 
-      describe('# after initialization', () => {
+      describe('# when initialized', () => {
         createBeforeHook(true);
 
         it('expect to return true', async () => {

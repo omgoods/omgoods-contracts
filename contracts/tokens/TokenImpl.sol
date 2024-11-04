@@ -31,7 +31,7 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   // modifiers
 
   modifier onlyReadyOrAnyManager() {
-    _onlyReadyOrAnyManager();
+    _requireOnlyReadyOrAnyManager();
 
     _;
   }
@@ -91,7 +91,7 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
     }
   }
 
-  function _onlyReadyOrAnyManager() internal view {
+  function _requireOnlyReadyOrAnyManager() internal view {
     if (!_isReady()) {
       address msgSender = _msgSender();
 
@@ -117,7 +117,7 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   }
 
   function _notifyTokenFactory(uint8 kind) internal {
-    TokenFactory(_getFactory()).emitTokenNotification(kind, new bytes(0));
+    _notifyTokenFactory(kind, new bytes(0));
   }
 
   function _notifyTokenFactory(uint8 kind, bytes memory encodedData) internal {

@@ -2,17 +2,16 @@ import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
 import { utils, ethers } from 'hardhat';
 import { expect } from 'chai';
-import { setupTokenFactory } from './fixtures';
+import { setupTokenMock } from './fixtures';
 
 const { ZeroAddress } = ethers;
-
 const { randomHex, randomAddress } = utils;
 
-describe('tokens/TokenHelper', () => {
-  let fixture: Awaited<ReturnType<typeof setupTokenFactory>>;
+describe('tokens/TokenFactory', () => {
+  let fixture: Awaited<ReturnType<typeof setupTokenMock>>;
 
   before(async () => {
-    fixture = await loadFixture(setupTokenFactory);
+    fixture = await loadFixture(setupTokenMock);
   });
 
   describe('# deployment', () => {
@@ -99,7 +98,7 @@ describe('tokens/TokenHelper', () => {
 
     describe('hashToken()', () => {
       it('expect to return token hash', async () => {
-        const { tokenFactory, typedDataHelper } = fixture;
+        const { tokenFactory, tokenFactoryTypedData } = fixture;
 
         const salt = randomHex();
         const impl = randomAddress();
@@ -112,7 +111,7 @@ describe('tokens/TokenHelper', () => {
         });
 
         expect(res).eq(
-          typedDataHelper.hash('Token', {
+          tokenFactoryTypedData.hash('Token', {
             salt,
             impl,
             initData,
@@ -139,7 +138,7 @@ describe('tokens/TokenHelper', () => {
         );
       });
 
-      it('expect to revert on invalid guardian signature', async () => {
+      it('expect to revert for invalid guardian signature', async () => {
         const { signers, tokenFactory } = fixture;
 
         const signer = signers.unknown.at(0);
@@ -188,7 +187,7 @@ describe('tokens/TokenHelper', () => {
           tokenFactory,
           tokenImpl,
           computeTokenAddress,
-          typedDataHelper,
+          tokenFactoryTypedData,
         } = fixture;
 
         const salt = randomHex();
@@ -202,11 +201,15 @@ describe('tokens/TokenHelper', () => {
           ready,
         ]);
 
-        const signature = await typedDataHelper.sign(signers.owner, 'Token', {
-          salt,
-          impl: await tokenImpl.getAddress(),
-          initData,
-        });
+        const signature = await tokenFactoryTypedData.sign(
+          signers.owner,
+          'Token',
+          {
+            salt,
+            impl: await tokenImpl.getAddress(),
+            initData,
+          },
+        );
 
         const tx = tokenFactory['createToken(bytes32,address,bytes,bytes)'](
           salt,

@@ -1,16 +1,16 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ZeroAddress } from 'ethers';
-import { utils } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
-import { deployOwnableMock } from './fixtures';
+import { setupOwnableMock } from './fixtures';
 
+const { ZeroAddress } = ethers;
 const { randomAddress } = utils;
 
 describe('access/Ownable // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployOwnableMock>>;
+  let fixture: Awaited<ReturnType<typeof setupOwnableMock>>;
 
   beforeEach(async () => {
-    fixture = await loadFixture(deployOwnableMock);
+    fixture = await loadFixture(setupOwnableMock);
   });
 
   describe('# getters', () => {

@@ -1,12 +1,12 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { setupCloneMock } from './fixtures';
+import { setupCloneFactoryMock } from './fixtures';
 
 describe('proxy/CloneImpl // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof setupCloneMock>>;
+  let fixture: Awaited<ReturnType<typeof setupCloneFactoryMock>>;
 
   before(async () => {
-    fixture = await loadFixture(setupCloneMock);
+    fixture = await loadFixture(setupCloneFactoryMock);
   });
 
   describe('# modifiers', () => {

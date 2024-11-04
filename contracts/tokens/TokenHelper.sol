@@ -11,16 +11,16 @@ contract TokenHelper {
     view
     returns (string memory name, string memory symbol, uint8 decimals)
   {
-    bytes memory data = _callToken(token, IERC20Metadata.symbol.selector);
+    if (token.code.length != 0) {
+      bytes memory data = _callToken(token, IERC20Metadata.symbol.selector);
 
-    if (data.length != 0) {
-      (symbol) = abi.decode(data, (string));
+      if (data.length != 0) {
+        (symbol) = abi.decode(data, (string));
+      }
 
       data = _callToken(token, IERC20Metadata.name.selector);
 
-      if (data.length == 0) {
-        name = symbol;
-      } else {
+      if (data.length != 0) {
         (name) = abi.decode(data, (string));
       }
 
@@ -40,14 +40,12 @@ contract TokenHelper {
     address token,
     bytes4 selector
   ) internal view returns (bytes memory result) {
-    if (token != address(0)) {
-      (bool success, bytes memory data) = token.staticcall(
-        abi.encodeWithSelector(selector)
-      );
+    (bool success, bytes memory data) = token.staticcall(
+      abi.encodeWithSelector(selector)
+    );
 
-      if (success) {
-        result = data;
-      }
+    if (success) {
+      result = data;
     }
 
     return result;

@@ -1,10 +1,9 @@
 import { ethers, utils } from 'hardhat';
 
+const { deployContract } = ethers;
 const { getSigners } = utils;
 
-const { deployContract } = ethers;
-
-export async function deployGuardedMock() {
+export async function setupGuardedMock() {
   const signers = await getSigners('owner', 'guardian');
 
   const guarded = await deployContract('GuardedMock', [signers.guardian]);
@@ -15,7 +14,7 @@ export async function deployGuardedMock() {
   };
 }
 
-export async function deployOwnableMock() {
+export async function setupOwnableMock() {
   const signers = await getSigners('owner');
 
   const ownable = await deployContract('OwnableMock');

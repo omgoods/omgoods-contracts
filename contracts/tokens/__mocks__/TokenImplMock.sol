@@ -4,10 +4,19 @@ pragma solidity 0.8.27;
 import {TokenImpl} from "../TokenImpl.sol";
 
 contract TokenImplMock is TokenImpl {
+  struct InitializationData {
+    address owner;
+    address controller;
+    bool ready;
+  }
+
+  bytes32 private constant INITIALIZATION_TYPEHASH =
+    keccak256("Initialization(address owner,address controller,bool ready)");
+
   // deployment
 
-  constructor(string memory eip712Name, address factory) TokenImpl(eip712Name) {
-    _setFactory(factory);
+  constructor(string memory eip712Name) TokenImpl(eip712Name) {
+    //
   }
 
   function initialize(
@@ -23,8 +32,36 @@ contract TokenImplMock is TokenImpl {
   // external getters
 
   function hashInitialization(
-    bytes32 structHash
-  ) external view virtual returns (bytes32) {
-    return _hashInitialization(structHash);
+    InitializationData calldata initializationData
+  ) external view returns (bytes32) {
+    return
+      _hashInitialization(
+        keccak256(
+          abi.encode(
+            INITIALIZATION_TYPEHASH, //
+            initializationData.owner,
+            initializationData.controller,
+            initializationData.ready
+          )
+        )
+      );
+  }
+
+  function requireOnlyCurrentManager()
+    external
+    view
+    onlyCurrentManager
+    returns (bool)
+  {
+    return true;
+  }
+
+  function requireOnlyReadyOrAnyManager()
+    external
+    view
+    onlyReadyOrAnyManager
+    returns (bool)
+  {
+    return true;
   }
 }

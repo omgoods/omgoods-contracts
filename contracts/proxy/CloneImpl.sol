@@ -11,15 +11,20 @@ abstract contract CloneImpl is Clone {
   // modifiers
 
   modifier onlyFactory() {
-    if (msg.sender != _getFactory()) {
-      revert MsgSenderIsNotTheFactory();
-    }
+    _requireOnlyFactory();
 
     _;
   }
+
   // deployment
 
   constructor() Clone() {
     //
+  }
+
+  // internal getters
+
+  function _requireOnlyFactory() internal view {
+    require(msg.sender == _getFactory(), MsgSenderIsNotTheFactory());
   }
 }

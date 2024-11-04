@@ -24,25 +24,14 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   // modifiers
 
   modifier onlyCurrentManager() {
-    address sender = _msgSender();
-    if (_isReady() == false) {
-      _checkOwner(sender);
-    } else if (sender != _getController()) {
-      revert MsgSenderIsNotTheController();
-    }
+    _requireOnlyCurrentManager();
 
     _;
   }
   // modifiers
 
   modifier onlyReadyOrAnyManager() {
-    if (_isReady() == false) {
-      address sender = _msgSender();
-
-      if (sender != _getController() && sender != _getOwner()) {
-        revert TokenNotReady();
-      }
-    }
+    _onlyReadyOrAnyManager();
 
     _;
   }
@@ -66,11 +55,10 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   // external setters
 
   function setReady() external onlyOwner {
-    if (_isReady()) {
-      revert TokenAlreadyReady();
-    }
+    require(!_isReady(), TokenAlreadyReady());
 
-    _setReady(true, true);
+    _setReady(true);
+    _onceReady();
   }
 
   // internal getters
@@ -89,7 +77,29 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
     if (_getFactory() == address(0)) {
       result = _hashTypedDataV4(structHash);
     }
+
     return result;
+  }
+
+  function _requireOnlyCurrentManager() internal view {
+    address msgSender = _msgSender();
+
+    if (!_isReady()) {
+      _requireOnlyOwner(msgSender);
+    } else {
+      require(msgSender == _getController(), MsgSenderIsNotTheController());
+    }
+  }
+
+  function _onlyReadyOrAnyManager() internal view {
+    if (!_isReady()) {
+      address msgSender = _msgSender();
+
+      require(
+        msgSender == _getController() || msgSender == _getOwner(),
+        TokenNotReady()
+      );
+    }
   }
 
   // internal setters
@@ -98,12 +108,12 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
     _controller = controller;
   }
 
-  function _setReady(bool ready, bool emitEvent) internal {
+  function _setReady(bool ready) internal {
     _ready = ready;
+  }
 
-    if (emitEvent) {
-      _notifyTokenFactory(0x00);
-    }
+  function _onceReady() internal {
+    _notifyTokenFactory(0x00);
   }
 
   function _notifyTokenFactory(uint8 kind) internal {
@@ -114,11 +124,9 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
     TokenFactory(_getFactory()).sendTokenNotification(kind, encodedData);
   }
 
-  function _setOwner(address owner, bool emitEvent) internal override {
-    super._setOwner(owner, emitEvent);
+  function _afterOwnerUpdated(address owner) internal override {
+    super._afterOwnerUpdated(owner);
 
-    if (emitEvent) {
-      _notifyTokenFactory(0x01, abi.encode(owner));
-    }
+    _notifyTokenFactory(0x01, abi.encode(owner));
   }
 }

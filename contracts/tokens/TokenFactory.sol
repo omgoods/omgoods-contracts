@@ -47,9 +47,7 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   // modifiers
 
   modifier onlyToken() {
-    if (_tokenSalts[msg.sender] == bytes32(0)) {
-      revert MsgSenderIsNotTheToken();
-    }
+    _requireOnlyToken();
 
     _;
   }
@@ -59,8 +57,8 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   constructor(
     string memory eip712Name,
     address owner,
-    address target
-  ) EIP712(eip712Name, "1") CloneFactory(target) {
+    address cloneTarget
+  ) EIP712(eip712Name, "1") CloneFactory(cloneTarget) {
     _setInitialOwner(owner);
   }
 
@@ -113,10 +111,14 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
     uint8 kind,
     bytes calldata encodedData
   ) external onlyToken {
-    emit TokenNotificationSent(msg.sender, kind, encodedData, block.timestamp);
+    _sendTokenNotification(msg.sender, kind, encodedData, block.timestamp);
   }
 
-  // internal getters
+  // private getters
+
+  function _isToken(address token) private view returns (bool) {
+    return _tokenSalts[token] != bytes32(0);
+  }
 
   function _hashToken(
     bytes32 salt,
@@ -136,17 +138,30 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
       );
   }
 
-  // internal setters
+  function _requireOnlyToken() private view {
+    require(_isToken(msg.sender), MsgSenderIsNotTheToken());
+  }
+
+  // private setters
 
   function _createToken(
     bytes32 salt,
     address impl,
     bytes calldata initData
-  ) internal {
+  ) private {
     address token = _createClone(salt, impl, initData);
 
     _tokenSalts[token] = salt;
 
     emit TokenCreated(token, impl, initData, block.timestamp);
+  }
+
+  function _sendTokenNotification(
+    address token,
+    uint8 kind,
+    bytes calldata encodedData,
+    uint256 timestamp
+  ) private {
+    emit TokenNotificationSent(token, kind, encodedData, timestamp);
   }
 }

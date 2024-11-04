@@ -113,12 +113,12 @@ abstract contract ERC721TokenImpl is ERC721, TokenImpl {
   ) internal virtual override returns (address from) {
     from = super._update(to, tokenId, auth);
 
-    _afterUpdate(from, to, tokenId);
+    _onUpdate(from, to, tokenId);
 
     return from;
   }
 
-  function _afterUpdate(
+  function _onUpdate(
     address from,
     address to,
     uint256 tokenId
@@ -134,10 +134,10 @@ abstract contract ERC721TokenImpl is ERC721, TokenImpl {
   ) internal override {
     super._approve(to, tokenId, auth, emitEvent);
 
-    _afterApprove(to, tokenId, emitEvent);
+    _onApprove(to, tokenId, emitEvent);
   }
 
-  function _afterApprove(
+  function _onApprove(
     address to,
     uint256 tokenId,
     bool emitEvent

@@ -42,15 +42,7 @@ abstract contract Guarded is Ownable {
   }
 
   function removeGuardian(address guardian) external onlyOwner {
-    if (guardian == address(0)) {
-      revert GuardianIsTheZeroAddress();
-    }
-
-    if (!_guardians[guardian]) {
-      revert GuardianDoesntExist();
-    }
-
-    _guardians[guardian] = false;
+    _removeGuardian(guardian);
 
     emit GuardianRemoved(guardian);
   }
@@ -67,9 +59,7 @@ abstract contract Guarded is Ownable {
   ) internal view {
     address signer = hash.recover(signature);
 
-    if (!_isGuardian(signer)) {
-      revert InvalidGuardianSignature();
-    }
+    require(_isGuardian(signer), InvalidGuardianSignature());
   }
 
   // internal setters
@@ -87,14 +77,16 @@ abstract contract Guarded is Ownable {
   }
 
   function _addGuardian(address guardian) internal {
-    if (guardian == address(0)) {
-      revert GuardianIsTheZeroAddress();
-    }
-
-    if (_guardians[guardian]) {
-      revert GuardianAlreadyExists();
-    }
+    require(guardian != address(0), GuardianIsTheZeroAddress());
+    require(!_guardians[guardian], GuardianAlreadyExists());
 
     _guardians[guardian] = true;
+  }
+
+  function _removeGuardian(address guardian) internal {
+    require(guardian != address(0), GuardianIsTheZeroAddress());
+    require(_guardians[guardian], GuardianDoesntExist());
+
+    _guardians[guardian] = false;
   }
 }

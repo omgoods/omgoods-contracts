@@ -39,8 +39,8 @@ contract ERC20TokenRegularImpl is ERC20TokenImpl {
     string calldata symbol_
   ) external onlyFactory {
     _setForwarder(forwarder);
-    _setReady(ready, false);
-    _setOwner(owner, false);
+    _setReady(ready);
+    _setOwner(owner);
     _setController(controller);
     _setName(name_);
     _setSymbol(symbol_);

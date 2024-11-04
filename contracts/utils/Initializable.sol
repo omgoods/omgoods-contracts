@@ -14,11 +14,7 @@ abstract contract Initializable {
   // modifiers
 
   modifier initializeOnce() {
-    if (_isInitialized()) {
-      revert AlreadyInitialized();
-    }
-
-    _setInitialized();
+    _requireInitializeOnce();
 
     _;
   }
@@ -37,6 +33,12 @@ abstract contract Initializable {
 
   function _setInitialized(bool initialized) internal {
     StorageSlot.getBooleanSlot(INITIALIZED_SLOT).value = initialized;
+  }
+
+  function _requireInitializeOnce() internal {
+    require(!_isInitialized(), AlreadyInitialized());
+
+    _setInitialized();
   }
 
   // internal getters

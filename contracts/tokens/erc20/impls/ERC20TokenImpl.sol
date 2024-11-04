@@ -80,14 +80,10 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
   ) internal virtual override {
     super._update(from, to, value);
 
-    _afterUpdate(from, to, value);
+    _onUpdate(from, to, value);
   }
 
-  function _afterUpdate(
-    address from,
-    address to,
-    uint256 value
-  ) internal virtual {
+  function _onUpdate(address from, address to, uint256 value) internal virtual {
     _notifyTokenFactory(0x50, abi.encode(from, to, value));
   }
 
@@ -99,10 +95,10 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
   ) internal virtual override {
     super._approve(owner, spender, value, true);
 
-    _afterApprove(owner, spender, value);
+    _onApprove(owner, spender, value);
   }
 
-  function _afterApprove(
+  function _onApprove(
     address owner,
     address spender,
     uint256 value

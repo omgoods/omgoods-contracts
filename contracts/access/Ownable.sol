@@ -21,7 +21,7 @@ abstract contract Ownable is ForwarderContext {
   // modifiers
 
   modifier onlyOwner() {
-    _checkOwner();
+    _requireOnlyOwner();
 
     _;
   }
@@ -35,7 +35,10 @@ abstract contract Ownable is ForwarderContext {
   // external setters
 
   function setOwner(address owner) external onlyOwner {
-    _setOwner(owner, true);
+    require(owner != address(0), OwnerIsTheZeroAddress());
+
+    _setOwner(owner);
+    _afterOwnerUpdated(owner);
   }
 
   // internal getters
@@ -44,34 +47,29 @@ abstract contract Ownable is ForwarderContext {
     return _owner;
   }
 
-  function _checkOwner() internal view {
-    _checkOwner(_msgSender());
+  function _requireOnlyOwner() internal view {
+    _requireOnlyOwner(_msgSender());
   }
 
-  function _checkOwner(address msgSender) internal view {
-    if (msgSender != _owner) {
-      revert MsgSenderIsNotTheOwner();
-    }
+  function _requireOnlyOwner(address msgSender) internal view {
+    require(_getOwner() == msgSender, MsgSenderIsNotTheOwner());
   }
 
   // internal setters
 
   function _setInitialOwner() internal {
-    _setInitialOwner(msg.sender);
-  }
-  function _setInitialOwner(address initialOwner) internal {
-    _owner = initialOwner == address(0) ? msg.sender : initialOwner;
+    _setInitialOwner(address(0));
   }
 
-  function _setOwner(address owner, bool emitEvent) internal virtual {
-    if (owner == address(0)) {
-      revert OwnerIsTheZeroAddress();
-    }
+  function _setInitialOwner(address owner) internal {
+    _setOwner(owner == address(0) ? msg.sender : owner);
+  }
 
+  function _setOwner(address owner) internal {
     _owner = owner;
+  }
 
-    if (emitEvent) {
-      emit OwnerUpdated(owner);
-    }
+  function _afterOwnerUpdated(address owner) internal virtual {
+    emit OwnerUpdated(owner);
   }
 }

@@ -9,7 +9,7 @@ export const FORWARDER_REQUEST = {
   data: randomHex(20),
 };
 
-export const FORWARDER_REQUEST_BATCH = {
+export const FORWARDER_BATCH = {
   account: randomAddress(),
   nonce: 0,
   to: [randomAddress()],

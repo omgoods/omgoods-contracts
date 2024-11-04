@@ -20,7 +20,7 @@ contract CloneTarget is Clone {
     _delegate(impl, initData);
   }
 
-  // fallback
+  // fallbacks
 
   receive() external payable {
     _delegate(_getImpl());

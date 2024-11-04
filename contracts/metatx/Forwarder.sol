@@ -91,14 +91,14 @@ contract Forwarder is EIP712 {
   }
 
   function hashBatch(
-    BatchData calldata requestBatchData
+    BatchData calldata batchData
   ) external view returns (bytes32) {
     return
       _hashBatch(
-        requestBatchData.account,
-        requestBatchData.nonce,
-        requestBatchData.to,
-        requestBatchData.data
+        batchData.account,
+        batchData.nonce,
+        batchData.to,
+        batchData.data
       );
   }
 

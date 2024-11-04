@@ -29,23 +29,18 @@ describe('proxy/CloneFactory // mocked', () => {
   describe('# setters', () => {
     describe('_createClone()', () => {
       it('expect to create the clone', async () => {
-        const { cloneImpl, cloneFactory, computeCloneAddress } = fixture;
+        const { cloneImpl, cloneFactory, createClone } = fixture;
 
-        const a = 40;
-        const salt = randomHex();
-        const initData = cloneImpl.interface.encodeFunctionData('initialize', [
-          a,
-        ]);
+        const value = 40;
 
-        await cloneFactory.createClone(salt, cloneImpl, initData);
-
-        const clone = cloneImpl.attach(
-          await computeCloneAddress(salt),
-        ) as typeof cloneImpl;
+        const clone = await createClone(
+          randomHex(),
+          cloneImpl.interface.encodeFunctionData('initialize', [value]),
+        );
 
         expect(await clone.getImpl()).eq(await cloneImpl.getAddress());
         expect(await clone.getFactory()).eq(await cloneFactory.getAddress());
-        expect(await clone.a()).eq(a);
+        expect(await clone.value()).eq(value);
       });
     });
   });

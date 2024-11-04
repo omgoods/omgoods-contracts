@@ -5,14 +5,14 @@ import { deployInitializableMock } from './fixtures';
 describe('utils/Initializable // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployInitializableMock>>;
 
-  const createBeforeHook = (initialize = false) => {
+  const createBeforeHook = (initialized = false) => {
     before(async () => {
       fixture = await loadFixture(deployInitializableMock);
 
-      if (initialize) {
+      if (initialized) {
         const { initializable } = fixture;
 
-        await initializable.initialize();
+        await initializable.setInitialized(initialized);
       }
     });
   };

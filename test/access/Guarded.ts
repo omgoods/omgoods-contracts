@@ -1,10 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { ZeroAddress } from 'ethers';
-import { utils } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
 import { deployGuardedMock } from './fixtures';
 
-const { randomAddress } = utils;
+const { hashMessage } = ethers;
+const { randomAddress, randomHex } = utils;
 
 describe('access/Guarded // mocked', () => {
   let fixture: Awaited<ReturnType<typeof deployGuardedMock>>;
@@ -41,6 +42,36 @@ describe('access/Guarded // mocked', () => {
         const res = await guarded.isGuardian(signers.owner);
 
         expect(res).true;
+      });
+    });
+
+    describe('_verifyGuardianSignature()', () => {
+      it('expect to revert on invalid signature', async () => {
+        const { guarded, signers } = fixture;
+
+        const signature = await signers.guardian.signMessage(randomHex());
+
+        const tx = guarded.verifyGuardianSignature(randomHex(), signature);
+
+        await expect(tx).revertedWithCustomError(
+          guarded,
+          'InvalidGuardianSignature',
+        );
+      });
+
+      it('expect not to revert on valid signature', async () => {
+        const { guarded, signers } = fixture;
+
+        const message = randomHex();
+        const hash = hashMessage(message);
+        const signature = await signers.guardian.signMessage(message);
+
+        const tx = guarded.verifyGuardianSignature(hash, signature);
+
+        await expect(tx).not.revertedWithCustomError(
+          guarded,
+          'InvalidGuardianSignature',
+        );
       });
     });
   });

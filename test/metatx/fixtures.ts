@@ -58,7 +58,7 @@ export async function setupForwarder() {
       to: string;
       data: BytesLike;
     };
-    RequestBatch: {
+    Batch: {
       account: string;
       nonce: BigNumberish;
       to: Array<string>;
@@ -83,7 +83,7 @@ export async function setupForwarder() {
         type: 'bytes',
       },
     ],
-    RequestBatch: [
+    Batch: [
       {
         name: 'account',
         type: 'address',

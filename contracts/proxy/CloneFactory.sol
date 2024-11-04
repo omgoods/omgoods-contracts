@@ -18,7 +18,12 @@ abstract contract CloneFactory {
   // internal getters
 
   function _computeClone(bytes32 salt) internal view returns (address) {
-    return Clones.predictDeterministicAddress(_target, salt, address(this));
+    return
+      Clones.predictDeterministicAddress(_getTarget(), salt, address(this));
+  }
+
+  function _getTarget() internal view returns (address) {
+    return _target;
   }
 
   // internal setters
@@ -28,7 +33,7 @@ abstract contract CloneFactory {
     address impl,
     bytes memory initData
   ) internal returns (address result) {
-    result = Clones.cloneDeterministic(_target, salt);
+    result = Clones.cloneDeterministic(_getTarget(), salt);
 
     CloneTarget clone = CloneTarget(payable(result));
 

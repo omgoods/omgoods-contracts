@@ -215,6 +215,7 @@ contract Forwarder is EIP712 {
       bytes4 result
     ) {
       selector = result;
+      // solhint-disable-next-line no-empty-blocks
     } catch {
       //
     }

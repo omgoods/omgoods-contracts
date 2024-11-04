@@ -1,23 +1,23 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { deployCloneImplMock } from './fixtures';
+import { setupCloneMock } from './fixtures';
 
 describe('proxy/CloneImpl // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployCloneImplMock>>;
+  let fixture: Awaited<ReturnType<typeof setupCloneMock>>;
 
   before(async () => {
-    fixture = await loadFixture(deployCloneImplMock);
+    fixture = await loadFixture(setupCloneMock);
   });
 
   describe('# modifiers', () => {
     describe('onlyFactory()', () => {
       it('expect to revert when msg.sender is not the factory', async () => {
-        const { signers, cloneImpl } = fixture;
+        const { clone } = fixture;
 
-        const tx = cloneImpl.connect(signers.unknown.at(0)).initialize(1);
+        const tx = clone.initialize(1);
 
         await expect(tx).revertedWithCustomError(
-          cloneImpl,
+          clone,
           'MsgSenderIsNotTheFactory',
         );
       });
@@ -25,12 +25,7 @@ describe('proxy/CloneImpl // mocked', () => {
       it('expect not to revert when msg.sender is the factory', async () => {
         const { signers, cloneImpl } = fixture;
 
-        const tx = cloneImpl.connect(signers.factory).initialize(1);
-
-        await expect(tx).not.revertedWithCustomError(
-          cloneImpl,
-          'MsgSenderIsNotTheFactory',
-        );
+        await cloneImpl.connect(signers.factory).initialize(1);
       });
     });
   });

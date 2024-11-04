@@ -33,6 +33,7 @@ contract CloneTarget is Clone {
   // internal setters
 
   function _delegate(address impl) internal {
+    // solhint-disable-next-line no-inline-assembly
     assembly {
       calldatacopy(0, 0, calldatasize())
 
@@ -51,6 +52,7 @@ contract CloneTarget is Clone {
   }
 
   function _delegate(address impl, bytes memory data) internal {
+    // solhint-disable-next-line no-inline-assembly
     assembly {
       let result := delegatecall(gas(), impl, add(data, 32), mload(data), 0, 0)
 

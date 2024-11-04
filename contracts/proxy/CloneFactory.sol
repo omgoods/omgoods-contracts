@@ -7,12 +7,12 @@ import {CloneTarget} from "./CloneTarget.sol";
 abstract contract CloneFactory {
   // storage
 
-  address private immutable _target;
+  address private immutable _TARGET;
 
   // deployment
 
   constructor(address target) {
-    _target = target;
+    _TARGET = target;
   }
 
   // internal getters
@@ -23,7 +23,7 @@ abstract contract CloneFactory {
   }
 
   function _getTarget() internal view returns (address) {
-    return _target;
+    return _TARGET;
   }
 
   // internal setters

@@ -27,8 +27,8 @@ contract ERC20TokenWrappedImpl is ERC20TokenImpl {
 
   function initialize(address forwarder, address underlyingToken) external {
     _setForwarder(forwarder);
-    _setReady(true);
     _setUnderlyingToken(underlyingToken);
+    _setReady(true);
   }
 
   // external getters

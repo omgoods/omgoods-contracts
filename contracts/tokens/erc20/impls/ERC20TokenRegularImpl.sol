@@ -6,16 +6,16 @@ import {ERC20TokenImpl} from "./ERC20TokenImpl.sol";
 contract ERC20TokenRegularImpl is ERC20TokenImpl {
   struct InitializationData {
     address forwarder;
-    bool ready;
     address owner;
     address controller;
     string name;
     string symbol;
+    bool ready;
   }
 
   bytes32 private constant INITIALIZATION_TYPEHASH =
     keccak256(
-      "Initialization(address forwarder,bool ready,address owner,address controller,string name,string symbol)"
+      "Initialization(address forwarder,address owner,address controller,string name,string symbol,bool ready)"
     );
 
   // storage
@@ -32,18 +32,18 @@ contract ERC20TokenRegularImpl is ERC20TokenImpl {
 
   function initialize(
     address forwarder,
-    bool ready,
     address owner,
     address controller,
     string calldata name_,
-    string calldata symbol_
+    string calldata symbol_,
+    bool ready
   ) external onlyFactory {
     _setForwarder(forwarder);
-    _setReady(ready);
     _setOwner(owner);
     _setController(controller);
     _setName(name_);
     _setSymbol(symbol_);
+    _setReady(ready);
   }
 
   // external getters
@@ -57,11 +57,11 @@ contract ERC20TokenRegularImpl is ERC20TokenImpl {
           abi.encode(
             INITIALIZATION_TYPEHASH, //
             initializationData.forwarder,
-            initializationData.ready,
             initializationData.owner,
             initializationData.controller,
             keccak256(abi.encodePacked(initializationData.name)),
-            keccak256(abi.encodePacked(initializationData.symbol))
+            keccak256(abi.encodePacked(initializationData.symbol)),
+            initializationData.ready
           )
         )
       );

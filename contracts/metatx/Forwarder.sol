@@ -207,23 +207,20 @@ contract Forwarder is EIP712 {
     bytes32 hash,
     bytes calldata signature
   ) private view {
-    require(account.code.length != 0, InvalidSignature());
+    bool isValid;
 
-    bytes4 selector;
-
-    try IERC1271(account).isValidSignature(hash, signature) returns (
-      bytes4 result
-    ) {
-      selector = result;
-      // solhint-disable-next-line no-empty-blocks
-    } catch {
-      //
+    if (account.code.length != 0) {
+      try IERC1271(account).isValidSignature(hash, signature) returns (
+        bytes4 selector
+      ) {
+        isValid = selector == IERC1271(account).isValidSignature.selector;
+        // solhint-disable-next-line no-empty-blocks
+      } catch {
+        //
+      }
     }
 
-    require(
-      selector == IERC1271(account).isValidSignature.selector,
-      InvalidSignature()
-    );
+    require(isValid, InvalidSignature());
   }
 
   // private setters

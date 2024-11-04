@@ -117,11 +117,11 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   }
 
   function _notifyTokenFactory(uint8 kind) internal {
-    TokenFactory(_getFactory()).sendTokenNotification(kind, new bytes(0));
+    TokenFactory(_getFactory()).emitTokenNotification(kind, new bytes(0));
   }
 
   function _notifyTokenFactory(uint8 kind, bytes memory encodedData) internal {
-    TokenFactory(_getFactory()).sendTokenNotification(kind, encodedData);
+    TokenFactory(_getFactory()).emitTokenNotification(kind, encodedData);
   }
 
   function _afterOwnerUpdated(address owner) internal override {

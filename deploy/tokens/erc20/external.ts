@@ -28,6 +28,7 @@ const func: DeployFunction = async (hre) => {
       args: [
         `${NAME_PREFIX} ${key}`,
         `${SYMBOL_PREFIX}${key}`,
+        18,
         parseEther(`${TOTAL_SUPPLY}`),
       ],
     });

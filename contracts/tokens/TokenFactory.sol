@@ -33,7 +33,7 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
     uint256 timestamp
   );
 
-  event TokenNotificationSent(
+  event TokenNotification(
     address token,
     uint8 kind,
     bytes encodedData,
@@ -78,6 +78,10 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
     return _computeClone(salt);
   }
 
+  function isToken(address token) external view returns (bool) {
+    return _isToken(token);
+  }
+
   function hashToken(
     TokenData calldata tokenData
   ) external view returns (bytes32) {
@@ -107,11 +111,11 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
     _createToken(salt, impl, initData);
   }
 
-  function sendTokenNotification(
+  function emitTokenNotification(
     uint8 kind,
     bytes calldata encodedData
   ) external onlyToken {
-    _sendTokenNotification(msg.sender, kind, encodedData, block.timestamp);
+    _emitTokenNotification(msg.sender, kind, encodedData, block.timestamp);
   }
 
   // private getters
@@ -156,12 +160,12 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
     emit TokenCreated(token, impl, initData, block.timestamp);
   }
 
-  function _sendTokenNotification(
+  function _emitTokenNotification(
     address token,
     uint8 kind,
     bytes calldata encodedData,
     uint256 timestamp
   ) private {
-    emit TokenNotificationSent(token, kind, encodedData, timestamp);
+    emit TokenNotification(token, kind, encodedData, timestamp);
   }
 }

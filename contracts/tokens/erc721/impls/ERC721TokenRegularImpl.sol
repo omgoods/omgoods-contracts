@@ -47,20 +47,18 @@ contract ERC721TokenRegularImpl is ERC721TokenImpl {
 
   function hashInitialization(
     InitializationData calldata initializationData
-  ) private view returns (bytes32) {
+  ) external view returns (bytes32) {
     return
       _hashInitialization(
-        keccak256(
-          abi.encode(
-            INITIALIZATION_TYPEHASH, //
-            initializationData.forwarder,
-            initializationData.owner,
-            initializationData.controller,
-            keccak256(abi.encodePacked(initializationData.name)),
-            keccak256(abi.encodePacked(initializationData.symbol)),
-            keccak256(abi.encodePacked(initializationData.uriPrefix)),
-            initializationData.ready
-          )
+        abi.encode(
+          INITIALIZATION_TYPEHASH, //
+          initializationData.forwarder,
+          initializationData.owner,
+          initializationData.controller,
+          keccak256(abi.encodePacked(initializationData.name)),
+          keccak256(abi.encodePacked(initializationData.symbol)),
+          keccak256(abi.encodePacked(initializationData.uriPrefix)),
+          initializationData.ready
         )
       );
   }

@@ -7,6 +7,12 @@ import {ForwarderContext} from "../../../metatx/ForwarderContext.sol";
 import {TokenImpl} from "../../TokenImpl.sol";
 
 abstract contract ERC20TokenImpl is ERC20, TokenImpl {
+  // storage
+
+  string private _name;
+
+  string private _symbol;
+
   // deployment
 
   constructor(string memory eip712Name) ERC20("", "") TokenImpl(eip712Name) {
@@ -53,9 +59,13 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
 
   // internal getters
 
-  function _getName() internal view virtual returns (string memory);
+  function _getName() internal view virtual returns (string memory) {
+    return _name;
+  }
 
-  function _getSymbol() internal view virtual returns (string memory);
+  function _getSymbol() internal view virtual returns (string memory) {
+    return _symbol;
+  }
 
   function _getDecimals() internal view virtual returns (uint8) {
     return 18;
@@ -72,6 +82,14 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
   }
 
   // internal setters
+
+  function _setName(string memory name_) internal {
+    _name = name_;
+  }
+
+  function _setSymbol(string memory symbol_) internal {
+    _symbol = symbol_;
+  }
 
   function _update(
     address from,

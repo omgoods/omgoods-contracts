@@ -39,6 +39,6 @@ abstract contract CloneFactory {
 
     clone.initialize(impl, initData);
 
-    return address(clone);
+    return result;
   }
 }

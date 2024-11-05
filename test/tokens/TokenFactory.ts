@@ -1,6 +1,6 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { utils, ethers } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
 import { setupTokenMock } from './fixtures';
 
@@ -162,12 +162,10 @@ describe('tokens/TokenFactory', () => {
         const salt = randomHex();
         const owner = signers.owner.address;
         const controller = signers.controller.address;
-        const ready = true;
 
         const initData = tokenImpl.interface.encodeFunctionData('initialize', [
           owner,
           controller,
-          ready,
         ]);
 
         const tx = tokenFactory['createToken(bytes32,address,bytes)'](
@@ -193,12 +191,10 @@ describe('tokens/TokenFactory', () => {
         const salt = randomHex();
         const owner = signers.owner.address;
         const controller = signers.controller.address;
-        const ready = true;
 
         const initData = tokenImpl.interface.encodeFunctionData('initialize', [
           owner,
           controller,
-          ready,
         ]);
 
         const signature = await tokenFactoryTypedData.sign(

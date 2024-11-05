@@ -18,15 +18,17 @@ describe('utils/Initializable // mocked', () => {
   };
 
   describe('# modifiers', () => {
-    createBeforeHook();
-
     describe('initializeOnce()', () => {
-      it('expect to initialize the contract', async () => {
-        const { initializable } = fixture;
+      describe('# when not initialized', () => {
+        createBeforeHook();
 
-        const tx = initializable.initialize();
+        it('expect to initialize the contract', async () => {
+          const { initializable } = fixture;
 
-        await expect(tx).emit(initializable, 'Initialized');
+          const tx = initializable.initialize();
+
+          await expect(tx).emit(initializable, 'Initialized');
+        });
       });
 
       describe('# when initialized', () => {

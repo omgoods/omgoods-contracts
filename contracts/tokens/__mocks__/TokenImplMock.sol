@@ -7,11 +7,10 @@ contract TokenImplMock is TokenImpl {
   struct InitializationData {
     address owner;
     address controller;
-    bool ready;
   }
 
   bytes32 private constant INITIALIZATION_TYPEHASH =
-    keccak256("Initialization(address owner,address controller,bool ready)");
+    keccak256("Initialization(address owner,address controller)");
 
   // deployment
 
@@ -19,14 +18,9 @@ contract TokenImplMock is TokenImpl {
     //
   }
 
-  function initialize(
-    address owner,
-    address controller,
-    bool ready
-  ) external onlyFactory {
+  function initialize(address owner, address controller) external onlyFactory {
     _setOwner(owner);
     _setController(controller);
-    _setReady(ready);
   }
 
   // external getters
@@ -36,13 +30,10 @@ contract TokenImplMock is TokenImpl {
   ) external view returns (bytes32) {
     return
       _hashInitialization(
-        keccak256(
-          abi.encode(
-            INITIALIZATION_TYPEHASH, //
-            initializationData.owner,
-            initializationData.controller,
-            initializationData.ready
-          )
+        abi.encode(
+          INITIALIZATION_TYPEHASH, //
+          initializationData.owner,
+          initializationData.controller
         )
       );
   }

@@ -18,12 +18,6 @@ contract ERC20TokenRegularImpl is ERC20TokenImpl {
       "Initialization(address forwarder,address owner,address controller,string name,string symbol,bool ready)"
     );
 
-  // storage
-
-  string private _name;
-
-  string private _symbol;
-
   // deployment
 
   constructor(string memory eip712Name) ERC20TokenImpl(eip712Name) {
@@ -53,16 +47,14 @@ contract ERC20TokenRegularImpl is ERC20TokenImpl {
   ) external view returns (bytes32) {
     return
       _hashInitialization(
-        keccak256(
-          abi.encode(
-            INITIALIZATION_TYPEHASH, //
-            initializationData.forwarder,
-            initializationData.owner,
-            initializationData.controller,
-            keccak256(abi.encodePacked(initializationData.name)),
-            keccak256(abi.encodePacked(initializationData.symbol)),
-            initializationData.ready
-          )
+        abi.encode(
+          INITIALIZATION_TYPEHASH, //
+          initializationData.forwarder,
+          initializationData.owner,
+          initializationData.controller,
+          keccak256(abi.encodePacked(initializationData.name)),
+          keccak256(abi.encodePacked(initializationData.symbol)),
+          initializationData.ready
         )
       );
   }
@@ -75,24 +67,5 @@ contract ERC20TokenRegularImpl is ERC20TokenImpl {
 
   function burn(address from, uint256 value) external onlyCurrentManager {
     _burn(from, value);
-  }
-
-  // internal getters
-
-  function _getName() internal view override returns (string memory) {
-    return _name;
-  }
-
-  function _getSymbol() internal view override returns (string memory) {
-    return _symbol;
-  }
-  // internal setters
-
-  function _setName(string memory name_) internal {
-    _name = name_;
-  }
-
-  function _setSymbol(string memory symbol_) internal {
-    _symbol = symbol_;
   }
 }

@@ -25,7 +25,10 @@ contract ERC20TokenWrappedImpl is ERC20TokenImpl {
     //
   }
 
-  function initialize(address forwarder, address underlyingToken) external {
+  function initialize(
+    address forwarder,
+    address underlyingToken
+  ) external onlyFactory {
     _setForwarder(forwarder);
     _setUnderlyingToken(underlyingToken);
     _setReady(true);
@@ -42,12 +45,10 @@ contract ERC20TokenWrappedImpl is ERC20TokenImpl {
   ) external view returns (bytes32) {
     return
       _hashInitialization(
-        keccak256(
-          abi.encode(
-            INITIALIZATION_TYPEHASH, //
-            initializationData.forwarder,
-            initializationData.underlyingToken
-          )
+        abi.encode(
+          INITIALIZATION_TYPEHASH, //
+          initializationData.forwarder,
+          initializationData.underlyingToken
         )
       );
   }
@@ -71,9 +72,7 @@ contract ERC20TokenWrappedImpl is ERC20TokenImpl {
   }
 
   function unwrapTo(address to, uint256 value) external {
-    address sender = _msgSender();
-
-    _unwrap(sender, to, value);
+    _unwrap(_msgSender(), to, value);
   }
 
   // internal getters

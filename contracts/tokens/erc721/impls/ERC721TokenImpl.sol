@@ -64,6 +64,12 @@ abstract contract ERC721TokenImpl is ERC721, TokenImpl {
     super.safeTransferFrom(from, to, tokenId, data);
   }
 
+  // external getters
+
+  function getUriPrefix() external view returns (string memory) {
+    return _getUriPrefix();
+  }
+
   // internal getters
 
   function _getName() internal view returns (string memory) {

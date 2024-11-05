@@ -1,7 +1,8 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { utils, ethers } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
+import { TokenNotificationKinds } from './constants';
 import { setupTokenMock } from './fixtures';
 
 const { AbiCoder, ZeroHash } = ethers;
@@ -155,19 +156,16 @@ describe('tokens/TokenImpl // mocked', () => {
 
         const owner = randomAddress();
         const controller = randomAddress();
-        const ready = true;
 
         const res = await tokenImpl.hashInitialization({
           owner,
           controller,
-          ready,
         });
 
         expect(res).eq(
           tokenImpTypedData.hash('Initialization', {
             owner,
             controller,
-            ready,
           }),
         );
       });
@@ -178,7 +176,6 @@ describe('tokens/TokenImpl // mocked', () => {
         const res = await token.hashInitialization({
           owner: randomAddress(),
           controller: randomAddress(),
-          ready: false,
         });
 
         expect(res).eq(ZeroHash);
@@ -187,28 +184,35 @@ describe('tokens/TokenImpl // mocked', () => {
   });
 
   describe('# setters', () => {
-    createBeforeHook();
-
     describe('setReady', () => {
-      it('expect to revert when the msg.sender is not the owner', async () => {
-        const { signers, token } = fixture;
+      describe('# when not ready', () => {
+        createBeforeHook();
 
-        const tx = token.connect(signers.unknown.at(0)).setReady();
+        it('expect to revert when the msg.sender is not the owner', async () => {
+          const { signers, token } = fixture;
 
-        await expect(tx).revertedWithCustomError(
-          token,
-          'MsgSenderIsNotTheOwner',
-        );
-      });
+          const tx = token.connect(signers.unknown.at(0)).setReady();
 
-      it('expect to set the ready state', async () => {
-        const { token, tokenFactory, signers } = fixture;
+          await expect(tx).revertedWithCustomError(
+            token,
+            'MsgSenderIsNotTheOwner',
+          );
+        });
 
-        const tx = token.connect(signers.owner).setReady();
+        it('expect to set the ready state', async () => {
+          const { token, tokenFactory, signers } = fixture;
 
-        await expect(tx)
-          .emit(tokenFactory, 'TokenNotification')
-          .withArgs(await token.getAddress(), 0, '0x', anyValue);
+          const tx = token.connect(signers.owner).setReady();
+
+          await expect(tx)
+            .emit(tokenFactory, 'TokenNotification')
+            .withArgs(
+              await token.getAddress(),
+              TokenNotificationKinds.Ready,
+              anyValue,
+              anyValue,
+            );
+        });
       });
 
       describe('# when ready', () => {
@@ -225,11 +229,7 @@ describe('tokens/TokenImpl // mocked', () => {
     });
 
     describe('_afterOwnerUpdated', () => {
-      after(async () => {
-        const { token, signers } = fixture;
-
-        await token.connect(signers.unknown.at(0)).setOwner(signers.owner);
-      });
+      createBeforeHook();
 
       it('expect to emit token notification', async () => {
         const { signers, token, tokenFactory } = fixture;
@@ -242,7 +242,7 @@ describe('tokens/TokenImpl // mocked', () => {
           .emit(tokenFactory, 'TokenNotification')
           .withArgs(
             await token.getAddress(),
-            1,
+            TokenNotificationKinds.OwnerUpdated,
             AbiCoder.defaultAbiCoder().encode(['address'], [owner]),
             anyValue,
           );

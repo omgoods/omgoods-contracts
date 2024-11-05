@@ -72,10 +72,10 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   }
 
   function _hashInitialization(
-    bytes32 structHash
+    bytes memory structData
   ) internal view virtual returns (bytes32 result) {
     if (_getFactory() == address(0)) {
-      result = _hashTypedDataV4(structHash);
+      result = _hashTypedDataV4(keccak256(structData));
     }
 
     return result;

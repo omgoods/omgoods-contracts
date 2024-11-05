@@ -17,7 +17,7 @@ export async function setupTokenHelper() {
     TOKEN_METADATA.name,
     TOKEN_METADATA.symbol,
     TOKEN_METADATA.decimals,
-    1_000_000,
+    0,
   ]);
 
   const erc721Token = await deployContract('ERC721ExternalToken', [
@@ -114,7 +114,6 @@ export async function setupTokenMock() {
     tokenImpl.interface.encodeFunctionData('initialize', [
       signers.owner.address,
       signers.controller.address,
-      false,
     ]),
   );
 
@@ -122,7 +121,6 @@ export async function setupTokenMock() {
     Initialization: {
       owner: string;
       controller: string;
-      ready: boolean;
     };
   }>(tokenImpl, {
     Initialization: [
@@ -133,10 +131,6 @@ export async function setupTokenMock() {
       {
         name: 'controller',
         type: 'address',
-      },
-      {
-        name: 'ready',
-        type: 'bool',
       },
     ],
   });

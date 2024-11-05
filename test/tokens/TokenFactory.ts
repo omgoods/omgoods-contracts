@@ -42,7 +42,7 @@ describe('tokens/TokenFactory', () => {
           .withArgs(forwarder, guardians);
       });
 
-      describe('# after initialization', () => {
+      describe('# when initialized', () => {
         before(async () => {
           const { tokenFactory } = fixture;
 

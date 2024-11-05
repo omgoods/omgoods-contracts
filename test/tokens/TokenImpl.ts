@@ -10,16 +10,120 @@ const { randomAddress } = utils;
 describe('tokens/TokenImpl // mocked', () => {
   let fixture: Awaited<ReturnType<typeof setupTokenMock>>;
 
-  const createBeforeHook = () => {
+  const createBeforeHook = (ready = false) => {
     before(async () => {
       fixture = await loadFixture(setupTokenMock);
+
+      if (ready) {
+        const { token } = fixture;
+
+        await token.setReady();
+      }
     });
   };
 
   describe('# modifiers', () => {
-    createBeforeHook();
+    describe('onlyCurrentManager()', () => {
+      createBeforeHook();
 
-    describe('# when ready', () => {});
+      it('expect to revert when msg.sender is not the owner', async () => {
+        const { token, signers } = fixture;
+
+        const tx = token
+          .connect(signers.controller)
+          .requireOnlyCurrentManager();
+
+        await expect(tx).revertedWithCustomError(
+          token,
+          'MsgSenderIsNotTheOwner',
+        );
+      });
+
+      it('expect not to revert when msg.sender is the owner', async () => {
+        const { token, signers } = fixture;
+
+        const tx = token.connect(signers.owner).requireOnlyCurrentManager();
+
+        await expect(tx).not.revertedWithCustomError(
+          token,
+          'MsgSenderIsNotTheOwner',
+        );
+      });
+
+      describe('# when ready', () => {
+        createBeforeHook(true);
+
+        it('expect to revert when msg.sender is not the controller', async () => {
+          const { token, signers } = fixture;
+
+          const tx = token.connect(signers.owner).requireOnlyCurrentManager();
+
+          await expect(tx).revertedWithCustomError(
+            token,
+            'MsgSenderIsNotTheController',
+          );
+        });
+
+        it('expect not to revert when msg.sender is the controller', async () => {
+          const { token, signers } = fixture;
+
+          const tx = token
+            .connect(signers.controller)
+            .requireOnlyCurrentManager();
+
+          await expect(tx).not.revertedWithCustomError(
+            token,
+            'MsgSenderIsNotTheController',
+          );
+        });
+      });
+    });
+
+    describe('onlyReadyOrAnyManager()', () => {
+      createBeforeHook();
+
+      it('expect to revert when msg.sender is not the owner or controller', async () => {
+        const { token, signers } = fixture;
+
+        const tx = token
+          .connect(signers.unknown.at(0))
+          .requireOnlyReadyOrAnyManager();
+
+        await expect(tx).revertedWithCustomError(token, 'TokenNotReady');
+      });
+
+      it('expect not to revert when msg.sender is the owner', async () => {
+        const { token, signers } = fixture;
+
+        const tx = token.connect(signers.owner).requireOnlyReadyOrAnyManager();
+
+        await expect(tx).not.revertedWithCustomError(token, 'TokenNotReady');
+      });
+
+      it('expect not to revert when msg.sender is the controller', async () => {
+        const { token, signers } = fixture;
+
+        const tx = token
+          .connect(signers.controller)
+          .requireOnlyReadyOrAnyManager();
+
+        await expect(tx).not.revertedWithCustomError(token, 'TokenNotReady');
+      });
+
+      describe('# when ready', () => {
+        createBeforeHook(true);
+
+        it('expect not to revert', async () => {
+          const { token, signers } = fixture;
+
+          const tx = token
+            .connect(signers.unknown.at(0))
+            .requireOnlyReadyOrAnyManager();
+
+          await expect(tx).not.revertedWithCustomError(token, 'TokenNotReady');
+        });
+      });
+    });
   });
 
   describe('# getters', () => {
@@ -37,11 +141,11 @@ describe('tokens/TokenImpl // mocked', () => {
 
     describe('isReady()', () => {
       it('expect to return true whe the token is ready', async () => {
-        const { token, signers } = fixture;
+        const { token } = fixture;
 
-        const res = await token.getController();
+        const res = await token.isReady();
 
-        expect(res).eq(signers.controller.address);
+        expect(res).false;
       });
     });
 
@@ -108,13 +212,7 @@ describe('tokens/TokenImpl // mocked', () => {
       });
 
       describe('# when ready', () => {
-        before(async () => {
-          const { token } = fixture;
-
-          if (!(await token.isReady())) {
-            await token.setReady();
-          }
-        });
+        createBeforeHook(true);
 
         it('expect to revert', async () => {
           const { signers, token } = fixture;

@@ -1,5 +1,4 @@
-export const HARDHAT_NETWORK = {
-  chainId: 31337,
+export const LOCAL_NETWORK = {
   accounts: {
     mnemonic: 'test test test test test test test test test test test junk',
     count: 10,

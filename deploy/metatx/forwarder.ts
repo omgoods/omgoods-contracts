@@ -1,15 +1,15 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
 const TAG = 'metatx/forwarder';
+const VERSION = '00-initial';
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy },
+    deployments: { deploy, logHeader },
     getNamedAccounts,
   } = hre;
 
-  log();
-  log(`# ${TAG}`);
+  logHeader(TAG, VERSION);
 
   const { deployer } = await getNamedAccounts();
 
@@ -22,6 +22,6 @@ const func: DeployFunction = async (hre) => {
   });
 };
 
-func.tags = [TAG];
+func.tags = [TAG, VERSION];
 
 module.exports = func;

@@ -1,6 +1,7 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
 const TAG = 'tokens/erc20/external';
+const VERSION = '00-initial';
 
 const KEYS = ['A', 'B', 'C', 'D', 'E'];
 
@@ -10,13 +11,12 @@ const TOTAL_SUPPLY = 100_000_000;
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy },
+    deployments: { logHeader, deploy },
     ethers: { parseEther },
     getNamedAccounts,
   } = hre;
 
-  log();
-  log(`# ${TAG}`);
+  logHeader(TAG, VERSION);
 
   const { owner } = await getNamedAccounts();
 
@@ -35,7 +35,7 @@ const func: DeployFunction = async (hre) => {
   }
 };
 
-func.tags = [TAG];
+func.tags = [TAG, VERSION];
 func.skip = async ({ network }) => network.live;
 func.runAtTheEnd = true;
 

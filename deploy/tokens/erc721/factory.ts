@@ -1,44 +1,40 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'tokens/factory';
+const TAG = 'tokens/erc721/factory';
+const VERSION = '00-initial';
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy, read, execute, getAddress },
+    deployments: { log, logHeader, deploy, read, execute, getAddress },
     getNamedAccounts,
     processEnvs,
   } = hre;
 
-  log();
-  log(`# ${TAG}`);
+  logHeader(TAG, VERSION);
 
   const { deployer, owner } = await getNamedAccounts();
 
+  const target = await getAddress('CloneTarget');
   const forwarder = await getAddress('Forwarder');
 
   const guardians = processEnvs.getAddresses('GUARDIANS');
 
-  const { address: target } = await deploy('TokenTarget', {
-    contract: 'CloneTarget',
-    from: deployer,
-    log: true,
-  });
-
-  await deploy('TokenFactory', {
+  await deploy('ERC721TokenFactory', {
+    contract: 'TokenFactory',
     from: deployer,
     log: true,
     args: [
-      'OM!goods Token Factory', // name
+      'OM!goods NFT Factory', // name
       owner,
       target,
     ],
   });
 
-  if (await read('TokenFactory', 'isInitialized')) {
-    log('TokenFactory already initialized');
+  if (await read('ERC721TokenFactory', 'isInitialized')) {
+    log('ERC721TokenFactory already initialized');
   } else {
     await execute(
-      'TokenFactory',
+      'ERC721TokenFactory',
       {
         from: owner,
         log: true,
@@ -50,7 +46,7 @@ const func: DeployFunction = async (hre) => {
   }
 };
 
-func.tags = [TAG];
-func.dependencies = ['tokens/helper'];
+func.tags = [TAG, VERSION];
+func.dependencies = ['tokens/erc721/impls/wrapped'];
 
 module.exports = func;

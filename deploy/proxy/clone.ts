@@ -1,6 +1,6 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
-const TAG = 'tokens/helper';
+const TAG = 'proxy/clone';
 const VERSION = '00-initial';
 
 const func: DeployFunction = async (hre) => {
@@ -13,7 +13,7 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer } = await getNamedAccounts();
 
-  await deploy('TokenHelper', {
+  await deploy('CloneTarget', {
     from: deployer,
     log: true,
   });

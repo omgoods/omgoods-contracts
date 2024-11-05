@@ -1,6 +1,7 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
 const TAG = 'tokens/erc721/external';
+const VERSION = '00-initial';
 
 const KEYS = ['A', 'B', 'C'];
 
@@ -12,12 +13,11 @@ const TOKEN_IDS = Array(50)
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy },
+    deployments: { logHeader, deploy },
     getNamedAccounts,
   } = hre;
 
-  log();
-  log(`# ${TAG}`);
+  logHeader(TAG, VERSION);
 
   const { owner } = await getNamedAccounts();
 
@@ -31,7 +31,7 @@ const func: DeployFunction = async (hre) => {
   }
 };
 
-func.tags = [TAG];
+func.tags = [TAG, VERSION];
 func.skip = async ({ network }) => network.live;
 func.runAtTheEnd = true;
 

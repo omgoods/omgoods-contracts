@@ -1,15 +1,15 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
 const TAG = 'tokens/erc20/impls/regular';
+const VERSION = '00-initial';
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy },
+    deployments: { logHeader, deploy },
     getNamedAccounts,
   } = hre;
 
-  log();
-  log(`# ${TAG}`);
+  logHeader(TAG, VERSION);
 
   const { deployer } = await getNamedAccounts();
 
@@ -22,7 +22,7 @@ const func: DeployFunction = async (hre) => {
   });
 };
 
-func.tags = [TAG];
-func.dependencies = ['tokens/factory'];
+func.tags = [TAG, VERSION];
+func.dependencies = ['tokens/erc20/factory'];
 
 module.exports = func;

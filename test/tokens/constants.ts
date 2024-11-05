@@ -1,5 +1,11 @@
-export enum TokenNotificationsKinds {
-  Unlocked = 0x00,
+export const TOKEN_METADATA = {
+  name: 'Test',
+  symbol: 'TEST',
+  decimals: 18,
+} as const;
+
+export enum TokenNotificationKinds {
+  Ready = 0x00,
   OwnerUpdated = 0x01,
   ERC20Update = 0x50,
   ERC20Approve = 0x51,
@@ -7,8 +13,3 @@ export enum TokenNotificationsKinds {
   ERC721Approve = 0x61,
   ERC721ApproveForAll = 0x62,
 }
-
-export const TOKEN = {
-  name: 'Example',
-  symbol: 'Example',
-};

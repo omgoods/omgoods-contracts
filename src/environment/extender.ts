@@ -13,6 +13,13 @@ extendEnvironment((hre) => {
     return deployment?.address || null;
   };
 
+  deployments.logHeader = (tag, version) => {
+    const { log } = deployments;
+
+    log();
+    log(`# ${version}: ${tag}`);
+  };
+
   hre.processEnvs = new ProcessEnvs(network?.config?.type);
 
   hre.utils = new Utils(hre);

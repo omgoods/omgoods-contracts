@@ -1,13 +1,12 @@
 import { HardhatEthersSigner } from '@nomicfoundation/hardhat-ethers/signers';
-import { network } from 'hardhat';
-import {
-  TypedDataDomain,
-  TypedDataEncoder,
-  TypedDataField,
-  AddressLike,
-  resolveAddress,
-} from 'ethers';
+import { ethers, network } from 'hardhat';
+import { TypedDataDomain, TypedDataField, AddressLike } from 'ethers';
 import { TYPED_DATA_DOMAIN_NAME } from './constants';
+
+const { TypedDataEncoder, resolveAddress } = ethers;
+const {
+  config: { chainId },
+} = network;
 
 export async function createTypedDataHelper<
   D extends Record<string, Record<string, any>>,
@@ -24,10 +23,6 @@ export async function createTypedDataHelper<
     data: D[P],
   ) => Promise<string>;
 }> {
-  const {
-    config: { chainId },
-  } = network;
-
   const domain: TypedDataDomain = {
     name: TYPED_DATA_DOMAIN_NAME,
     version: '1',

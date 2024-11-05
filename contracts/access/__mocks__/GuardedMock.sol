@@ -7,9 +7,18 @@ contract GuardedMock is Guarded {
   // deployment
 
   constructor(address guardian) {
-    _setInitialOwner(address(0));
+    _setInitialOwner();
 
     _addGuardian(guardian);
+  }
+
+  // external getters
+
+  function verifyGuardianSignature(
+    bytes32 hash,
+    bytes calldata signature
+  ) external view {
+    _verifyGuardianSignature(hash, signature);
   }
 
   // external setters

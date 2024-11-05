@@ -1,27 +1,27 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { ZeroAddress } from 'ethers';
-import { utils } from 'hardhat';
+import { anyValue } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
-import { deployTokenFactoryMock, setupTokenFactoryMock } from './fixtures';
+import { setupTokenMock } from './fixtures';
 
-const { randomAddress, randomHex } = utils;
+const { ZeroAddress } = ethers;
+const { randomHex, randomAddress } = utils;
 
-describe('tokens/TokenFactory // mocked', () => {
+describe('tokens/TokenFactory', () => {
+  let fixture: Awaited<ReturnType<typeof setupTokenMock>>;
+
+  before(async () => {
+    fixture = await loadFixture(setupTokenMock);
+  });
+
   describe('# deployment', () => {
-    let fixture: Awaited<ReturnType<typeof deployTokenFactoryMock>>;
-
-    before(async () => {
-      fixture = await loadFixture(deployTokenFactoryMock);
-    });
-
     describe('initialize()', () => {
-      it('expect to revert when the sender is not the owner', async () => {
-        const { tokenFactory, signers } = fixture;
+      it('expect to revert when the msg.sender is not the owner', async () => {
+        const { signers, tokenFactory } = fixture;
 
         const tx = tokenFactory
           .connect(signers.unknown.at(0))
-          .initialize(ZeroAddress, ZeroAddress, randomAddress());
+          .initialize(ZeroAddress, []);
 
         await expect(tx).revertedWithCustomError(
           tokenFactory,
@@ -29,75 +29,32 @@ describe('tokens/TokenFactory // mocked', () => {
         );
       });
 
-      it('expect to revert when the token impl is the zero address', async () => {
-        const { tokenFactory } = fixture;
-
-        const tx = tokenFactory.initialize(
-          ZeroAddress,
-          ZeroAddress,
-          randomAddress(),
-        );
-
-        await expect(tx).revertedWithCustomError(
-          tokenFactory,
-          'TokenImplIsTheZeroAddress',
-        );
-      });
-
-      it('expect to revert when the token registry is the zero address', async () => {
-        const { tokenFactory } = fixture;
-
-        const tx = tokenFactory.initialize(
-          ZeroAddress,
-          randomAddress(),
-          ZeroAddress,
-        );
-
-        await expect(tx).revertedWithCustomError(
-          tokenFactory,
-          'TokenRegistryIsTheZeroAddress',
-        );
-      });
-
       it('expect to initialize the contract', async () => {
         const { tokenFactory } = fixture;
 
         const forwarder = randomAddress();
-        const tokenImpl = randomAddress();
-        const tokenRegistry = randomAddress();
+        const guardians = [randomAddress()];
 
-        const tx = tokenFactory.initialize(forwarder, tokenImpl, tokenRegistry);
+        const tx = tokenFactory.initialize(forwarder, guardians);
 
         await expect(tx)
           .emit(tokenFactory, 'Initialized')
-          .withArgs(forwarder, tokenImpl, tokenRegistry);
-
-        expect(await tokenFactory.forwarder()).eq(forwarder);
-        expect(await tokenFactory.getTokenImpl()).eq(tokenImpl);
-        expect(await tokenFactory.getTokenRegistry()).eq(tokenRegistry);
+          .withArgs(forwarder, guardians);
       });
 
-      describe('# after initialization', () => {
+      describe('# when initialized', () => {
         before(async () => {
           const { tokenFactory } = fixture;
 
-          if (!(await tokenFactory.initialized())) {
-            await tokenFactory.initialize(
-              randomAddress(),
-              randomAddress(),
-              randomAddress(),
-            );
+          if (!(await tokenFactory.isInitialized())) {
+            await tokenFactory.initialize(ZeroAddress, []);
           }
         });
 
         it('expect to revert', async () => {
           const { tokenFactory } = fixture;
 
-          const tx = tokenFactory.initialize(
-            ZeroAddress,
-            ZeroAddress,
-            ZeroAddress,
-          );
+          const tx = tokenFactory.initialize(ZeroAddress, []);
 
           await expect(tx).revertedWithCustomError(
             tokenFactory,
@@ -108,34 +65,8 @@ describe('tokens/TokenFactory // mocked', () => {
     });
   });
 
-  let fixture: Awaited<ReturnType<typeof setupTokenFactoryMock>>;
-
-  before(async () => {
-    fixture = await loadFixture(setupTokenFactoryMock);
-  });
-
   describe('# getters', () => {
-    describe('getTokenImpl()', () => {
-      it('expect to return the token impl address', async () => {
-        const { tokenFactory, tokenImpl } = fixture;
-
-        const res = await tokenFactory.getTokenImpl();
-
-        expect(res).eq(await tokenImpl.getAddress());
-      });
-    });
-
-    describe('getTokenRegistry()', () => {
-      it('expect to return the token registry address', async () => {
-        const { tokenFactory, tokenRegistry } = fixture;
-
-        const res = await tokenFactory.getTokenRegistry();
-
-        expect(res).eq(await tokenRegistry.getAddress());
-      });
-    });
-
-    describe('_computeToken()', () => {
+    describe('computeToken()', () => {
       it('expect to compute the token address', async () => {
         const { tokenFactory, computeTokenAddress } = fixture;
 
@@ -146,65 +77,169 @@ describe('tokens/TokenFactory // mocked', () => {
         expect(res).eq(await computeTokenAddress(salt));
       });
     });
+
+    describe('isToken()', () => {
+      it('expect to return true when token exists', async () => {
+        const { token, tokenFactory } = fixture;
+
+        const res = await tokenFactory.isToken(await token.getAddress());
+
+        expect(res).true;
+      });
+
+      it("expect to return false when token doesn't exist", async () => {
+        const { tokenFactory } = fixture;
+
+        const res = await tokenFactory.isToken(randomAddress());
+
+        expect(res).false;
+      });
+    });
+
+    describe('hashToken()', () => {
+      it('expect to return token hash', async () => {
+        const { tokenFactory, tokenFactoryTypedData } = fixture;
+
+        const salt = randomHex();
+        const impl = randomAddress();
+        const initData = randomHex();
+
+        const res = await tokenFactory.hashToken({
+          salt,
+          impl,
+          initData,
+        });
+
+        expect(res).eq(
+          tokenFactoryTypedData.hash('Token', {
+            salt,
+            impl,
+            initData,
+          }),
+        );
+      });
+    });
   });
 
   describe('# setters', () => {
-    describe('_createToken()', () => {
-      it('expect to create the token without signature verification if the sender is the owner', async () => {
-        const { tokenImpl, tokenFactory, tokenRegistry, computeTokenAddress } =
+    describe('createToken', () => {
+      it('expect to revert when the msg.sender is not the owner', async () => {
+        const { signers, tokenFactory } = fixture;
+
+        const tx = tokenFactory
+          .connect(signers.unknown.at(0))
+          [
+            'createToken(bytes32,address,bytes)'
+          ](randomHex(), ZeroAddress, '0x');
+
+        await expect(tx).revertedWithCustomError(
+          tokenFactory,
+          'MsgSenderIsNotTheOwner',
+        );
+      });
+
+      it('expect to revert for invalid guardian signature', async () => {
+        const { signers, tokenFactory } = fixture;
+
+        const signer = signers.unknown.at(0);
+
+        const tx = tokenFactory
+          .connect(signer)
+          [
+            'createToken(bytes32,address,bytes,bytes)'
+          ](randomHex(), ZeroAddress, '0x', await signer.signMessage(''));
+
+        await expect(tx).revertedWithCustomError(
+          tokenFactory,
+          'InvalidGuardianSignature',
+        );
+      });
+
+      it('expect to create the token', async () => {
+        const { signers, tokenFactory, tokenImpl, computeTokenAddress } =
           fixture;
 
         const salt = randomHex();
-        const initCode = tokenImpl.interface.encodeFunctionData('initialize', [
-          ZeroAddress,
-          true,
+        const owner = signers.owner.address;
+        const controller = signers.controller.address;
+
+        const initData = tokenImpl.interface.encodeFunctionData('initialize', [
+          owner,
+          controller,
         ]);
 
-        const tx = tokenFactory.createToken(salt, initCode, '0x');
-
-        await expect(tx)
-          .emit(tokenRegistry, 'TokenCreated')
-          .withArgs(
-            await computeTokenAddress(salt),
-            await tokenImpl.getAddress(),
-            initCode,
-            anyUint,
-          );
-      });
-
-      it("expect to verify the guardian's signature if the sender is not the owner", async () => {
-        const {
-          tokenImpl,
-          tokenFactory,
-          typedDataHelper,
-          signers,
-          tokenRegistry,
-          computeTokenAddress,
-        } = fixture;
-
-        const salt = randomHex();
-        const initCode = tokenImpl.interface.encodeFunctionData('initialize', [
-          ZeroAddress,
-          true,
-        ]);
-
-        const tx = tokenFactory.connect(signers.unknown.at(0)).createToken(
+        const tx = tokenFactory['createToken(bytes32,address,bytes)'](
           salt,
-          initCode,
-          await typedDataHelper.sign(signers.guardian, 'Token', {
-            tokenImpl: await tokenImpl.getAddress(),
-            initCode,
-          }),
+          tokenImpl,
+          initData,
         );
 
         await expect(tx)
-          .emit(tokenRegistry, 'TokenCreated')
-          .withArgs(
-            await computeTokenAddress(salt),
-            await tokenImpl.getAddress(),
-            initCode,
-            anyUint,
-          );
+          .emit(tokenFactory, 'TokenCreated')
+          .withArgs(computeTokenAddress(salt), tokenImpl, initData, anyValue);
+      });
+
+      it('expect to create the token with guardian signature', async () => {
+        const {
+          signers,
+          tokenFactory,
+          tokenImpl,
+          computeTokenAddress,
+          tokenFactoryTypedData,
+        } = fixture;
+
+        const salt = randomHex();
+        const owner = signers.owner.address;
+        const controller = signers.controller.address;
+
+        const initData = tokenImpl.interface.encodeFunctionData('initialize', [
+          owner,
+          controller,
+        ]);
+
+        const signature = await tokenFactoryTypedData.sign(
+          signers.owner,
+          'Token',
+          {
+            salt,
+            impl: await tokenImpl.getAddress(),
+            initData,
+          },
+        );
+
+        const tx = tokenFactory['createToken(bytes32,address,bytes,bytes)'](
+          salt,
+          tokenImpl,
+          initData,
+          signature,
+        );
+
+        await expect(tx)
+          .emit(tokenFactory, 'TokenCreated')
+          .withArgs(computeTokenAddress(salt), tokenImpl, initData, anyValue);
+      });
+    });
+
+    describe('emitTokenNotification', () => {
+      it('expect to revert when the msg.sender is not the token', async () => {
+        const { tokenFactory } = fixture;
+
+        const tx = tokenFactory.emitTokenNotification(1, '0x');
+
+        await expect(tx).revertedWithCustomError(
+          tokenFactory,
+          'MsgSenderIsNotTheToken',
+        );
+      });
+
+      it('expect to emit token notification', async () => {
+        const { tokenFactory, token } = fixture;
+
+        const tx = token.setReady();
+
+        await expect(tx)
+          .emit(tokenFactory, 'TokenNotification')
+          .withArgs(await token.getAddress(), 0n, '0x', anyValue);
       });
     });
   });

@@ -9,8 +9,8 @@ import { FAUCET_TASK_NAME, FaucetTaskArgs } from './faucet';
 import { TokensTaskNames, TokensGenerateTaskArgs } from './tokens';
 
 let globalArgs: {
-  totalErc20: number;
-  totalErc721: number;
+  erc20RegularTotal: number;
+  erc721RegularTotal: number;
   externalAccount: string;
   externalBalance: bigint;
   disableExport: boolean;
@@ -18,14 +18,14 @@ let globalArgs: {
 
 task(TASK_NODE)
   .addOptionalParam(
-    'totalErc20',
-    'Number of ERC20 tokens to generate',
+    'erc20RegularTotal',
+    'Number of regular ERC20 tokens to generate',
     undefined,
     types.int,
   )
   .addOptionalParam(
-    'totalErc721',
-    'Number of ERC721 tokens to generate',
+    'erc721RegularTotal',
+    'Number of regular ERC721 tokens to generate',
     undefined,
     types.int,
   )
@@ -46,8 +46,8 @@ task(TASK_NODE)
     const {
       externalAccount,
       externalBalance,
-      totalErc20,
-      totalErc721,
+      erc20RegularTotal,
+      erc721RegularTotal,
       disableExport,
       ...superArgs
     } = args;
@@ -55,8 +55,8 @@ task(TASK_NODE)
     globalArgs = {
       externalAccount,
       externalBalance,
-      totalErc20,
-      totalErc721,
+      erc20RegularTotal,
+      erc721RegularTotal,
       disableExport,
     };
 
@@ -71,16 +71,17 @@ subtask(TASK_NODE_SERVER_READY, async (_, hre, runSuper) => {
   const {
     externalAccount,
     externalBalance,
-    totalErc20,
-    totalErc721,
+    erc20RegularTotal,
+    erc721RegularTotal,
     disableExport,
   } = globalArgs;
 
-  if (totalErc20 || totalErc721) {
+  if (erc20RegularTotal || erc721RegularTotal) {
     const subTaskArgs: TokensGenerateTaskArgs = {
       customAccount: externalAccount,
-      totalErc20,
-      totalErc721,
+      erc20RegularTotal,
+      erc20Wrapped: true,
+      erc721RegularTotal,
       silent: true,
     };
 

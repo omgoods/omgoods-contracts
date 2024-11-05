@@ -1,36 +1,37 @@
 import { DeployFunction } from 'hardhat-deploy/types';
 
 const TAG = 'tokens/erc721/external';
+const VERSION = '00-initial';
 
-const NAME = 'External NFT';
-const SYMBOL = 'EXN';
-const TOTAL_SUPPLY = 50;
+const KEYS = ['A', 'B', 'C'];
+
+const NAME_PREFIX = 'External NFT';
+const SYMBOL_PREFIX = 'ExN';
+const TOKEN_IDS = Array(50)
+  .fill(1)
+  .map((_, index) => index + 1);
 
 const func: DeployFunction = async (hre) => {
   const {
-    deployments: { log, deploy },
+    deployments: { logHeader, deploy },
     getNamedAccounts,
   } = hre;
 
-  log();
-  log(`# ${TAG}`);
+  logHeader(TAG, VERSION);
 
-  const { owner } = await getNamedAccounts();
+  const { faucet } = await getNamedAccounts();
 
-  await deploy('ERC721ExternalToken', {
-    from: owner,
-    log: true,
-    args: [
-      NAME,
-      SYMBOL,
-      Array(TOTAL_SUPPLY)
-        .fill(1)
-        .map((_, index) => index + 1),
-    ],
-  });
+  for (const key of KEYS) {
+    await deploy(`ERC721ExternalToken${key}`, {
+      contract: 'ERC721ExternalToken',
+      from: faucet,
+      log: true,
+      args: [`${NAME_PREFIX} ${key}`, `${SYMBOL_PREFIX}${key}`, TOKEN_IDS],
+    });
+  }
 };
 
-func.tags = [TAG];
+func.tags = [TAG, VERSION];
 func.skip = async ({ network }) => network.live;
 func.runAtTheEnd = true;
 

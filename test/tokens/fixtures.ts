@@ -1,159 +1,143 @@
 import { ethers, utils } from 'hardhat';
-import { AddressLike, BytesLike, ZeroAddress } from 'ethers';
-import { createTypedDataHelper, TYPED_DATA_DOMAIN_NAME } from '../common';
+import { BaseContract, BytesLike } from 'ethers';
+import { TYPED_DATA_DOMAIN_NAME, createTypedDataHelper } from '../common';
+import { TOKEN_METADATA } from './constants';
 
-const { randomHex, computeProxyCloneAddress, getSigners } = utils;
+const { deployContract } = ethers;
+const { computeProxyCloneAddress, getSigners, randomHex } = utils;
 
-const { deployContract, getContractAt } = ethers;
-
-export async function deployTokenMock() {
-  const token = await deployContract('TokenMock');
-
-  return {
-    token,
-  };
+function deployTokenImplMock() {
+  return deployContract('TokenImplMock', [TYPED_DATA_DOMAIN_NAME]);
 }
 
-export async function deployTokenImplMock() {
-  const tokenImpl = await deployContract('TokenImplMock');
+export async function setupTokenHelper() {
+  const tokenHelper = await deployContract('TokenHelper');
 
-  return {
-    tokenImpl,
-  };
-}
+  const erc20Token = await deployContract('ERC20ExternalToken', [
+    TOKEN_METADATA.name,
+    TOKEN_METADATA.symbol,
+    TOKEN_METADATA.decimals,
+    0,
+  ]);
 
-export async function deployTokenFactoryMock() {
-  const signers = await getSigners('owner');
-
-  const tokenFactory = await deployContract('TokenFactoryMock');
-
-  return {
-    signers,
-    tokenFactory,
-  };
-}
-
-export async function deployTokenRegistry() {
-  const signers = await getSigners(
-    'owner',
-    'guardian',
-    'token',
-    'tokenFactory',
-  );
-
-  const tokenRegistry = await deployContract('TokenRegistry', [
-    ZeroAddress,
-    TYPED_DATA_DOMAIN_NAME,
+  const erc721Token = await deployContract('ERC721ExternalToken', [
+    TOKEN_METADATA.name,
+    TOKEN_METADATA.symbol,
+    [],
   ]);
 
   return {
-    signers,
-    tokenRegistry,
+    tokenHelper,
+    erc20Token,
+    erc721Token,
   };
 }
 
-export async function setupTokenMock() {
-  const { token } = await deployTokenMock();
+export async function setupTokenFactory<
+  T extends BaseContract = Awaited<ReturnType<typeof deployTokenImplMock>>,
+>(
+  options: {
+    tokenImpl?: T;
+  } = {},
+) {
+  let { tokenImpl } = options;
 
-  const { tokenRegistry, signers } = await setupTokenRegistry({
-    token,
-  });
+  const signers = await getSigners('owner', 'controller');
 
-  await token.initialize(ZeroAddress, tokenRegistry, true);
+  const cloneTarget = await deployContract('CloneTarget');
 
-  return {
-    signers,
-    token,
-    tokenRegistry,
-  };
-}
+  if (!tokenImpl) {
+    tokenImpl = (await deployTokenImplMock()) as BaseContract as T;
+  }
 
-export async function setupTokenFactoryMock() {
-  const { tokenFactory } = await deployTokenFactoryMock();
-
-  const { tokenRegistry, tokenImpl, typedDataHelper, signers } =
-    await setupTokenRegistry({
-      tokenFactory,
-    });
+  const tokenFactory = await deployContract('TokenFactory', [
+    TYPED_DATA_DOMAIN_NAME,
+    signers.owner,
+    cloneTarget,
+  ]);
 
   const computeTokenAddress = (salt: BytesLike) =>
-    computeProxyCloneAddress(tokenRegistry, tokenImpl, salt);
+    computeProxyCloneAddress(tokenFactory, cloneTarget, salt);
 
-  const computeToken = async (salt: BytesLike) =>
-    getContractAt('TokenImplMock', await computeTokenAddress(salt));
+  const createToken = async (salt: BytesLike, initData: BytesLike) => {
+    const tokenAddress = await computeTokenAddress(salt);
 
-  await tokenFactory.initialize(ZeroAddress, tokenImpl, tokenRegistry);
+    await tokenFactory['createToken(bytes32,address,bytes)'](
+      salt,
+      tokenImpl,
+      initData,
+    );
 
-  const salt = randomHex();
-
-  await tokenFactory.createToken(
-    salt,
-    tokenImpl.interface.encodeFunctionData('initialize', [ZeroAddress, false]),
-    '0x',
-  );
-
-  const token = await computeToken(salt);
-
-  return {
-    signers,
-    token,
-    tokenImpl,
-    tokenFactory,
-    tokenRegistry,
-    computeToken,
-    computeTokenAddress,
-    typedDataHelper,
+    return tokenImpl.attach(tokenAddress) as T;
   };
-}
 
-export async function setupTokenRegistry(options?: {
-  token?: AddressLike;
-  tokenFactory?: AddressLike;
-}) {
-  const { tokenImpl } = await deployTokenImplMock();
-
-  const { signers, tokenRegistry } = await deployTokenRegistry();
-
-  const typedDataHelper = await createTypedDataHelper<{
+  const tokenFactoryTypedData = await createTypedDataHelper<{
     Token: {
-      tokenImpl: string;
-      initCode: BytesLike;
+      salt: string;
+      impl: string;
+      initData: string;
     };
-  }>(tokenRegistry, {
+  }>(tokenFactory, {
     Token: [
       {
-        name: 'tokenImpl',
+        name: 'salt',
+        type: 'bytes32',
+      },
+      {
+        name: 'impl',
         type: 'address',
       },
       {
-        name: 'initCode',
+        name: 'initData',
         type: 'bytes',
       },
     ],
   });
 
-  await tokenRegistry.initialize(ZeroAddress, [signers.guardian]);
+  return {
+    computeTokenAddress,
+    createToken,
+    signers,
+    tokenFactory,
+    tokenFactoryTypedData,
+    tokenImpl,
+  };
+}
 
-  await tokenRegistry.addToken(signers.token);
+export async function setupTokenMock() {
+  const result = await setupTokenFactory();
 
-  await tokenRegistry.addTokenFactory(signers.tokenFactory);
+  const { signers, tokenImpl, createToken } = result;
 
-  if (options?.token) {
-    await tokenRegistry.addToken(options.token);
-  }
+  const token = await createToken(
+    randomHex(),
+    tokenImpl.interface.encodeFunctionData('initialize', [
+      signers.owner.address,
+      signers.controller.address,
+    ]),
+  );
 
-  if (options?.tokenFactory) {
-    await tokenRegistry.addTokenFactory(options.tokenFactory);
-  }
-
-  const computeTokenAddress = (tokenImpl: AddressLike, salt: BytesLike) =>
-    computeProxyCloneAddress(tokenRegistry, tokenImpl, salt);
+  const tokenImpTypedData = await createTypedDataHelper<{
+    Initialization: {
+      owner: string;
+      controller: string;
+    };
+  }>(tokenImpl, {
+    Initialization: [
+      {
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        name: 'controller',
+        type: 'address',
+      },
+    ],
+  });
 
   return {
-    tokenImpl,
-    tokenRegistry,
-    signers,
-    typedDataHelper,
-    computeTokenAddress,
+    ...result,
+    token,
+    tokenImpTypedData,
   };
 }

@@ -7,12 +7,16 @@ contract OwnableMock is Ownable {
   // deployment
 
   constructor() {
-    _setInitialOwner(address(0));
+    _setInitialOwner();
   }
 
   // external setters
 
   function setInitialOwner(address initialOwner) external {
-    _setInitialOwner(initialOwner);
+    if (initialOwner == address(0)) {
+      _setInitialOwner();
+    } else {
+      _setInitialOwner(initialOwner);
+    }
   }
 }

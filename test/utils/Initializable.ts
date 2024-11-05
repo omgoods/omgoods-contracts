@@ -1,35 +1,37 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { expect } from 'chai';
-import { deployInitializableMock } from './fixtures';
+import { setupInitializableMock } from './fixtures';
 
 describe('utils/Initializable // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployInitializableMock>>;
+  let fixture: Awaited<ReturnType<typeof setupInitializableMock>>;
 
-  const createBeforeHook = (initialize = false) => {
+  const createBeforeHook = (initialized = false) => {
     before(async () => {
-      fixture = await loadFixture(deployInitializableMock);
+      fixture = await loadFixture(setupInitializableMock);
 
-      if (initialize) {
+      if (initialized) {
         const { initializable } = fixture;
 
-        await initializable.initialize();
+        await initializable.setInitialized(initialized);
       }
     });
   };
 
   describe('# modifiers', () => {
-    createBeforeHook();
-
     describe('initializeOnce()', () => {
-      it('expect to initialize the contract', async () => {
-        const { initializable } = fixture;
+      describe('# when not initialized', () => {
+        createBeforeHook();
 
-        const tx = initializable.initialize();
+        it('expect to initialize the contract', async () => {
+          const { initializable } = fixture;
 
-        await expect(tx).emit(initializable, 'Initialized');
+          const tx = initializable.initialize();
+
+          await expect(tx).emit(initializable, 'Initialized');
+        });
       });
 
-      describe('# after initialization', () => {
+      describe('# when initialized', () => {
         createBeforeHook(true);
 
         it('expect to revert', async () => {
@@ -49,22 +51,22 @@ describe('utils/Initializable // mocked', () => {
   describe('# getters', () => {
     createBeforeHook();
 
-    describe('initialized()', () => {
+    describe('isInitialized()', () => {
       it('expect to return false before initialization', async () => {
         const { initializable } = fixture;
 
-        const res = await initializable.initialized();
+        const res = await initializable.isInitialized();
 
         expect(res).false;
       });
 
-      describe('# after initialization', () => {
+      describe('# when initialized', () => {
         createBeforeHook(true);
 
         it('expect to return true', async () => {
           const { initializable } = fixture;
 
-          const res = await initializable.initialized();
+          const res = await initializable.isInitialized();
 
           expect(res).true;
         });

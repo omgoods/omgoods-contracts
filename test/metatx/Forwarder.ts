@@ -1,11 +1,11 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 import { anyUint } from '@nomicfoundation/hardhat-chai-matchers/withArgs';
-import { ZeroAddress } from 'ethers';
-import { utils } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
 import { setupForwarder } from './fixtures';
-import { FORWARDER_REQUEST, FORWARDER_REQUEST_BATCH } from './constants';
+import { FORWARDER_REQUEST, FORWARDER_BATCH } from './constants';
 
+const { ZeroAddress } = ethers;
 const { randomAddress } = utils;
 
 describe('metatx/Forwarder', () => {
@@ -32,23 +32,21 @@ describe('metatx/Forwarder', () => {
 
     describe('hashRequest()', () => {
       it('expect to return the correct hash', async () => {
-        const { forwarder, typedDataHelper } = fixture;
+        const { forwarder, forwarderTypedData } = fixture;
 
         const res = await forwarder.hashRequest(FORWARDER_REQUEST);
 
-        expect(res).eq(typedDataHelper.hash('Request', FORWARDER_REQUEST));
+        expect(res).eq(forwarderTypedData.hash('Request', FORWARDER_REQUEST));
       });
     });
 
-    describe('hashRequestBatch()', () => {
+    describe('hashBatch()', () => {
       it('expect to return the correct hash', async () => {
-        const { forwarder, typedDataHelper } = fixture;
+        const { forwarder, forwarderTypedData } = fixture;
 
-        const res = await forwarder.hashRequestBatch(FORWARDER_REQUEST_BATCH);
+        const res = await forwarder.hashBatch(FORWARDER_BATCH);
 
-        expect(res).eq(
-          typedDataHelper.hash('RequestBatch', FORWARDER_REQUEST_BATCH),
-        );
+        expect(res).eq(forwarderTypedData.hash('Batch', FORWARDER_BATCH));
       });
     });
   });
@@ -102,32 +100,26 @@ describe('metatx/Forwarder', () => {
       });
     });
 
-    describe('sendRequestBatch()', () => {
+    describe('sendBatch()', () => {
       createBeforeHook();
 
-      it('expect to revert when the request batch is empty', async () => {
+      it('expect to revert when the batch is empty', async () => {
         const { forwarder } = fixture;
 
-        const tx = forwarder.sendRequestBatch([], []);
+        const tx = forwarder.sendBatch([], []);
 
-        await expect(tx).revertedWithCustomError(
-          forwarder,
-          'EmptyRequestBatch',
-        );
+        await expect(tx).revertedWithCustomError(forwarder, 'BatchIsEmpty');
       });
 
-      it('expect to revert when the request batch size is invalid', async () => {
+      it('expect to revert when the batch size is invalid', async () => {
         const { forwarder } = fixture;
 
-        const tx = forwarder.sendRequestBatch([randomAddress()], []);
+        const tx = forwarder.sendBatch([randomAddress()], []);
 
-        await expect(tx).revertedWithCustomError(
-          forwarder,
-          'InvalidRequestBatchSize',
-        );
+        await expect(tx).revertedWithCustomError(forwarder, 'InvalidBatchSize');
       });
 
-      it('expect request batch to be sent successfully', async () => {
+      it('expect batch to be sent successfully', async () => {
         const { forwarder, forwarderContext, signers } = fixture;
 
         const account = signers.unknown.at(0);
@@ -136,12 +128,12 @@ describe('metatx/Forwarder', () => {
           forwarderContext.interface.encodeFunctionData('emitMsgSender'),
         ];
 
-        const tx = forwarder.connect(account).sendRequestBatch(to, data);
+        const tx = forwarder.connect(account).sendBatch(to, data);
 
         await expect(tx).not.emit(forwarder, 'RequestSent');
 
         await expect(tx)
-          .emit(forwarder, 'RequestBatchSent')
+          .emit(forwarder, 'BatchSent')
           .withArgs(account.address, 0, to, data, anyUint);
 
         await expect(tx)
@@ -196,7 +188,7 @@ describe('metatx/Forwarder', () => {
       });
 
       it('expect request to be sent successfully', async () => {
-        const { forwarder, forwarderContext, typedDataHelper, signers } =
+        const { forwarder, forwarderContext, forwarderTypedData, signers } =
           fixture;
 
         const signer = signers.unknown.at(0);
@@ -214,7 +206,7 @@ describe('metatx/Forwarder', () => {
             request.account,
             request.to,
             request.data,
-            await typedDataHelper.sign(signer, 'Request', request),
+            await forwarderTypedData.sign(signer, 'Request', request),
           );
 
         await expect(tx)
@@ -237,20 +229,20 @@ describe('metatx/Forwarder', () => {
       });
     });
 
-    describe('forwardRequestBatch()', () => {
-      it('expect request batch to be sent successfully', async () => {
+    describe('forwardBatch()', () => {
+      it('expect batch to be sent successfully', async () => {
         const {
           forwarder,
           forwarderContext,
           account,
-          typedDataHelper,
+          forwarderTypedData,
           signers,
         } = fixture;
 
         const signer = signers.owner;
 
         const requestBatch = {
-          ...FORWARDER_REQUEST_BATCH,
+          ...FORWARDER_BATCH,
           account: await account.getAddress(),
           to: [await forwarderContext.getAddress()],
           data: [
@@ -260,15 +252,15 @@ describe('metatx/Forwarder', () => {
 
         const tx = forwarder
           .connect(signers.forwarder)
-          .forwardRequestBatch(
+          .forwardBatch(
             requestBatch.account,
             requestBatch.to,
             requestBatch.data,
-            await typedDataHelper.sign(signer, 'RequestBatch', requestBatch),
+            await forwarderTypedData.sign(signer, 'Batch', requestBatch),
           );
 
         await expect(tx)
-          .emit(forwarder, 'RequestBatchSent')
+          .emit(forwarder, 'BatchSent')
           .withArgs(
             requestBatch.account,
             requestBatch.nonce,

@@ -15,9 +15,9 @@ contract AccountMock is IERC1271, Ownable {
   // deployment
 
   constructor(address forwarder) {
-    _setInitialOwner(address(0));
+    _setInitialOwner();
 
-    _forwarder = forwarder;
+    _setForwarder(forwarder);
   }
 
   // external getters
@@ -29,7 +29,9 @@ contract AccountMock is IERC1271, Ownable {
     address signer = hash.recover(signature);
 
     return
-      signer == _owner ? this.isValidSignature.selector : bytes4(0xffffffff);
+      signer == _getOwner()
+        ? this.isValidSignature.selector
+        : bytes4(0xffffffff);
   }
 
   // external setters

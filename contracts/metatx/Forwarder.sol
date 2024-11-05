@@ -17,7 +17,7 @@ contract Forwarder is EIP712 {
     bytes data;
   }
 
-  struct RequestBatchData {
+  struct BatchData {
     address account;
     uint256 nonce;
     address[] to;
@@ -29,10 +29,8 @@ contract Forwarder is EIP712 {
       "Request(address account,uint256 nonce,address to,bytes data)" //
     );
 
-  bytes32 private constant REQUEST_BATCH_TYPEHASH =
-    keccak256(
-      "RequestBatch(address account,uint256 nonce,address[] to,bytes[] data)"
-    );
+  bytes32 private constant BATCH_TYPEHASH =
+    keccak256("Batch(address account,uint256 nonce,address[] to,bytes[] data)");
 
   // storage
 
@@ -48,7 +46,7 @@ contract Forwarder is EIP712 {
     uint256 timestamp
   );
 
-  event RequestBatchSent(
+  event BatchSent(
     address account,
     uint256 nonce,
     address[] to,
@@ -64,13 +62,13 @@ contract Forwarder is EIP712 {
 
   error CallToTheZeroAddress();
 
-  error EmptyRequestBatch();
+  error BatchIsEmpty();
 
-  error InvalidRequestBatchSize();
+  error InvalidBatchSize();
 
   // deployment
 
-  constructor(string memory name) EIP712(name, "1") {
+  constructor(string memory eip712Name) EIP712(eip712Name, "1") {
     //
   }
 
@@ -92,15 +90,15 @@ contract Forwarder is EIP712 {
       );
   }
 
-  function hashRequestBatch(
-    RequestBatchData calldata requestBatchData
+  function hashBatch(
+    BatchData calldata batchData
   ) external view returns (bytes32) {
     return
-      _hashRequestBatch(
-        requestBatchData.account,
-        requestBatchData.nonce,
-        requestBatchData.to,
-        requestBatchData.data
+      _hashBatch(
+        batchData.account,
+        batchData.nonce,
+        batchData.to,
+        batchData.data
       );
   }
 
@@ -110,11 +108,8 @@ contract Forwarder is EIP712 {
     _sendRequest(msg.sender, _nextNonce[msg.sender], to, data);
   }
 
-  function sendRequestBatch(
-    address[] calldata to,
-    bytes[] calldata data
-  ) external {
-    _sendRequestBatch(msg.sender, _nextNonce[msg.sender], to, data);
+  function sendBatch(address[] calldata to, bytes[] calldata data) external {
+    _sendBatch(msg.sender, _nextNonce[msg.sender], to, data);
   }
 
   function forwardRequest(
@@ -125,7 +120,7 @@ contract Forwarder is EIP712 {
   ) external {
     uint256 nonce = _nextNonce[account];
 
-    _verifyAccountSigner(
+    _verifyAccountSignature(
       account,
       _hashRequest(account, nonce, to, data),
       signature
@@ -134,7 +129,7 @@ contract Forwarder is EIP712 {
     _sendRequest(account, nonce, to, data);
   }
 
-  function forwardRequestBatch(
+  function forwardBatch(
     address account,
     address[] calldata to,
     bytes[] calldata data,
@@ -142,13 +137,13 @@ contract Forwarder is EIP712 {
   ) external {
     uint256 nonce = _nextNonce[account];
 
-    _verifyAccountSigner(
+    _verifyAccountSignature(
       account,
-      _hashRequestBatch(account, nonce, to, data),
+      _hashBatch(account, nonce, to, data),
       signature
     );
 
-    _sendRequestBatch(account, nonce, to, data);
+    _sendBatch(account, nonce, to, data);
   }
 
   // private getters
@@ -173,7 +168,7 @@ contract Forwarder is EIP712 {
       );
   }
 
-  function _hashRequestBatch(
+  function _hashBatch(
     address account,
     uint256 nonce,
     address[] calldata to,
@@ -183,7 +178,7 @@ contract Forwarder is EIP712 {
       _hashTypedDataV4(
         keccak256(
           abi.encode(
-            REQUEST_BATCH_TYPEHASH,
+            BATCH_TYPEHASH,
             account,
             nonce,
             keccak256(abi.encodePacked(to)),
@@ -193,25 +188,39 @@ contract Forwarder is EIP712 {
       );
   }
 
-  function _verifyAccountSigner(
+  function _verifyAccountSignature(
     address account,
     bytes32 hash,
     bytes calldata signature
   ) private view {
-    if (account == address(0)) {
-      revert AccountIsTheZeroAddress();
-    }
+    require(account != address(0), AccountIsTheZeroAddress());
 
     address signer = hash.recover(signature);
 
-    if (
-      account != signer &&
-      (account.code.length == 0 ||
-        IERC1271(account).isValidSignature(hash, signature) !=
-        IERC1271(account).isValidSignature.selector)
-    ) {
-      revert InvalidSignature();
+    if (account != signer) {
+      _verifyERC1271AccountSignature(account, hash, signature);
     }
+  }
+
+  function _verifyERC1271AccountSignature(
+    address account,
+    bytes32 hash,
+    bytes calldata signature
+  ) private view {
+    bool isValid;
+
+    if (account.code.length != 0) {
+      try IERC1271(account).isValidSignature(hash, signature) returns (
+        bytes4 selector
+      ) {
+        isValid = selector == IERC1271(account).isValidSignature.selector;
+        // solhint-disable-next-line no-empty-blocks
+      } catch {
+        //
+      }
+    }
+
+    require(isValid, InvalidSignature());
   }
 
   // private setters
@@ -226,12 +235,12 @@ contract Forwarder is EIP712 {
       _nextNonce[account] = nonce + 1;
     }
 
-    _executeRequestCall(account, to, data);
+    _executeRequest(account, to, data);
 
     emit RequestSent(account, nonce, to, data, block.timestamp);
   }
 
-  function _sendRequestBatch(
+  function _sendBatch(
     address account,
     uint256 nonce,
     address[] calldata to,
@@ -241,19 +250,17 @@ contract Forwarder is EIP712 {
       _nextNonce[account] = nonce + 1;
     }
 
-    _executeRequestBatchCalls(account, to, data);
+    _executeBatch(account, to, data);
 
-    emit RequestBatchSent(account, nonce, to, data, block.timestamp);
+    emit BatchSent(account, nonce, to, data, block.timestamp);
   }
 
-  function _executeRequestCall(
+  function _executeRequest(
     address account,
     address to,
     bytes calldata data
   ) private {
-    if (to == address(0)) {
-      revert CallToTheZeroAddress();
-    }
+    require(to != address(0), CallToTheZeroAddress());
 
     // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory response) = to.call(
@@ -268,23 +275,18 @@ contract Forwarder is EIP712 {
     }
   }
 
-  function _executeRequestBatchCalls(
+  function _executeBatch(
     address account,
     address[] calldata to,
     bytes[] calldata data
   ) private {
     uint256 len = to.length;
 
-    if (len == 0) {
-      revert EmptyRequestBatch();
-    }
-
-    if (len != data.length) {
-      revert InvalidRequestBatchSize();
-    }
+    require(len != 0, BatchIsEmpty());
+    require(len == data.length, InvalidBatchSize());
 
     for (uint256 index; index < len; ) {
-      _executeRequestCall(account, to[index], data[index]);
+      _executeRequest(account, to[index], data[index]);
 
       unchecked {
         ++index;

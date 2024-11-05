@@ -1,17 +1,17 @@
 import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
-import { ZeroAddress } from 'ethers';
-import { utils } from 'hardhat';
+import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
-import { deployGuardedMock } from './fixtures';
+import { setupGuardedMock } from './fixtures';
 
-const { randomAddress } = utils;
+const { hashMessage, ZeroAddress } = ethers;
+const { randomAddress, randomHex } = utils;
 
 describe('access/Guarded // mocked', () => {
-  let fixture: Awaited<ReturnType<typeof deployGuardedMock>>;
+  let fixture: Awaited<ReturnType<typeof setupGuardedMock>>;
 
   const createBeforeHook = () => {
     before(async () => {
-      fixture = await loadFixture(deployGuardedMock);
+      fixture = await loadFixture(setupGuardedMock);
     });
   };
 
@@ -22,7 +22,7 @@ describe('access/Guarded // mocked', () => {
       it("expect to return false if the guardian doesn't exist", async () => {
         const { guarded } = fixture;
 
-        const res = await guarded.hasGuardian(randomAddress());
+        const res = await guarded.isGuardian(randomAddress());
 
         expect(res).false;
       });
@@ -30,7 +30,7 @@ describe('access/Guarded // mocked', () => {
       it('expect to return true if the guardian exists', async () => {
         const { guarded, signers } = fixture;
 
-        const res = await guarded.hasGuardian(signers.guardian);
+        const res = await guarded.isGuardian(signers.guardian);
 
         expect(res).true;
       });
@@ -38,9 +38,39 @@ describe('access/Guarded // mocked', () => {
       it('expect to return true for the owner', async () => {
         const { guarded, signers } = fixture;
 
-        const res = await guarded.hasGuardian(signers.owner);
+        const res = await guarded.isGuardian(signers.owner);
 
         expect(res).true;
+      });
+    });
+
+    describe('_verifyGuardianSignature()', () => {
+      it('expect to revert for invalid signature', async () => {
+        const { guarded, signers } = fixture;
+
+        const signature = await signers.guardian.signMessage(randomHex());
+
+        const tx = guarded.verifyGuardianSignature(randomHex(), signature);
+
+        await expect(tx).revertedWithCustomError(
+          guarded,
+          'InvalidGuardianSignature',
+        );
+      });
+
+      it('expect not to revert for valid signature', async () => {
+        const { guarded, signers } = fixture;
+
+        const message = randomHex();
+        const hash = hashMessage(message);
+        const signature = await signers.guardian.signMessage(message);
+
+        const tx = guarded.verifyGuardianSignature(hash, signature);
+
+        await expect(tx).not.revertedWithCustomError(
+          guarded,
+          'InvalidGuardianSignature',
+        );
       });
     });
   });
@@ -155,7 +185,7 @@ describe('access/Guarded // mocked', () => {
         await guarded.setInitialGuardians(guardians);
 
         for (const guardian of guardians) {
-          expect(await guarded.hasGuardian(guardian)).true;
+          expect(await guarded.isGuardian(guardian)).true;
         }
       });
     });

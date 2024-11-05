@@ -4,7 +4,7 @@
 
 | Token Type | Notification Name | Notification Value |
 |------------|-------------------|--------------------|
-| `*`        | Unlocked          | `0x00`             |
+| `*`        | Ready             | `0x00`             |
 | `*`        | OwnerUpdated      | `0x01`             |
 | `ERC20`    | Update            | `0x50`             |
 | `ERC20`    | Approve           | `0x51`             |

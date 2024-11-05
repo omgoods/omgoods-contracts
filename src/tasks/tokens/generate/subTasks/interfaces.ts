@@ -1,18 +1,17 @@
 import { TaskArgsWithSilent } from '../../../common';
 
-interface CommonSubTaskArgs extends TaskArgsWithSilent {
+export interface ERC20RegularSubTaskArgs extends TaskArgsWithSilent {
   name: string;
   symbol: string;
-}
-
-export interface ERC20SubTaskArgs extends CommonSubTaskArgs {
-  customAccount?: string;
+  account?: string;
   initialSupply: number;
   burnAmount: number;
   maxTransfers: number;
-  totalApproves: number;
 }
 
-export interface ERC721SubTaskArgs extends CommonSubTaskArgs {
-  //
+export interface ERC721RegularSubTaskArgs extends TaskArgsWithSilent {
+  name: string;
+  symbol: string;
+  account?: string;
+  totalItems: number;
 }

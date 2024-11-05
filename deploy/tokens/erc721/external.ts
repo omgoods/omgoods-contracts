@@ -19,12 +19,12 @@ const func: DeployFunction = async (hre) => {
 
   logHeader(TAG, VERSION);
 
-  const { owner } = await getNamedAccounts();
+  const { faucet } = await getNamedAccounts();
 
   for (const key of KEYS) {
     await deploy(`ERC721ExternalToken${key}`, {
       contract: 'ERC721ExternalToken',
-      from: owner,
+      from: faucet,
       log: true,
       args: [`${NAME_PREFIX} ${key}`, `${SYMBOL_PREFIX}${key}`, TOKEN_IDS],
     });

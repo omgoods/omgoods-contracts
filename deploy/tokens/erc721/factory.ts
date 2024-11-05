@@ -14,7 +14,7 @@ const func: DeployFunction = async (hre) => {
 
   const { deployer, owner } = await getNamedAccounts();
 
-  const target = await getAddress('CloneTarget');
+  const cloneTarget = await getAddress('CloneTarget');
   const forwarder = await getAddress('Forwarder');
 
   const guardians = processEnvs.getAddresses('GUARDIANS');
@@ -24,9 +24,9 @@ const func: DeployFunction = async (hre) => {
     from: deployer,
     log: true,
     args: [
-      'OM!goods NFT Factory', // name
+      'OM!goods NFT Factory', //
       owner,
-      target,
+      cloneTarget,
     ],
   });
 

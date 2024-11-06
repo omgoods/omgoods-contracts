@@ -8,7 +8,11 @@ import {
 } from 'ethers';
 import { processEnvs } from '../common';
 import { NetworkConfig, NetworkType } from './interfaces';
-import { HARDHAT_NETWORK } from './constants';
+import {
+  LOCAL_NETWORK_CONFIG,
+  LOCALHOST_NETWORK_CHAIN_ID,
+  LOCALHOST_NETWORK_URL,
+} from './constants';
 
 function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
@@ -65,34 +69,39 @@ function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
 export function createNetworksConfig(
   config: Record<string, NetworkConfig>,
 ): NetworksUserConfig {
+  const hardhat = {
+    chainId: LOCALHOST_NETWORK_CHAIN_ID,
+    live: false,
+    ...LOCAL_NETWORK_CONFIG,
+  };
+
   const result: NetworksUserConfig = {
-    hardhat: HARDHAT_NETWORK,
+    hardhat,
     localhost: {
-      ...HARDHAT_NETWORK,
-      url: processEnvs.getUrl('LOCALHOST_URL'),
+      ...hardhat,
+      live: true,
+      url: LOCALHOST_NETWORK_URL,
     },
   };
 
-  const configEntries = Object.entries(config);
+  const networkConfigs = Object.entries(config);
 
-  const commonNetworkAccountsConfigs = {
+  const networkAccountsConfigs = {
+    localnet: LOCAL_NETWORK_CONFIG,
     mainnet: getNetworkAccountsConfig('mainnet'),
     testnet: getNetworkAccountsConfig('testnet'),
   };
 
-  for (const [name, config] of configEntries) {
-    const { type, ...custom } = config;
-
+  for (const [name, { type, ...networkConfig }] of networkConfigs) {
     const url = processEnvs.getUrl(name, 'URL');
-    const accountsConfig = commonNetworkAccountsConfigs[type];
 
-    if (url && accountsConfig) {
+    if (url && networkConfig) {
       result[name] = {
+        ...networkAccountsConfigs[type],
+        ...networkConfig,
         url,
-        ...accountsConfig,
-        ...custom,
-        live: true,
         type,
+        live: true,
         verify: {
           etherscan: {
             apiKey: processEnvs.getRaw(name, 'ETHERSCAN_API_KEY'),

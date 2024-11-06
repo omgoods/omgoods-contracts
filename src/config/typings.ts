@@ -16,4 +16,16 @@ declare module 'hardhat/types' {
   export interface HttpNetworkConfig {
     type?: NetworkType;
   }
+
+  export interface HardhatTokensConfig {
+    externalKeys?: string[];
+  }
+
+  export interface HardhatConfig {
+    tokens?: HardhatTokensConfig;
+  }
+
+  export interface HardhatUserConfig {
+    tokens?: HardhatTokensConfig;
+  }
 }

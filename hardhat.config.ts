@@ -17,20 +17,31 @@ export default createConfig({
       optimizer: { enabled: true, runs: 10_000 },
     },
   },
+  tokens: {
+    externalKeys: ['A', 'B', 'C', 'D', 'E'],
+  },
   networks: {
+    local: {
+      chainId: 900,
+      type: 'localnet',
+    },
+    localOptimism: {
+      chainId: 901,
+      type: 'localnet',
+    },
     ethereum: {
       chainId: 1,
       type: 'mainnet',
     },
-    ethereumGoerli: {
-      chainId: 5,
-      type: 'testnet',
-    },
-    optimism: {
+    ethereumOptimism: {
       chainId: 10,
       type: 'mainnet',
     },
-    optimismGoerli: {
+    goerli: {
+      chainId: 5,
+      type: 'testnet',
+    },
+    goerliOptimism: {
       chainId: 420,
       type: 'testnet',
     },

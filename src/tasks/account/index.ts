@@ -1,0 +1,2 @@
+import './faucet';
+import './generate';

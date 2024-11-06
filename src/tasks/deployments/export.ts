@@ -129,7 +129,7 @@ task(
       }
 
       const content = await (format(
-        `export default {${dataFields.map(([key, value]) => `['${key}']: ${JSON.stringify(value)},`).join(',')}} as ${dataType}`,
+        `export default {${dataFields.map(([key, value]) => `['${key}']: ${JSON.stringify(value)}`).join(',')}} as ${dataType}`,
         {
           parser: 'typescript',
           singleQuote: true,
@@ -137,7 +137,7 @@ task(
         },
       ) as Promise<string>);
 
-      logger.print(`Exporting ${type.padEnd(8, ' ')} `);
+      logger.print(`exporting ${type.padEnd(8, ' ')} `);
 
       await writeFile(filePath, content, {
         encoding: 'utf8',
@@ -145,6 +145,4 @@ task(
 
       logger.printLn('[DONE]');
     }
-
-    logger.log('Completed!');
   });

@@ -3,9 +3,9 @@ import { customTypes, Logger } from '../common';
 import { FAUCET_TASK_NAME } from './constants';
 import { FaucetTaskArgs } from './interfaces';
 
-task(FAUCET_TASK_NAME, 'Top-ups account')
-  .addParam('account', 'Account address', undefined, customTypes.address)
-  .addParam('amount', 'Top-up amount', undefined, customTypes.ether)
+task(FAUCET_TASK_NAME, 'Tops up the account')
+  .addParam('to', 'Account address', undefined, customTypes.address)
+  .addParam('value', 'Top-up value', undefined, customTypes.ether)
   .addFlag('silent', 'Turn off logging')
   .setAction(async (args: FaucetTaskArgs, hre) => {
     const {
@@ -13,7 +13,7 @@ task(FAUCET_TASK_NAME, 'Top-ups account')
       ethers: { getSigner },
     } = hre;
 
-    const { account, amount, silent } = args;
+    const { to, value, silent } = args;
 
     const logger = new Logger(!silent);
 
@@ -24,8 +24,8 @@ task(FAUCET_TASK_NAME, 'Top-ups account')
     await logger.logTx(
       'Sending transaction',
       sender.sendTransaction({
-        to: account,
-        value: amount,
+        to,
+        value,
       }),
     );
   });

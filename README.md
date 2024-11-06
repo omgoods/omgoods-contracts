@@ -16,19 +16,22 @@ Copy `.env` to `.env.local` to set or override environment variables.
 ## Scripts
 
 ```bash
-npm start                   # starts hardhat node
+# npm
+npm start         # starts hardhat node
+npm run linter    # runs solhint
+npm run format    # runs prettier
+npm run compile   # compiles contracts
+npm run test      # runs unit tests
+npm run coverage  # runs coverage tests
+npm run hardhat   # hardhat cli wrapper
 
-npm run linter              # runs solhint
-npm run format              # runs prettier
-npm run compile             # compiles contracts
-npm run test                # runs unit tests
-npm run coverage            # runs coverage tests
-npm run deploy              # deploys contracts
-npm run deployments:export  # exports all deployed contracts into ./deployments/exported/*.ts
-npm run deployments:verify  # verifies all deployed contracts on etherscan
-npm run faucet              # top-ups account
-npm run tokens:generate     # generates tokens
-npm run hardhat             # hardhat cli wrapper
+# bash
+cd ./scripts
+./deploy.sh <networks>  # deploys contracts
+                        # supported networks:
+                        # localnets, mainnets, testnets 
+
+./seed.sh [account]     # generates tokens and sample events  
 ```
 
 ## License

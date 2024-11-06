@@ -32,7 +32,7 @@ const func: DeployFunction = async (hre) => {
 };
 
 func.tags = [TAG, VERSION];
-func.skip = async ({ network }) => network.live;
+func.skip = async ({ network }) => network.config.type !== 'localnet';
 func.runAtTheEnd = true;
 
 module.exports = func;

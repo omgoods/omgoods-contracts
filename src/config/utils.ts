@@ -8,7 +8,7 @@ import {
 } from 'ethers';
 import { processEnvs } from '../common';
 import { NetworkConfig, NetworkType } from './interfaces';
-import { LOCAL_NETWORK } from './constants';
+import { LOCAL_NETWORK_CONFIG } from './constants';
 
 function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
@@ -68,29 +68,29 @@ export function createNetworksConfig(
   const result: NetworksUserConfig = {
     hardhat: {
       chainId: 31337,
-      ...LOCAL_NETWORK,
+      live: false,
+      ...LOCAL_NETWORK_CONFIG,
     },
   };
 
   const networkConfigs = Object.entries(config);
 
   const networkAccountsConfigs = {
+    localnet: LOCAL_NETWORK_CONFIG,
     mainnet: getNetworkAccountsConfig('mainnet'),
     testnet: getNetworkAccountsConfig('testnet'),
   };
 
   for (const [name, { type, ...networkConfig }] of networkConfigs) {
     const url = processEnvs.getUrl(name, 'URL');
-    const typeConfig =
-      type === 'localnet' ? LOCAL_NETWORK : networkAccountsConfigs[type];
 
     if (url && networkConfig) {
       result[name] = {
         url,
-        live: true,
-        ...typeConfig,
-        ...networkConfig,
         type,
+        ...networkAccountsConfigs[type],
+        ...networkConfig,
+        live: true,
         verify: {
           etherscan: {
             apiKey: processEnvs.getRaw(name, 'ETHERSCAN_API_KEY'),

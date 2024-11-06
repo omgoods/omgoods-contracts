@@ -1,8 +1,8 @@
-export const LOCAL_NETWORK = {
+export const LOCAL_NETWORK_CONFIG = {
   accounts: {
     mnemonic: 'test test test test test test test test test test test junk',
     count: 10,
+    initialIndex: 7,
   },
-  live: false,
   type: 'localnet' as const,
 };

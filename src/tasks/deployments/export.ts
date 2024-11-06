@@ -129,7 +129,7 @@ task(
       }
 
       const content = await (format(
-        `export default {${dataFields.map(([key, value]) => `['${key}']: ${JSON.stringify(value)},`).join(',')}} as ${dataType}`,
+        `export default {${dataFields.map(([key, value]) => `['${key}']: ${JSON.stringify(value)}`).join(',')}} as ${dataType}`,
         {
           parser: 'typescript',
           singleQuote: true,

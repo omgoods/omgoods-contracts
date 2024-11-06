@@ -33,9 +33,11 @@ export class Logger {
     message: string,
     tx: Promise<TransactionResponse>,
   ): Promise<void> {
-    this.print(`${message} →`);
-
     const res = await tx;
+
+    const { hash } = res;
+
+    this.print(`${message} (tx: ${hash}) →`);
 
     const { gasUsed } = await res.wait();
 

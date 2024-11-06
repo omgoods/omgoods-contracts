@@ -8,7 +8,11 @@ import {
 } from 'ethers';
 import { processEnvs } from '../common';
 import { NetworkConfig, NetworkType } from './interfaces';
-import { LOCAL_NETWORK_CONFIG } from './constants';
+import {
+  LOCAL_NETWORK_CONFIG,
+  LOCALHOST_NETWORK_CHAIN_ID,
+  LOCALHOST_NETWORK_URL,
+} from './constants';
 
 function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
   let result: NetworkUserConfig = null;
@@ -65,11 +69,18 @@ function getNetworkAccountsConfig(type: NetworkType): NetworkUserConfig {
 export function createNetworksConfig(
   config: Record<string, NetworkConfig>,
 ): NetworksUserConfig {
+  const hardhat = {
+    chainId: LOCALHOST_NETWORK_CHAIN_ID,
+    live: false,
+    ...LOCAL_NETWORK_CONFIG,
+  };
+
   const result: NetworksUserConfig = {
-    hardhat: {
-      chainId: 31337,
-      live: false,
-      ...LOCAL_NETWORK_CONFIG,
+    hardhat,
+    localhost: {
+      ...hardhat,
+      live: true,
+      url: LOCALHOST_NETWORK_URL,
     },
   };
 
@@ -86,10 +97,10 @@ export function createNetworksConfig(
 
     if (url && networkConfig) {
       result[name] = {
-        url,
-        type,
         ...networkAccountsConfigs[type],
         ...networkConfig,
+        url,
+        type,
         live: true,
         verify: {
           etherscan: {

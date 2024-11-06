@@ -21,7 +21,9 @@ case $1 in
     # hardhat deployments:verify --network goerli
     # hardhat deployments:verify --network goerliOptimism
     ;;
-  *) exit 0
+  *)
+    hardhat deploy
+    exit 0
 esac
 
 hardhat deployments:export

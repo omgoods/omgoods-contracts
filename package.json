@@ -2,7 +2,7 @@
   "name": "@omgoods/contracts",
   "private": true,
   "scripts": {
-    "start": "hardhat node",
+    "start": "hardhat node --port 7545",
     "linter": "solhint \"contracts/**/*.sol\"",
     "format": "prettier --write \"{contracts,deploy,scripts,src,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",

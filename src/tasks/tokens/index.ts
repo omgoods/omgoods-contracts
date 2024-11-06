@@ -1,2 +1,2 @@
-export * from './constants';
-export * from './generate';
+import './erc20';
+import './erc721';

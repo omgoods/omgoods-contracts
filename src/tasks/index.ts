@@ -1,3 +1,3 @@
+import './account';
 import './deployments';
-import './faucet';
 import './tokens';

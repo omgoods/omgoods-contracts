@@ -3,14 +3,15 @@ import { DeployFunction } from 'hardhat-deploy/types';
 const TAG = 'tokens/erc20/external';
 const VERSION = '00-initial';
 
-const KEYS = ['A', 'B', 'C', 'D', 'E'];
-
 const NAME_PREFIX = 'External Coin';
 const SYMBOL_PREFIX = 'ExC';
 const TOTAL_SUPPLY = 100_000_000;
 
 const func: DeployFunction = async (hre) => {
   const {
+    config: {
+      tokens: { externalKeys },
+    },
     deployments: { logHeader, deploy },
     ethers: { parseEther },
     getNamedAccounts,
@@ -18,12 +19,12 @@ const func: DeployFunction = async (hre) => {
 
   logHeader(TAG, VERSION);
 
-  const { faucet } = await getNamedAccounts();
+  const { owner } = await getNamedAccounts();
 
-  for (const key of KEYS) {
+  for (const key of externalKeys) {
     await deploy(`ERC20ExternalToken${key}`, {
       contract: 'ERC20ExternalToken',
-      from: faucet,
+      from: owner,
       log: true,
       args: [
         `${NAME_PREFIX} ${key}`,

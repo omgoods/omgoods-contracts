@@ -6,3 +6,6 @@ export const LOCAL_NETWORK_CONFIG = {
   },
   type: 'localnet' as const,
 };
+
+export const LOCALHOST_NETWORK_CHAIN_ID = 31337;
+export const LOCALHOST_NETWORK_URL = ' http://127.0.0.1:7545/';

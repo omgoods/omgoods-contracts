@@ -17,6 +17,9 @@ export default createConfig({
       optimizer: { enabled: true, runs: 10_000 },
     },
   },
+  tokens: {
+    externalKeys: ['A', 'B', 'C', 'D', 'E'],
+  },
   networks: {
     local: {
       chainId: 900,

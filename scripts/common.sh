@@ -1,6 +1,5 @@
 #!/bin/bash
 
-ROOT_PATH=$(pwd -P)
 ROOT_PATH=$(dirname "$ROOT_PATH")
 
 cd "$ROOT_PATH" || exit 0;

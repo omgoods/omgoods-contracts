@@ -19,6 +19,8 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
 
   error TokenNotReady();
 
+  error ControllerAlreadyUpdated();
+
   error MsgSenderIsNotTheController();
 
   // modifiers
@@ -54,11 +56,18 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
 
   // external setters
 
+  function setController(address controller) external onlyCurrentManager {
+    require(_getController() != controller, ControllerAlreadyUpdated());
+
+    _setController(controller);
+    _afterControllerUpdated(controller);
+  }
+
   function setReady() external onlyOwner {
     require(!_isReady(), TokenAlreadyReady());
 
     _setReady(true);
-    _onceReady();
+    _afterSetReady();
   }
 
   // internal getters
@@ -103,17 +112,26 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
   }
 
   // internal setters
-
   function _setController(address controller) internal {
     _controller = controller;
+  }
+
+  function _afterControllerUpdated(address controller) internal {
+    _notifyTokenFactory(0x02, abi.encode(controller));
   }
 
   function _setReady(bool ready) internal {
     _ready = ready;
   }
 
-  function _onceReady() internal {
+  function _afterSetReady() internal {
     _notifyTokenFactory(0x00);
+  }
+
+  function _afterOwnerUpdated(address owner) internal override {
+    super._afterOwnerUpdated(owner);
+
+    _notifyTokenFactory(0x01, abi.encode(owner));
   }
 
   function _notifyTokenFactory(uint8 kind) internal {
@@ -122,11 +140,5 @@ abstract contract TokenImpl is EIP712, Ownable, CloneImpl {
 
   function _notifyTokenFactory(uint8 kind, bytes memory encodedData) internal {
     TokenFactory(_getFactory()).emitTokenNotification(kind, encodedData);
-  }
-
-  function _afterOwnerUpdated(address owner) internal override {
-    super._afterOwnerUpdated(owner);
-
-    _notifyTokenFactory(0x01, abi.encode(owner));
   }
 }

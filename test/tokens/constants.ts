@@ -7,6 +7,7 @@ export const TOKEN_METADATA = {
 export enum TokenNotificationKinds {
   Ready = 0x00,
   OwnerUpdated = 0x01,
+  ControllerUpdated = 0x02,
   ERC20Update = 0x50,
   ERC20Approve = 0x51,
   ERC721Update = 0x60,

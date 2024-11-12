@@ -184,6 +184,51 @@ describe('tokens/TokenImpl // mocked', () => {
   });
 
   describe('# setters', () => {
+    describe('setController', () => {
+      createBeforeHook();
+
+      it('expect to revert when the msg.sender is not the current manager', async () => {
+        const { signers, token } = fixture;
+
+        const tx = token
+          .connect(signers.unknown.at(0))
+          .setController(randomAddress());
+
+        await expect(tx).revertedWithCustomError(
+          token,
+          'MsgSenderIsNotTheOwner',
+        );
+      });
+
+      it("expect to revert when doesn't update the controller", async () => {
+        const { signers, token } = fixture;
+
+        const tx = token.setController(signers.controller);
+
+        await expect(tx).revertedWithCustomError(
+          token,
+          'ControllerAlreadyUpdated',
+        );
+      });
+
+      it('expect to update the controller', async () => {
+        const { token, tokenFactory, signers } = fixture;
+
+        const controller = randomAddress();
+
+        const tx = token.connect(signers.owner).setController(controller);
+
+        await expect(tx)
+          .emit(tokenFactory, 'TokenNotification')
+          .withArgs(
+            await token.getAddress(),
+            TokenNotificationKinds.ControllerUpdated,
+            AbiCoder.defaultAbiCoder().encode(['address'], [controller]),
+            anyValue,
+          );
+      });
+    });
+
     describe('setReady', () => {
       describe('# when not ready', () => {
         createBeforeHook();

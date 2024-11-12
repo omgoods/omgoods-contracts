@@ -73,6 +73,11 @@ task(TokenERC721TaskNames.CreateRegular, 'Creates ERC721 regular token')
       logger.log();
     }
 
+    if (!(await token.isReady())) {
+      await logger.logTx('setting token ready', token.setReady());
+      logger.log();
+    }
+
     if (totalTokens > 0) {
       for (let index = 0; index > totalTokens; index++) {
         let owner: string;

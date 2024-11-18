@@ -9,7 +9,7 @@ import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import { createConfig } from './src';
 
-export default createConfig({
+const config = createConfig({
   solidity: {
     version: '0.8.27',
     settings: {
@@ -37,13 +37,15 @@ export default createConfig({
       chainId: 10,
       type: 'mainnet',
     },
-    goerli: {
-      chainId: 5,
+    sepolia: {
+      chainId: 11155111,
       type: 'testnet',
     },
-    goerliOptimism: {
-      chainId: 420,
+    sepoliaOptimism: {
+      chainId: 11155420,
       type: 'testnet',
     },
   },
 });
+
+export default config;

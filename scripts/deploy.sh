@@ -19,11 +19,11 @@ case $1 in
     ;;
 
   "testnets")
-    # hardhat deploy --network goerli
-    # hardhat deploy --network goerliOptimism
+     hardhat deploy --network sepolia
+     hardhat deploy --network sepoliaOptimism
 
-    # hardhat deployments:verify --network goerli
-    # hardhat deployments:verify --network goerliOptimism
+    # hardhat deployments:verify --network sepolia
+    # hardhat deployments:verify --network sepoliaOptimism
     ;;
 
   *) # hardhat

@@ -28,11 +28,11 @@ npm run hardhat   # hardhat cli wrapper
 # bash
 cd ./scripts
 ./deploy.sh [networks]        # deploys contracts
-                              # networks (default: hardhat / localhost):
+                              # networks (default: hardhat network):
                               # localnets, mainnets, testnets 
 
 ./seed.sh [network] [account] # generates tokens and sample events
-                              # network (default: hardhat / localhost):
+                              # network (default: hardhat network):
                               # local, localOptimism 
 ```
 

@@ -13,6 +13,8 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
 
   string private _symbol;
 
+  uint8 private _decimals;
+
   // deployment
 
   constructor(string memory eip712Name) ERC20("", "") TokenImpl(eip712Name) {
@@ -68,7 +70,7 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
   }
 
   function _getDecimals() internal view virtual returns (uint8) {
-    return 18;
+    return _decimals;
   }
 
   function _msgSender()
@@ -89,6 +91,10 @@ abstract contract ERC20TokenImpl is ERC20, TokenImpl {
 
   function _setSymbol(string memory symbol_) internal {
     _symbol = symbol_;
+  }
+
+  function _setDecimals(uint8 decimals_) internal {
+    _decimals = decimals_;
   }
 
   function _update(

@@ -7,14 +7,16 @@ import {ERC20TokenImpl} from "./ERC20TokenImpl.sol";
 
 contract ERC20TokenWrappedImpl is ERC20TokenImpl {
   struct InitializationData {
-    address forwarder;
     address underlyingToken;
   }
 
   bytes32 private constant INITIALIZATION_TYPEHASH =
     keccak256(
-      "Initialization(address forwarder,address underlyingToken)" //
+      "Initialization(address underlyingToken)" //
     );
+
+  string private constant SYMBOL_PREFIX = "w";
+
   // storage
 
   address private _underlyingToken;
@@ -47,7 +49,6 @@ contract ERC20TokenWrappedImpl is ERC20TokenImpl {
       _hashInitialization(
         abi.encode(
           INITIALIZATION_TYPEHASH, //
-          initializationData.forwarder,
           initializationData.underlyingToken
         )
       );
@@ -82,7 +83,11 @@ contract ERC20TokenWrappedImpl is ERC20TokenImpl {
   }
 
   function _getSymbol() internal view override returns (string memory) {
-    return IERC20Metadata(_underlyingToken).symbol();
+    return
+      string.concat(
+        SYMBOL_PREFIX, //
+        IERC20Metadata(_underlyingToken).symbol()
+      );
   }
 
   function _getDecimals() internal view override returns (uint8) {

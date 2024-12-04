@@ -14,12 +14,14 @@ contract ERC20TokenImplMock is ERC20TokenImpl {
     address owner,
     address controller,
     string calldata name_,
-    string calldata symbol_
+    string calldata symbol_,
+    uint8 decimals_
   ) external onlyFactory {
     _setOwner(owner);
     _setController(controller);
     _setName(name_);
     _setSymbol(symbol_);
+    _setDecimals(decimals_);
   }
 
   // external setters

@@ -9,9 +9,13 @@ library Bytes {
   ) internal pure returns (bytes32) {
     uint256 len = self.length;
 
-    bytes memory data = new bytes(len * 32);
+    bytes memory data;
 
-    for (uint256 index = 0; index < len; ) {
+    unchecked {
+      data = new bytes(len * 32);
+    }
+
+    for (uint256 index; index < len; ) {
       bytes32 hash = keccak256(self[index]);
 
       // solhint-disable-next-line no-inline-assembly

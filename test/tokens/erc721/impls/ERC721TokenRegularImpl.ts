@@ -45,12 +45,10 @@ describe('tokens/erc721/impls/ERC721TokenRegularImpl // mocked', () => {
         const { tokenImpl, tokenImplTypedData } = fixture;
 
         const typedData = {
-          forwarder: randomAddress(),
           owner: randomAddress(),
           controller: randomAddress(),
           name: TOKEN_METADATA.name,
           symbol: TOKEN_METADATA.symbol,
-          uriPrefix: TOKEN_URI_PREFIX,
           ready: true,
         };
 

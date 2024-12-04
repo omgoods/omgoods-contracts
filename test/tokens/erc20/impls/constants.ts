@@ -1,1 +1,3 @@
 export const TOKEN_TOTAL_SUPPLY = 1_000_000_000;
+
+export const WRAPPED_TOKEN_SYMBOL_PREFIX = 'w';

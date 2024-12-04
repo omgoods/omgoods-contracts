@@ -4,6 +4,7 @@ import { ethers, utils } from 'hardhat';
 import { expect } from 'chai';
 import { TokenNotificationKinds } from '../../constants';
 import { setupTokenWrappedImpl } from './fixtures';
+import { WRAPPED_TOKEN_SYMBOL_PREFIX } from './constants';
 
 const { AbiCoder, ZeroAddress } = ethers;
 const { randomAddress } = utils;
@@ -55,7 +56,9 @@ describe('tokens/erc20/impls/ERC20TokenWrappedImpl // mocked', () => {
 
         const res = await token.symbol();
 
-        expect(res).eq(await underlyingToken.symbol());
+        const symbol = await underlyingToken.symbol();
+
+        expect(res).eq(`${WRAPPED_TOKEN_SYMBOL_PREFIX}${symbol}`);
       });
     });
 
@@ -84,7 +87,6 @@ describe('tokens/erc20/impls/ERC20TokenWrappedImpl // mocked', () => {
         const { tokenImpl, tokenImplTypedData } = fixture;
 
         const typedData = {
-          forwarder: randomAddress(),
           underlyingToken: randomAddress(),
         };
 

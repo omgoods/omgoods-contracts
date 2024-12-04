@@ -75,20 +75,14 @@ export async function setupTokenRegularImpl() {
 
   const tokenImplTypedData = await createTypedDataHelper<{
     Initialization: {
-      forwarder: string;
       owner: string;
       controller: string;
       name: string;
       symbol: string;
-      uriPrefix: string;
       ready: boolean;
     };
   }>(tokenImpl, {
     Initialization: [
-      {
-        name: 'forwarder',
-        type: 'address',
-      },
       {
         name: 'owner',
         type: 'address',
@@ -103,10 +97,6 @@ export async function setupTokenRegularImpl() {
       },
       {
         name: 'symbol',
-        type: 'string',
-      },
-      {
-        name: 'uriPrefix',
         type: 'string',
       },
       {

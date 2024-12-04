@@ -1,4 +1,5 @@
 import { ethers, utils } from 'hardhat';
+import { BigNumberish } from 'ethers';
 import { createTypedDataHelper, TYPED_DATA_DOMAIN_NAME } from '../../../common';
 import { TOKEN_METADATA } from '../../constants';
 import { setupTokenFactory } from '../../fixtures';
@@ -25,6 +26,7 @@ export async function setupTokenImplMock() {
       signers.controller.address,
       TOKEN_METADATA.name,
       TOKEN_METADATA.symbol,
+      TOKEN_METADATA.decimals,
     ]),
   );
 
@@ -61,6 +63,7 @@ export async function setupTokenRegularImpl() {
       signers.controller.address,
       TOKEN_METADATA.name,
       TOKEN_METADATA.symbol,
+      TOKEN_METADATA.decimals,
       false,
     ]),
   );
@@ -69,19 +72,15 @@ export async function setupTokenRegularImpl() {
 
   const tokenImplTypedData = await createTypedDataHelper<{
     Initialization: {
-      forwarder: string;
       owner: string;
       controller: string;
       name: string;
       symbol: string;
+      decimals: BigNumberish;
       ready: boolean;
     };
   }>(tokenImpl, {
     Initialization: [
-      {
-        name: 'forwarder',
-        type: 'address',
-      },
       {
         name: 'owner',
         type: 'address',
@@ -97,6 +96,10 @@ export async function setupTokenRegularImpl() {
       {
         name: 'symbol',
         type: 'string',
+      },
+      {
+        name: 'decimals',
+        type: 'uint8',
       },
       {
         name: 'ready',
@@ -147,15 +150,10 @@ export async function setupTokenWrappedImpl() {
 
   const tokenImplTypedData = await createTypedDataHelper<{
     Initialization: {
-      forwarder: string;
       underlyingToken: string;
     };
   }>(tokenImpl, {
     Initialization: [
-      {
-        name: 'forwarder',
-        type: 'address',
-      },
       {
         name: 'underlyingToken',
         type: 'address',

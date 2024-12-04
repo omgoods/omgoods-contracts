@@ -5,18 +5,16 @@ import {ERC721TokenImpl} from "./ERC721TokenImpl.sol";
 
 contract ERC721TokenRegularImpl is ERC721TokenImpl {
   struct InitializationData {
-    address forwarder;
     address owner;
     address controller;
     string name;
     string symbol;
-    string uriPrefix;
     bool ready;
   }
 
   bytes32 private constant INITIALIZATION_TYPEHASH =
     keccak256(
-      "Initialization(address forwarder,address owner,address controller,string name,string symbol,string uriPrefix,bool ready)"
+      "Initialization(address owner,address controller,string name,string symbol,bool ready)"
     );
 
   // deployment
@@ -52,12 +50,10 @@ contract ERC721TokenRegularImpl is ERC721TokenImpl {
       _hashInitialization(
         abi.encode(
           INITIALIZATION_TYPEHASH, //
-          initializationData.forwarder,
           initializationData.owner,
           initializationData.controller,
           keccak256(abi.encodePacked(initializationData.name)),
           keccak256(abi.encodePacked(initializationData.symbol)),
-          keccak256(abi.encodePacked(initializationData.uriPrefix)),
           initializationData.ready
         )
       );

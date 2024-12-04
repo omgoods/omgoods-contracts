@@ -115,7 +115,7 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
     uint8 kind,
     bytes calldata encodedData
   ) external onlyToken {
-    _emitTokenNotification(msg.sender, kind, encodedData, block.timestamp);
+    _emitTokenNotification(kind, encodedData);
   }
 
   // private getters
@@ -161,11 +161,9 @@ contract TokenFactory is EIP712, Guarded, CloneFactory, Initializable {
   }
 
   function _emitTokenNotification(
-    address token,
     uint8 kind,
-    bytes calldata encodedData,
-    uint256 timestamp
+    bytes calldata encodedData
   ) private {
-    emit TokenNotification(token, kind, encodedData, timestamp);
+    emit TokenNotification(msg.sender, kind, encodedData, block.timestamp);
   }
 }

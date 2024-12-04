@@ -26,7 +26,7 @@ describe('tokens/erc20/impls/ERC20TokenRegularImpl // mocked', () => {
 
         const tx = token
           .connect(signers.unknown.at(0))
-          .initialize(ZeroAddress, ZeroAddress, ZeroAddress, '', '', false);
+          .initialize(ZeroAddress, ZeroAddress, ZeroAddress, '', '', 0, false);
 
         await expect(tx).revertedWithCustomError(
           token,
@@ -44,11 +44,11 @@ describe('tokens/erc20/impls/ERC20TokenRegularImpl // mocked', () => {
         const { tokenImpl, tokenImplTypedData } = fixture;
 
         const typedData = {
-          forwarder: randomAddress(),
           owner: randomAddress(),
           controller: randomAddress(),
           name: TOKEN_METADATA.name,
           symbol: TOKEN_METADATA.symbol,
+          decimals: TOKEN_METADATA.decimals,
           ready: true,
         };
 

@@ -81,6 +81,7 @@ task(TokenERC20TaskNames.CreateRegular, 'Creates ERC20 regular token')
             owner.address,
             name,
             symbol,
+            18,
             false,
           ]),
         ),

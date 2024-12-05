@@ -79,7 +79,9 @@ task(TokenERC721TaskNames.CreateRegular, 'Creates ERC721 regular token')
     }
 
     if (totalTokens > 0) {
-      for (let index = 0; index > totalTokens; index++) {
+      let minted = false;
+
+      for (let index = 0; index < totalTokens; index++) {
         let owner: string;
         const tokenId = index + 1;
 
@@ -93,10 +95,16 @@ task(TokenERC721TaskNames.CreateRegular, 'Creates ERC721 regular token')
           const to = !index && account ? account : randomAddress();
 
           await logger.logTx(
-            `minting token #{tokenId}`,
+            `minting token #${tokenId}`,
             token.mint(to, tokenId),
           );
+
+          minted = true;
         }
+      }
+
+      if (minted) {
+        logger.log();
       }
     }
   });

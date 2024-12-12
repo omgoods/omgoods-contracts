@@ -21,6 +21,7 @@ const config = createConfig({
     externalKeys: ['A', 'B', 'C', 'D', 'E'],
   },
   networks: {
+    // localnets
     local: {
       chainId: 900,
       type: 'localnet',
@@ -29,25 +30,27 @@ const config = createConfig({
       chainId: 901,
       type: 'localnet',
     },
+    // mainnets
     eth: {
       chainId: 1,
       type: 'mainnet',
-    },
-    ethSepolia: {
-      chainId: 11155111,
-      type: 'testnet',
     },
     op: {
       chainId: 10,
       type: 'mainnet',
     },
-    opSepolia: {
-      chainId: 11155420,
-      type: 'testnet',
-    },
     bnb: {
       chainId: 56,
       type: 'mainnet',
+    },
+    // testnets
+    ethSepolia: {
+      chainId: 11155111,
+      type: 'testnet',
+    },
+    opSepolia: {
+      chainId: 11155420,
+      type: 'testnet',
     },
     bnbTestnet: {
       chainId: 97,

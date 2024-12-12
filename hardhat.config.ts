@@ -25,24 +25,32 @@ const config = createConfig({
       chainId: 900,
       type: 'localnet',
     },
-    localOptimism: {
+    localOp: {
       chainId: 901,
       type: 'localnet',
     },
-    ethereum: {
+    eth: {
       chainId: 1,
       type: 'mainnet',
     },
-    ethereumOptimism: {
-      chainId: 10,
-      type: 'mainnet',
-    },
-    sepolia: {
+    ethSepolia: {
       chainId: 11155111,
       type: 'testnet',
     },
-    sepoliaOptimism: {
+    op: {
+      chainId: 10,
+      type: 'mainnet',
+    },
+    opSepolia: {
       chainId: 11155420,
+      type: 'testnet',
+    },
+    bnb: {
+      chainId: 56,
+      type: 'mainnet',
+    },
+    bnbTestnet: {
+      chainId: 97,
       type: 'testnet',
     },
   },

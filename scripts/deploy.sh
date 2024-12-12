@@ -7,23 +7,27 @@ source "${ROOT_PATH}/common.sh"
 case $1 in
   "localnets")
     hardhat deploy --network local
-    hardhat deploy --network localOptimism
+    hardhat deploy --network localOp
     ;;
 
   "mainnets")
-    # hardhat deploy --network ethereum
-    # hardhat deploy --network ethereumOptimism
+    # hardhat deploy --network eth
+    # hardhat deploy --network op
+    # hardhat deploy --network bnb
 
-    # hardhat deployments:verify --network ethereum
-    # hardhat deployments:verify --network ethereumOptimism
+    # hardhat deployments:verify --network eth
+    # hardhat deployments:verify --network op
+    # hardhat deployments:verify --network bnb
     ;;
 
   "testnets")
-     hardhat deploy --network sepolia
-     hardhat deploy --network sepoliaOptimism
+     hardhat deploy --network ethSepolia
+     hardhat deploy --network opSepolia
+     hardhat deploy --network bnbTestnet
 
-    # hardhat deployments:verify --network sepolia
-    # hardhat deployments:verify --network sepoliaOptimism
+    # hardhat deployments:verify --network ethSepolia
+    # hardhat deployments:verify --network opSepolia
+    # hardhat deployments:verify --network bnbTestnet
     ;;
 
   *) # hardhat

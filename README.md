@@ -33,7 +33,7 @@ cd ./scripts
 
 ./seed.sh [network] [account] # generates tokens and sample events
                               # network (default: hardhat network):
-                              # local, localOptimism 
+                              # local, localOp 
 ```
 
 ## License

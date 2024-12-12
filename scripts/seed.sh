@@ -23,17 +23,17 @@ case $1 in
       --total-regular 2
     ;;
 
-  "localOptimism")
-    hardhat account:faucet --network localOptimism \
+  "localOp")
+    hardhat account:faucet --network localOp \
       --account "$ACCOUNT" \
       --value 100
 
-    hardhat tokens:erc20:generate --network localOptimism \
+    hardhat tokens:erc20:generate --network localOp \
       --account "$ACCOUNT" \
       --initial-metadata-index 80 \
       --total-regular 2
 
-    hardhat tokens:erc721:generate --network localOptimism \
+    hardhat tokens:erc721:generate --network localOp \
       --account "$ACCOUNT" \
       --initial-metadata-index 85 \
       --total-regular 3

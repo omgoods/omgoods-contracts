@@ -17,6 +17,8 @@ abstract contract ACT is
 {
   using ECDSA for bytes32;
 
+  // epoch length
+
   /**
    * @dev Enumeration to represent the different types of "Kinds" supported by the contract.
    * `Unknown` (0) - Represents an undefined or default kind.
@@ -30,9 +32,6 @@ abstract contract ACT is
   }
 
   // storage
-  string private _name;
-
-  string private _symbol;
 
   mapping(address extension => bool enabled) private _enabledExtensions;
 
@@ -132,14 +131,14 @@ abstract contract ACT is
     emit Received(msg.sender, msg.value);
 
     _triggerRegistryEvent(
-      abi.encodeCall(ACTEvents.Received, (msg.sender, msg.value))
+      abi.encodeCall(ACTEvents.received, (msg.sender, msg.value))
     );
   }
 
   // external getters
 
   function getRegistry() external view returns (address) {
-    return _getRegistry();
+    return _getRegistrySlot().value;
   }
 
   function getSystem() external view returns (Systems) {
@@ -158,7 +157,9 @@ abstract contract ACT is
     return _getAuthority();
   }
 
-  function kind() external pure virtual returns (Kinds);
+  function kind() external pure virtual returns (Kinds) {
+    return Kinds.Unknown;
+  }
 
   function name() external view returns (string memory) {
     return _getName();
@@ -191,7 +192,7 @@ abstract contract ACT is
     emit RegistryUpdated(registry);
 
     _triggerRegistryEvent(
-      abi.encodeCall(ACTEvents.RegistryUpdated, (registry))
+      abi.encodeCall(ACTEvents.registryUpdated, (registry))
     );
   }
 
@@ -213,7 +214,7 @@ abstract contract ACT is
 
     emit BecameReady();
 
-    _triggerRegistryEvent(abi.encodeCall(ACTEvents.BecameReady, ()));
+    _triggerRegistryEvent(abi.encodeCall(ACTEvents.becameReady, ()));
   }
 
   function setOwner(address owner) external onlyOwner {
@@ -269,14 +270,6 @@ abstract contract ACT is
       _getSystem() == Systems.AbsoluteMonarchy ? _getOwner() : address(this);
   }
 
-  function _getName() internal view returns (string memory) {
-    return _name;
-  }
-
-  function _getSymbol() internal view returns (string memory) {
-    return _symbol;
-  }
-
   function _hasExtensionEnabled(
     address extension
   ) internal view returns (bool) {
@@ -305,14 +298,6 @@ abstract contract ACT is
   }
 
   // internal setters
-
-  function _setName(string calldata name_) internal {
-    _name = name_;
-  }
-
-  function _setSymbol(string calldata symbol_) internal {
-    _symbol = symbol_;
-  }
 
   function _enableExtension(address extension) internal {
     _enabledExtensions[extension] = true;

@@ -1,16 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {SlotAccess} from "../utils/SlotAccess.sol";
 
 abstract contract ACTStorage {
-  enum Systems {
-    Unknown, // 0
-    AbsoluteMonarchy, // 1
-    ConstitutionalMonarchy, // 2
-    Democracy // 3
-  }
-
   // slots
 
   bytes32 private constant SLOT_REGISTRY =
@@ -25,7 +19,30 @@ abstract contract ACTStorage {
   bytes32 private constant SLOT_OWNER =
     keccak256(abi.encodePacked("ACT#owner"));
 
+  bytes32 private constant SLOT_NAME = //
+    keccak256(abi.encodePacked("ACT#name"));
+
+  bytes32 private constant SLOT_SYMBOL = //
+    keccak256(abi.encodePacked("ACT#symbol"));
+
+  // enums
+
+  enum Systems {
+    Unknown, // 0
+    AbsoluteMonarchy, // 1
+    ConstitutionalMonarchy, // 2
+    Democracy // 3
+  }
+
   // internal getters
+
+  function _getRegistrySlot()
+    internal
+    view
+    returns (StorageSlot.AddressSlot storage)
+  {
+    return StorageSlot.getAddressSlot(SLOT_REGISTRY);
+  }
 
   function _getRegistry() internal view returns (address) {
     return SlotAccess.getAddress(SLOT_REGISTRY);
@@ -60,4 +77,23 @@ abstract contract ACTStorage {
   function _setOwner(address owner) internal {
     SlotAccess.setAddress(SLOT_OWNER, owner);
   }
+
+  // test
+
+  function _getName() internal view returns (string memory) {
+    return SlotAccess.getString(SLOT_NAME);
+  }
+
+  function _getSymbol() internal view returns (string memory) {
+    return SlotAccess.getString(SLOT_SYMBOL);
+  }
+
+  function _setName(string memory name_) internal {
+    return SlotAccess.setString(SLOT_NAME, name_);
+  }
+
+  function _setSymbol(string memory symbol_) internal {
+    return SlotAccess.setString(SLOT_SYMBOL, symbol_);
+  }
+
 }

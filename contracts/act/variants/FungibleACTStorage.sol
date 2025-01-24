@@ -8,11 +8,11 @@ abstract contract FungibleACTStorage is ACTStorage {
   bytes32 private constant SLOT_TOTAL_SUPPLY =
     keccak256(abi.encodePacked("FungibleACT#totalSupply"));
 
-  bytes32 private constant SLOT_BALANCE =
-    keccak256(abi.encodePacked("FungibleACT#balance"));
-
   bytes32 private constant SLOT_ALLOWANCE =
     keccak256(abi.encodePacked("FungibleACT#allowance"));
+
+  bytes32 private constant SLOT_BALANCE =
+    keccak256(abi.encodePacked("FungibleACT#balance"));
 
   // internal getters
 
@@ -35,7 +35,7 @@ abstract contract FungibleACTStorage is ACTStorage {
     address owner,
     address spender
   ) private pure returns (bytes32) {
-    return keccak256(abi.encodePacked(SLOT_BALANCE, owner, spender));
+    return keccak256(abi.encodePacked(SLOT_ALLOWANCE, owner, spender));
   }
 
   function _getBalanceSlot(address account) private pure returns (bytes32) {

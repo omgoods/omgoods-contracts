@@ -1,0 +1,27 @@
+# os
+.DS_Store
+
+# ide
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# node
+node_modules
+
+# hardhat
+.hardhat
+coverage*
+typechain
+
+# envs
+.env*.local

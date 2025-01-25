@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "../../interfaces/IERC20.sol";
 import {ACT} from "../ACT.sol";
+import {ACTKinds} from "../enums.sol";
 import {FungibleACTEvents} from "./FungibleACTEvents.sol";
 import {FungibleACTStorage} from "./FungibleACTStorage.sol";
 
@@ -31,8 +32,8 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
 
   // external getters
 
-  function kind() external pure override returns (Kinds) {
-    return Kinds.Fungible;
+  function kind() external pure override returns (ACTKinds) {
+    return ACTKinds.Fungible;
   }
 
   function decimals() external pure returns (uint8) {
@@ -64,10 +65,7 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
     return true;
   }
 
-  function transfer(
-    address to,
-    uint256 value
-  ) external whenReadyWithExceptions returns (bool) {
+  function transfer(address to, uint256 value) external returns (bool) {
     if (value == 0) {
       // nothing to do
       return false;
@@ -84,7 +82,7 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
     address from,
     address to,
     uint256 value
-  ) external whenReadyWithExceptions returns (bool) {
+  ) external returns (bool) {
     if (value == 0) {
       // nothing to do
       return false;

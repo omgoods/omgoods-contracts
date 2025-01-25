@@ -2,11 +2,12 @@
 pragma solidity 0.8.28;
 
 import {ACT} from "../ACT.sol";
+import {ACTKinds} from "../enums.sol";
 
 contract NonFungibleACT is ACT {
   // external getters
 
-  function kind() external pure override returns (Kinds) {
-    return Kinds.NonFungible;
+  function kind() external pure override returns (ACTKinds) {
+    return ACTKinds.NonFungible;
   }
 }

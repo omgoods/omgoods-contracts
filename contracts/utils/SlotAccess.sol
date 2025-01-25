@@ -4,6 +4,8 @@ pragma solidity 0.8.28;
 /* solhint-disable no-inline-assembly */
 
 library SlotAccess {
+  // structs
+
   struct BytesSlot {
     bytes value;
   }

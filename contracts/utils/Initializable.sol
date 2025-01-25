@@ -1,10 +1,12 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
+import {SlotAccess} from "./SlotAccess.sol";
 
 abstract contract Initializable {
-  bytes32 private constant INITIALIZED_SLOT =
+  // slots
+
+  bytes32 private constant SLOT_INITIALIZED =
     keccak256(abi.encodePacked("Initializable#initialized"));
 
   // errors
@@ -32,7 +34,7 @@ abstract contract Initializable {
   }
 
   function _setInitialized(bool initialized) internal {
-    StorageSlot.getBooleanSlot(INITIALIZED_SLOT).value = initialized;
+    SlotAccess.setBool(SLOT_INITIALIZED, initialized);
   }
 
   function _requireInitializeOnce() internal {
@@ -44,6 +46,6 @@ abstract contract Initializable {
   // internal getters
 
   function _isInitialized() internal view returns (bool) {
-    return StorageSlot.getBooleanSlot(INITIALIZED_SLOT).value;
+    return SlotAccess.getBool(SLOT_INITIALIZED);
   }
 }

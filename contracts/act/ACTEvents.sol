@@ -1,10 +1,15 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
+import {ACTSystems} from "./enums.sol";
 
 interface ACTEvents {
-  function received(address sender, uint256 value) external view;
+  function NameUpdated(string memory name) external view;
 
-  function becameReady() external view;
+  function RegistryUpdated(address registry) external view;
 
-  function registryUpdated(address registry) external view;
+  function MaintainerUpdated(address maintainer) external view;
+
+  function SystemUpdated(ACTSystems system) external view;
+
+  function BecameReady() external view;
 }

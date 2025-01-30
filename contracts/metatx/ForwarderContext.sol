@@ -16,7 +16,7 @@ abstract contract ForwarderContext is Context {
 
   // internal getters
 
-  function _getForwarder() internal view returns (address) {
+  function _getForwarder() internal view virtual returns (address) {
     return _forwarder;
   }
 
@@ -24,7 +24,7 @@ abstract contract ForwarderContext is Context {
     uint256 calldataLength = msg.data.length;
 
     if (
-      msg.sender == _forwarder && //
+      msg.sender == _getForwarder() && //
       calldataLength >= 20
     ) {
       return address(bytes20(msg.data[calldataLength - 20:]));
@@ -35,7 +35,7 @@ abstract contract ForwarderContext is Context {
 
   // internal setters
 
-  function _setForwarder(address forwarder) internal {
+  function _setForwarder(address forwarder) internal virtual {
     _forwarder = forwarder;
   }
 }

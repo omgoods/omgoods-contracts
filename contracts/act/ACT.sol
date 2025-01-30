@@ -5,22 +5,26 @@ import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {ITokenMetadata} from "../interfaces/ITokenMetadata.sol";
 import {ForwarderContext} from "../metatx/ForwarderContext.sol";
 import {Delegatable} from "../utils/Delegatable.sol";
-import {Initializable} from "../utils/Initializable.sol";
+import {ACTKinds} from "./enums/ACTKinds.sol";
+import {ACTSystems} from "./enums/ACTSystems.sol";
+import {IACT} from "./interfaces/IACT.sol";
+import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
+import {ACTSettings} from "./structs/ACTSettings.sol";
 import {ACTEvents} from "./ACTEvents.sol";
-import {ACTRegistry} from "./ACTRegistry.sol";
 import {ACTStorage} from "./ACTStorage.sol";
-import {ACTKinds, ACTSystems} from "./enums.sol";
 
 abstract contract ACT is
   ITokenMetadata,
   ForwarderContext,
   Delegatable,
-  Initializable,
+  IACT,
   ACTStorage
 {
   using ECDSA for bytes32;
 
   // errors
+
+  error AlreadyInitialized();
 
   error AlreadyInReadyState();
 
@@ -40,6 +44,12 @@ abstract contract ACT is
 
   event BecameReady();
 
+  // modifiers
+
+  modifier onlyOwnerOrModule() {
+    _;
+  }
+
   // deployment
 
   function initialize(
@@ -47,29 +57,42 @@ abstract contract ACT is
     string calldata name_,
     string calldata symbol_,
     address maintainer,
-    bool ready
-  ) external initializeOnce {
+    bool ready,
+    uint128 epochLength,
+    uint128 initialEpoch
+  ) external {
+    require(_getRegistry() == address(0), AlreadyInitialized());
+
     _setForwarder(forwarder);
     _setName(name_);
     _setSymbol(symbol_);
     _setRegistry(msg.sender);
 
+    ACTSettings storage settings = _getSettings();
+
     if (maintainer == address(0) || maintainer == address(this)) {
-      _setSystem(ACTSystems.Democracy);
+      settings.system = uint8(ACTSystems.Democracy);
     } else {
+      settings.system = uint8(ACTSystems.AbsoluteMonarchy);
       _setMaintainer(maintainer);
-      _setSystem(ACTSystems.AbsoluteMonarchy);
     }
 
     if (ready) {
-      _setAsReady();
+      settings.ready = true;
     }
+
+    settings.initialEpoch = initialEpoch;
+    settings.epochLength = epochLength;
   }
 
   // external getters
 
   function kind() external pure virtual returns (ACTKinds) {
     return ACTKinds.Unknown;
+  }
+
+  function getSettings() external pure returns (ACTSettings memory) {
+    return _getSettings();
   }
 
   function name() external view returns (string memory) {
@@ -84,20 +107,12 @@ abstract contract ACT is
     return _getRegistry();
   }
 
-  function getOwner() external view returns (address) {
-    return _getOwner();
-  }
-
   function getMaintainer() external view returns (address) {
     return _getMaintainer();
   }
 
-  function getSystem() external view returns (ACTSystems) {
-    return _getSystem();
-  }
-
-  function isReady() external view returns (bool) {
-    return _isReady();
+  function getOwner() external view returns (address) {
+    return _getOwner();
   }
 
   // external setters
@@ -111,8 +126,9 @@ abstract contract ACT is
     _triggerRegistryEvent(abi.encodeCall(ACTEvents.NameUpdated, (name_)));
   }
 
-  // TODO: add sender verification
   function setRegistry(address registry) external {
+    // TODO: add sender verification
+
     if (_getRegistry() == registry) {
       // nothing to do
       return;
@@ -127,8 +143,9 @@ abstract contract ACT is
     );
   }
 
-  // TODO: add sender verification
   function setMaintainer(address maintainer) external {
+    // TODO: add sender verification
+
     if (_getMaintainer() == maintainer) {
       // nothing to do
       return;
@@ -143,25 +160,31 @@ abstract contract ACT is
     );
   }
 
-  // TODO: add sender verification
   function setSystem(ACTSystems system) external {
-    if (_getSystem() == system) {
+    ACTSettings storage settings = _getSettings();
+
+    // TODO: add sender verification
+
+    if (ACTSystems(settings.system) == system) {
       // nothing to do
       return;
     }
 
-    _setSystem(system);
+    settings.system = uint8(system);
 
     emit SystemUpdated(system);
 
     _triggerRegistryEvent(abi.encodeCall(ACTEvents.SystemUpdated, (system)));
   }
 
-  // TODO: add sender verification
   function setAsReady() external {
-    require(!_isReady(), AlreadyInReadyState());
+    ACTSettings storage settings = _getSettings();
 
-    _setAsReady();
+    // TODO: add sender verification
+
+    require(!settings.ready, AlreadyInReadyState());
+
+    settings.ready = true;
 
     emit BecameReady();
 
@@ -170,20 +193,41 @@ abstract contract ACT is
 
   // internal getters
 
-  function _getOwner() internal view returns (address _result) {
+  function _getForwarder()
+    internal
+    view
+    override(ForwarderContext, ACTStorage)
+    returns (address)
+  {
+    return ACTStorage._getForwarder();
+  }
+
+  function _getOwner() internal view returns (address) {
+    return _getOwner(_getSettings());
+  }
+
+  function _getOwner(
+    ACTSettings memory settings
+  ) internal view returns (address) {
     return
-      _getSystem() == ACTSystems.AbsoluteMonarchy
+      ACTSystems(settings.system) == ACTSystems.AbsoluteMonarchy
         ? _getMaintainer()
         : address(this);
   }
 
   // internal setters
 
+  function _setForwarder(
+    address forwarder
+  ) internal override(ForwarderContext, ACTStorage) {
+    ACTStorage._setForwarder(forwarder);
+  }
+
   function _triggerRegistryEvent(bytes memory data) internal {
     address registry = _getRegistry();
 
     if (registry != address(0)) {
-      ACTRegistry(registry).emitTokenEvent(data);
+      IACTRegistry(registry).emitTokenEvent(data);
     }
   }
 }

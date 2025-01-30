@@ -3,6 +3,10 @@ pragma solidity 0.8.28;
 
 import {ITokenMetadata} from "./ITokenMetadata.sol";
 
+/// @title IERC20 Interface
+/// @notice This interface defines the standard ERC20 methods and events,
+///         which should be implemented by any ERC20-compliant token.
+/// @dev Inherits metadata methods from ITokenMetadata.sol.
 interface IERC20 is ITokenMetadata {
   // events
 

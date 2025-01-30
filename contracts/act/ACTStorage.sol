@@ -2,12 +2,17 @@
 pragma solidity 0.8.28;
 
 import {SlotAccess} from "../utils/SlotAccess.sol";
-import {ACTSystems} from "./enums.sol";
+import {ACTSystems} from "./enums/ACTSystems.sol";
+import {ACTSettings} from "./structs/ACTSettings.sol";
 
 abstract contract ACTStorage {
-  // TODO: add epoch, epoch length, powers
-
   // slots
+
+  bytes32 private constant SLOT_FORWARDER = //
+  keccak256(abi.encodePacked("ACT#forwarder"));
+
+  bytes32 private constant SLOT_SETTINGS = //
+  keccak256(abi.encodePacked("ACT#settings"));
 
   bytes32 private constant SLOT_NAME = //
   keccak256(abi.encodePacked("ACT#name"));
@@ -21,12 +26,6 @@ abstract contract ACTStorage {
   bytes32 private constant SLOT_MAINTAINER =
   keccak256(abi.encodePacked("ACT#maintainer"));
 
-  bytes32 private constant SLOT_SYSTEM =
-  keccak256(abi.encodePacked("ACT#system"));
-
-  bytes32 private constant SLOT_READY =
-  keccak256(abi.encodePacked("ACT#ready"));
-
   bytes32 private constant SLOT_TOTAL_SUPPLY =
   keccak256(abi.encodePacked("ACT#totalSupply"));
 
@@ -34,6 +33,20 @@ abstract contract ACTStorage {
   keccak256(abi.encodePacked("ACT#balance"));
 
   // internal getters
+
+  function _getForwarder() internal virtual view returns (address) {
+    return SlotAccess.getAddress(SLOT_FORWARDER);
+  }
+
+  function _getSettings() internal pure returns (ACTSettings storage result) {
+    bytes32 slot = SLOT_SETTINGS;
+
+    assembly ("memory-safe") {
+      result.slot := slot
+    }
+
+    return result;
+  }
 
   function _getName() internal view returns (string memory) {
     return SlotAccess.getString(SLOT_NAME);
@@ -51,23 +64,27 @@ abstract contract ACTStorage {
     return SlotAccess.getAddress(SLOT_MAINTAINER);
   }
 
-  function _getSystem() internal view returns (ACTSystems) {
-    return ACTSystems(SlotAccess.getUint256(SLOT_SYSTEM));
-  }
-
-  function _isReady() internal view returns (bool) {
-    return SlotAccess.getBool(SLOT_READY);
-  }
-
   function _getTotalSupply() internal view returns (uint256) {
     return SlotAccess.getUint256(SLOT_TOTAL_SUPPLY);
   }
 
+  function _getBalance(bytes32 slot) internal view returns (uint256) {
+    return SlotAccess.getUint256(slot);
+  }
+
   function _getBalance(address account) internal view returns (uint256) {
-    return SlotAccess.getUint256(_getBalanceSlot(account));
+    return SlotAccess.getUint256(_hashBalanceSlot(account));
+  }
+
+  function _hashBalanceSlot(address account) internal pure returns (bytes32) {
+    return keccak256(abi.encodePacked(SLOT_BALANCE, account));
   }
 
   // internal setters
+
+  function _setForwarder(address forwarder) internal virtual {
+    SlotAccess.setAddress(SLOT_FORWARDER, forwarder);
+  }
 
   function _setName(string memory name_) internal {
     return SlotAccess.setString(SLOT_NAME, name_);
@@ -85,25 +102,15 @@ abstract contract ACTStorage {
     SlotAccess.setAddress(SLOT_MAINTAINER, maintainer);
   }
 
-  function _setSystem(ACTSystems system) internal {
-    SlotAccess.setUint256(SLOT_SYSTEM, uint256(system));
-  }
-
-  function _setAsReady() internal {
-    SlotAccess.setBool(SLOT_READY, true);
-  }
-
   function _setTotalSupply(uint256 totalSupply_) internal {
     SlotAccess.setUint256(SLOT_TOTAL_SUPPLY, totalSupply_);
   }
 
-  function _setBalance(address account, uint256 balance) internal {
-    SlotAccess.setUint256(_getBalanceSlot(account), balance);
+  function _setBalance(bytes32 slot, uint256 balance) internal {
+    SlotAccess.setUint256(slot, balance);
   }
 
-  // private getters
-
-  function _getBalanceSlot(address account) private pure returns (bytes32) {
-    return keccak256(abi.encodePacked(SLOT_BALANCE, account));
+  function _setBalance(address account, uint256 balance) internal {
+    SlotAccess.setUint256(_hashBalanceSlot(account), balance);
   }
 }

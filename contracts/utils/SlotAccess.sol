@@ -6,68 +6,38 @@ pragma solidity 0.8.28;
 library SlotAccess {
   // structs
 
-  struct BytesSlot {
-    bytes value;
-  }
-
   struct StringSlot {
     string value;
   }
 
   // internal getters
 
-  function getAddress(bytes32 slot) internal view returns (address) {
+  function getAddress(bytes32 slot) internal view returns (address result) {
     assembly ("memory-safe") {
-      mstore(0x00, sload(slot))
-      return(0x00, 0x20)
+      result := sload(slot)
     }
   }
 
-  function getUint256(bytes32 slot) internal view returns (uint256) {
+  function getUint256(bytes32 slot) internal view returns (uint256 result) {
     assembly ("memory-safe") {
-      mstore(0x00, sload(slot))
-      return(0x00, 0x20)
+      result := sload(slot)
     }
   }
 
-  function getBool(bytes32 slot) internal view returns (bool) {
+  function getBool(bytes32 slot) internal view returns (bool result) {
     assembly ("memory-safe") {
-      mstore(0x00, sload(slot))
-      return(0x00, 0x20)
+      result := sload(slot)
     }
   }
 
-  function getBytes32(bytes32 slot) internal view returns (bytes32) {
+  function getBytes32(bytes32 slot) internal view returns (bytes32 result) {
     assembly ("memory-safe") {
-      mstore(0x00, sload(slot))
-      return(0x00, 0x20)
+      result := sload(slot)
     }
-  }
-
-  function getBytes(bytes32 slot) internal view returns (bytes memory) {
-    return getBytesSlot(slot).value;
-  }
-
-  function getBytesSlot(
-    bytes32 slot
-  ) internal view returns (BytesSlot storage result) {
-    assembly ("memory-safe") {
-      result.slot := slot
-    }
-    return result;
   }
 
   function getString(bytes32 slot) internal view returns (string memory) {
     return getStringSlot(slot).value;
-  }
-
-  function getStringSlot(
-    bytes32 slot
-  ) internal view returns (StringSlot storage result) {
-    assembly ("memory-safe") {
-      result.slot := slot
-    }
-    return result;
   }
 
   // internal setters
@@ -100,7 +70,15 @@ library SlotAccess {
     getStringSlot(slot).value = value;
   }
 
-  function setBytes(bytes32 slot, bytes memory value) internal {
-    getBytesSlot(slot).value = value;
+  // private getters
+
+  function getStringSlot(
+    bytes32 slot
+  ) private pure returns (StringSlot storage result) {
+    assembly ("memory-safe") {
+      result.slot := slot
+    }
+
+    return result;
   }
 }

@@ -6,10 +6,3 @@ enum ACTKinds {
   Fungible, // 1
   NonFungible // 2
 }
-
-enum ACTSystems {
-  Unknown, // 0
-  AbsoluteMonarchy, // 1
-  ConstitutionalMonarchy, // 2
-  Democracy // 3
-}

@@ -2,7 +2,7 @@
 pragma solidity 0.8.28;
 
 import {ACT} from "../ACT.sol";
-import {ACTKinds} from "../enums.sol";
+import {ACTKinds} from "../enums/ACTKinds.sol";
 
 contract NonFungibleACT is ACT {
   // external getters

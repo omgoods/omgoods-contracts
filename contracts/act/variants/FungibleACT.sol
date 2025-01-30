@@ -3,7 +3,7 @@ pragma solidity 0.8.28;
 
 import {IERC20} from "../../interfaces/IERC20.sol";
 import {ACT} from "../ACT.sol";
-import {ACTKinds} from "../enums.sol";
+import {ACTKinds} from "../enums/ACTKinds.sol";
 import {FungibleACTEvents} from "./FungibleACTEvents.sol";
 import {FungibleACTStorage} from "./FungibleACTStorage.sol";
 
@@ -71,9 +71,11 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
       return false;
     }
 
+    address from = _msgSender();
+
     require(to != address(0), InvalidReceiver(address(0)));
 
-    _transfer(_msgSender(), to, value);
+    _transfer(from, to, value);
 
     return true;
   }
@@ -113,6 +115,17 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
     return true;
   }
 
+  function mint(address to, uint256 value) external {
+    if (value == 0) {
+      // nothing to do
+      return;
+    }
+
+    require(to != address(0), InvalidReceiver(address(0)));
+
+    _transfer(address(0), to, value);
+  }
+
   // internal setters
 
   function _approve(
@@ -138,7 +151,8 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
         _getTotalSupply() + value //
       );
     } else {
-      uint256 fromBalance = _getBalance(from);
+      bytes32 fromBalanceSlot = _hashBalanceSlot(from);
+      uint256 fromBalance = _getBalance(fromBalanceSlot);
 
       require(
         fromBalance >= value,
@@ -146,7 +160,7 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
       );
 
       unchecked {
-        _setBalance(from, fromBalance - value);
+        _setBalance(fromBalanceSlot, fromBalance - value);
       }
     }
 

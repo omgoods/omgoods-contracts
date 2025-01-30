@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
-import {ACTSystems} from "./enums.sol";
+
+import {ACTSystems} from "./enums/ACTSystems.sol";
 
 interface ACTEvents {
   function NameUpdated(string memory name) external view;

@@ -1,28 +1,29 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {IERC20} from "../../interfaces/IERC20.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ACT} from "../ACT.sol";
-import {ACTKinds} from "../enums/ACTKinds.sol";
+import {ACTCore} from "../ACTCore.sol";
 import {FungibleACTEvents} from "./FungibleACTEvents.sol";
-import {FungibleACTStorage} from "./FungibleACTStorage.sol";
 
-contract FungibleACT is IERC20, ACT, FungibleACTStorage {
+contract FungibleACT is IERC20Metadata, ACT {
+  // slots
+
+  bytes32 private constant ALLOWANCE_SLOT =
+    keccak256(abi.encodePacked("FungibleACT#allowance"));
+
   // errors
 
-  error InsufficientBalance(address sender, uint256 balance, uint256 needed);
+  error InsufficientBalance();
 
-  error InsufficientAllowance(
-    address spender,
-    uint256 allowance,
-    uint256 needed
-  );
+  error InsufficientAllowance();
 
-  error InvalidSender(address sender);
+  error ZeroAddressSender();
 
-  error InvalidReceiver(address receiver);
+  error ZeroAddressReceiver();
 
-  error InvalidSpender(address spender);
+  error ZeroAddressSpender();
 
   // deployment
 
@@ -32,8 +33,16 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
 
   // external getters
 
-  function kind() external pure override returns (ACTKinds) {
-    return ACTKinds.Fungible;
+  function kind() external pure override returns (ACTCore.Kinds) {
+    return ACTCore.Kinds.Fungible;
+  }
+
+  function name() external view returns (string memory) {
+    return _getNameSlot().value;
+  }
+
+  function symbol() external view returns (string memory) {
+    return _getSymbolSlot().value;
   }
 
   function decimals() external pure returns (uint8) {
@@ -41,26 +50,30 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
   }
 
   function totalSupply() external view returns (uint256) {
-    return _getTotalSupply();
+    return _getTotalSupplySlot().value;
   }
 
   function allowance(
     address owner,
     address spender
   ) external view returns (uint256) {
-    return _getAllowance(owner, spender);
+    return _getAllowanceSlot(owner, spender).value;
   }
 
   function balanceOf(address account) external view returns (uint256) {
-    return _getBalance(account);
+    return _getBalanceSlot(account).value;
   }
 
   // external setters
 
   function approve(address spender, uint256 value) external returns (bool) {
-    require(spender != address(0), InvalidSpender(address(0)));
+    require(spender != address(0), ZeroAddressSpender());
 
-    _approve(_msgSender(), spender, value);
+    address owner = _msgSender();
+
+    _getAllowanceSlot(owner, spender).value = value;
+
+    _emitApprovalEvent(owner, spender, value);
 
     return true;
   }
@@ -73,9 +86,9 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
 
     address from = _msgSender();
 
-    require(to != address(0), InvalidReceiver(address(0)));
+    require(to != address(0), ZeroAddressReceiver());
 
-    _transfer(from, to, value);
+    _transfer(from, to, value, value);
 
     return true;
   }
@@ -90,51 +103,95 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
       return false;
     }
 
-    require(from != address(0), InvalidSender(address(0)));
-    require(to != address(0), InvalidReceiver(address(0)));
+    require(from != address(0), ZeroAddressSender());
+    require(to != address(0), ZeroAddressReceiver());
 
     address spender = _msgSender();
 
-    uint256 fromAllowance = _getAllowance(from, spender);
+    StorageSlot.Uint256Slot storage fromAllowanceSlot = _getAllowanceSlot(
+      from,
+      spender
+    );
+
+    uint256 fromAllowance = fromAllowanceSlot.value;
 
     if (fromAllowance != type(uint256).max) {
-      require(
-        fromAllowance >= value,
-        InsufficientAllowance(spender, fromAllowance, value)
-      );
+      require(fromAllowance >= value, InsufficientAllowance());
 
       unchecked {
-        fromAllowance -= value;
+        fromAllowanceSlot.value = fromAllowance - value;
       }
 
-      _approve(from, spender, fromAllowance);
+      _emitApprovalEvent(from, spender, fromAllowance);
     }
 
-    _transfer(from, to, value);
+    _transfer(from, to, value, value);
 
     return true;
   }
 
-  function mint(address to, uint256 value) external {
+  function mint(address to, uint256 value, uint256 votingUnits) external {
     if (value == 0) {
       // nothing to do
       return;
     }
 
-    require(to != address(0), InvalidReceiver(address(0)));
+    require(to != address(0), ZeroAddressReceiver());
 
-    _transfer(address(0), to, value);
+    _transfer(address(0), to, value, votingUnits);
   }
 
-  // internal setters
+  // private getters
 
-  function _approve(
+  function _getAllowanceSlot(
+    address owner,
+    address spender
+  ) private pure returns (StorageSlot.Uint256Slot storage) {
+    return
+      StorageSlot.getUint256Slot(
+        keccak256(abi.encodePacked(ALLOWANCE_SLOT, owner, spender)) //
+      );
+  }
+
+  // private setters
+
+  function _transfer(
+    address from,
+    address to,
+    uint256 value,
+    uint256 votingUnits
+  ) private {
+    if (from == address(0)) {
+      _getTotalSupplySlot().value += value;
+    } else {
+      StorageSlot.Uint256Slot storage fromBalanceSlot = _getBalanceSlot(from);
+      uint256 fromBalance = fromBalanceSlot.value;
+
+      require(fromBalance >= value, InsufficientBalance());
+
+      unchecked {
+        fromBalanceSlot.value = fromBalance - value;
+      }
+    }
+
+    unchecked {
+      if (to == address(0)) {
+        _getTotalSupplySlot().value -= value;
+      } else {
+        _getBalanceSlot(to).value += value;
+      }
+    }
+
+    _transferVotingUnits(from, to, votingUnits);
+
+    _emitTransferEvent(from, to, value, votingUnits);
+  }
+
+  function _emitApprovalEvent(
     address owner,
     address spender,
     uint256 value
-  ) internal virtual {
-    _setAllowance(owner, spender, value);
-
+  ) private {
     emit Approval(owner, spender, value);
 
     _triggerRegistryEvent(
@@ -145,42 +202,19 @@ contract FungibleACT is IERC20, ACT, FungibleACTStorage {
     );
   }
 
-  function _transfer(address from, address to, uint256 value) internal virtual {
-    if (from == address(0)) {
-      _setTotalSupply(
-        _getTotalSupply() + value //
-      );
-    } else {
-      bytes32 fromBalanceSlot = _hashBalanceSlot(from);
-      uint256 fromBalance = _getBalance(fromBalanceSlot);
-
-      require(
-        fromBalance >= value,
-        InsufficientBalance(from, fromBalance, value)
-      );
-
-      unchecked {
-        _setBalance(fromBalanceSlot, fromBalance - value);
-      }
-    }
-
-    unchecked {
-      if (to == address(0)) {
-        _setTotalSupply(
-          _getTotalSupply() - value //
-        );
-      } else {
-        _setBalance(
-          to, //
-          _getBalance(to) + value
-        );
-      }
-    }
-
+  function _emitTransferEvent(
+    address from,
+    address to,
+    uint256 value,
+    uint256 votingUnits
+  ) private {
     emit Transfer(from, to, value);
 
     _triggerRegistryEvent(
-      abi.encodeCall(FungibleACTEvents.FungibleTransfer, (from, to, value))
+      abi.encodeCall(
+        FungibleACTEvents.FungibleTransfer,
+        (from, to, value, votingUnits)
+      )
     );
   }
 }

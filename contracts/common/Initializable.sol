@@ -1,16 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {SlotAccess} from "./SlotAccess.sol";
+import {IInitializable} from "./interfaces/IInitializable.sol";
 
-abstract contract Initializable {
-  // storage
-
+abstract contract Initializable is IInitializable {
   bool private _initialized;
-
-  // errors
-
-  error AlreadyInitialized();
 
   // modifiers
 
@@ -40,7 +34,7 @@ abstract contract Initializable {
 
   // internal getters
 
-  function _isInitialized() internal view returns (bool) {
+  function _isInitialized() internal view virtual returns (bool) {
     return _initialized;
   }
 }

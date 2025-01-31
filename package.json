@@ -13,17 +13,28 @@
   },
   "devDependencies": {
     "@eslint/js": "9.18.0",
-    "@nomicfoundation/hardhat-toolbox-viem": "3.0.0",
+    "@nomicfoundation/hardhat-ignition-viem": "0.15.9",
+    "@nomicfoundation/hardhat-network-helpers": "1.0.12",
+    "@nomicfoundation/hardhat-verify": "2.0.12",
+    "@nomicfoundation/hardhat-viem": "2.0.6",
+    "@types/chai": "4.3.20",
+    "@types/chai-as-promised": "7.1.8",
+    "@types/mocha": "9.1.1",
     "@types/node": "22.10.10",
+    "chai": "4.3.7",
+    "chai-as-promised": "7.1.2",
     "eslint": "9.18.0",
     "eslint-config-prettier": "10.0.1",
     "eslint-plugin-prettier": "5.2.3",
     "globals": "15.14.0",
     "hardhat": "2.22.18",
+    "hardhat-gas-reporter": "2.0.0",
     "prettier": "3.4.2",
     "prettier-plugin-solidity": "1.4.2",
     "solhint": "5.0.5",
+    "solidity-coverage": "0.8.14",
     "typescript": "5.7.3",
-    "typescript-eslint": "8.21.0"
+    "typescript-eslint": "8.21.0",
+    "viem": "2.22.17"
   }
 }

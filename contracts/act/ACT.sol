@@ -2,35 +2,29 @@
 pragma solidity 0.8.28;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {ITokenMetadata} from "../interfaces/ITokenMetadata.sol";
+import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
+import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ForwarderContext} from "../metatx/ForwarderContext.sol";
-import {Delegatable} from "../utils/Delegatable.sol";
-import {ACTKinds} from "./enums/ACTKinds.sol";
-import {ACTSystems} from "./enums/ACTSystems.sol";
+import {IInitializable} from "../common/interfaces/IInitializable.sol";
+import {Delegatable} from "../common/Delegatable.sol";
 import {IACT} from "./interfaces/IACT.sol";
-import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
-import {ACTSettings} from "./structs/ACTSettings.sol";
+import {ACTCore} from "./ACTCore.sol";
 import {ACTEvents} from "./ACTEvents.sol";
-import {ACTStorage} from "./ACTStorage.sol";
 
 abstract contract ACT is
-  ITokenMetadata,
   ForwarderContext,
+  IInitializable,
   Delegatable,
   IACT,
-  ACTStorage
+  ACTCore
 {
   using ECDSA for bytes32;
+  using Checkpoints for Checkpoints.Trace208;
 
   // errors
 
-  error AlreadyInitialized();
-
   error AlreadyInReadyState();
-
-  error MsgSenderIsNotTheOwner(address msgSender);
-
-  error MsgSenderIsNotTheAuthority(address msgSender);
 
   // events
 
@@ -40,7 +34,7 @@ abstract contract ACT is
 
   event MaintainerUpdated(address maintainer);
 
-  event SystemUpdated(ACTSystems system);
+  event SystemUpdated(ACTCore.Systems system);
 
   event BecameReady();
 
@@ -58,100 +52,112 @@ abstract contract ACT is
     string calldata symbol_,
     address maintainer,
     bool ready,
-    uint128 epochLength,
-    uint128 initialEpoch
+    uint48 epochLength
   ) external {
-    require(_getRegistry() == address(0), AlreadyInitialized());
+    StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
 
-    _setForwarder(forwarder);
-    _setName(name_);
-    _setSymbol(symbol_);
-    _setRegistry(msg.sender);
+    require(registrySlot.value == address(0), AlreadyInitialized());
 
-    ACTSettings storage settings = _getSettings();
+    registrySlot.value = msg.sender;
+
+    _getForwarderSlot().value = forwarder;
+    _getNameSlot().value = name_;
+    _getSymbolSlot().value = symbol_;
+
+    ACTCore.Settings storage settings = _getSettings();
 
     if (maintainer == address(0) || maintainer == address(this)) {
-      settings.system = uint8(ACTSystems.Democracy);
+      settings.system = uint8(ACTCore.Systems.Democracy);
     } else {
-      settings.system = uint8(ACTSystems.AbsoluteMonarchy);
-      _setMaintainer(maintainer);
+      settings.system = uint8(ACTCore.Systems.AbsoluteMonarchy);
+      _getMaintainerSlot().value = maintainer;
     }
 
     if (ready) {
       settings.ready = true;
     }
 
-    settings.initialEpoch = initialEpoch;
     settings.epochLength = epochLength;
+    settings.initialEpochTimestamp = Time.timestamp();
   }
 
   // external getters
 
-  function kind() external pure virtual returns (ACTKinds) {
-    return ACTKinds.Unknown;
+  function isInitialized() external view returns (bool) {
+    return _getRegistrySlot().value != address(0);
   }
 
-  function getSettings() external pure returns (ACTSettings memory) {
+  function getSettings() external pure returns (ACTCore.Settings memory) {
     return _getSettings();
   }
 
-  function name() external view returns (string memory) {
-    return _getName();
-  }
-
-  function symbol() external view returns (string memory) {
-    return _getSymbol();
-  }
-
   function getRegistry() external view returns (address) {
-    return _getRegistry();
+    return _getRegistrySlot().value;
   }
 
   function getMaintainer() external view returns (address) {
-    return _getMaintainer();
+    return _getMaintainerSlot().value;
   }
 
   function getOwner() external view returns (address) {
     return _getOwner();
   }
 
+  function getTotalVotingUnits() external view returns (uint256) {
+    return _getTotalVotingUnitsSlot().value;
+  }
+
+  function getVotingUnits(address account) external view returns (uint256) {
+    return _getVotingUnitsSlot(account).value;
+  }
+
   // external setters
 
   // TODO: add sender verification
   function setName(string calldata name_) external {
-    _setName(name_);
+    _getNameSlot().value = name_;
 
     emit NameUpdated(name_);
 
     _triggerRegistryEvent(abi.encodeCall(ACTEvents.NameUpdated, (name_)));
   }
 
+  // TODO: add sender verification
   function setRegistry(address registry) external {
-    // TODO: add sender verification
+    StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
 
-    if (_getRegistry() == registry) {
+    address oldRegistry = registrySlot.value;
+
+    if (oldRegistry == registry) {
       // nothing to do
       return;
     }
 
-    _setRegistry(registry);
+    registrySlot.value = registry;
 
     emit RegistryUpdated(registry);
 
     _triggerRegistryEvent(
+      oldRegistry,
+      abi.encodeCall(ACTEvents.RegistryUpdated, (registry))
+    );
+
+    _triggerRegistryEvent(
+      registry,
       abi.encodeCall(ACTEvents.RegistryUpdated, (registry))
     );
   }
 
+  // TODO: add sender verification
   function setMaintainer(address maintainer) external {
-    // TODO: add sender verification
+    StorageSlot.AddressSlot storage maintainerSlot = _getMaintainerSlot();
 
-    if (_getMaintainer() == maintainer) {
+    if (maintainerSlot.value == maintainer) {
       // nothing to do
       return;
     }
 
-    _setMaintainer(maintainer);
+    maintainerSlot.value = maintainer;
 
     emit MaintainerUpdated(maintainer);
 
@@ -160,12 +166,11 @@ abstract contract ACT is
     );
   }
 
-  function setSystem(ACTSystems system) external {
-    ACTSettings storage settings = _getSettings();
+  // TODO: add sender verification
+  function setSystem(ACTCore.Systems system) external {
+    ACTCore.Settings storage settings = _getSettings();
 
-    // TODO: add sender verification
-
-    if (ACTSystems(settings.system) == system) {
+    if (ACTCore.Systems(settings.system) == system) {
       // nothing to do
       return;
     }
@@ -177,10 +182,9 @@ abstract contract ACT is
     _triggerRegistryEvent(abi.encodeCall(ACTEvents.SystemUpdated, (system)));
   }
 
+  // TODO: add sender verification
   function setAsReady() external {
-    ACTSettings storage settings = _getSettings();
-
-    // TODO: add sender verification
+    ACTCore.Settings storage settings = _getSettings();
 
     require(!settings.ready, AlreadyInReadyState());
 
@@ -191,43 +195,45 @@ abstract contract ACT is
     _triggerRegistryEvent(abi.encodeCall(ACTEvents.BecameReady, ()));
   }
 
-  // internal getters
-
-  function _getForwarder()
-    internal
-    view
-    override(ForwarderContext, ACTStorage)
-    returns (address)
-  {
-    return ACTStorage._getForwarder();
-  }
-
-  function _getOwner() internal view returns (address) {
-    return _getOwner(_getSettings());
-  }
-
-  function _getOwner(
-    ACTSettings memory settings
-  ) internal view returns (address) {
-    return
-      ACTSystems(settings.system) == ACTSystems.AbsoluteMonarchy
-        ? _getMaintainer()
-        : address(this);
-  }
-
   // internal setters
 
-  function _setForwarder(
-    address forwarder
-  ) internal override(ForwarderContext, ACTStorage) {
-    ACTStorage._setForwarder(forwarder);
-  }
+  function _transferVotingUnits(
+    address from,
+    address to,
+    uint256 value
+  ) internal {
+    if (value == 0) {
+      return;
+    }
 
-  function _triggerRegistryEvent(bytes memory data) internal {
-    address registry = _getRegistry();
+    if (from == address(0)) {
+      _getTotalVotingUnitsSlot().value += value;
+    } else {
+      StorageSlot.Uint256Slot storage fromVotingUnitsSlot = _getVotingUnitsSlot(
+        from
+      );
 
-    if (registry != address(0)) {
-      IACTRegistry(registry).emitTokenEvent(data);
+      uint256 fromVotingUnits = fromVotingUnitsSlot.value;
+
+      if (fromVotingUnits == 0) {
+        return;
+      }
+
+      if (fromVotingUnits < value) {
+        value = fromVotingUnits;
+      }
+
+      unchecked {
+        fromVotingUnitsSlot.value = fromVotingUnits - value;
+      }
+    }
+
+    unchecked {
+      if (to == address(0)) {
+        _getTotalVotingUnitsSlot().value -= value;
+      } else {
+        _getVotingUnitsSlot(to).value += value;
+      }
     }
   }
 }

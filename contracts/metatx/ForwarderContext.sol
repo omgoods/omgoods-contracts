@@ -2,40 +2,38 @@
 pragma solidity 0.8.28;
 
 import {Context} from "@openzeppelin/contracts/utils/Context.sol";
+import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 
 abstract contract ForwarderContext is Context {
-  // storage
+  // slots
 
-  address private _forwarder;
+  bytes32 private constant FORWARDER_SLOT =
+    keccak256(abi.encodePacked("ForwarderContext#forwarder"));
 
   // external getters
 
   function getForwarder() external view returns (address) {
-    return _getForwarder();
+    return _getForwarderSlot().value;
   }
 
   // internal getters
 
-  function _getForwarder() internal view virtual returns (address) {
-    return _forwarder;
+  function _getForwarderSlot()
+    internal
+    view
+    virtual
+    returns (StorageSlot.AddressSlot storage)
+  {
+    return StorageSlot.getAddressSlot(FORWARDER_SLOT);
   }
 
   function _msgSender() internal view virtual override returns (address) {
-    uint256 calldataLength = msg.data.length;
+    uint256 dataLength = msg.data.length;
 
-    if (
-      msg.sender == _getForwarder() && //
-      calldataLength >= 20
-    ) {
-      return address(bytes20(msg.data[calldataLength - 20:]));
+    if (dataLength >= 20 && msg.sender == _getForwarderSlot().value) {
+      return address(bytes20(msg.data[dataLength - 20:]));
     } else {
       return super._msgSender();
     }
-  }
-
-  // internal setters
-
-  function _setForwarder(address forwarder) internal virtual {
-    _forwarder = forwarder;
   }
 }

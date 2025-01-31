@@ -1,6 +1,6 @@
 import { viem } from 'hardhat';
 import { zeroAddress, Hash } from 'viem';
-import { loadFixture } from '@nomicfoundation/hardhat-toolbox-viem/network-helpers';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 
 const { deployContract, getContractAt, getPublicClient, getWalletClients } =
   viem;
@@ -42,6 +42,7 @@ describe('act/ACTRegistry', function () {
       symbol,
       zeroAddress,
       true,
+      2,
     ]);
 
     const txReceipt = await publicClient.waitForTransactionReceipt({ hash });

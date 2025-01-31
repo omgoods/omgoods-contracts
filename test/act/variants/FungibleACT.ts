@@ -1,10 +1,10 @@
 import { viem } from 'hardhat';
 import { expect } from 'chai';
-import { loadFixture } from '@nomicfoundation/hardhat-toolbox-viem/network-helpers';
+import { loadFixture } from '@nomicfoundation/hardhat-network-helpers';
 
 const { deployContract, getPublicClient, getWalletClients } = viem;
 
-describe('act/variants/FungibleACT', function () {
+describe.only('act/variants/FungibleACT', function () {
   async function deployFixture() {
     const act = await deployContract('FungibleACT');
     const publicClient = await getPublicClient();
@@ -36,30 +36,34 @@ describe('act/variants/FungibleACT', function () {
             console.log('account:', walletA.account.address);
 
             await act.write.mint(
-              [walletA.account.address, 10_000_000],
+              [walletA.account.address, 10_000_000, 3000],
               walletB,
             );
 
-            const hash = await act.write.transfer(
-              [walletB.account.address, 1_000_000],
-              walletA,
-            );
+            for (let i = 0; i < 10; i++) {
+              console.log();
+              console.log('Transfer #', i);
+              const hash = await act.write.transfer(
+                [walletB.account.address, 1_000],
+                walletA,
+              );
 
-            const txReceipt = await publicClient.waitForTransactionReceipt({
-              hash,
-            });
+              const txReceipt = await publicClient.waitForTransactionReceipt({
+                hash,
+              });
 
-            console.log('gasUsed:', txReceipt?.gasUsed);
+              console.log('gasUsed:', txReceipt?.gasUsed);
 
-            console.log(
-              'walletA.balanceOf:',
-              await act.read.balanceOf([walletA.account.address]),
-            );
-            console.log(
-              'walletB.balanceOf:',
-              await act.read.balanceOf([walletB.account.address]),
-            );
-            console.log('totalSupply:', await act.read.totalSupply());
+              console.log(
+                'walletA.balanceOf:',
+                await act.read.balanceOf([walletA.account.address]),
+              );
+              console.log(
+                'walletB.balanceOf:',
+                await act.read.balanceOf([walletB.account.address]),
+              );
+              console.log('totalSupply:', await act.read.totalSupply());
+            }
           }
         }
 

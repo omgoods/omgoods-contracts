@@ -2,27 +2,15 @@
 pragma solidity 0.8.28;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
 import {ForwarderContext} from "../metatx/ForwarderContext.sol";
 import {IACT} from "./interfaces/IACT.sol";
 import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
 
 contract ACTRegistry is ForwarderContext, IACTRegistry {
-  // storage
-
-  uint128 private _epochLength;
-
-  uint128 private _initialEpochTime;
-
   // events
 
   event TokenEvent(address token, bytes data, uint256 timestamp);
-
-  // deployment
-
-  constructor() {
-    _epochLength = 10;
-    _initialEpochTime = uint128(block.timestamp);
-  }
 
   // external setters
 
@@ -31,20 +19,20 @@ contract ACTRegistry is ForwarderContext, IACTRegistry {
     string calldata name,
     string calldata symbol,
     address maintainer,
-    bool ready
+    bool ready,
+    uint48 epochLength
   ) external returns (address result) {
     result = Clones.cloneDeterministic(variant, _computeTokenSalt(symbol));
 
     IACT token = IACT(result);
 
     token.initialize(
-      _getForwarder(), //
+      _getForwarderSlot().value, //
       name,
       symbol,
       maintainer,
       ready,
-      _epochLength,
-      _initialEpochTime
+      epochLength
     );
 
     return result;

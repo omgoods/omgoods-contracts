@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+import {ACTCore} from "../ACTCore.sol";
+
 interface IACT {
   // deployment
 
@@ -10,7 +12,10 @@ interface IACT {
     string calldata symbol_,
     address maintainer,
     bool ready,
-    uint128 epochLength,
-    uint128 initialEpoch
+    uint48 epochLength
   ) external;
+
+  // external getters
+
+  function kind() external pure returns (ACTCore.Kinds);
 }

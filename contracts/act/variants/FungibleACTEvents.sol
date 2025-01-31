@@ -13,6 +13,7 @@ interface FungibleACTEvents {
   function FungibleTransfer(
     address from,
     address to,
-    uint256 value
+    uint256 value,
+    uint256 votingUnits
   ) external view;
 }

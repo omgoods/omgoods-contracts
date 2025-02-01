@@ -2,7 +2,6 @@
 pragma solidity 0.8.28;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {IInitializable} from "../common/interfaces/IInitializable.sol";
 import {IOwnable} from "../common/interfaces/IOwnable.sol";
@@ -48,7 +47,7 @@ abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
     string calldata symbol_,
     address maintainer,
     bool ready,
-    Epochs.Settings memory epochs
+    Epochs.Settings memory epochSettings
   ) external {
     StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
 
@@ -73,7 +72,7 @@ abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
       _getMaintainerSlot().value = maintainer;
     }
 
-    settings.epochs = epochs;
+    settings.epochs = epochSettings;
   }
 
   // external getters

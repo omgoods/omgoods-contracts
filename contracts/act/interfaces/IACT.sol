@@ -13,7 +13,7 @@ interface IACT {
     string calldata symbol_,
     address maintainer,
     bool ready,
-    Epochs.Settings memory epochs
+    Epochs.Settings memory epochSettings
   ) external;
 
   // external getters

@@ -13,16 +13,21 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   // structs
 
   struct Token {
-    bool created;
+    bytes32 salt;
   }
 
   // storage
 
+  /**
+   * @notice Settings related to token epochs.
+   */
   Epochs.Settings private _epochsSettings;
 
+  /**
+   * @notice Mapping of token addresses to their corresponding `Token` struct.
+   * @dev Stores information about each registered token, including its unique salt.
+   */
   mapping(address addr => Token token) private _tokens;
-
-  mapping(bytes32 salt => address addr) private _tokensSalts;
 
   // errors
 
@@ -56,8 +61,12 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
 
   // modifiers
 
+  /**
+   * @dev Ensures that the function can only be called by a registered token.
+   * Reverts with `MsgSenderIsNotAToken()` error if the caller is not a registered token.
+   */
   modifier onlyToken() {
-    require(_tokens[_msgSender()].created, MsgSenderIsNotAToken());
+    require(_isToken(msg.sender), MsgSenderIsNotAToken());
 
     _;
   }
@@ -117,6 +126,11 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     return _createToken(variant, name, symbol, maintainer, ready);
   }
 
+  /**
+   * @notice Emits a `TokenEvent` for a token-related action or update.
+   * @dev This function can only be called by a registered token via the `onlyToken` modifier.
+   * @param data Additional data to be included in the emitted event.
+   */
   function emitTokenEvent(bytes calldata data) external onlyToken {
     emit TokenEvent(msg.sender, data, block.timestamp);
   }
@@ -136,12 +150,7 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     address variant,
     string calldata symbol
   ) external view returns (address) {
-    return
-      Clones.predictDeterministicAddress(
-        variant,
-        _computeTokenSalt(symbol),
-        address(this)
-      );
+    return _computeTokenAddress(variant, symbol);
   }
 
   // private getters
@@ -157,6 +166,24 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     string calldata symbol
   ) private pure returns (bytes32) {
     return keccak256(abi.encodePacked(symbol));
+  }
+
+  function _computeTokenAddress(
+    address variant,
+    string calldata symbol
+  ) private view returns (address) {
+    return _computeTokenAddress(variant, _computeTokenSalt(symbol));
+  }
+
+  function _computeTokenAddress(
+    address variant,
+    bytes32 salt
+  ) private view returns (address) {
+    return Clones.predictDeterministicAddress(variant, salt, address(this));
+  }
+
+  function _isToken(address token) private view returns (bool) {
+    return _tokens[token].salt != bytes32(0);
   }
 
   // private setters
@@ -179,25 +206,23 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     address maintainer,
     bool ready
   ) private returns (address token) {
-    // Compute the salt for the token using its symbol
     bytes32 salt = _computeTokenSalt(symbol);
 
-    // Ensure the token with the same salt does not already exist
-    require(_tokensSalts[salt] == address(0), TokenAlreadyCreated());
+    require(
+      !_isToken(_computeTokenAddress(variant, salt)),
+      TokenAlreadyCreated()
+    );
 
-    // Clone the token deterministically with the computed salt
     token = Clones.cloneDeterministic(variant, _computeTokenSalt(symbol));
 
-    // Encode the initialization data for the token
     bytes memory data = abi.encodeCall(
       IACT.initialize,
       (_getForwarder(), name, symbol, maintainer, ready, _epochsSettings)
     );
 
-    // Call the token's initialize function with the encoded data
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory response) = token.call(data);
 
-    // If the initialization call fails, revert with the error returned
     if (!success) {
       // solhint-disable-next-line no-inline-assembly
       assembly {
@@ -205,14 +230,10 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
       }
     }
 
-    // Mark the token as created and map the salt to the token address
-    _tokens[token].created = true;
-    _tokensSalts[salt] = token;
+    _tokens[token].salt = salt;
 
-    // Emit the TokenCreated event with the token details
     emit TokenCreated(token, data, block.timestamp);
 
-    // Return the address of the newly created token
     return token;
   }
 }

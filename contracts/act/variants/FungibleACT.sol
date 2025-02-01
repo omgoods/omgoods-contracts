@@ -4,7 +4,7 @@ pragma solidity 0.8.28;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ACT} from "../ACT.sol";
-import {ACTCore} from "../ACTCore.sol";
+import {ACTKinds} from "../enums.sol";
 import {FungibleACTEvents} from "./FungibleACTEvents.sol";
 
 contract FungibleACT is IERC20Metadata, ACT {
@@ -33,8 +33,8 @@ contract FungibleACT is IERC20Metadata, ACT {
 
   // external getters
 
-  function kind() external pure override returns (ACTCore.Kinds) {
-    return ACTCore.Kinds.Fungible;
+  function kind() external pure override returns (ACTKinds) {
+    return ACTKinds.Fungible;
   }
 
   function name() external view returns (string memory) {
@@ -84,11 +84,9 @@ contract FungibleACT is IERC20Metadata, ACT {
       return false;
     }
 
-    address from = _msgSender();
-
     require(to != address(0), ZeroAddressReceiver());
 
-    _transfer(from, to, value, value);
+    _transfer(_msgSender(), to, value);
 
     return true;
   }
@@ -125,12 +123,12 @@ contract FungibleACT is IERC20Metadata, ACT {
       _emitApprovalEvent(from, spender, fromAllowance);
     }
 
-    _transfer(from, to, value, value);
+    _transfer(from, to, value);
 
     return true;
   }
 
-  function mint(address to, uint256 value, uint256 votingUnits) external {
+  function mint(address to, uint256 value) external {
     if (value == 0) {
       // nothing to do
       return;
@@ -138,7 +136,7 @@ contract FungibleACT is IERC20Metadata, ACT {
 
     require(to != address(0), ZeroAddressReceiver());
 
-    _transfer(address(0), to, value, votingUnits);
+    _transfer(address(0), to, value);
   }
 
   // private getters
@@ -155,36 +153,50 @@ contract FungibleACT is IERC20Metadata, ACT {
 
   // private setters
 
-  function _transfer(
-    address from,
-    address to,
-    uint256 value,
-    uint256 votingUnits
-  ) private {
+  function _transfer(address from, address to, uint256 value) private {
+    uint48 epoch = _getEpoch();
+
     if (from == address(0)) {
-      _getTotalSupplySlot().value += value;
+      uint256 totalSupply_ = _getTotalSupplySlot().value + value;
+
+      _getTotalSupplySlot().value = totalSupply_;
+
+      _saveTotalSupplyHistory(epoch, totalSupply_);
     } else {
       StorageSlot.Uint256Slot storage fromBalanceSlot = _getBalanceSlot(from);
+
       uint256 fromBalance = fromBalanceSlot.value;
 
       require(fromBalance >= value, InsufficientBalance());
 
       unchecked {
-        fromBalanceSlot.value = fromBalance - value;
+        fromBalance -= value;
+
+        fromBalanceSlot.value = fromBalance;
+
+        _saveBalanceHistory(from, epoch, fromBalance);
       }
     }
 
     unchecked {
       if (to == address(0)) {
-        _getTotalSupplySlot().value -= value;
+        uint256 totalSupply_ = _getTotalSupplySlot().value - value;
+
+        _getTotalSupplySlot().value = totalSupply_;
+
+        _saveTotalSupplyHistory(epoch, totalSupply_);
       } else {
-        _getBalanceSlot(to).value += value;
+        StorageSlot.Uint256Slot storage toBalanceSlot = _getBalanceSlot(to);
+
+        uint256 toBalance = toBalanceSlot.value + value;
+
+        toBalanceSlot.value = toBalance;
+
+        _saveBalanceHistory(to, epoch, toBalance);
       }
     }
 
-    _transferVotingUnits(from, to, votingUnits);
-
-    _emitTransferEvent(from, to, value, votingUnits);
+    _emitTransferEvent(from, to, epoch, value);
   }
 
   function _emitApprovalEvent(
@@ -205,15 +217,15 @@ contract FungibleACT is IERC20Metadata, ACT {
   function _emitTransferEvent(
     address from,
     address to,
-    uint256 value,
-    uint256 votingUnits
+    uint48 epoch,
+    uint256 value
   ) private {
     emit Transfer(from, to, value);
 
     _triggerRegistryEvent(
       abi.encodeCall(
         FungibleACTEvents.FungibleTransfer,
-        (from, to, value, votingUnits)
+        (from, to, epoch, value)
       )
     );
   }

@@ -4,37 +4,35 @@ pragma solidity 0.8.28;
 import {IInitializable} from "./interfaces/IInitializable.sol";
 
 abstract contract Initializable is IInitializable {
-  bool private _initialized;
+  // storage
+
+  address private _initializer;
+
+  // errors
+
+  error MsgSenderIsNotTheInitializer();
 
   // modifiers
 
   modifier initializeOnce() {
-    _requireInitializeOnce();
+    require(_initializer != address(0), AlreadyInitialized());
+
+    require(msg.sender == _initializer, MsgSenderIsNotTheInitializer());
 
     _;
+
+    delete _initializer;
+  }
+
+  // deployment
+
+  constructor(address initializer) {
+    _initializer = initializer == address(0) ? msg.sender : initializer;
   }
 
   // external getters
 
   function isInitialized() external view returns (bool) {
-    return _isInitialized();
-  }
-
-  // internal setters
-
-  function _setInitialized(bool initialized) internal {
-    _initialized = initialized;
-  }
-
-  function _requireInitializeOnce() internal {
-    require(!_isInitialized(), AlreadyInitialized());
-
-    _setInitialized(true);
-  }
-
-  // internal getters
-
-  function _isInitialized() internal view virtual returns (bool) {
-    return _initialized;
+    return _initializer == address(0);
   }
 }

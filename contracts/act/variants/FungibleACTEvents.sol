@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+/* solhint-disable func-name-mixedcase */
+
 interface FungibleACTEvents {
   // external getters
 
@@ -13,7 +15,7 @@ interface FungibleACTEvents {
   function FungibleTransfer(
     address from,
     address to,
-    uint256 value,
-    uint256 votingUnits
+    uint48 epoch,
+    uint256 value
   ) external view;
 }

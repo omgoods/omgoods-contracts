@@ -2,25 +2,21 @@
 pragma solidity 0.8.28;
 
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import {Checkpoints} from "@openzeppelin/contracts/utils/structs/Checkpoints.sol";
 import {Time} from "@openzeppelin/contracts/utils/types/Time.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
-import {ForwarderContext} from "../metatx/ForwarderContext.sol";
 import {IInitializable} from "../common/interfaces/IInitializable.sol";
+import {IOwnable} from "../common/interfaces/IOwnable.sol";
 import {Delegatable} from "../common/Delegatable.sol";
+import {Epochs} from "../common/Epochs.sol";
 import {IACT} from "./interfaces/IACT.sol";
 import {ACTCore} from "./ACTCore.sol";
 import {ACTEvents} from "./ACTEvents.sol";
+import {ACTSystems} from "./enums.sol";
+import {ACTSettings} from "./structs.sol";
 
-abstract contract ACT is
-  ForwarderContext,
-  IInitializable,
-  Delegatable,
-  IACT,
-  ACTCore
-{
+abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
   using ECDSA for bytes32;
-  using Checkpoints for Checkpoints.Trace208;
+  using Epochs for Epochs.Checkpoints;
 
   // errors
 
@@ -34,7 +30,7 @@ abstract contract ACT is
 
   event MaintainerUpdated(address maintainer);
 
-  event SystemUpdated(ACTCore.Systems system);
+  event SystemUpdated(ACTSystems system);
 
   event BecameReady();
 
@@ -52,7 +48,7 @@ abstract contract ACT is
     string calldata symbol_,
     address maintainer,
     bool ready,
-    uint48 epochLength
+    Epochs.Settings memory epochs
   ) external {
     StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
 
@@ -64,21 +60,20 @@ abstract contract ACT is
     _getNameSlot().value = name_;
     _getSymbolSlot().value = symbol_;
 
-    ACTCore.Settings storage settings = _getSettings();
+    ACTSettings storage settings = _getSettings();
 
     if (maintainer == address(0) || maintainer == address(this)) {
-      settings.system = uint8(ACTCore.Systems.Democracy);
+      settings.system = uint8(ACTSystems.Democracy);
+      settings.ready = true;
     } else {
-      settings.system = uint8(ACTCore.Systems.AbsoluteMonarchy);
+      settings.system = uint8(ACTSystems.AbsoluteMonarchy);
+      if (ready) {
+        settings.ready = ready;
+      }
       _getMaintainerSlot().value = maintainer;
     }
 
-    if (ready) {
-      settings.ready = true;
-    }
-
-    settings.epochLength = epochLength;
-    settings.initialEpochTimestamp = Time.timestamp();
+    settings.epochs = epochs;
   }
 
   // external getters
@@ -87,7 +82,7 @@ abstract contract ACT is
     return _getRegistrySlot().value != address(0);
   }
 
-  function getSettings() external pure returns (ACTCore.Settings memory) {
+  function getSettings() external pure returns (ACTSettings memory) {
     return _getSettings();
   }
 
@@ -103,12 +98,19 @@ abstract contract ACT is
     return _getOwner();
   }
 
-  function getTotalVotingUnits() external view returns (uint256) {
-    return _getTotalVotingUnitsSlot().value;
+  function getEpoch() external view returns (uint48) {
+    return _getEpoch();
   }
 
-  function getVotingUnits(address account) external view returns (uint256) {
-    return _getVotingUnitsSlot(account).value;
+  function getTotalSupplyAt(uint48 epoch) external view returns (uint256) {
+    return _getTotalSupplyAt(epoch);
+  }
+
+  function getBalanceAt(
+    uint48 epoch,
+    address account
+  ) external view returns (uint256) {
+    return _getBalanceAt(epoch, account);
   }
 
   // external setters
@@ -167,10 +169,10 @@ abstract contract ACT is
   }
 
   // TODO: add sender verification
-  function setSystem(ACTCore.Systems system) external {
-    ACTCore.Settings storage settings = _getSettings();
+  function setSystem(ACTSystems system) external {
+    ACTSettings storage settings = _getSettings();
 
-    if (ACTCore.Systems(settings.system) == system) {
+    if (ACTSystems(settings.system) == system) {
       // nothing to do
       return;
     }
@@ -184,7 +186,7 @@ abstract contract ACT is
 
   // TODO: add sender verification
   function setAsReady() external {
-    ACTCore.Settings storage settings = _getSettings();
+    ACTSettings storage settings = _getSettings();
 
     require(!settings.ready, AlreadyInReadyState());
 
@@ -197,43 +199,23 @@ abstract contract ACT is
 
   // internal setters
 
-  function _transferVotingUnits(
-    address from,
-    address to,
-    uint256 value
-  ) internal {
-    if (value == 0) {
+  function _saveTotalSupplyHistory(uint48 epoch, uint256 totalSupply) internal {
+    if (epoch == 0) {
       return;
     }
 
-    if (from == address(0)) {
-      _getTotalVotingUnitsSlot().value += value;
-    } else {
-      StorageSlot.Uint256Slot storage fromVotingUnitsSlot = _getVotingUnitsSlot(
-        from
-      );
+    _getTotalSupplyCheckpoints().push(epoch, totalSupply);
+  }
 
-      uint256 fromVotingUnits = fromVotingUnitsSlot.value;
-
-      if (fromVotingUnits == 0) {
-        return;
-      }
-
-      if (fromVotingUnits < value) {
-        value = fromVotingUnits;
-      }
-
-      unchecked {
-        fromVotingUnitsSlot.value = fromVotingUnits - value;
-      }
+  function _saveBalanceHistory(
+    address account,
+    uint48 epoch,
+    uint256 balance
+  ) internal {
+    if (epoch == 0) {
+      return;
     }
 
-    unchecked {
-      if (to == address(0)) {
-        _getTotalVotingUnitsSlot().value -= value;
-      } else {
-        _getVotingUnitsSlot(to).value += value;
-      }
-    }
+    _getBalanceCheckpoints(account).push(epoch, balance);
   }
 }

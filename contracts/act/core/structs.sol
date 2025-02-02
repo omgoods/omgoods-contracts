@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {Epochs} from "../common/Epochs.sol";
+import {Epochs} from "../../common/Epochs.sol";
 import {ACTStates, ACTSystems} from "./enums.sol";
 
 struct ACTSettings {

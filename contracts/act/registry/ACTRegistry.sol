@@ -2,40 +2,40 @@
 pragma solidity 0.8.28;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
-import {Epochs} from "../common/Epochs.sol";
-import {Initializable} from "../common/Initializable.sol";
-import {Guarded} from "../common/Guarded.sol";
-import {ForwarderContext} from "../metatx/ForwarderContext.sol";
-import {IACT} from "./interfaces/IACT.sol";
+import {Epochs} from "../../common/Epochs.sol";
+import {Guarded} from "../../common/Guarded.sol";
+import {Initializable} from "../../common/Initializable.sol";
+import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
+import {IACTImpl} from "../impls/interfaces/IACTImpl.sol";
 import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
-import {ACTVariants} from "./enums.sol";
 
-contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
+contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
+  // enums
+
+  enum Variants {
+    Fungible, // 0
+    NonFungible // 1
+  }
+
   // storage
 
   Epochs.Settings private _epochsSettings;
 
-  mapping(ACTVariants variant => address variantImpl) private _tokenVariants;
+  mapping(Variants variant => address impl) private _variantsImpls;
+
+  mapping(address extension => bool active) private _activeExtensions;
 
   mapping(address token => bytes32 salt) private _tokensSalts;
 
-  mapping(address extension => bool active) private _extensions;
-
   // errors
 
-  /**
-   * @dev Reverts when the sender is not a registered token in the contract.
-   */
   error MsgSenderIsNotAToken();
 
-  /**
-   * @dev Reverts when attempting to create a token that already exists.
-   */
-  error ZeroAddressTokenVariantImpl();
+  error ZeroAddressVariantImpl();
 
   error ZeroAddressExtension();
 
-  error InvalidTokenVariant();
+  error InvalidVariant();
 
   // events
 
@@ -48,7 +48,7 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     uint256 timestamp
   );
 
-  event TokenVariantUpdated(ACTVariants variant, address variantImpl);
+  event VariantUpdated(Variants variant, address impl);
 
   event ExtensionUpdated(address extension, bool active);
 
@@ -94,14 +94,16 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     return Epochs.calcEpoch(_epochsSettings);
   }
 
-  function getTokenVariantImpl(
-    ACTVariants variant
-  ) external view returns (address) {
-    return _tokenVariants[variant];
+  function getVariantImpl(Variants variant) external view returns (address) {
+    return _variantsImpls[variant];
+  }
+
+  function isExtensionActive(address extension) external view returns (bool) {
+    return _activeExtensions[extension];
   }
 
   function computeTokenAddress(
-    ACTVariants variant,
+    Variants variant,
     string calldata symbol
   ) external view returns (address) {
     return _computeTokenAddress(variant, symbol);
@@ -111,46 +113,24 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     return _isTokenCreated(token);
   }
 
-  function isExtensionActive(address extension) external view returns (bool) {
-    return _extensions[extension];
-  }
-
   // external setters
 
-  function setTokenVariant(
-    ACTVariants variant,
-    address variantImpl
+  function setVariant(
+    Variants variant,
+    address impl
   ) external onlyOwner returns (bool) {
-    require(variantImpl != address(0), ZeroAddressTokenVariantImpl());
+    require(impl != address(0), ZeroAddressVariantImpl());
 
-    if (_tokenVariants[variant] == variantImpl) {
+    if (_variantsImpls[variant] == impl) {
       // nothing to do
       return false;
     }
 
-    _tokenVariants[variant] = variantImpl;
+    _variantsImpls[variant] = impl;
 
-    emit TokenVariantUpdated(variant, variantImpl);
+    emit VariantUpdated(variant, impl);
 
     return true;
-  }
-
-  function createToken(
-    ACTVariants variant,
-    string calldata name,
-    string calldata symbol,
-    address maintainer
-  ) external onlyOwner returns (address) {
-    return _createToken(variant, name, symbol, maintainer);
-  }
-
-  /**
-   * @notice Emits a `TokenEvent` for a token-related action or update.
-   * @dev This function can only be called by a registered token via the `onlyToken` modifier.
-   * @param data Additional data to be included in the emitted event.
-   */
-  function emitTokenEvent(bytes calldata data) external onlyToken {
-    emit TokenEvent(msg.sender, data, block.timestamp);
   }
 
   function setExtension(
@@ -159,16 +139,29 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   ) external onlyOwner returns (bool) {
     require(extension != address(0), ZeroAddressExtension());
 
-    if (_extensions[extension] == active) {
+    if (_activeExtensions[extension] == active) {
       // nothing to do
       return false;
     }
 
-    _extensions[extension] = active;
+    _activeExtensions[extension] = active;
 
     emit ExtensionUpdated(extension, active);
 
     return true;
+  }
+
+  function createToken(
+    Variants variant,
+    string calldata name,
+    string calldata symbol,
+    address maintainer
+  ) external onlyOwner returns (address) {
+    return _createToken(variant, name, symbol, maintainer);
+  }
+
+  function emitTokenEvent(bytes calldata data) external onlyToken {
+    emit TokenEvent(msg.sender, data, block.timestamp);
   }
 
   // private getters
@@ -180,14 +173,14 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   }
 
   function _computeTokenAddress(
-    ACTVariants variant,
+    Variants variant,
     string calldata symbol
   ) private view returns (address result) {
-    address variantImpl = _tokenVariants[variant];
+    address impl = _variantsImpls[variant];
 
-    if (variantImpl != address(0)) {
+    if (impl != address(0)) {
       result = Clones.predictDeterministicAddress(
-        variantImpl,
+        impl,
         _computeTokenSalt(symbol),
         address(this)
       );
@@ -203,21 +196,21 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   // private setters
 
   function _createToken(
-    ACTVariants variant,
+    Variants variant,
     string calldata name,
     string calldata symbol,
     address maintainer
   ) private returns (address token) {
-    address variantImpl = _tokenVariants[variant];
+    address impl = _variantsImpls[variant];
 
-    require(variantImpl != address(0), InvalidTokenVariant());
+    require(impl != address(0), InvalidVariant());
 
     bytes32 salt = _computeTokenSalt(symbol);
 
-    token = Clones.cloneDeterministic(variantImpl, salt);
+    token = Clones.cloneDeterministic(impl, salt);
 
     bytes memory data = abi.encodeCall(
-      IACT.initialize,
+      IACTImpl.initialize,
       (_getForwarder(), name, symbol, maintainer, _epochsSettings)
     );
 
@@ -233,7 +226,7 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
 
     _tokensSalts[token] = salt;
 
-    emit TokenCreated(token, variantImpl, data, block.timestamp);
+    emit TokenCreated(token, impl, data, block.timestamp);
 
     return token;
   }

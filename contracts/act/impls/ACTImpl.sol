@@ -3,18 +3,18 @@ pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {IInitializable} from "../common/interfaces/IInitializable.sol";
-import {Delegatable} from "../common/Delegatable.sol";
-import {Epochs} from "../common/Epochs.sol";
-import {IACT} from "./interfaces/IACT.sol";
-import {IACTExtension} from "./interfaces/IACTExtension.sol";
-import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
-import {ACTCore} from "./ACTCore.sol";
+import {IInitializable} from "../../common/interfaces/IInitializable.sol";
+import {Delegatable} from "../../common/Delegatable.sol";
+import {Epochs} from "../../common/Epochs.sol";
+import {ACTCore} from "../core/ACTCore.sol";
+import {ACTStates, ACTSystems} from "../core/enums.sol";
+import {ACTSettings, ACTExtensions, ACTModules, ACTModuleAccess} from "../core/structs.sol";
+import {IACTExtension} from "../extensions/interfaces/IACTExtension.sol";
+import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
+import {IACTImpl} from "./interfaces/IACTImpl.sol";
 import {ACTEvents} from "./ACTEvents.sol";
-import {ACTStates, ACTSystems} from "./enums.sol";
-import {ACTSettings, ACTExtensions, ACTModules, ACTModuleAccess} from "./structs.sol";
 
-abstract contract ACT is IInitializable, Delegatable, IACT, ACTCore {
+abstract contract ACTImpl is IInitializable, Delegatable, ACTCore, IACTImpl {
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -44,6 +44,10 @@ abstract contract ACT is IInitializable, Delegatable, IACT, ACTCore {
   event ModuleUpdated(address module, ACTModuleAccess access);
 
   // deployment
+
+  constructor() {
+    _getRegistrySlot().value = msg.sender;
+  }
 
   function initialize(
     address forwarder,

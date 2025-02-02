@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+import {ACTCore} from "../core/ACTCore.sol";
 import {IACTExtension} from "./interfaces/IACTExtension.sol";
-import {ACTCore} from "./ACTCore.sol";
 
-abstract contract ACTExtension is IACTExtension, ACTCore {
+abstract contract ACTExtension is ACTCore, IACTExtension {
   // external getters
 
   function getSupportedSelectors()

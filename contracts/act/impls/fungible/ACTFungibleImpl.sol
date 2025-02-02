@@ -3,28 +3,27 @@ pragma solidity 0.8.28;
 
 import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
-import {ACT} from "../ACT.sol";
-import {ACTVariants} from "../enums.sol";
-import {ACTSettings} from "../structs.sol";
-import {FungibleACTEvents} from "./FungibleACTEvents.sol";
-import {FungibleACTStorage} from "./FungibleACTStorage.sol";
+import {ACTSettings} from "../../core/structs.sol";
+import {ACTImpl} from "../ACTImpl.sol";
+import {ACTFungibleEvents} from "./ACTFungibleEvents.sol";
 
-contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
+contract ACTFungibleImpl is IERC20Metadata, ACTImpl {
+  // slots
+
+  bytes32 private constant ALLOWANCE_SLOT =
+    keccak256(abi.encodePacked("act.fungible#allowance"));
+
   // errors
 
   error InsufficientAllowance();
 
   // deployment
 
-  constructor() ACT() {
+  constructor() ACTImpl() {
     //
   }
 
   // external getters
-
-  function variant() external pure override returns (ACTVariants) {
-    return ACTVariants.Fungible;
-  }
 
   function name() external view returns (string memory) {
     return _getNameSlot().value;
@@ -181,6 +180,16 @@ contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
 
   // private setters
 
+  function _getAllowanceSlot(
+    address owner,
+    address spender
+  ) private pure returns (StorageSlot.Uint256Slot storage) {
+    return
+      StorageSlot.getUint256Slot(
+        keccak256(abi.encodePacked(ALLOWANCE_SLOT, owner, spender)) //
+      );
+  }
+
   function _emitApprovalEvent(
     address owner,
     address spender,
@@ -190,7 +199,7 @@ contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        FungibleACTEvents.FungibleApproval,
+        ACTFungibleEvents.FungibleApproval,
         (owner, spender, value)
       )
     );
@@ -206,7 +215,7 @@ contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        FungibleACTEvents.FungibleTransfer,
+        ACTFungibleEvents.FungibleTransfer,
         (epoch, from, to, value)
       )
     );

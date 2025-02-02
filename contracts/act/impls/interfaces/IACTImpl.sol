@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {Epochs} from "../../common/Epochs.sol";
-import {ACTVariants} from "../enums.sol";
+import {Epochs} from "../../../common/Epochs.sol";
 
-interface IACT {
+interface IACTImpl {
   // deployment
 
   function initialize(
@@ -14,8 +13,4 @@ interface IACT {
     address maintainer,
     Epochs.Settings memory epochSettings
   ) external;
-
-  // external getters
-
-  function variant() external pure returns (ACTVariants);
 }

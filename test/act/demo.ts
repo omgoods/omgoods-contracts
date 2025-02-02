@@ -10,52 +10,50 @@ const symbol = 'TEST';
 
 describe.only('act/variants/FungibleACT', function () {
   async function deployFixture() {
-    const actVariant = await deployContract('FungibleACT');
-    const actRegistry = await deployContract('ACTRegistry', [zeroAddress]);
+    const impl = await deployContract('ACTFungibleImpl');
+    const registry = await deployContract('ACTRegistry', [zeroAddress]);
+
     const publicClient = await getPublicClient();
     const walletClients = await getWalletClients();
 
-    await actRegistry.write.initialize([zeroAddress, [], zeroAddress, 20]);
+    await registry.write.initialize([zeroAddress, [], zeroAddress, 20]);
 
-    await actRegistry.write.setTokenVariant([
-      ACTVariants.Fungible,
-      actVariant.address,
-    ]);
+    await registry.write.setVariant([ACTVariants.Fungible, impl.address]);
 
-    const address = await actRegistry.read.computeTokenAddress([
+    const address = await registry.read.computeTokenAddress([
       ACTVariants.Fungible,
       symbol,
     ]);
 
-    await actRegistry.write.createToken([
+    await registry.write.createToken([
       ACTVariants.Fungible,
       'Test',
       symbol,
       walletClients[0].account.address || zeroAddress,
     ]);
 
-    const act = await getContractAt('FungibleACT', address as Hash);
+    const token = await getContractAt('ACTFungibleImpl', address as Hash);
 
-    await act.write.setState([ACTStates.Tracked]);
+    await token.write.setState([ACTStates.Tracked]);
 
     return {
-      act,
-      actRegistry,
+      token,
+      registry,
       publicClient,
       walletClients,
     };
   }
 
-  describe.only('# executing transactions', function () {
+  describe('# executing transactions', function () {
     it('Should not to revert ...', async function () {
-      const { act, actRegistry, publicClient, walletClients } =
+      const { token, registry, publicClient, walletClients } =
         await loadFixture(deployFixture);
 
       const actWalletExtension = await deployContract('ACTWalletExtension');
 
-      await actRegistry.write.setExtension([actWalletExtension.address, true]);
+      await registry.write.setExtension([actWalletExtension.address, true]);
 
-      await act.write.enableExtension([actWalletExtension.address]);
+      await token.write.enableExtension([actWalletExtension.address]);
 
       const [, walletA, walletB] = walletClients;
 
@@ -64,18 +62,21 @@ describe.only('act/variants/FungibleACT', function () {
       }
 
       await walletClients.at(0)?.sendTransaction({
-        to: act.address,
+        to: token.address,
         value: 10000000n,
       });
 
       console.log(
-        'act.balance:',
+        'token.balance:',
         await publicClient.getBalance({
-          address: act.address,
+          address: token.address,
         }),
       );
 
-      const actWallet = await getContractAt('ACTWalletExtension', act.address);
+      const actWallet = await getContractAt(
+        'ACTWalletExtension',
+        token.address,
+      );
 
       await actWallet.write.executeTransaction([
         {
@@ -86,9 +87,9 @@ describe.only('act/variants/FungibleACT', function () {
       ]);
 
       console.log(
-        'act.balance:',
+        'token.balance:',
         await publicClient.getBalance({
-          address: act.address,
+          address: token.address,
         }),
       );
     });
@@ -96,7 +97,7 @@ describe.only('act/variants/FungibleACT', function () {
 
   describe('# sending transfers', function () {
     it('Should not to revert ...', async function () {
-      const { act, publicClient, walletClients } =
+      const { token, publicClient, walletClients } =
         await loadFixture(deployFixture);
 
       if (walletClients) {
@@ -105,13 +106,13 @@ describe.only('act/variants/FungibleACT', function () {
         if (walletB && walletC) {
           console.log('account:', walletA.account.address);
 
-          await act.write.mint([walletA.account.address, 10_000_000]);
+          await token.write.mint([walletA.account.address, 10_000_000]);
 
           for (let i = 0; i < 10; i++) {
             console.log();
             console.log('Transfer #', i);
 
-            const hash = await act.write.transfer(
+            const hash = await token.write.transfer(
               [walletB.account.address, 1_000],
               walletA,
             );
@@ -124,23 +125,23 @@ describe.only('act/variants/FungibleACT', function () {
 
             console.log(
               'walletA.balanceOf:',
-              await act.read.balanceOf([walletA.account.address]),
+              await token.read.balanceOf([walletA.account.address]),
             );
 
             console.log(
               'walletB.balanceOf:',
-              await act.read.balanceOf([walletB.account.address]),
+              await token.read.balanceOf([walletB.account.address]),
             );
 
             console.log(
               'walletC.balanceOf:',
-              await act.read.balanceOf([walletC.account.address]),
+              await token.read.balanceOf([walletC.account.address]),
             );
 
-            console.log('epoch:', await act.read.getEpoch());
-            console.log('totalSupply:', await act.read.totalSupply());
+            console.log('epoch:', await token.read.getEpoch());
+            console.log('totalSupply:', await token.read.totalSupply());
 
-            await act.write.mint([walletC.account.address, 100]);
+            await token.write.mint([walletC.account.address, 100]);
 
             await time.increase(7);
           }
@@ -149,25 +150,25 @@ describe.only('act/variants/FungibleACT', function () {
             console.log();
             console.log(
               `getTotalSupplyAt(${i}):`,
-              await act.read.getTotalSupplyAt([i]),
+              await token.read.getTotalSupplyAt([i]),
             );
             console.log(
               `walletA.getBalanceAt(${i}):`,
-              await act.read.getBalanceAt([i, walletA.account.address]),
+              await token.read.getBalanceAt([i, walletA.account.address]),
             );
             console.log(
               `walletB.getBalanceAt(${i}):`,
-              await act.read.getBalanceAt([i, walletB.account.address]),
+              await token.read.getBalanceAt([i, walletB.account.address]),
             );
             console.log(
               `walletC.getBalanceAt(${i}):`,
-              await act.read.getBalanceAt([i, walletC.account.address]),
+              await token.read.getBalanceAt([i, walletC.account.address]),
             );
           }
         }
       }
 
-      console.log(await act.read.getSettings());
+      console.log(await token.read.getSettings());
     });
   });
 });

@@ -2,15 +2,15 @@
 pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
-import {Epochs} from "../common/Epochs.sol";
-import {IOwnable} from "../common/interfaces/IOwnable.sol";
-import {ForwarderContext} from "../metatx/ForwarderContext.sol";
-import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
-import {ACTStorage} from "./ACTStorage.sol";
+import {IOwnable} from "../../common/interfaces/IOwnable.sol";
+import {Epochs} from "../../common/Epochs.sol";
+import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
+import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
+import {ACTCoreStorage} from "./ACTCoreStorage.sol";
 import {ACTStates, ACTSystems} from "./enums.sol";
 import {ACTSettings} from "./structs.sol";
 
-abstract contract ACTCore is IOwnable, ACTStorage, ForwarderContext {
+abstract contract ACTCore is IOwnable, ForwarderContext, ACTCoreStorage {
   using Epochs for Epochs.Checkpoints;
 
   // errors

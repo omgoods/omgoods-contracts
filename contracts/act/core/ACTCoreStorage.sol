@@ -2,46 +2,47 @@
 pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
-import {Epochs} from "../common/Epochs.sol";
+import {Epochs} from "../../common/Epochs.sol";
 import {ACTSettings, ACTExtensions, ACTModules} from "./structs.sol";
 
-abstract contract ACTStorage {
+abstract contract ACTCoreStorage {
   // slots
 
   bytes32 private constant FORWARDER_SLOT =
-    keccak256(abi.encodePacked("ACT#forwarder"));
+    keccak256(abi.encodePacked("act.core#forwarder"));
 
   bytes32 private constant SETTINGS_SLOT =
-    keccak256(abi.encodePacked("ACT#settings"));
+    keccak256(abi.encodePacked("act.core#settings"));
 
-  bytes32 private constant NAME_SLOT = keccak256(abi.encodePacked("ACT#name"));
+  bytes32 private constant NAME_SLOT =
+    keccak256(abi.encodePacked("act.core#name"));
 
   bytes32 private constant SYMBOL_SLOT =
-    keccak256(abi.encodePacked("ACT#symbol"));
+    keccak256(abi.encodePacked("act.core#symbol"));
 
   bytes32 private constant REGISTRY_SLOT =
-    keccak256(abi.encodePacked("ACT#registry"));
+    keccak256(abi.encodePacked("act.core#registry"));
 
   bytes32 private constant MAINTAINER_SLOT =
-    keccak256(abi.encodePacked("ACT#maintainer"));
+    keccak256(abi.encodePacked("act.core#maintainer"));
 
   bytes32 private constant TOTAL_SUPPLY_SLOT =
-    keccak256(abi.encodePacked("ACT#totalSupply"));
+    keccak256(abi.encodePacked("act.core#totalSupply"));
 
   bytes32 private constant TOTAL_SUPPLY_CHECKPOINTS_SLOT =
-    keccak256(abi.encodePacked("ACT#totalSupplyCheckpoints"));
+    keccak256(abi.encodePacked("act.core#totalSupplyCheckpoints"));
 
   bytes32 private constant BALANCE_SLOT =
-    keccak256(abi.encodePacked("ACT#balance"));
+    keccak256(abi.encodePacked("act.core#balance"));
 
   bytes32 private constant BALANCE_CHECKPOINTS_SLOT =
-    keccak256(abi.encodePacked("ACT#balanceCheckpoints"));
+    keccak256(abi.encodePacked("act.core#balanceCheckpoints"));
 
   bytes32 private constant EXTENSIONS_SLOT =
-    keccak256(abi.encodePacked("ACT#extensions"));
+    keccak256(abi.encodePacked("act.core#extensions"));
 
   bytes32 private constant MODULES_SLOT =
-    keccak256(abi.encodePacked("ACT#modules"));
+    keccak256(abi.encodePacked("act.core#modules"));
 
   // internal getters
 

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ACT} from "../ACT.sol";
 import {ACTVariants} from "../enums.sol";
@@ -103,9 +103,9 @@ contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
       return false;
     }
 
-    address spender = _msgSender();
+    if (!_isOperatorModuleCall()) {
+      address spender = _msgSender();
 
-    if (!_isOperatorModule(spender)) {
       StorageSlot.Uint256Slot storage fromAllowanceSlot = _getAllowanceSlot(
         from,
         spender
@@ -134,11 +134,10 @@ contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
   }
 
   function mint(address to, uint256 value) external returns (bool) {
-    address msgSender = _msgSender();
     ACTSettings memory settings = _getSettings();
 
-    if (!_isMinterModule(msgSender)) {
-      _requireOnlyOwner(msgSender, settings);
+    if (!_isMinterModuleCall()) {
+      _requireOnlyOwner(settings);
     }
 
     require(to != address(0), ZeroAddressReceiver());
@@ -158,12 +157,10 @@ contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
   }
 
   function burn(address from, uint256 value) external returns (bool) {
-    address msgSender = _msgSender();
-
     ACTSettings memory settings = _getSettings();
 
-    if (!_isBurnerModule(msgSender)) {
-      _requireOnlyOwner(msgSender, settings);
+    if (!_isBurnerModuleCall()) {
+      _requireOnlyOwner(settings);
     }
 
     require(from != address(0), ZeroAddressSender());

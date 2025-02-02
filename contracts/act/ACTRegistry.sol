@@ -13,14 +13,13 @@ import {ACTVariants} from "./enums.sol";
 contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   // storage
 
-  /**
-   * @notice Settings related to token epochs.
-   */
   Epochs.Settings private _epochsSettings;
 
   mapping(ACTVariants variant => address variantImpl) private _tokenVariants;
 
   mapping(address token => bytes32 salt) private _tokensSalts;
+
+  mapping(address extension => bool active) private _extensions;
 
   // errors
 
@@ -34,16 +33,12 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
    */
   error ZeroAddressTokenVariantImpl();
 
+  error ZeroAddressExtension();
+
   error InvalidTokenVariant();
 
   // events
 
-  /**
-   * @notice Emitted when a token-related event occurs.
-   * @param token The address of the token triggering the event.
-   * @param data Additional data associated with the event.
-   * @param timestamp The timestamp when the event occurred.
-   */
   event TokenEvent(address token, bytes data, uint256 timestamp);
 
   event TokenCreated(
@@ -54,6 +49,8 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   );
 
   event TokenVariantUpdated(ACTVariants variant, address variantImpl);
+
+  event ExtensionUpdated(address extension, bool active);
 
   // modifiers
 
@@ -114,6 +111,10 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     return _isTokenCreated(token);
   }
 
+  function isExtensionActive(address extension) external view returns (bool) {
+    return _extensions[extension];
+  }
+
   // external setters
 
   function setTokenVariant(
@@ -150,6 +151,24 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
    */
   function emitTokenEvent(bytes calldata data) external onlyToken {
     emit TokenEvent(msg.sender, data, block.timestamp);
+  }
+
+  function setExtension(
+    address extension,
+    bool active
+  ) external onlyOwner returns (bool) {
+    require(extension != address(0), ZeroAddressExtension());
+
+    if (_extensions[extension] == active) {
+      // nothing to do
+      return false;
+    }
+
+    _extensions[extension] = active;
+
+    emit ExtensionUpdated(extension, active);
+
+    return true;
   }
 
   // private getters

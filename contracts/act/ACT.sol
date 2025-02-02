@@ -7,10 +7,12 @@ import {IInitializable} from "../common/interfaces/IInitializable.sol";
 import {Delegatable} from "../common/Delegatable.sol";
 import {Epochs} from "../common/Epochs.sol";
 import {IACT} from "./interfaces/IACT.sol";
+import {IACTExtension} from "./interfaces/IACTExtension.sol";
+import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
 import {ACTCore} from "./ACTCore.sol";
 import {ACTEvents} from "./ACTEvents.sol";
 import {ACTStates, ACTSystems} from "./enums.sol";
-import {ACTSettings, ACTModules, ACTModuleAccess} from "./structs.sol";
+import {ACTSettings, ACTExtensions, ACTModules, ACTModuleAccess} from "./structs.sol";
 
 abstract contract ACT is IInitializable, Delegatable, IACT, ACTCore {
   using Epochs for Epochs.Checkpoints;
@@ -22,6 +24,12 @@ abstract contract ACT is IInitializable, Delegatable, IACT, ACTCore {
   error InvalidState();
 
   error ZeroAddressModule();
+
+  error ZeroAddressExtension();
+
+  error UnsupportedExtension();
+
+  error ExtensionNotFound();
 
   // events
 
@@ -55,6 +63,21 @@ abstract contract ACT is IInitializable, Delegatable, IACT, ACTCore {
     _getSymbolSlot().value = symbol_;
     _getMaintainerSlot().value = maintainer;
     _getSettings().epochs = epochSettings;
+  }
+
+  // receive
+
+  receive() external payable {
+    //
+  }
+
+  // solhint-disable-next-line no-complex-fallback
+  fallback() external payable {
+    address extension = _getExtensions().selectors[msg.sig];
+
+    require(extension != address(0), ExtensionNotFound());
+
+    _delegate(extension);
   }
 
   // external getters
@@ -203,4 +226,44 @@ abstract contract ACT is IInitializable, Delegatable, IACT, ACTCore {
 
     return true;
   }
+
+  function enableExtension(
+    address extension
+  ) external onlyOwner returns (bool) {
+    address registry = _getRegistrySlot().value;
+
+    if (registry == address(0)) {
+      return false;
+    }
+
+    require(extension != address(0), ZeroAddressExtension());
+
+    require(
+      IACTRegistry(registry).isExtensionActive(extension),
+      UnsupportedExtension()
+    );
+
+    bytes4[] memory selectors = IACTExtension(extension)
+      .getSupportedSelectors();
+
+    ACTExtensions storage extensions = _getExtensions();
+
+    extensions.enabled[extension] = true;
+
+    uint256 len = selectors.length;
+
+    for (uint256 index; index < len; ) {
+      extensions.selectors[selectors[index]] = extension;
+
+      unchecked {
+        index += 1;
+      }
+    }
+
+    // TODO: emit event
+
+    return true;
+  }
+
+  // TODO: disable extension
 }

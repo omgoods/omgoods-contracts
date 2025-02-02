@@ -50,15 +50,8 @@ abstract contract ACTCore is IOwnable, ACTStorage, ForwarderContext {
   // internal getters
 
   function _requireOnlyOwner(ACTSettings memory settings) internal view {
-    _requireOnlyOwner(_msgSender(), settings);
-  }
-
-  function _requireOnlyOwner(
-    address msgSender,
-    ACTSettings memory settings
-  ) internal view {
     require(
-      msgSender == _getOwner(_getMaintainerSlot().value, settings),
+      _msgSender() == _getOwner(_getMaintainerSlot().value, settings),
       MsgSenderIsNotTheOwner()
     );
   }
@@ -125,16 +118,16 @@ abstract contract ACTCore is IOwnable, ACTStorage, ForwarderContext {
       );
   }
 
-  function _isMinterModule(address module) internal view returns (bool) {
-    return _getModules().accesses[module].isMinter;
+  function _isMinterModuleCall() internal view returns (bool) {
+    return _getModules().accesses[msg.sender].isMinter;
   }
 
-  function _isBurnerModule(address module) internal view returns (bool) {
-    return _getModules().accesses[module].isBurner;
+  function _isBurnerModuleCall() internal view returns (bool) {
+    return _getModules().accesses[msg.sender].isBurner;
   }
 
-  function _isOperatorModule(address module) internal view returns (bool) {
-    return _getModules().accesses[module].isOperator;
+  function _isOperatorModuleCall() internal view returns (bool) {
+    return _getModules().accesses[msg.sender].isOperator;
   }
 
   // internal setters

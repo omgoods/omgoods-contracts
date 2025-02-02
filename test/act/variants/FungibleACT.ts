@@ -2,6 +2,7 @@ import { viem } from 'hardhat';
 import { expect } from 'chai';
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { Hash, zeroAddress } from 'viem';
+import { ACTVariants, ACTStates } from '../constants';
 
 const { deployContract, getContractAt, getPublicClient, getWalletClients } =
   viem;
@@ -15,24 +16,28 @@ describe.only('act/variants/FungibleACT', function () {
     const publicClient = await getPublicClient();
     const walletClients = await getWalletClients();
 
-    const address = await actRegistry.read.computeTokenAddress([
+    await actRegistry.write.initialize([zeroAddress, [], zeroAddress, 20]);
+
+    await actRegistry.write.setTokenVariant([
+      ACTVariants.Fungible,
       actVariant.address,
+    ]);
+
+    const address = await actRegistry.read.computeTokenAddress([
+      ACTVariants.Fungible,
       symbol,
     ]);
 
-    await time.increase(1000);
-
-    await actRegistry.write.initialize([zeroAddress, [], zeroAddress, 20]);
-
     await actRegistry.write.createToken([
-      actVariant.address,
+      ACTVariants.Fungible,
       'Test',
       symbol,
-      zeroAddress,
-      true,
+      walletClients[0].account.address || zeroAddress,
     ]);
 
     const act = await getContractAt('FungibleACT', address as Hash);
+
+    await act.write.setState([ACTStates.Tracked]);
 
     return {
       act,
@@ -53,10 +58,7 @@ describe.only('act/variants/FungibleACT', function () {
           if (walletB && walletC) {
             console.log('account:', walletA.account.address);
 
-            await act.write.mint(
-              [walletA.account.address, 10_000_000],
-              walletB,
-            );
+            await act.write.mint([walletA.account.address, 10_000_000]);
 
             for (let i = 0; i < 10; i++) {
               console.log();
@@ -91,7 +93,7 @@ describe.only('act/variants/FungibleACT', function () {
               console.log('epoch:', await act.read.getEpoch());
               console.log('totalSupply:', await act.read.totalSupply());
 
-              await act.write.mint([walletC.account.address, 100], walletA);
+              await act.write.mint([walletC.account.address, 100]);
 
               await time.increase(7);
             }
@@ -117,6 +119,8 @@ describe.only('act/variants/FungibleACT', function () {
             }
           }
         }
+
+        console.log(await act.read.getSettings());
 
         expect(await act.read.symbol()).eq(symbol);
       });

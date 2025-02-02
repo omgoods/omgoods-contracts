@@ -21,8 +21,6 @@ abstract contract Guarded is Ownable {
 
   error ZeroAddressGuardian();
 
-  error InvalidGuardian();
-
   error InvalidGuardianSignature();
 
   // external getters
@@ -33,29 +31,37 @@ abstract contract Guarded is Ownable {
 
   // external setters
 
-  function addGuardian(address guardian) external onlyOwner {
+  function addGuardian(address guardian) external onlyOwner returns (bool) {
     require(guardian != address(0), ZeroAddressGuardian());
 
-    require(!_guardians[guardian], InvalidGuardian());
+    if (_guardians[guardian]) {
+      return false;
+    }
 
     _guardians[guardian] = true;
 
     emit GuardianAdded(guardian);
+
+    return true;
   }
 
-  function removeGuardian(address guardian) external onlyOwner {
+  function removeGuardian(address guardian) external onlyOwner returns (bool) {
     require(guardian != address(0), ZeroAddressGuardian());
 
-    require(_guardians[guardian], InvalidGuardian());
+    if (_guardians[guardian]) {
+      return false;
+    }
 
-    _guardians[guardian] = false;
+    delete _guardians[guardian];
 
     emit GuardianRemoved(guardian);
+
+    return true;
   }
 
   // internal getters
 
-  function _verifyGuardianSignature(
+  function _requireGuardianSignature(
     bytes32 hash,
     bytes calldata signature
   ) internal view {
@@ -67,9 +73,9 @@ abstract contract Guarded is Ownable {
   // internal setters
 
   function _setInitialGuardians(address[] calldata guardians) internal {
-    uint256 length = guardians.length;
+    uint256 len = guardians.length;
 
-    for (uint256 index; index < length; ) {
+    for (uint256 index; index < len; ) {
       address guardian = guardians[index];
 
       if (guardian != address(0)) {

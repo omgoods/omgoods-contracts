@@ -90,6 +90,10 @@ library Epochs {
     uint48 epoch,
     uint256 value
   ) internal {
+    if (epoch == 0) {
+      return;
+    }
+
     Checkpoint[] storage checkpoints = self.checkpoints;
 
     uint256 pos = checkpoints.length;

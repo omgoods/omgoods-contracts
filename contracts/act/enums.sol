@@ -1,15 +1,19 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-enum ACTKinds {
-  Unknown, // 0
-  Fungible, // 1
-  NonFungible // 2
+enum ACTVariants {
+  Fungible, // 0
+  NonFungible // 1
+}
+
+enum ACTStates {
+  Locked, // 0
+  Active, // 1
+  Tracked // 2
 }
 
 enum ACTSystems {
-  Unknown, // 0
-  AbsoluteMonarchy, // 1
-  ConstitutionalMonarchy, // 2
-  Democracy // 3
+  AbsoluteMonarchy, // 0
+  ConstitutionalMonarchy, // 1
+  Democracy // 2
 }

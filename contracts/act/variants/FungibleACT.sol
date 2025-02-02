@@ -4,26 +4,15 @@ pragma solidity 0.8.28;
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ACT} from "../ACT.sol";
-import {ACTKinds} from "../enums.sol";
+import {ACTVariants} from "../enums.sol";
+import {ACTSettings} from "../structs.sol";
 import {FungibleACTEvents} from "./FungibleACTEvents.sol";
+import {FungibleACTStorage} from "./FungibleACTStorage.sol";
 
-contract FungibleACT is IERC20Metadata, ACT {
-  // slots
-
-  bytes32 private constant ALLOWANCE_SLOT =
-    keccak256(abi.encodePacked("FungibleACT#allowance"));
-
+contract FungibleACT is IERC20Metadata, ACT, FungibleACTStorage {
   // errors
 
-  error InsufficientBalance();
-
   error InsufficientAllowance();
-
-  error ZeroAddressSender();
-
-  error ZeroAddressReceiver();
-
-  error ZeroAddressSpender();
 
   // deployment
 
@@ -33,8 +22,8 @@ contract FungibleACT is IERC20Metadata, ACT {
 
   // external getters
 
-  function kind() external pure override returns (ACTKinds) {
-    return ACTKinds.Fungible;
+  function variant() external pure override returns (ACTVariants) {
+    return ACTVariants.Fungible;
   }
 
   function name() external view returns (string memory) {
@@ -79,14 +68,21 @@ contract FungibleACT is IERC20Metadata, ACT {
   }
 
   function transfer(address to, uint256 value) external returns (bool) {
+    ACTSettings memory settings = _getSettings();
+
+    require(to != address(0), ZeroAddressReceiver());
+
     if (value == 0) {
       // nothing to do
       return false;
     }
 
-    require(to != address(0), ZeroAddressReceiver());
+    uint48 epoch = _getEpoch(settings);
+    address from = _msgSender();
 
-    _transfer(_msgSender(), to, value);
+    _transferAt(epoch, from, to, value);
+
+    _emitTransferEvent(epoch, from, to, value);
 
     return true;
   }
@@ -96,108 +92,97 @@ contract FungibleACT is IERC20Metadata, ACT {
     address to,
     uint256 value
   ) external returns (bool) {
+    ACTSettings memory settings = _getSettings();
+
+    require(from != address(0), ZeroAddressSender());
+
+    require(to != address(0), ZeroAddressReceiver());
+
     if (value == 0) {
       // nothing to do
       return false;
     }
 
-    require(from != address(0), ZeroAddressSender());
-    require(to != address(0), ZeroAddressReceiver());
-
     address spender = _msgSender();
 
-    StorageSlot.Uint256Slot storage fromAllowanceSlot = _getAllowanceSlot(
-      from,
-      spender
-    );
+    if (!_isOperatorModule(spender)) {
+      StorageSlot.Uint256Slot storage fromAllowanceSlot = _getAllowanceSlot(
+        from,
+        spender
+      );
 
-    uint256 fromAllowance = fromAllowanceSlot.value;
+      uint256 fromAllowance = fromAllowanceSlot.value;
 
-    if (fromAllowance != type(uint256).max) {
-      require(fromAllowance >= value, InsufficientAllowance());
+      if (fromAllowance != type(uint256).max) {
+        require(fromAllowance >= value, InsufficientAllowance());
 
-      unchecked {
-        fromAllowanceSlot.value = fromAllowance - value;
+        unchecked {
+          fromAllowanceSlot.value = fromAllowance - value;
+        }
+
+        _emitApprovalEvent(from, spender, fromAllowance);
       }
-
-      _emitApprovalEvent(from, spender, fromAllowance);
     }
 
-    _transfer(from, to, value);
+    uint48 epoch = _getEpoch(settings);
+
+    _transferAt(epoch, from, to, value);
+
+    _emitTransferEvent(epoch, from, to, value);
 
     return true;
   }
 
-  function mint(address to, uint256 value) external {
-    if (value == 0) {
-      // nothing to do
-      return;
+  function mint(address to, uint256 value) external returns (bool) {
+    address msgSender = _msgSender();
+    ACTSettings memory settings = _getSettings();
+
+    if (!_isMinterModule(msgSender)) {
+      _requireOnlyOwner(msgSender, settings);
     }
 
     require(to != address(0), ZeroAddressReceiver());
 
-    _transfer(address(0), to, value);
+    if (value == 0) {
+      // nothing to do
+      return false;
+    }
+
+    uint48 epoch = _getEpoch(settings);
+
+    _transferAt(epoch, address(0), to, value);
+
+    _emitTransferEvent(epoch, address(0), to, value);
+
+    return true;
   }
 
-  // private getters
+  function burn(address from, uint256 value) external returns (bool) {
+    address msgSender = _msgSender();
 
-  function _getAllowanceSlot(
-    address owner,
-    address spender
-  ) private pure returns (StorageSlot.Uint256Slot storage) {
-    return
-      StorageSlot.getUint256Slot(
-        keccak256(abi.encodePacked(ALLOWANCE_SLOT, owner, spender)) //
-      );
+    ACTSettings memory settings = _getSettings();
+
+    if (!_isBurnerModule(msgSender)) {
+      _requireOnlyOwner(msgSender, settings);
+    }
+
+    require(from != address(0), ZeroAddressSender());
+
+    if (value == 0) {
+      // nothing to do
+      return false;
+    }
+
+    uint48 epoch = _getEpoch(settings);
+
+    _transferAt(epoch, from, address(0), value);
+
+    _emitTransferEvent(epoch, from, address(0), value);
+
+    return true;
   }
 
   // private setters
-
-  function _transfer(address from, address to, uint256 value) private {
-    uint48 epoch = _getEpoch();
-
-    if (from == address(0)) {
-      uint256 totalSupply_ = _getTotalSupplySlot().value + value;
-
-      _getTotalSupplySlot().value = totalSupply_;
-
-      _saveTotalSupplyHistory(epoch, totalSupply_);
-    } else {
-      StorageSlot.Uint256Slot storage fromBalanceSlot = _getBalanceSlot(from);
-
-      uint256 fromBalance = fromBalanceSlot.value;
-
-      require(fromBalance >= value, InsufficientBalance());
-
-      unchecked {
-        fromBalance -= value;
-
-        fromBalanceSlot.value = fromBalance;
-
-        _saveBalanceHistory(from, epoch, fromBalance);
-      }
-    }
-
-    unchecked {
-      if (to == address(0)) {
-        uint256 totalSupply_ = _getTotalSupplySlot().value - value;
-
-        _getTotalSupplySlot().value = totalSupply_;
-
-        _saveTotalSupplyHistory(epoch, totalSupply_);
-      } else {
-        StorageSlot.Uint256Slot storage toBalanceSlot = _getBalanceSlot(to);
-
-        uint256 toBalance = toBalanceSlot.value + value;
-
-        toBalanceSlot.value = toBalance;
-
-        _saveBalanceHistory(to, epoch, toBalance);
-      }
-    }
-
-    _emitTransferEvent(from, to, epoch, value);
-  }
 
   function _emitApprovalEvent(
     address owner,
@@ -215,9 +200,9 @@ contract FungibleACT is IERC20Metadata, ACT {
   }
 
   function _emitTransferEvent(
+    uint48 epoch,
     address from,
     address to,
-    uint48 epoch,
     uint256 value
   ) private {
     emit Transfer(from, to, value);
@@ -225,7 +210,7 @@ contract FungibleACT is IERC20Metadata, ACT {
     _triggerRegistryEvent(
       abi.encodeCall(
         FungibleACTEvents.FungibleTransfer,
-        (from, to, epoch, value)
+        (epoch, from, to, value)
       )
     );
   }

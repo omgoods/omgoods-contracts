@@ -3,7 +3,7 @@ pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Epochs} from "../common/Epochs.sol";
-import {ACTSettings} from "./structs.sol";
+import {ACTSettings, ACTExtensions, ACTModules} from "./structs.sol";
 
 abstract contract ACTStorage {
   // slots
@@ -36,6 +36,12 @@ abstract contract ACTStorage {
 
   bytes32 private constant BALANCE_CHECKPOINTS_SLOT =
     keccak256(abi.encodePacked("ACT#balanceCheckpoints"));
+
+  bytes32 private constant EXTENSIONS_SLOT =
+    keccak256(abi.encodePacked("ACT#extensions"));
+
+  bytes32 private constant MODULES_SLOT =
+    keccak256(abi.encodePacked("ACT#modules"));
 
   // internal getters
 
@@ -128,6 +134,32 @@ abstract contract ACTStorage {
     bytes32 slot = keccak256(
       abi.encodePacked(BALANCE_CHECKPOINTS_SLOT, account)
     );
+
+    // solhint-disable-next-line no-inline-assembly
+    assembly ("memory-safe") {
+      result.slot := slot
+    }
+
+    return result;
+  }
+
+  function _getExtensions()
+    internal
+    pure
+    returns (ACTExtensions storage result)
+  {
+    bytes32 slot = EXTENSIONS_SLOT;
+
+    // solhint-disable-next-line no-inline-assembly
+    assembly ("memory-safe") {
+      result.slot := slot
+    }
+
+    return result;
+  }
+
+  function _getModules() internal pure returns (ACTModules storage result) {
+    bytes32 slot = MODULES_SLOT;
 
     // solhint-disable-next-line no-inline-assembly
     assembly ("memory-safe") {

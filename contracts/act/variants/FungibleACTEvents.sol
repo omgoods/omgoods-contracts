@@ -13,9 +13,9 @@ interface FungibleACTEvents {
   ) external view;
 
   function FungibleTransfer(
+    uint48 epoch,
     address from,
     address to,
-    uint48 epoch,
     uint256 value
   ) external view;
 }

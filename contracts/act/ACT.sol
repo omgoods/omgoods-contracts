@@ -1,43 +1,39 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
+import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IInitializable} from "../common/interfaces/IInitializable.sol";
-import {IOwnable} from "../common/interfaces/IOwnable.sol";
 import {Delegatable} from "../common/Delegatable.sol";
 import {Epochs} from "../common/Epochs.sol";
 import {IACT} from "./interfaces/IACT.sol";
 import {ACTCore} from "./ACTCore.sol";
 import {ACTEvents} from "./ACTEvents.sol";
-import {ACTSystems} from "./enums.sol";
-import {ACTSettings} from "./structs.sol";
+import {ACTStates, ACTSystems} from "./enums.sol";
+import {ACTSettings, ACTModules, ACTModuleAccess} from "./structs.sol";
 
-abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
-  using ECDSA for bytes32;
+abstract contract ACT is IInitializable, Delegatable, IACT, ACTCore {
   using Epochs for Epochs.Checkpoints;
 
   // errors
 
   error AlreadyInReadyState();
 
+  error InvalidState();
+
+  error ZeroAddressModule();
+
   // events
 
   event NameUpdated(string name);
 
-  event RegistryUpdated(address registry);
-
   event MaintainerUpdated(address maintainer);
+
+  event StateUpdated(ACTStates state);
 
   event SystemUpdated(ACTSystems system);
 
-  event BecameReady();
-
-  // modifiers
-
-  modifier onlyOwnerOrModule() {
-    _;
-  }
+  event ModuleUpdated(address module, ACTModuleAccess access);
 
   // deployment
 
@@ -46,7 +42,6 @@ abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
     string calldata name_,
     string calldata symbol_,
     address maintainer,
-    bool ready,
     Epochs.Settings memory epochSettings
   ) external {
     StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
@@ -58,21 +53,8 @@ abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
     _getForwarderSlot().value = forwarder;
     _getNameSlot().value = name_;
     _getSymbolSlot().value = symbol_;
-
-    ACTSettings storage settings = _getSettings();
-
-    if (maintainer == address(0) || maintainer == address(this)) {
-      settings.system = uint8(ACTSystems.Democracy);
-      settings.ready = true;
-    } else {
-      settings.system = uint8(ACTSystems.AbsoluteMonarchy);
-      if (ready) {
-        settings.ready = ready;
-      }
-      _getMaintainerSlot().value = maintainer;
-    }
-
-    settings.epochs = epochSettings;
+    _getMaintainerSlot().value = maintainer;
+    _getSettings().epochs = epochSettings;
   }
 
   // external getters
@@ -93,69 +75,50 @@ abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
     return _getMaintainerSlot().value;
   }
 
-  function getOwner() external view returns (address) {
-    return _getOwner();
-  }
-
   function getEpoch() external view returns (uint48) {
     return _getEpoch();
   }
 
   function getTotalSupplyAt(uint48 epoch) external view returns (uint256) {
-    return _getTotalSupplyAt(epoch);
+    return _getTotalSupplyAt(epoch, _getEpoch());
   }
 
   function getBalanceAt(
     uint48 epoch,
     address account
   ) external view returns (uint256) {
-    return _getBalanceAt(epoch, account);
+    return _getBalanceAt(epoch, _getEpoch(), account);
   }
 
   // external setters
 
-  // TODO: add sender verification
-  function setName(string calldata name_) external {
-    _getNameSlot().value = name_;
+  function setName(string calldata name_) external onlyOwner returns (bool) {
+    StorageSlot.StringSlot storage nameSlot = _getNameSlot();
+
+    if (Strings.equal(nameSlot.value, name_)) {
+      // nothing to do
+      return false;
+    }
+
+    nameSlot.value = name_;
 
     emit NameUpdated(name_);
 
     _triggerRegistryEvent(abi.encodeCall(ACTEvents.NameUpdated, (name_)));
+
+    return true;
   }
 
-  // TODO: add sender verification
-  function setRegistry(address registry) external {
-    StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
-
-    address oldRegistry = registrySlot.value;
-
-    if (oldRegistry == registry) {
-      // nothing to do
-      return;
-    }
-
-    registrySlot.value = registry;
-
-    emit RegistryUpdated(registry);
-
-    _triggerRegistryEvent(
-      oldRegistry,
-      abi.encodeCall(ACTEvents.RegistryUpdated, (registry))
-    );
-
-    _triggerRegistryEvent(
-      registry,
-      abi.encodeCall(ACTEvents.RegistryUpdated, (registry))
-    );
-  }
-
-  // TODO: add sender verification
-  function setMaintainer(address maintainer) external {
+  function setMaintainer(address maintainer) external returns (bool) {
     StorageSlot.AddressSlot storage maintainerSlot = _getMaintainerSlot();
 
-    if (maintainerSlot.value == maintainer) {
+    address oldMaintainer = maintainerSlot.value;
+
+    _requireOnlyOwnerOrMaintainer(oldMaintainer);
+
+    if (oldMaintainer == maintainer) {
       // nothing to do
-      return;
+      return false;
     }
 
     maintainerSlot.value = maintainer;
@@ -165,56 +128,79 @@ abstract contract ACT is IInitializable, IOwnable, Delegatable, IACT, ACTCore {
     _triggerRegistryEvent(
       abi.encodeCall(ACTEvents.MaintainerUpdated, (maintainer))
     );
+
+    return true;
   }
 
-  // TODO: add sender verification
-  function setSystem(ACTSystems system) external {
+  function setState(ACTStates state) external returns (bool) {
     ACTSettings storage settings = _getSettings();
 
-    if (ACTSystems(settings.system) == system) {
+    _requireOnlyOwner(settings);
+
+    ACTStates oldState = settings.state;
+
+    if (oldState == state) {
       // nothing to do
-      return;
+      return false;
     }
 
-    settings.system = uint8(system);
+    require(oldState < state, InvalidState());
+
+    settings.state = state;
+
+    emit StateUpdated(state);
+
+    _triggerRegistryEvent(abi.encodeCall(ACTEvents.StateUpdated, (state)));
+
+    return true;
+  }
+
+  function setSystem(ACTSystems system) external returns (bool) {
+    ACTSettings storage settings = _getSettings();
+
+    _requireOnlyOwner(settings);
+
+    if (settings.system == system) {
+      // nothing to do
+      return false;
+    }
+
+    settings.system = system;
 
     emit SystemUpdated(system);
 
     _triggerRegistryEvent(abi.encodeCall(ACTEvents.SystemUpdated, (system)));
+
+    return true;
   }
 
-  // TODO: add sender verification
-  function setAsReady() external {
-    ACTSettings storage settings = _getSettings();
+  function setModule(
+    address module,
+    ACTModuleAccess memory access
+  ) external onlyOwner returns (bool) {
+    require(module != address(0), ZeroAddressModule());
 
-    require(!settings.ready, AlreadyInReadyState());
+    ACTModules storage modules = _getModules();
 
-    settings.ready = true;
+    ACTModuleAccess memory oldAccess = modules.accesses[module];
 
-    emit BecameReady();
-
-    _triggerRegistryEvent(abi.encodeCall(ACTEvents.BecameReady, ()));
-  }
-
-  // internal setters
-
-  function _saveTotalSupplyHistory(uint48 epoch, uint256 totalSupply) internal {
-    if (epoch == 0) {
-      return;
+    if (
+      oldAccess.isMinter == access.isMinter &&
+      oldAccess.isBurner == access.isBurner &&
+      oldAccess.isOperator == access.isOperator
+    ) {
+      // nothing to do
+      return false;
     }
 
-    _getTotalSupplyCheckpoints().push(epoch, totalSupply);
-  }
+    modules.accesses[module] = access;
 
-  function _saveBalanceHistory(
-    address account,
-    uint48 epoch,
-    uint256 balance
-  ) internal {
-    if (epoch == 0) {
-      return;
-    }
+    emit ModuleUpdated(module, access);
 
-    _getBalanceCheckpoints(account).push(epoch, balance);
+    _triggerRegistryEvent(
+      abi.encodeCall(ACTEvents.ModuleUpdated, (module, access))
+    );
+
+    return true;
   }
 }

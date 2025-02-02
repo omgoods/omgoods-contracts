@@ -2,17 +2,25 @@
 pragma solidity 0.8.28;
 
 import {Epochs} from "../common/Epochs.sol";
+import {ACTStates, ACTSystems} from "./enums.sol";
 
 struct ACTSettings {
-  uint8 system;
-  bool ready;
+  ACTStates state;
+  ACTSystems system;
   Epochs.Settings epochs;
 }
 
 struct ACTExtensions {
-  mapping(bytes4 => address) enabled;
+  mapping(address => bool) enabled;
+  mapping(bytes4 => address) selectors;
+}
+
+struct ACTModuleAccess {
+  bool isMinter;
+  bool isBurner;
+  bool isOperator;
 }
 
 struct ACTModules {
-  mapping(bytes4 => address) enabled;
+  mapping(address => ACTModuleAccess) accesses;
 }

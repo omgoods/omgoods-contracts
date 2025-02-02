@@ -23,7 +23,6 @@ abstract contract Delegatable {
     }
   }
 
-  // TODO: memory > calldata
   function _delegate(address target, bytes memory data) internal {
     // solhint-disable-next-line no-inline-assembly
     assembly {

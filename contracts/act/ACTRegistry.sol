@@ -8,14 +8,9 @@ import {Guarded} from "../common/Guarded.sol";
 import {ForwarderContext} from "../metatx/ForwarderContext.sol";
 import {IACT} from "./interfaces/IACT.sol";
 import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
+import {ACTVariants} from "./enums.sol";
 
 contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
-  // structs
-
-  struct Token {
-    bytes32 salt;
-  }
-
   // storage
 
   /**
@@ -23,11 +18,9 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
    */
   Epochs.Settings private _epochsSettings;
 
-  /**
-   * @notice Mapping of token addresses to their corresponding `Token` struct.
-   * @dev Stores information about each registered token, including its unique salt.
-   */
-  mapping(address addr => Token token) private _tokens;
+  mapping(ACTVariants variant => address variantImpl) private _tokenVariants;
+
+  mapping(address token => bytes32 salt) private _tokensSalts;
 
   // errors
 
@@ -39,7 +32,9 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   /**
    * @dev Reverts when attempting to create a token that already exists.
    */
-  error TokenAlreadyCreated();
+  error ZeroAddressTokenVariantImpl();
+
+  error InvalidTokenVariant();
 
   // events
 
@@ -51,22 +46,19 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
    */
   event TokenEvent(address token, bytes data, uint256 timestamp);
 
-  /**
-   * @notice Emitted when a new token is successfully created.
-   * @param token The address of the newly created token.
-   * @param data The initialization data of the created token.
-   * @param timestamp The timestamp when the token was created.
-   */
-  event TokenCreated(address token, bytes data, uint256 timestamp);
+  event TokenCreated(
+    address token,
+    address impl,
+    bytes data,
+    uint256 timestamp
+  );
+
+  event TokenVariantUpdated(ACTVariants variant, address variantImpl);
 
   // modifiers
 
-  /**
-   * @dev Ensures that the function can only be called by a registered token.
-   * Reverts with `MsgSenderIsNotAToken()` error if the caller is not a registered token.
-   */
   modifier onlyToken() {
-    require(_isToken(msg.sender), MsgSenderIsNotAToken());
+    require(_isTokenCreated(msg.sender), MsgSenderIsNotAToken());
 
     _;
   }
@@ -82,14 +74,6 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     //
   }
 
-  /**
-   * @notice Initializes the contract with the given parameters.
-   * @dev This function can only be called once due to the `initializeOnce` modifier.
-   * @param owner The address to be set as the initial owner of the contract.
-   * @param guardians An array of addresses that will act as guardians for the contract.
-   * @param forwarder The address of the meta-transaction forwarder.
-   * @param epochWindowLength The length of the epoch window, in seconds.
-   */
   function initialize(
     address owner,
     address[] calldata guardians,
@@ -103,27 +87,60 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     _epochsSettings = Epochs.initEpochSettings(epochWindowLength);
   }
 
+  // external getters
+
+  function getEpochSettings() external view returns (Epochs.Settings memory) {
+    return _epochsSettings;
+  }
+
+  function getEpoch() external view returns (uint48) {
+    return Epochs.calcEpoch(_epochsSettings);
+  }
+
+  function getTokenVariantImpl(
+    ACTVariants variant
+  ) external view returns (address) {
+    return _tokenVariants[variant];
+  }
+
+  function computeTokenAddress(
+    ACTVariants variant,
+    string calldata symbol
+  ) external view returns (address) {
+    return _computeTokenAddress(variant, symbol);
+  }
+
+  function isTokenCreated(address token) external view returns (bool) {
+    return _isTokenCreated(token);
+  }
+
   // external setters
 
-  /**
-   * @notice Creates a new token using the provided parameters.
-   * @dev This function can only be called by the contract owner.
-   * Internally calls the `_createToken` function to handle the token creation logic.
-   * @param variant The address of the token variant to clone.
-   * @param name The name of the token to be created.
-   * @param symbol The symbol of the token to be created.
-   * @param maintainer The address of the maintainer of the token.
-   * @param ready A boolean indicating whether the token should be ready upon creation.
-   * @return The address of the newly created token.
-   */
+  function setTokenVariant(
+    ACTVariants variant,
+    address variantImpl
+  ) external onlyOwner returns (bool) {
+    require(variantImpl != address(0), ZeroAddressTokenVariantImpl());
+
+    if (_tokenVariants[variant] == variantImpl) {
+      // nothing to do
+      return false;
+    }
+
+    _tokenVariants[variant] = variantImpl;
+
+    emit TokenVariantUpdated(variant, variantImpl);
+
+    return true;
+  }
+
   function createToken(
-    address variant,
+    ACTVariants variant,
     string calldata name,
     string calldata symbol,
-    address maintainer,
-    bool ready
+    address maintainer
   ) external onlyOwner returns (address) {
-    return _createToken(variant, name, symbol, maintainer, ready);
+    return _createToken(variant, name, symbol, maintainer);
   }
 
   /**
@@ -135,33 +152,8 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
     emit TokenEvent(msg.sender, data, block.timestamp);
   }
 
-  // external getters
-
-  /**
-   * @notice Computes the deterministic address of a token clone.
-   * @dev Uses the provided variant and symbol to calculate a unique address.
-   *      The computed address is based on the `Clones` library and uses
-   *      the factory's address as the deployment context.
-   * @param variant The address of the token variant to clone.
-   * @param symbol The symbol of the token to be used as part of the salt.
-   * @return The computed deterministic address for the token clone.
-   */
-  function computeTokenAddress(
-    address variant,
-    string calldata symbol
-  ) external view returns (address) {
-    return _computeTokenAddress(variant, symbol);
-  }
-
   // private getters
 
-  /**
-   * @notice Computes a unique token salt based on the provided symbol.
-   * @dev This function uses the `keccak256` hash of the encoded symbol
-   *      to generate a deterministic and unique salt.
-   * @param symbol The symbol of the token to generate the salt for.
-   * @return A `bytes32` value representing the unique salt for the token.
-   */
   function _computeTokenSalt(
     string calldata symbol
   ) private pure returns (bytes32) {
@@ -169,55 +161,45 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
   }
 
   function _computeTokenAddress(
-    address variant,
+    ACTVariants variant,
     string calldata symbol
-  ) private view returns (address) {
-    return _computeTokenAddress(variant, _computeTokenSalt(symbol));
+  ) private view returns (address result) {
+    address variantImpl = _tokenVariants[variant];
+
+    if (variantImpl != address(0)) {
+      result = Clones.predictDeterministicAddress(
+        variantImpl,
+        _computeTokenSalt(symbol),
+        address(this)
+      );
+    }
+
+    return result;
   }
 
-  function _computeTokenAddress(
-    address variant,
-    bytes32 salt
-  ) private view returns (address) {
-    return Clones.predictDeterministicAddress(variant, salt, address(this));
-  }
-
-  function _isToken(address token) private view returns (bool) {
-    return _tokens[token].salt != bytes32(0);
+  function _isTokenCreated(address token) internal view returns (bool) {
+    return _tokensSalts[token] != bytes32(0);
   }
 
   // private setters
 
-  /**
-   * @notice Creates a new token instance using deterministic deployment.
-   * @dev This function clones a token `variant` deterministically, encodes initialization data,
-   *      and initializes the token. Reverts if the token with the same `symbol` already exists.
-   * @param variant The address of the token variant to be cloned.
-   * @param name The name of the token to be created.
-   * @param symbol The symbol of the token to be created. This is used to compute a unique salt.
-   * @param maintainer The address of the maintainer for the newly created token.
-   * @param ready A boolean indicating if the token should be marked as ready upon creation.
-   * @return token The address of the newly created token.
-   */
   function _createToken(
-    address variant,
+    ACTVariants variant,
     string calldata name,
     string calldata symbol,
-    address maintainer,
-    bool ready
+    address maintainer
   ) private returns (address token) {
+    address variantImpl = _tokenVariants[variant];
+
+    require(variantImpl != address(0), InvalidTokenVariant());
+
     bytes32 salt = _computeTokenSalt(symbol);
 
-    require(
-      !_isToken(_computeTokenAddress(variant, salt)),
-      TokenAlreadyCreated()
-    );
-
-    token = Clones.cloneDeterministic(variant, _computeTokenSalt(symbol));
+    token = Clones.cloneDeterministic(variantImpl, salt);
 
     bytes memory data = abi.encodeCall(
       IACT.initialize,
-      (_getForwarder(), name, symbol, maintainer, ready, _epochsSettings)
+      (_getForwarder(), name, symbol, maintainer, _epochsSettings)
     );
 
     // solhint-disable-next-line avoid-low-level-calls
@@ -230,9 +212,9 @@ contract ACTRegistry is Initializable, Guarded, ForwarderContext, IACTRegistry {
       }
     }
 
-    _tokens[token].salt = salt;
+    _tokensSalts[token] = salt;
 
-    emit TokenCreated(token, data, block.timestamp);
+    emit TokenCreated(token, variantImpl, data, block.timestamp);
 
     return token;
   }

@@ -17,6 +17,8 @@ interface ACTEvents {
 
   function SystemUpdated(ACTSystems system) external view;
 
+  function ExtensionUpdated(address extension, bool enabled) external view;
+
   function ModuleUpdated(
     address module,
     ACTModuleAccess memory access

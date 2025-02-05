@@ -11,7 +11,7 @@ const symbol = 'TEST';
 describe.only('demo', function () {
   async function deployFixture() {
     const impl = await deployContract('ACTFungibleImpl');
-    const registry = await deployContract('ACTRegistry', [zeroAddress]);
+    const registry = await deployContract('ACTRegistry', ['test', zeroAddress]);
 
     const publicClient = await getPublicClient();
     const walletClients = await getWalletClients();
@@ -51,9 +51,15 @@ describe.only('demo', function () {
 
       const actWalletExtension = await deployContract('ACTWalletExtension');
 
-      await registry.write.setExtension([actWalletExtension.address, true]);
+      await registry.write.setExtension([
+        actWalletExtension.address,
+        {
+          active: true,
+          variant: ACTVariants.UnknownOrAny,
+        },
+      ]);
 
-      await token.write.enableExtension([actWalletExtension.address]);
+      await token.write.setExtension([actWalletExtension.address, true]);
 
       const [, walletA, walletB] = walletClients;
 
@@ -138,7 +144,7 @@ describe.only('demo', function () {
               await token.read.balanceOf([walletC.account.address]),
             );
 
-            console.log('epoch:', await token.read.getEpoch());
+            console.log('currentEpoch:', await token.read.getCurrentEpoch());
             console.log('totalSupply:', await token.read.totalSupply());
 
             await token.write.mint([walletC.account.address, 100]);

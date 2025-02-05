@@ -2,6 +2,7 @@
 pragma solidity 0.8.28;
 
 import {Clones} from "@openzeppelin/contracts/proxy/Clones.sol";
+import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Epochs} from "../../common/Epochs.sol";
 import {Guarded} from "../../common/Guarded.sol";
 import {Initializable} from "../../common/Initializable.sol";
@@ -9,27 +10,58 @@ import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
 import {IACTImpl} from "../impls/interfaces/IACTImpl.sol";
 import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
 
-contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
+contract ACTRegistry is
+  EIP712,
+  Guarded,
+  Initializable,
+  ForwarderContext,
+  IACTRegistry
+{
+  bytes32 private constant TOKEN_TYPED_DATA_HASH =
+    keccak256(
+      "Token(uint8 variant,string name,string symbol,address maintainer)"
+    );
+
   // enums
 
   enum Variants {
-    Fungible, // 0
-    NonFungible // 1
+    UnknownOrAny, // 0
+    Fungible, // 1
+    NonFungible // 2
+  }
+
+  // structs
+
+  struct TokenTypedData {
+    Variants variant;
+    string name;
+    string symbol;
+    address maintainer;
+  }
+
+  struct ExtensionOptions {
+    bool active;
+    Variants variant;
+  }
+
+  struct CreatedToken {
+    bytes32 salt;
+    Variants variant;
   }
 
   // storage
 
   Epochs.Settings private _epochsSettings;
 
-  mapping(Variants variant => address impl) private _variantsImpls;
+  mapping(Variants => address) private _variantImpls;
 
-  mapping(address extension => bool active) private _activeExtensions;
+  mapping(address => ExtensionOptions) private _extensionOptions;
 
-  mapping(address token => bytes32 salt) private _tokensSalts;
+  mapping(address => CreatedToken) private _createdTokens;
 
   // errors
 
-  error MsgSenderIsNotAToken();
+  error MsgSenderIsNotACreatedToken();
 
   error ZeroAddressVariantImpl();
 
@@ -39,35 +71,33 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
 
   // events
 
-  event TokenEvent(address token, bytes data, uint256 timestamp);
-
   event TokenCreated(
     address token,
-    address impl,
+    Variants variant,
     bytes data,
     uint256 timestamp
   );
 
+  event TokenEvent(address token, bytes data, uint256 timestamp);
+
   event VariantUpdated(Variants variant, address impl);
 
-  event ExtensionUpdated(address extension, bool active);
+  event ExtensionUpdated(address extension, ExtensionOptions options);
 
   // modifiers
 
-  modifier onlyToken() {
-    require(_isTokenCreated(msg.sender), MsgSenderIsNotAToken());
+  modifier onlyCreatedToken() {
+    _requireOnlyCreatedToken();
 
     _;
   }
 
   // deployment
 
-  /**
-   * @notice Constructor for the ACTRegistry contract.
-   * @dev Initializes the contract with an initializer address.
-   * @param initializer The address that will be used to initialize the contract.
-   */
-  constructor(address initializer) Initializable(initializer) {
+  constructor(
+    string memory eip712Name,
+    address initializer
+  ) EIP712(eip712Name, "1") Initializable(initializer) {
     //
   }
 
@@ -86,20 +116,49 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
 
   // external getters
 
+  function getCurrentEpoch() external view returns (uint48) {
+    return Epochs.calcEpoch(_epochsSettings);
+  }
+
   function getEpochSettings() external view returns (Epochs.Settings memory) {
     return _epochsSettings;
   }
 
-  function getEpoch() external view returns (uint48) {
-    return Epochs.calcEpoch(_epochsSettings);
-  }
-
   function getVariantImpl(Variants variant) external view returns (address) {
-    return _variantsImpls[variant];
+    return _variantImpls[variant];
   }
 
-  function isExtensionActive(address extension) external view returns (bool) {
-    return _activeExtensions[extension];
+  function getExtensionOptions(
+    address extension
+  ) external view returns (ExtensionOptions memory) {
+    return _extensionOptions[extension];
+  }
+
+  function isExtensionEnabled(address extension) external view returns (bool) {
+    ExtensionOptions memory extensionOptions = _extensionOptions[extension];
+
+    return
+      extensionOptions.active &&
+      (extensionOptions.variant == Variants.UnknownOrAny ||
+        extensionOptions.variant == _createdTokens[msg.sender].variant);
+  }
+
+  function getCreatedToken(
+    address token
+  ) external view returns (CreatedToken memory) {
+    return _createdTokens[token];
+  }
+
+  function hashToken(
+    TokenTypedData calldata token
+  ) external view returns (bytes32) {
+    return
+      _hashTokenTypedData(
+        token.variant,
+        token.name,
+        token.symbol,
+        token.maintainer
+      );
   }
 
   function computeTokenAddress(
@@ -109,24 +168,22 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
     return _computeTokenAddress(variant, symbol);
   }
 
-  function isTokenCreated(address token) external view returns (bool) {
-    return _isTokenCreated(token);
-  }
-
   // external setters
 
   function setVariant(
     Variants variant,
     address impl
   ) external onlyOwner returns (bool) {
+    require(variant != Variants.UnknownOrAny, InvalidVariant());
+
     require(impl != address(0), ZeroAddressVariantImpl());
 
-    if (_variantsImpls[variant] == impl) {
+    if (_variantImpls[variant] == impl) {
       // nothing to do
       return false;
     }
 
-    _variantsImpls[variant] = impl;
+    _variantImpls[variant] = impl;
 
     emit VariantUpdated(variant, impl);
 
@@ -135,18 +192,23 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
 
   function setExtension(
     address extension,
-    bool active
+    ExtensionOptions memory options
   ) external onlyOwner returns (bool) {
     require(extension != address(0), ZeroAddressExtension());
 
-    if (_activeExtensions[extension] == active) {
+    ExtensionOptions memory oldOptions = _extensionOptions[extension];
+
+    if (
+      oldOptions.active == options.active &&
+      oldOptions.variant == options.variant
+    ) {
       // nothing to do
       return false;
     }
 
-    _activeExtensions[extension] = active;
+    _extensionOptions[extension] = options;
 
-    emit ExtensionUpdated(extension, active);
+    emit ExtensionUpdated(extension, options);
 
     return true;
   }
@@ -160,11 +222,53 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
     return _createToken(variant, name, symbol, maintainer);
   }
 
-  function emitTokenEvent(bytes calldata data) external onlyToken {
+  function createToken(
+    Variants variant,
+    string calldata name,
+    string calldata symbol,
+    address maintainer,
+    bytes calldata guardianSignature
+  ) external returns (address) {
+    _requireGuardianSignature(
+      _hashTokenTypedData(variant, name, symbol, maintainer),
+      guardianSignature
+    );
+
+    return _createToken(variant, name, symbol, maintainer);
+  }
+
+  function emitTokenEvent(bytes calldata data) external onlyCreatedToken {
     emit TokenEvent(msg.sender, data, block.timestamp);
   }
 
   // private getters
+
+  function _requireOnlyCreatedToken() private view {
+    require(
+      _createdTokens[msg.sender].variant != Variants.UnknownOrAny,
+      MsgSenderIsNotACreatedToken()
+    );
+  }
+
+  function _hashTokenTypedData(
+    Variants variant,
+    string calldata name,
+    string calldata symbol,
+    address maintainer
+  ) private view returns (bytes32) {
+    return
+      _hashTypedDataV4(
+        keccak256(
+          abi.encode(
+            TOKEN_TYPED_DATA_HASH,
+            variant,
+            keccak256(abi.encodePacked(name)),
+            keccak256(abi.encodePacked(symbol)),
+            maintainer
+          )
+        )
+      );
+  }
 
   function _computeTokenSalt(
     string calldata symbol
@@ -176,7 +280,7 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
     Variants variant,
     string calldata symbol
   ) private view returns (address result) {
-    address impl = _variantsImpls[variant];
+    address impl = _variantImpls[variant];
 
     if (impl != address(0)) {
       result = Clones.predictDeterministicAddress(
@@ -189,10 +293,6 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
     return result;
   }
 
-  function _isTokenCreated(address token) internal view returns (bool) {
-    return _tokensSalts[token] != bytes32(0);
-  }
-
   // private setters
 
   function _createToken(
@@ -201,7 +301,7 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
     string calldata symbol,
     address maintainer
   ) private returns (address token) {
-    address impl = _variantsImpls[variant];
+    address impl = _variantImpls[variant];
 
     require(impl != address(0), InvalidVariant());
 
@@ -211,7 +311,7 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
 
     bytes memory data = abi.encodeCall(
       IACTImpl.initialize,
-      (_getForwarder(), name, symbol, maintainer, _epochsSettings)
+      (_forwarder, name, symbol, maintainer, _epochsSettings)
     );
 
     // solhint-disable-next-line avoid-low-level-calls
@@ -224,9 +324,12 @@ contract ACTRegistry is Guarded, Initializable, ForwarderContext, IACTRegistry {
       }
     }
 
-    _tokensSalts[token] = salt;
+    CreatedToken storage createdToken = _createdTokens[token];
 
-    emit TokenCreated(token, impl, data, block.timestamp);
+    createdToken.salt = salt;
+    createdToken.variant = variant;
+
+    emit TokenCreated(token, variant, data, block.timestamp);
 
     return token;
   }

@@ -1,4 +1,5 @@
 export enum ACTVariants {
+  UnknownOrAny,
   Fungible,
   NonFungible,
 }

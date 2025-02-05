@@ -183,10 +183,10 @@ abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
   }
 
   function _triggerRegistryEvent(bytes memory data) internal {
-    address registry = _getRegistrySlot().value;
+    _triggerRegistryEvent(_getRegistrySlot().value, data);
+  }
 
-    if (registry != address(0)) {
-      IACTRegistry(registry).emitTokenEvent(data);
-    }
+  function _triggerRegistryEvent(address registry, bytes memory data) internal {
+    IACTRegistry(registry).emitTokenEvent(data);
   }
 }

@@ -30,6 +30,8 @@ abstract contract ACTImpl is
 
   error InvalidState();
 
+  error ZeroAddressMaintainer();
+
   error ZeroAddressModule();
 
   error ZeroAddressExtension();
@@ -47,6 +49,8 @@ abstract contract ACTImpl is
   event StateUpdated(ACTStates state);
 
   event SystemUpdated(ACTSystems system);
+
+  event ExtensionUpdated(address extension, bool enabled);
 
   event ModuleUpdated(address module, ACTModuleAccess access);
 
@@ -66,6 +70,8 @@ abstract contract ACTImpl is
     StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
 
     require(registrySlot.value == address(0), AlreadyInitialized());
+
+    require(maintainer != address(0), ZeroAddressMaintainer());
 
     registrySlot.value = msg.sender;
 
@@ -140,7 +146,7 @@ abstract contract ACTImpl is
     return _getMaintainerSlot().value;
   }
 
-  function getEpoch() external view returns (uint48) {
+  function getCurrentEpoch() external view returns (uint48) {
     return _getEpoch();
   }
 
@@ -164,6 +170,8 @@ abstract contract ACTImpl is
   }
 
   function setMaintainer(address maintainer) external returns (bool) {
+    require(maintainer != address(0), ZeroAddressMaintainer());
+
     StorageSlot.AddressSlot storage maintainerSlot = _getMaintainerSlot();
 
     address oldMaintainer = maintainerSlot.value;
@@ -228,6 +236,52 @@ abstract contract ACTImpl is
     return true;
   }
 
+  function setExtension(
+    address extension,
+    bool enabled
+  ) external onlyOwner returns (bool) {
+    require(extension != address(0), ZeroAddressExtension());
+
+    address registry = _getRegistrySlot().value;
+
+    require(
+      IACTRegistry(registry).isExtensionEnabled(extension),
+      UnsupportedExtension()
+    );
+
+    bytes4[] memory selectors = IACTExtension(extension)
+      .getSupportedSelectors();
+
+    ACTExtensions storage extensions = _getExtensions();
+
+    if (extensions.enabled[extension] == enabled) {
+      // nothing to do
+      return false;
+    }
+
+    extensions.enabled[extension] = enabled;
+
+    uint256 len = selectors.length;
+    address target = enabled ? extension : address(0);
+
+    for (uint256 index; index < len; ) {
+      extensions.selectors[selectors[index]] = target;
+
+      unchecked {
+        index += 1;
+      }
+    }
+
+    emit ExtensionUpdated(extension, enabled);
+
+    _triggerRegistryEvent(
+      registry,
+      abi.encodeCall(ACTEvents.ExtensionUpdated, (extension, enabled))
+    );
+
+    return true;
+  }
+
   function setModule(
     address module,
     ACTModuleAccess memory access
@@ -257,44 +311,4 @@ abstract contract ACTImpl is
 
     return true;
   }
-
-  function enableExtension(
-    address extension
-  ) external onlyOwner returns (bool) {
-    address registry = _getRegistrySlot().value;
-
-    if (registry == address(0)) {
-      return false;
-    }
-
-    require(extension != address(0), ZeroAddressExtension());
-
-    require(
-      IACTRegistry(registry).isExtensionActive(extension),
-      UnsupportedExtension()
-    );
-
-    bytes4[] memory selectors = IACTExtension(extension)
-      .getSupportedSelectors();
-
-    ACTExtensions storage extensions = _getExtensions();
-
-    extensions.enabled[extension] = true;
-
-    uint256 len = selectors.length;
-
-    for (uint256 index; index < len; ) {
-      extensions.selectors[selectors[index]] = extension;
-
-      unchecked {
-        index += 1;
-      }
-    }
-
-    // TODO: emit event
-
-    return true;
-  }
-
-  // TODO: disable extension
 }

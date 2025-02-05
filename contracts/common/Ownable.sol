@@ -8,6 +8,12 @@ abstract contract Ownable is IOwnable {
 
   address private _owner;
 
+  // errors
+
+  error MsgSenderIsNotTheOwner();
+
+  error ZeroAddressOwner();
+
   // events
 
   event OwnerUpdated(address owner);

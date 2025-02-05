@@ -1,5 +1,5 @@
-import { viem } from 'hardhat';
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
+import { viem } from 'hardhat';
 import { Hash, zeroAddress } from 'viem';
 import { ACTVariants, ACTStates } from './constants';
 
@@ -8,7 +8,7 @@ const { deployContract, getContractAt, getPublicClient, getWalletClients } =
 
 const symbol = 'TEST';
 
-describe.only('act/variants/FungibleACT', function () {
+describe.only('demo', function () {
   async function deployFixture() {
     const impl = await deployContract('ACTFungibleImpl');
     const registry = await deployContract('ACTRegistry', [zeroAddress]);
@@ -149,20 +149,20 @@ describe.only('act/variants/FungibleACT', function () {
           for (let i = 0; i < 8; i++) {
             console.log();
             console.log(
-              `getTotalSupplyAt(${i}):`,
-              await token.read.getTotalSupplyAt([i]),
+              `totalSupplyAt(${i}):`,
+              await token.read.totalSupplyAt([i]),
             );
             console.log(
-              `walletA.getBalanceAt(${i}):`,
-              await token.read.getBalanceAt([i, walletA.account.address]),
+              `walletA.balanceAt(${i}):`,
+              await token.read.balanceAt([i, walletA.account.address]),
             );
             console.log(
-              `walletB.getBalanceAt(${i}):`,
-              await token.read.getBalanceAt([i, walletB.account.address]),
+              `walletB.balanceAt(${i}):`,
+              await token.read.balanceAt([i, walletB.account.address]),
             );
             console.log(
-              `walletC.getBalanceAt(${i}):`,
-              await token.read.getBalanceAt([i, walletC.account.address]),
+              `walletC.balanceAt(${i}):`,
+              await token.read.balanceAt([i, walletC.account.address]),
             );
           }
         }

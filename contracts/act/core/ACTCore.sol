@@ -2,7 +2,6 @@
 pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
-import {IOwnable} from "../../common/interfaces/IOwnable.sol";
 import {Epochs} from "../../common/Epochs.sol";
 import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
@@ -10,10 +9,12 @@ import {ACTCoreStorage} from "./ACTCoreStorage.sol";
 import {ACTStates, ACTSystems} from "./enums.sol";
 import {ACTSettings} from "./structs.sol";
 
-abstract contract ACTCore is IOwnable, ForwarderContext, ACTCoreStorage {
+abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
   using Epochs for Epochs.Checkpoints;
 
   // errors
+
+  error MsgSenderIsNotTheOwner();
 
   error MsgSenderIsNotTheOwnerOrMaintainer();
 
@@ -39,12 +40,6 @@ abstract contract ACTCore is IOwnable, ForwarderContext, ACTCoreStorage {
     _requireOnlyOwnerOrMaintainer(_getMaintainerSlot().value);
 
     _;
-  }
-
-  // external getters
-
-  function getOwner() external view returns (address) {
-    return _getOwner(_getMaintainerSlot().value, _getSettings());
   }
 
   // internal getters

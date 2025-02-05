@@ -10,11 +10,18 @@ import {ACTCore} from "../core/ACTCore.sol";
 import {ACTStates, ACTSystems} from "../core/enums.sol";
 import {ACTSettings, ACTExtensions, ACTModules, ACTModuleAccess} from "../core/structs.sol";
 import {IACTExtension} from "../extensions/interfaces/IACTExtension.sol";
+import {IACT} from "../interfaces/IACT.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
 import {IACTImpl} from "./interfaces/IACTImpl.sol";
 import {ACTEvents} from "./ACTEvents.sol";
 
-abstract contract ACTImpl is IInitializable, Delegatable, ACTCore, IACTImpl {
+abstract contract ACTImpl is
+  IInitializable,
+  Delegatable,
+  ACTCore,
+  IACT,
+  IACTImpl
+{
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -86,6 +93,37 @@ abstract contract ACTImpl is IInitializable, Delegatable, ACTCore, IACTImpl {
 
   // external getters
 
+  function name() external view returns (string memory) {
+    return _getNameSlot().value;
+  }
+
+  function symbol() external view returns (string memory) {
+    return _getSymbolSlot().value;
+  }
+
+  function totalSupply() external view returns (uint256) {
+    return _getTotalSupplySlot().value;
+  }
+
+  function totalSupplyAt(uint48 epoch) external view returns (uint256) {
+    return _getTotalSupplyAt(epoch, _getEpoch());
+  }
+
+  function balanceOf(address account) external view returns (uint256) {
+    return _getBalanceSlot(account).value;
+  }
+
+  function balanceAt(
+    uint48 epoch,
+    address account
+  ) external view returns (uint256) {
+    return _getBalanceAt(epoch, _getEpoch(), account);
+  }
+
+  function getOwner() external view returns (address) {
+    return _getOwner(_getMaintainerSlot().value, _getSettings());
+  }
+
   function isInitialized() external view returns (bool) {
     return _getRegistrySlot().value != address(0);
   }
@@ -104,17 +142,6 @@ abstract contract ACTImpl is IInitializable, Delegatable, ACTCore, IACTImpl {
 
   function getEpoch() external view returns (uint48) {
     return _getEpoch();
-  }
-
-  function getTotalSupplyAt(uint48 epoch) external view returns (uint256) {
-    return _getTotalSupplyAt(epoch, _getEpoch());
-  }
-
-  function getBalanceAt(
-    uint48 epoch,
-    address account
-  ) external view returns (uint256) {
-    return _getBalanceAt(epoch, _getEpoch(), account);
   }
 
   // external setters

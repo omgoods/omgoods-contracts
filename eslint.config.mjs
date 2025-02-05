@@ -1,5 +1,5 @@
-import globals from 'globals';
 import js from '@eslint/js';
+import globals from 'globals';
 import prettier from 'eslint-plugin-prettier/recommended';
 import typescript from 'typescript-eslint';
 

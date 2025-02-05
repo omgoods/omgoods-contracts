@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {IERC20Metadata} from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ACTSettings} from "../../core/structs.sol";
+import {IACTFungible} from "../../interfaces/IACTFungible.sol";
 import {ACTImpl} from "../ACTImpl.sol";
 import {ACTFungibleEvents} from "./ACTFungibleEvents.sol";
 
-contract ACTFungibleImpl is IERC20Metadata, ACTImpl {
+contract ACTFungibleImpl is IACTFungible, ACTImpl {
   // slots
 
   bytes32 private constant ALLOWANCE_SLOT =
@@ -25,20 +25,8 @@ contract ACTFungibleImpl is IERC20Metadata, ACTImpl {
 
   // external getters
 
-  function name() external view returns (string memory) {
-    return _getNameSlot().value;
-  }
-
-  function symbol() external view returns (string memory) {
-    return _getSymbolSlot().value;
-  }
-
   function decimals() external pure returns (uint8) {
     return 18;
-  }
-
-  function totalSupply() external view returns (uint256) {
-    return _getTotalSupplySlot().value;
   }
 
   function allowance(
@@ -46,10 +34,6 @@ contract ACTFungibleImpl is IERC20Metadata, ACTImpl {
     address spender
   ) external view returns (uint256) {
     return _getAllowanceSlot(owner, spender).value;
-  }
-
-  function balanceOf(address account) external view returns (uint256) {
-    return _getBalanceSlot(account).value;
   }
 
   // external setters

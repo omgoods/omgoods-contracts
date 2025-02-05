@@ -5,7 +5,7 @@ export default buildModule('ACT', (m) => {
   const deployer = m.getAccount(1);
   const owner = m.getAccount(0);
 
-  const registry = m.contract('ACTRegistry', [owner], {
+  const registry = m.contract('ACTRegistry', ['ACT Registry', owner], {
     from: deployer,
   });
 

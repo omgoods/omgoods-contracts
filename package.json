@@ -2,8 +2,9 @@
   "name": "@omgoods/contracts",
   "private": true,
   "scripts": {
+    "start": "hardhat node",
     "linter": "solhint \"contracts/**/*.sol\"",
-    "format": "prettier --write \"{contracts,src,test}/**/*.{ts,sol}\"",
+    "format": "prettier --write \"{contracts,ignition,src,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",
     "test": "hardhat test",
     "hardhat": "hardhat"
@@ -33,6 +34,7 @@
     "prettier-plugin-solidity": "1.4.2",
     "solhint": "5.0.5",
     "solidity-coverage": "0.8.14",
+    "tsconfig-paths": "4.2.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.21.0",
     "viem": "2.22.17"

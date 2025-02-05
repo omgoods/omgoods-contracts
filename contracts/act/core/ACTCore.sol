@@ -9,6 +9,9 @@ import {ACTCoreStorage} from "./ACTCoreStorage.sol";
 import {ACTStates, ACTSystems} from "./enums.sol";
 import {ACTSettings} from "./structs.sol";
 
+/**
+ * @title ACTCore
+ */
 abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
   using Epochs for Epochs.Checkpoints;
 
@@ -134,40 +137,52 @@ abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
     uint256 value
   ) internal {
     if (from == address(0)) {
+      // Minting tokens: Increase the total supply by the specified value
       uint256 totalSupply_ = _getTotalSupplySlot().value + value;
 
+      // Ensure the total supply does not exceed the maximum limit
       require(totalSupply_ <= type(uint240).max, OverflowedTotalSupply());
 
+      // Update the total supply slot with the new value
       _getTotalSupplySlot().value = totalSupply_;
 
+      // Record the new total supply in checkpoints
       _getTotalSupplyCheckpoints().push(epoch, totalSupply_);
     } else {
+      // Transferring tokens: Decrease the balance of the sender
       StorageSlot.Uint256Slot storage fromBalanceSlot = _getBalanceSlot(from);
 
       uint256 fromBalance = fromBalanceSlot.value;
 
+      // Ensure the sender has sufficient tokens for the transfer
       require(fromBalance >= value, InsufficientBalance());
 
       unchecked {
         fromBalance -= value;
       }
 
+      // Update the sender's balance slot with the new value
       fromBalanceSlot.value = fromBalance;
 
+      // Record the new balance in checkpoints for the sender
       _getBalanceCheckpoints(from).push(epoch, fromBalance);
     }
 
     if (to == address(0)) {
+      // Burning tokens: Decrease the total supply by the specified value
       uint256 totalSupply_ = _getTotalSupplySlot().value;
 
       unchecked {
         totalSupply_ -= value;
       }
 
+      // Update the total supply slot with the new value
       _getTotalSupplySlot().value = totalSupply_;
 
+      // Record the new total supply in checkpoints
       _getTotalSupplyCheckpoints().push(epoch, totalSupply_);
     } else {
+      // Transferring tokens: Increase the balance of the receiver
       StorageSlot.Uint256Slot storage toBalanceSlot = _getBalanceSlot(to);
 
       uint256 toBalance = toBalanceSlot.value;
@@ -176,8 +191,10 @@ abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
         toBalance += value;
       }
 
+      // Update the receiver's balance slot with the new value
       toBalanceSlot.value = toBalance;
 
+      // Record the new balance in checkpoints for the receiver
       _getBalanceCheckpoints(to).push(epoch, toBalance);
     }
   }

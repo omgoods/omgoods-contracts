@@ -1,7 +1,7 @@
 import { loadFixture, time } from '@nomicfoundation/hardhat-network-helpers';
 import { viem } from 'hardhat';
 import { Hash, zeroAddress } from 'viem';
-import { ACTVariants, ACTStates } from './constants';
+import { ACTVariants, ACTStates } from '@/common';
 
 const { deployContract, getContractAt, getPublicClient, getWalletClients } =
   viem;

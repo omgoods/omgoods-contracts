@@ -15,6 +15,9 @@ import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
 import {IACTImpl} from "./interfaces/IACTImpl.sol";
 import {ACTEvents} from "./ACTEvents.sol";
 
+/**
+ * @title ACTImpl
+ */
 abstract contract ACTImpl is
   IInitializable,
   Delegatable,
@@ -249,31 +252,40 @@ abstract contract ACTImpl is
       UnsupportedExtension()
     );
 
+    // Retrieve the function selectors supported by the given extension
     bytes4[] memory selectors = IACTExtension(extension)
       .getSupportedSelectors();
 
+    // Access the storage for managing extensions
     ACTExtensions storage extensions = _getExtensions();
 
+    // Check if the extension's enabled status is already set to the desired value
     if (extensions.enabled[extension] == enabled) {
       // nothing to do
       return false;
     }
 
+    // Update the enabled status of the extension
     extensions.enabled[extension] = enabled;
 
+    // Determine the address to assign to the selectors (either the extension or a null address)
     uint256 len = selectors.length;
     address target = enabled ? extension : address(0);
 
+    // Iterate through all selectors and update their mapped target
     for (uint256 index; index < len; ) {
       extensions.selectors[selectors[index]] = target;
 
+      // Increment index without overflow checks
       unchecked {
         index += 1;
       }
     }
 
+    // Emit an event indicating the extension has been updated
     emit ExtensionUpdated(extension, enabled);
 
+    // Trigger a registry event to notify of the change
     _triggerRegistryEvent(
       registry,
       abi.encodeCall(ACTEvents.ExtensionUpdated, (extension, enabled))

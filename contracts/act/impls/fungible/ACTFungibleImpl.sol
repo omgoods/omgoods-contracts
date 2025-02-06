@@ -60,7 +60,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
   function approve(address spender, uint256 value) external returns (bool) {
     require(spender != address(0), ZeroAddressSpender());
 
-    address owner = _msgSender();
+    address owner = msg.sender;
 
     _getAllowanceSlot(owner, spender).value = value;
 
@@ -87,7 +87,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
     }
 
     uint48 epoch = _getEpoch(settings);
-    address from = _msgSender();
+    address from = msg.sender;
 
     _transferAt(epoch, from, to, value);
 
@@ -122,7 +122,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
     }
 
     if (!_isOperatorModuleCall()) {
-      address spender = _msgSender(); // Retrieve the address of the current caller
+      address spender = msg.sender; // Retrieve the address of the current caller
 
       // Get the storage slot tracking the allowance for the spender on the owner's (from) tokens
       StorageSlot.Uint256Slot storage fromAllowanceSlot = _getAllowanceSlot(

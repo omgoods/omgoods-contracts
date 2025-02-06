@@ -3,7 +3,6 @@ pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Epochs} from "../../common/Epochs.sol";
-import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
 import {ACTCoreStorage} from "./ACTCoreStorage.sol";
 import {ACTStates, ACTSystems} from "./enums.sol";
@@ -12,10 +11,12 @@ import {ACTSettings} from "./structs.sol";
 /**
  * @title ACTCore
  */
-abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
+abstract contract ACTCore is ACTCoreStorage {
   using Epochs for Epochs.Checkpoints;
 
   // errors
+
+  error MsgSenderIsNotTheEntryPoint();
 
   error MsgSenderIsNotTheOwner();
 
@@ -33,6 +34,12 @@ abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
 
   // modifiers
 
+  modifier onlyEntryPoint() {
+    _requireOnlyEntryPoint();
+
+    _;
+  }
+
   modifier onlyOwner() {
     _requireOnlyOwner(_getSettings());
 
@@ -47,25 +54,25 @@ abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
 
   // internal getters
 
+  function _requireOnlyEntryPoint() internal view {
+    require(_isEntryPointCall(), MsgSenderIsNotTheEntryPoint());
+  }
+
   function _requireOnlyOwner(ACTSettings memory settings) internal view {
     require(
-      _msgSender() == _getOwner(_getMaintainerSlot().value, settings),
+      _isEntryPointCall() ||
+        msg.sender == _getOwner(_getMaintainerSlot().value, settings),
       MsgSenderIsNotTheOwner()
     );
   }
 
   function _requireOnlyOwnerOrMaintainer(address maintainer) internal view {
-    address msgSender = _msgSender();
-
     require(
-      msgSender == maintainer ||
-        msgSender == _getOwner(maintainer, _getSettings()),
+      _isEntryPointCall() ||
+        msg.sender == maintainer ||
+        msg.sender == _getOwner(maintainer, _getSettings()),
       MsgSenderIsNotTheOwnerOrMaintainer()
     );
-  }
-
-  function _getForwarder() internal view override returns (address) {
-    return _getForwarderSlot().value;
   }
 
   function _getOwner(
@@ -114,6 +121,10 @@ abstract contract ACTCore is ForwarderContext, ACTCoreStorage {
         currentEpoch,
         _getBalanceSlot(account).value
       );
+  }
+
+  function _isEntryPointCall() internal view returns (bool) {
+    return _getEntryPointSlot().value == msg.sender;
   }
 
   function _isMinterModuleCall() internal view returns (bool) {

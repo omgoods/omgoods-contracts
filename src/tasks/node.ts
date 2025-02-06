@@ -5,36 +5,43 @@ import {
 } from 'hardhat/builtin-tasks/task-names';
 import { TASK_DEPLOY } from './deploy';
 
-interface NodeArgs {
-  deployModules: boolean;
-}
-
-let nodeServerReadyOptions: {
+let serverReadyOptions: {
   deployModules?: boolean;
 } = {};
 
 task(TASK_NODE)
-  .addFlag('deployModules', 'Deploy all modules after running the node')
-  .setAction(async (args: NodeArgs, _, runSuper) => {
-    const { deployModules } = args;
+  .addFlag('deployModules', 'Deploys all modules after running the node')
+  .setAction(
+    async (
+      args: {
+        deployModules: boolean;
+      },
+      _hre,
+      runSuper,
+    ) => {
+      const { deployModules } = args;
 
-    nodeServerReadyOptions = {
-      deployModules,
-    };
+      serverReadyOptions = {
+        deployModules,
+      };
 
-    return runSuper(args);
+      return runSuper(args);
+    },
+  );
+
+subtask(TASK_NODE_SERVER_READY) //
+  .setAction(async (_args, hre, runSuper) => {
+    const result = await runSuper();
+
+    const { run } = hre;
+
+    const { deployModules } = serverReadyOptions;
+
+    if (deployModules) {
+      await run(TASK_DEPLOY, {
+        silent: true,
+      });
+    }
+
+    return result;
   });
-
-subtask(TASK_NODE_SERVER_READY, async (_, hre, runSuper) => {
-  const result = await runSuper();
-
-  const { run } = hre;
-
-  const { deployModules } = nodeServerReadyOptions;
-
-  if (deployModules) {
-    await run(TASK_DEPLOY);
-  }
-
-  return result;
-});

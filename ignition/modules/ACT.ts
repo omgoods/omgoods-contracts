@@ -1,15 +1,24 @@
 import { buildModule } from '@nomicfoundation/hardhat-ignition/modules';
-import { zeroAddress } from 'viem';
+import { ACTVariants } from '@/common';
+import ACTImpls from './ACTImpls';
+import ACTRegistry from './ACTRegistry';
 
 export default buildModule('ACT', (m) => {
-  const deployer = m.getAccount(1);
-  const owner = m.getAccount(0);
+  const owner = m.getAccount(1);
 
-  const registry = m.contract('ACTRegistry', ['ACT Registry', owner], {
-    from: deployer,
+  const { registry } = m.useModule(ACTRegistry);
+
+  const { fungible, nonFungible } = m.useModule(ACTImpls);
+
+  m.call(registry, 'setVariant', [ACTVariants.Fungible, fungible], {
+    from: owner,
+    id: 'setFungibleVariant',
   });
 
-  m.call(registry, 'initialize', [owner, [], zeroAddress, 0], { from: owner });
+  m.call(registry, 'setVariant', [ACTVariants.NonFungible, nonFungible], {
+    from: owner,
+    id: 'setNonFungibleVariant',
+  });
 
   return { registry };
 });

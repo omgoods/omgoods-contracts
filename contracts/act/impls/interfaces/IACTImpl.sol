@@ -7,10 +7,10 @@ interface IACTImpl {
   // deployment
 
   function initialize(
-    address forwarder,
+    address entryPoint,
+    address maintainer,
     string calldata name,
     string calldata symbol,
-    address maintainer,
     Epochs.Settings memory epochSettings
   ) external;
 }

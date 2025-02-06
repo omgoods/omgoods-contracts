@@ -16,7 +16,7 @@ describe.only('demo', function () {
     const publicClient = await getPublicClient();
     const walletClients = await getWalletClients();
 
-    await registry.write.initialize([zeroAddress, [], zeroAddress, 20]);
+    await registry.write.initialize([zeroAddress, zeroAddress, [], 20]);
 
     await registry.write.setVariant([ACTVariants.Fungible, impl.address]);
 
@@ -27,9 +27,9 @@ describe.only('demo', function () {
 
     await registry.write.createToken([
       ACTVariants.Fungible,
+      walletClients[0].account.address || zeroAddress,
       'Test',
       symbol,
-      walletClients[0].account.address || zeroAddress,
     ]);
 
     const token = await getContractAt('ACTFungibleImpl', address as Hash);
@@ -155,20 +155,20 @@ describe.only('demo', function () {
           for (let i = 0; i < 8; i++) {
             console.log();
             console.log(
-              `totalSupplyAt(${i}):`,
-              await token.read.totalSupplyAt([i]),
+              `getTotalSupplyAt(${i}):`,
+              await token.read.getTotalSupplyAt([i]),
             );
             console.log(
-              `walletA.balanceAt(${i}):`,
-              await token.read.balanceAt([i, walletA.account.address]),
+              `walletA.getBalanceAt(${i}):`,
+              await token.read.getBalanceAt([i, walletA.account.address]),
             );
             console.log(
-              `walletB.balanceAt(${i}):`,
-              await token.read.balanceAt([i, walletB.account.address]),
+              `walletB.getBalanceAt(${i}):`,
+              await token.read.getBalanceAt([i, walletB.account.address]),
             );
             console.log(
-              `walletC.balanceAt(${i}):`,
-              await token.read.balanceAt([i, walletC.account.address]),
+              `walletC.getBalanceAt(${i}):`,
+              await token.read.getBalanceAt([i, walletC.account.address]),
             );
           }
         }

@@ -6,23 +6,16 @@ import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Epochs} from "../../common/Epochs.sol";
 import {Guarded} from "../../common/Guarded.sol";
 import {Initializable} from "../../common/Initializable.sol";
-import {ForwarderContext} from "../../metatx/ForwarderContext.sol";
 import {IACTImpl} from "../impls/interfaces/IACTImpl.sol";
 import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
 
 /**
  * @title ACTRegistry
  */
-contract ACTRegistry is
-  EIP712,
-  Guarded,
-  Initializable,
-  ForwarderContext,
-  IACTRegistry
-{
+contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
   bytes32 private constant TOKEN_TYPED_DATA_HASH =
     keccak256(
-      "Token(uint8 variant,string name,string symbol,address maintainer)"
+      "Token(uint8 variant,address maintainer,string name,string symbol)"
     );
 
   // enums
@@ -37,9 +30,9 @@ contract ACTRegistry is
 
   struct TokenTypedData {
     Variants variant;
+    address maintainer;
     string name;
     string symbol;
-    address maintainer;
   }
 
   struct ExtensionOptions {
@@ -53,6 +46,8 @@ contract ACTRegistry is
   }
 
   // storage
+
+  address private _entryPoint;
 
   Epochs.Settings private _epochsSettings;
 
@@ -73,6 +68,13 @@ contract ACTRegistry is
   error InvalidVariant();
 
   // events
+
+  event Initialized(
+    address entryPoint,
+    address owner,
+    address[] guardians,
+    Epochs.Settings epochsSettings
+  );
 
   event TokenCreated(
     address token,
@@ -112,25 +114,36 @@ contract ACTRegistry is
   /**
    * @notice Initializes the contract with the provided parameters.
    * @dev Can only be called once due to the `initializeOnce` modifier.
+   * @param entryPoint The address of the ERC4337 entry point.
    * @param owner The address of the contract owner.
    * @param guardians The list of guardian addresses to set.
-   * @param forwarder The address of the forwarder contract.
    * @param epochWindowLength The length of the epoch window in seconds.
    */
   function initialize(
+    address entryPoint,
     address owner,
     address[] calldata guardians,
-    address forwarder,
     uint48 epochWindowLength
   ) external initializeOnce {
-    _setInitialOwner(owner);
+    _entryPoint = entryPoint;
+
+    owner = _setInitialOwner(owner);
     _setInitialGuardians(guardians);
 
-    _forwarder = forwarder;
-    _epochsSettings = Epochs.initEpochSettings(epochWindowLength);
+    Epochs.Settings memory epochsSettings = Epochs.initEpochSettings(
+      epochWindowLength
+    );
+
+    _epochsSettings = epochsSettings;
+
+    emit Initialized(entryPoint, owner, guardians, epochsSettings);
   }
 
   // external getters
+
+  function getEntryPoint() external view returns (address) {
+    return _entryPoint;
+  }
 
   /**
    * @notice Retrieves the current epoch based on the contract's epoch settings.
@@ -205,9 +218,9 @@ contract ACTRegistry is
     return
       _hashTokenTypedData(
         token.variant,
+        token.maintainer,
         token.name,
-        token.symbol,
-        token.maintainer
+        token.symbol
       );
   }
 
@@ -288,43 +301,43 @@ contract ACTRegistry is
    * @notice Creates a new token with the specified parameters.
    * @dev Can only be called by the owner of the contract.
    * @param variant The token variant to create.
+   * @param maintainer The address of the token's maintainer.
    * @param name The name of the token.
    * @param symbol The symbol of the token.
-   * @param maintainer The address of the token's maintainer.
    * @return The address of the created token.
    */
   function createToken(
     Variants variant,
+    address maintainer,
     string calldata name,
-    string calldata symbol,
-    address maintainer
+    string calldata symbol
   ) external onlyOwner returns (address) {
-    return _createToken(variant, name, symbol, maintainer);
+    return _createToken(variant, maintainer, name, symbol);
   }
 
   /**
    * @notice Creates a new token using a guardian signature for verification.
    * @dev Requires a valid guardian signature for authorization.
    * @param variant The token variant to create.
+   * @param maintainer The address of the token's maintainer.
    * @param name The name of the token.
    * @param symbol The symbol of the token.
-   * @param maintainer The address of the token's maintainer.
    * @param guardianSignature The signature from a guardian authorizing the token creation.
    * @return The address of the created token.
    */
   function createToken(
     Variants variant,
+    address maintainer,
     string calldata name,
     string calldata symbol,
-    address maintainer,
     bytes calldata guardianSignature
   ) external returns (address) {
     _requireGuardianSignature(
-      _hashTokenTypedData(variant, name, symbol, maintainer),
+      _hashTokenTypedData(variant, maintainer, name, symbol),
       guardianSignature
     );
 
-    return _createToken(variant, name, symbol, maintainer);
+    return _createToken(variant, maintainer, name, symbol);
   }
 
   /**
@@ -348,9 +361,9 @@ contract ACTRegistry is
 
   function _hashTokenTypedData(
     Variants variant,
+    address maintainer,
     string calldata name,
-    string calldata symbol,
-    address maintainer
+    string calldata symbol
   ) private view returns (bytes32) {
     return
       _hashTypedDataV4(
@@ -358,9 +371,9 @@ contract ACTRegistry is
           abi.encode(
             TOKEN_TYPED_DATA_HASH,
             variant,
+            maintainer,
             keccak256(abi.encodePacked(name)),
-            keccak256(abi.encodePacked(symbol)),
-            maintainer
+            keccak256(abi.encodePacked(symbol))
           )
         )
       );
@@ -393,9 +406,9 @@ contract ACTRegistry is
 
   function _createToken(
     Variants variant,
+    address maintainer,
     string calldata name,
-    string calldata symbol,
-    address maintainer
+    string calldata symbol
   ) private returns (address token) {
     address impl = _variantImpls[variant];
 
@@ -411,7 +424,7 @@ contract ACTRegistry is
     // Prepare the initialization data for the created token
     bytes memory data = abi.encodeCall(
       IACTImpl.initialize,
-      (_forwarder, name, symbol, maintainer, _epochsSettings)
+      (_entryPoint, maintainer, name, symbol, _epochsSettings)
     );
 
     // Initialize the deployed token by calling the initialize function

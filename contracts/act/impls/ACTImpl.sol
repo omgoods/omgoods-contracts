@@ -60,14 +60,14 @@ abstract contract ACTImpl is
   // deployment
 
   constructor() {
-    _getRegistrySlot().value = msg.sender;
+    _getRegistrySlot().value = address(this); // singleton
   }
 
   function initialize(
-    address forwarder,
+    address entryPoint,
+    address maintainer,
     string calldata name_,
     string calldata symbol_,
-    address maintainer,
     Epochs.Settings memory epochSettings
   ) external {
     StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
@@ -78,10 +78,10 @@ abstract contract ACTImpl is
 
     registrySlot.value = msg.sender;
 
-    _getForwarderSlot().value = forwarder;
+    _getEntryPointSlot().value = entryPoint;
+    _getMaintainerSlot().value = maintainer;
     _getNameSlot().value = name_;
     _getSymbolSlot().value = symbol_;
-    _getMaintainerSlot().value = maintainer;
     _getSettings().epochs = epochSettings;
   }
 
@@ -114,39 +114,43 @@ abstract contract ACTImpl is
     return _getTotalSupplySlot().value;
   }
 
-  function totalSupplyAt(uint48 epoch) external view returns (uint256) {
-    return _getTotalSupplyAt(epoch, _getEpoch());
-  }
-
   function balanceOf(address account) external view returns (uint256) {
     return _getBalanceSlot(account).value;
-  }
-
-  function balanceAt(
-    uint48 epoch,
-    address account
-  ) external view returns (uint256) {
-    return _getBalanceAt(epoch, _getEpoch(), account);
-  }
-
-  function getOwner() external view returns (address) {
-    return _getOwner(_getMaintainerSlot().value, _getSettings());
-  }
-
-  function isInitialized() external view returns (bool) {
-    return _getRegistrySlot().value != address(0);
-  }
-
-  function getSettings() external pure returns (ACTSettings memory) {
-    return _getSettings();
   }
 
   function getRegistry() external view returns (address) {
     return _getRegistrySlot().value;
   }
 
+  function getEntryPoint() external view returns (address) {
+    return _getEntryPointSlot().value;
+  }
+
   function getMaintainer() external view returns (address) {
     return _getMaintainerSlot().value;
+  }
+
+  function getOwner() external view returns (address) {
+    return _getOwner(_getMaintainerSlot().value, _getSettings());
+  }
+
+  function getSettings() external pure returns (ACTSettings memory) {
+    return _getSettings();
+  }
+
+  function getTotalSupplyAt(uint48 epoch) external view returns (uint256) {
+    return _getTotalSupplyAt(epoch, _getEpoch());
+  }
+
+  function getBalanceAt(
+    uint48 epoch,
+    address account
+  ) external view returns (uint256) {
+    return _getBalanceAt(epoch, _getEpoch(), account);
+  }
+
+  function isInitialized() external view returns (bool) {
+    return _getRegistrySlot().value != address(0);
   }
 
   function getCurrentEpoch() external view returns (uint48) {
@@ -270,15 +274,30 @@ abstract contract ACTImpl is
 
     // Determine the address to assign to the selectors (either the extension or a null address)
     uint256 len = selectors.length;
-    address target = enabled ? extension : address(0);
 
     // Iterate through all selectors and update their mapped target
-    for (uint256 index; index < len; ) {
-      extensions.selectors[selectors[index]] = target;
 
-      // Increment index without overflow checks
-      unchecked {
-        index += 1;
+    if (enabled) {
+      for (uint256 index; index < len; ) {
+        extensions.selectors[selectors[index]] = extension;
+
+        // Increment index without overflow checks
+        unchecked {
+          index += 1;
+        }
+      }
+    } else {
+      for (uint256 index; index < len; ) {
+        bytes4 selector = selectors[index];
+
+        if (extensions.selectors[selector] == extension) {
+          delete extensions.selectors[selector];
+        }
+
+        // Increment index without overflow checks
+        unchecked {
+          index += 1;
+        }
       }
     }
 

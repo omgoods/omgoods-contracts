@@ -12,12 +12,5 @@ interface IACT is IOwnable {
 
   function totalSupply() external view returns (uint256);
 
-  function totalSupplyAt(uint48 epoch) external view returns (uint256);
-
   function balanceOf(address account) external view returns (uint256);
-
-  function balanceAt(
-    uint48 epoch,
-    address account
-  ) external view returns (uint256);
 }

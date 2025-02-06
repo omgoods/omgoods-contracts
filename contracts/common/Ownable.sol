@@ -56,7 +56,13 @@ abstract contract Ownable is IOwnable {
 
   // internal setters
 
-  function _setInitialOwner(address owner) internal {
-    _owner = owner == address(0) ? msg.sender : owner;
+  function _setInitialOwner(address owner) internal returns (address) {
+    if (owner == address(0)) {
+      owner = msg.sender;
+    }
+
+    _owner = owner;
+
+    return owner;
   }
 }

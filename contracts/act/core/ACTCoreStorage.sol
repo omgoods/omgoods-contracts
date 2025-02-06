@@ -8,11 +8,14 @@ import {ACTSettings, ACTExtensions, ACTModules} from "./structs.sol";
 abstract contract ACTCoreStorage {
   // slots
 
-  bytes32 private constant FORWARDER_SLOT =
-    keccak256(abi.encodePacked("act.core#forwarder"));
+  bytes32 private constant REGISTRY_SLOT =
+    keccak256(abi.encodePacked("act.core#registry"));
 
-  bytes32 private constant SETTINGS_SLOT =
-    keccak256(abi.encodePacked("act.core#settings"));
+  bytes32 private constant ENTRY_POINT_SLOT =
+    keccak256(abi.encodePacked("act.core#entryPoint"));
+
+  bytes32 private constant MAINTAINER_SLOT =
+    keccak256(abi.encodePacked("act.core#maintainer"));
 
   bytes32 private constant NAME_SLOT =
     keccak256(abi.encodePacked("act.core#name"));
@@ -20,11 +23,8 @@ abstract contract ACTCoreStorage {
   bytes32 private constant SYMBOL_SLOT =
     keccak256(abi.encodePacked("act.core#symbol"));
 
-  bytes32 private constant REGISTRY_SLOT =
-    keccak256(abi.encodePacked("act.core#registry"));
-
-  bytes32 private constant MAINTAINER_SLOT =
-    keccak256(abi.encodePacked("act.core#maintainer"));
+  bytes32 private constant SETTINGS_SLOT =
+    keccak256(abi.encodePacked("act.core#settings"));
 
   bytes32 private constant TOTAL_SUPPLY_SLOT =
     keccak256(abi.encodePacked("act.core#totalSupply"));
@@ -46,23 +46,28 @@ abstract contract ACTCoreStorage {
 
   // internal getters
 
-  function _getForwarderSlot()
+  function _getRegistrySlot()
     internal
     pure
     returns (StorageSlot.AddressSlot storage)
   {
-    return StorageSlot.getAddressSlot(FORWARDER_SLOT);
+    return StorageSlot.getAddressSlot(REGISTRY_SLOT);
   }
 
-  function _getSettings() internal pure returns (ACTSettings storage result) {
-    bytes32 slot = SETTINGS_SLOT;
+  function _getEntryPointSlot()
+    internal
+    pure
+    returns (StorageSlot.AddressSlot storage)
+  {
+    return StorageSlot.getAddressSlot(ENTRY_POINT_SLOT);
+  }
 
-    // solhint-disable-next-line no-inline-assembly
-    assembly ("memory-safe") {
-      result.slot := slot
-    }
-
-    return result;
+  function _getMaintainerSlot()
+    internal
+    pure
+    returns (StorageSlot.AddressSlot storage)
+  {
+    return StorageSlot.getAddressSlot(MAINTAINER_SLOT);
   }
 
   function _getNameSlot()
@@ -81,20 +86,15 @@ abstract contract ACTCoreStorage {
     return StorageSlot.getStringSlot(SYMBOL_SLOT);
   }
 
-  function _getRegistrySlot()
-    internal
-    pure
-    returns (StorageSlot.AddressSlot storage)
-  {
-    return StorageSlot.getAddressSlot(REGISTRY_SLOT);
-  }
+  function _getSettings() internal pure returns (ACTSettings storage result) {
+    bytes32 slot = SETTINGS_SLOT;
 
-  function _getMaintainerSlot()
-    internal
-    pure
-    returns (StorageSlot.AddressSlot storage)
-  {
-    return StorageSlot.getAddressSlot(MAINTAINER_SLOT);
+    // solhint-disable-next-line no-inline-assembly
+    assembly ("memory-safe") {
+      result.slot := slot
+    }
+
+    return result;
   }
 
   function _getTotalSupplySlot()

@@ -13,7 +13,6 @@ npm i
 ## Scripts
 
 ```bash
-# npm
 npm run linter    # runs solhint
 npm run format    # runs prettier
 npm run compile   # compiles contracts
@@ -28,6 +27,5 @@ NONE
 
 > This project is proprietary and is not licensed for public use, modification, or distribution.<br/> 
 > Unauthorized use, reproduction, or distribution of this software is strictly prohibited.
-
 
 [license-image]: https://img.shields.io/badge/license-NONE-red.svg

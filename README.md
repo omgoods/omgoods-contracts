@@ -26,7 +26,7 @@ npm run hardhat   # hardhat cli wrapper
 
 NONE
 
-> This project is proprietary and is not licensed for public use, modification, or distribution.
+> This project is proprietary and is not licensed for public use, modification, or distribution.<br/> 
 > Unauthorized use, reproduction, or distribution of this software is strictly prohibited.
 
 

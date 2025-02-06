@@ -6,9 +6,9 @@ import { ACTVariants, ACTStates } from '@/common';
 const { deployContract, getContractAt, getPublicClient, getWalletClients } =
   viem;
 
-const symbol = 'TEST';
+describe.only('poc', function () {
+  const symbol = 'TEST';
 
-describe.only('demo', function () {
   async function deployFixture() {
     const impl = await deployContract('ACTFungibleImpl');
     const registry = await deployContract('ACTRegistry', ['test', zeroAddress]);

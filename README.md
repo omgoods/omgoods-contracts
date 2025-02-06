@@ -24,7 +24,9 @@ npm run hardhat   # hardhat cli wrapper
 
 ## License
 
-This project is **proprietary** and is not licensed for public use, modification, or distribution. 
+NONE
+
+This project is **proprietary** and is not licensed for public use, modification, or distribution. <br/>
 Unauthorized use, reproduction, or distribution of this software is strictly prohibited.
 
 [license-image]: https://img.shields.io/badge/license-NONE-red.svg

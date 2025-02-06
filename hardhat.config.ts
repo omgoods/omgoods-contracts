@@ -5,6 +5,7 @@ import '@nomicfoundation/hardhat-viem';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import '@/config';
+import '@/setup';
 import '@/tasks';
 
 const config: HardhatUserConfig = {

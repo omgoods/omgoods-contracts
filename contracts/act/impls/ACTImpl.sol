@@ -4,7 +4,6 @@ pragma solidity 0.8.28;
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IInitializable} from "../../common/interfaces/IInitializable.sol";
-import {Delegatable} from "../../common/Delegatable.sol";
 import {Epochs} from "../../common/Epochs.sol";
 import {ACTCore} from "../core/ACTCore.sol";
 import {ACTStates, ACTSystems} from "../core/enums.sol";
@@ -18,13 +17,7 @@ import {ACTEvents} from "./ACTEvents.sol";
 /**
  * @title ACTImpl
  */
-abstract contract ACTImpl is
-  IInitializable,
-  Delegatable,
-  ACTCore,
-  IACT,
-  IACTImpl
-{
+abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -40,8 +33,6 @@ abstract contract ACTImpl is
   error ZeroAddressExtension();
 
   error UnsupportedExtension();
-
-  error ExtensionNotFound();
 
   // events
 
@@ -93,11 +84,7 @@ abstract contract ACTImpl is
 
   // solhint-disable-next-line no-complex-fallback
   fallback() external payable {
-    address extension = _getExtensions().selectors[msg.sig];
-
-    require(extension != address(0), ExtensionNotFound());
-
-    _delegate(extension);
+    _callExtension();
   }
 
   // external getters

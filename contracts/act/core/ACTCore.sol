@@ -3,6 +3,7 @@ pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Epochs} from "../../common/Epochs.sol";
+import {Expandable} from "../../common/Expandable.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
 import {ACTCoreStorage} from "./ACTCoreStorage.sol";
 import {ACTStates, ACTSystems} from "./enums.sol";
@@ -11,7 +12,7 @@ import {ACTSettings} from "./structs.sol";
 /**
  * @title ACTCore
  */
-abstract contract ACTCore is ACTCoreStorage {
+abstract contract ACTCore is Expandable, ACTCoreStorage {
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -137,6 +138,12 @@ abstract contract ACTCore is ACTCoreStorage {
 
   function _isOperatorModuleCall() internal view returns (bool) {
     return _getModules().accesses[msg.sender].isOperator;
+  }
+
+  function _getExtension(
+    bytes4 selector
+  ) internal view override returns (address) {
+    return _getExtensions().selectors[selector];
   }
 
   // internal setters

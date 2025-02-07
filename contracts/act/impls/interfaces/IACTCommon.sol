@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {IOwnable} from "../../common/interfaces/IOwnable.sol";
+import {IAccount} from "@account-abstraction/contracts/interfaces/IAccount.sol";
+import {IOwnable} from "../../../common/interfaces/IOwnable.sol";
 
-interface IACT is IOwnable {
+interface IACTCommon is IAccount, IOwnable {
   // external getters
 
   function name() external view returns (string memory);

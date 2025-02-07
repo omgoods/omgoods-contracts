@@ -20,8 +20,8 @@ node_modules
 
 # hardhat
 .hardhat
+abi
 coverage*
-typechain
 
 # envs
 .env*.local

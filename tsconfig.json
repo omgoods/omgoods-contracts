@@ -13,7 +13,8 @@
     "resolveJsonModule": true,
     "paths": {
       "@/*": ["src/*"],
-      "@/modules/*": ["ignition/modules/*"]
+      "@/modules/*": ["ignition/modules/*"],
+      "@/scripts/*": ["scripts/*"]
     },
     "baseUrl": "./"
   }

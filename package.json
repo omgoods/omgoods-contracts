@@ -5,9 +5,10 @@
   "scripts": {
     "start": "hardhat node",
     "linter": "solhint \"contracts/**/*.sol\"",
-    "format": "prettier --write \"{contracts,ignition,src,test}/**/*.{ts,sol}\"",
+    "format": "prettier --write \"{contracts,ignition,scripts,src,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy",
+    "export": "hardhat export-abi",
     "test": "hardhat test",
     "hardhat": "hardhat"
   },
@@ -32,6 +33,7 @@
     "eslint-plugin-prettier": "5.2.3",
     "globals": "15.14.0",
     "hardhat": "2.22.18",
+    "hardhat-abi-exporter": "2.10.1",
     "hardhat-gas-reporter": "2.0.0",
     "prettier": "3.4.2",
     "prettier-plugin-solidity": "1.4.2",

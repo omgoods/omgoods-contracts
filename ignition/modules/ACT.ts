@@ -3,7 +3,7 @@ import { ACTVariants } from '@/common';
 import ACTImpls from './ACTImpls';
 import ACTRegistry from './ACTRegistry';
 
-export default buildModule('ACT', (m) => {
+export default buildModule<'ACT', 'ACTRegistry', any>('ACT', (m) => {
   const owner = m.getAccount(1);
 
   const { registry } = m.useModule(ACTRegistry);

@@ -6,7 +6,7 @@ import {IOwnable} from "./interfaces/IOwnable.sol";
 abstract contract Ownable is IOwnable {
   // storage
 
-  address private _owner;
+  address internal _owner;
 
   // errors
 

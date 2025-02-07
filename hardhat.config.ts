@@ -1,12 +1,12 @@
 import type { HardhatUserConfig } from 'hardhat/config';
+import '@nomicfoundation/hardhat-ignition';
 import '@nomicfoundation/hardhat-ignition-viem';
 import '@nomicfoundation/hardhat-verify';
 import '@nomicfoundation/hardhat-viem';
+import 'hardhat-abi-exporter';
 import 'hardhat-gas-reporter';
 import 'solidity-coverage';
 import '@/config';
-import '@/setup';
-import '@/tasks';
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -24,6 +24,12 @@ const config: HardhatUserConfig = {
     reportFormat: 'legacy',
     darkMode: true,
     reportPureAndViewMethods: true,
+  },
+  abiExporter: {
+    clear: true,
+    format: 'minimal',
+    only: ['contracts/act'],
+    rename: (sourceName) => sourceName.slice(10, -4),
   },
 };
 

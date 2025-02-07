@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {IACT} from "./IACT.sol";
+import {IACTCommon} from "../../interfaces/IACTCommon.sol";
 
-interface IACTFungible is IACT {
+interface IACTFungible is IACTCommon {
   // events
 
   event Approval(address indexed owner, address indexed spender, uint256 value);

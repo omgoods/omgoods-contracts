@@ -3,37 +3,16 @@ pragma solidity 0.8.28;
 
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ACTExtension} from "../ACTExtension.sol";
+import {IACTSigner} from "./interfaces/IACTSigner.sol";
+import {IACTSignerEvents} from "./interfaces/IACTSignerEvents.sol";
+import {ACTSignerSignatureModes} from "./enums.sol";
+import {ACTSignerSignature} from "./structs.sol";
 
-contract ACTSignerExtension is IERC1271, ACTExtension {
+contract ACTSignerExtension is ACTExtension, IACTSigner {
   // slots
 
   bytes32 private constant SIGNATURE_SLOT =
     keccak256(abi.encodePacked("act.extensions.signer#signature"));
-
-  // enums
-
-  enum SignatureModes {
-    Unknown, // 0
-    Infinity, // 1
-    EpochBase, // 2
-    TimestampBase // 3
-  }
-
-  // struct
-
-  struct Signature {
-    SignatureModes mode;
-    uint48 validFrom;
-    uint48 validTo;
-  }
-
-  // error
-
-  error InvalidSignatureHash();
-
-  // events
-
-  event SignatureUpdated(bytes32 hash, Signature signature);
 
   // external getters
 
@@ -44,10 +23,11 @@ contract ACTSignerExtension is IERC1271, ACTExtension {
     override
     returns (bytes4[] memory result)
   {
-    result = new bytes4[](2);
+    result = new bytes4[](3);
 
-    result[0] = ACTSignerExtension.isValidSignature.selector;
-    result[1] = ACTSignerExtension.setSignature.selector;
+    result[0] = IERC1271.isValidSignature.selector;
+    result[1] = IACTSigner.getSignature.selector;
+    result[2] = IACTSigner.validateSignature.selector;
 
     return result;
   }
@@ -58,57 +38,66 @@ contract ACTSignerExtension is IERC1271, ACTExtension {
   ) external view returns (bytes4) {
     bool isValid;
 
-    Signature memory signature = _getSignature(hash);
+    ACTSignerSignature memory signature = _getSignature(hash);
 
-    if (signature.mode == SignatureModes.Infinity) {
-      isValid = true;
-    } else if (signature.mode == SignatureModes.EpochBase) {
-      uint48 epoch = _getEpoch();
-
-      isValid = epoch >= signature.validFrom && epoch <= signature.validTo;
-    } else if (signature.mode == SignatureModes.TimestampBase) {
+    if (signature.mode == ACTSignerSignatureModes.TimestampBase) {
       uint48 timestamp = uint48(block.timestamp);
 
       isValid =
-        timestamp >= signature.validFrom &&
-        timestamp <= signature.validTo;
+        timestamp >= signature.validAfter &&
+        timestamp <= signature.validUntil;
+    } else {
+      isValid = signature.mode == ACTSignerSignatureModes.Infinity;
     }
 
     return isValid ? IERC1271.isValidSignature.selector : bytes4(0xffffffff);
+  }
+
+  function getSignature(
+    bytes32 hash
+  ) external pure returns (ACTSignerSignature memory) {
+    return _getSignature(hash);
+  }
+
+  function validateSignature(bytes32 hash) external pure returns (uint256) {
+    ACTSignerSignature memory signature = _getSignature(hash);
+
+    if (signature.mode == ACTSignerSignatureModes.TimestampBase) {
+      return
+        (uint256(signature.validUntil) << 160) |
+        (uint256(signature.validAfter) << 208);
+    } else {
+      return signature.mode == ACTSignerSignatureModes.Infinity ? 0 : 1;
+    }
   }
 
   // external setters
 
   function setSignature(
     bytes32 hash,
-    Signature calldata signature
+    ACTSignerSignature calldata signature
   ) external onlyOwner returns (bool) {
-    return _setSignature(hash, signature);
-  }
-
-  // internal setters
-
-  function _setSignature(
-    bytes32 hash,
-    Signature memory signature
-  ) internal returns (bool) {
     require(hash != bytes32(0), InvalidSignatureHash());
 
-    Signature storage signature_ = _getSignature(hash);
+    ACTSignerSignature storage signature_ = _getSignature(hash);
 
     if (
       signature.mode == signature_.mode &&
-      signature.validFrom == signature_.validFrom &&
-      signature.validTo == signature_.validTo
+      signature.validAfter == signature_.validAfter &&
+      signature.validUntil == signature_.validUntil
     ) {
       return false;
     }
 
-    signature.mode = signature_.mode;
-    signature.validFrom = signature_.validFrom;
-    signature.validTo = signature_.validTo;
+    signature_.mode = signature.mode;
+    signature_.validAfter = signature.validAfter;
+    signature_.validUntil = signature.validUntil;
 
-    emit SignatureUpdated(hash, signature_);
+    emit SignatureUpdated(hash, signature);
+
+    _triggerRegistryEvent(
+      abi.encodeCall(IACTSignerEvents.SignatureUpdated, (hash, signature))
+    );
 
     return true;
   }
@@ -117,7 +106,7 @@ contract ACTSignerExtension is IERC1271, ACTExtension {
 
   function _getSignature(
     bytes32 hash
-  ) private pure returns (Signature storage result) {
+  ) private pure returns (ACTSignerSignature storage result) {
     bytes32 slot = keccak256(abi.encodePacked(SIGNATURE_SLOT, hash));
 
     // solhint-disable-next-line no-inline-assembly

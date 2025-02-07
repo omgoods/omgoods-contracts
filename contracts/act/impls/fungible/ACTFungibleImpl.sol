@@ -3,9 +3,9 @@ pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {ACTSettings} from "../../core/structs.sol";
-import {IACTFungible} from "../../interfaces/IACTFungible.sol";
 import {ACTImpl} from "../ACTImpl.sol";
-import {ACTFungibleEvents} from "./ACTFungibleEvents.sol";
+import {IACTFungible} from "./interfaces/IACTFungible.sol";
+import {IACTFungibleEvents} from "./interfaces/IACTFungibleEvents.sol";
 
 /**
  * @title ACTFungibleImpl
@@ -236,7 +236,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        ACTFungibleEvents.FungibleApproval,
+        IACTFungibleEvents.FungibleApproval,
         (owner, spender, value)
       )
     );
@@ -252,7 +252,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        ACTFungibleEvents.FungibleTransfer,
+        IACTFungibleEvents.FungibleTransfer,
         (epoch, from, to, value)
       )
     );

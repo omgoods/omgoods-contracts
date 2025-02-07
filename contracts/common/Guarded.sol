@@ -67,7 +67,7 @@ abstract contract Guarded is Ownable {
   ) internal view {
     address signer = hash.recover(signature);
 
-    require(_guardians[signer], InvalidGuardianSignature());
+    require(signer == _owner || _guardians[signer], InvalidGuardianSignature());
   }
 
   // internal setters

@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {ACTStates, ACTSystems} from "../core/enums.sol";
-import {ACTModuleAccess} from "../core/structs.sol";
+import {ACTStates, ACTSystems} from "../../core/enums.sol";
+import {ACTModuleAccess} from "../../core/structs.sol";
 
 /* solhint-disable func-name-mixedcase */
 
-interface ACTEvents {
-  // external views
+interface IACTEvents {
+  // pseudo events
 
   function NameUpdated(string memory name) external view;
 

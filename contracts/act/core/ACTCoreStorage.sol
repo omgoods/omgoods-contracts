@@ -8,6 +8,9 @@ import {ACTSettings, ACTExtensions, ACTModules} from "./structs.sol";
 abstract contract ACTCoreStorage {
   // slots
 
+  bytes32 private constant NONCE_SLOT =
+    keccak256(abi.encodePacked("act.core#nonce"));
+
   bytes32 private constant REGISTRY_SLOT =
     keccak256(abi.encodePacked("act.core#registry"));
 
@@ -45,6 +48,15 @@ abstract contract ACTCoreStorage {
     keccak256(abi.encodePacked("act.core#modules"));
 
   // internal getters
+
+  function _getNonceSlot(
+    address account
+  ) internal pure returns (StorageSlot.Uint256Slot storage) {
+    return
+      StorageSlot.getUint256Slot(
+        keccak256(abi.encodePacked(NONCE_SLOT, account))
+      );
+  }
 
   function _getRegistrySlot()
     internal

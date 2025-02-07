@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
+import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IInitializable} from "../../common/interfaces/IInitializable.sol";
@@ -9,15 +11,17 @@ import {ACTCore} from "../core/ACTCore.sol";
 import {ACTStates, ACTSystems} from "../core/enums.sol";
 import {ACTSettings, ACTExtensions, ACTModules, ACTModuleAccess} from "../core/structs.sol";
 import {IACTExtension} from "../extensions/interfaces/IACTExtension.sol";
-import {IACT} from "../interfaces/IACT.sol";
+import {IACTSigner} from "../extensions/signer/interfaces/IACTSigner.sol";
+import {IACTCommon} from "./interfaces/IACTCommon.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
+import {IACTEvents} from "./interfaces/IACTEvents.sol";
 import {IACTImpl} from "./interfaces/IACTImpl.sol";
-import {ACTEvents} from "./ACTEvents.sol";
 
 /**
  * @title ACTImpl
  */
-abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
+abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
+  using ECDSA for bytes32;
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -33,6 +37,8 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
   error ZeroAddressExtension();
 
   error UnsupportedExtension();
+
+  error InvalidNonce();
 
   // events
 
@@ -105,6 +111,14 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
     return _getBalanceSlot(account).value;
   }
 
+  function getNonce() external view returns (uint256) {
+    return _getNonceSlot(address(this)).value;
+  }
+
+  function getNonce(address account) external view returns (uint256) {
+    return _getNonceSlot(account).value;
+  }
+
   function getRegistry() external view returns (address) {
     return _getRegistrySlot().value;
   }
@@ -146,6 +160,38 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
 
   // external setters
 
+  function validateUserOp(
+    PackedUserOperation calldata userOp,
+    bytes32 userOpHash,
+    uint256 missingAccountFunds
+  ) external onlyEntryPoint returns (uint256) {
+    ACTSettings memory settings = _getSettings();
+
+    if (settings.system == ACTSystems.AbsoluteMonarchy) {
+      (address recovered, , ) = userOpHash.tryRecover(userOp.signature);
+
+      if (recovered != address(0)) {
+        address maintainer = _getMaintainerSlot().value;
+
+        if (maintainer == recovered) {
+          _validateNonce(userOp.nonce, maintainer);
+
+          _payPrefund(missingAccountFunds);
+
+          return 0;
+        }
+      }
+    }
+
+    _validateNonce(userOp.nonce, address(this));
+
+    bytes memory encodedData = _callExtension(
+      abi.encodeCall(IACTSigner.validateSignature, (userOpHash))
+    );
+
+    return abi.decode(encodedData, (uint256));
+  }
+
   function setName(string calldata name_) external onlyOwner returns (bool) {
     StorageSlot.StringSlot storage nameSlot = _getNameSlot();
 
@@ -158,7 +204,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
 
     emit NameUpdated(name_);
 
-    _triggerRegistryEvent(abi.encodeCall(ACTEvents.NameUpdated, (name_)));
+    _triggerRegistryEvent(abi.encodeCall(IACTEvents.NameUpdated, (name_)));
 
     return true;
   }
@@ -182,7 +228,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
     emit MaintainerUpdated(maintainer);
 
     _triggerRegistryEvent(
-      abi.encodeCall(ACTEvents.MaintainerUpdated, (maintainer))
+      abi.encodeCall(IACTEvents.MaintainerUpdated, (maintainer))
     );
 
     return true;
@@ -206,7 +252,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
 
     emit StateUpdated(state);
 
-    _triggerRegistryEvent(abi.encodeCall(ACTEvents.StateUpdated, (state)));
+    _triggerRegistryEvent(abi.encodeCall(IACTEvents.StateUpdated, (state)));
 
     return true;
   }
@@ -225,7 +271,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
 
     emit SystemUpdated(system);
 
-    _triggerRegistryEvent(abi.encodeCall(ACTEvents.SystemUpdated, (system)));
+    _triggerRegistryEvent(abi.encodeCall(IACTEvents.SystemUpdated, (system)));
 
     return true;
   }
@@ -294,7 +340,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
     // Trigger a registry event to notify of the change
     _triggerRegistryEvent(
       registry,
-      abi.encodeCall(ACTEvents.ExtensionUpdated, (extension, enabled))
+      abi.encodeCall(IACTEvents.ExtensionUpdated, (extension, enabled))
     );
 
     return true;
@@ -324,9 +370,32 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACT, IACTImpl {
     emit ModuleUpdated(module, access);
 
     _triggerRegistryEvent(
-      abi.encodeCall(ACTEvents.ModuleUpdated, (module, access))
+      abi.encodeCall(IACTEvents.ModuleUpdated, (module, access))
     );
 
     return true;
+  }
+
+  // private setters
+
+  function _validateNonce(uint256 nonce, address account) private {
+    StorageSlot.Uint256Slot storage nonceSlot = _getNonceSlot(account);
+
+    require(nonceSlot.value == nonce, InvalidNonce());
+
+    unchecked {
+      nonceSlot.value = nonce + 1;
+    }
+  }
+
+  function _payPrefund(uint256 prefund) private {
+    if (prefund != 0) {
+      (bool success, ) = payable(msg.sender).call{
+        value: prefund,
+        gas: type(uint256).max
+      }("");
+
+      (success);
+    }
   }
 }

@@ -3,8 +3,8 @@ pragma solidity 0.8.28;
 
 /* solhint-disable func-name-mixedcase */
 
-interface ACTFungibleEvents {
-  // external getters
+interface IACTFungibleEvents {
+  // pseudo events
 
   function FungibleApproval(
     address owner,

@@ -11,7 +11,7 @@ describe.only('poc', function () {
 
   async function deployFixture() {
     const impl = await deployContract('ACTFungibleImpl');
-    const registry = await deployContract('ACTRegistry', ['test', zeroAddress]);
+    const registry = await deployContract('ACTRegistry', [zeroAddress]);
 
     const publicClient = await getPublicClient();
     const walletClients = await getWalletClients();

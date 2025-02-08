@@ -3,6 +3,7 @@ pragma solidity 0.8.28;
 
 import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IInitializable} from "../../common/interfaces/IInitializable.sol";
@@ -22,6 +23,7 @@ import {IACTImpl} from "./interfaces/IACTImpl.sol";
  */
 abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
   using ECDSA for bytes32;
+  using MessageHashUtils for bytes32;
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -168,7 +170,10 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     ACTSettings memory settings = _getSettings();
 
     if (settings.system == ACTSystems.AbsoluteMonarchy) {
-      (address recovered, , ) = userOpHash.tryRecover(userOp.signature);
+      // TODO: fix validation
+      (address recovered, , ) = userOpHash.toEthSignedMessageHash().tryRecover(
+        userOp.signature
+      );
 
       if (recovered != address(0)) {
         address maintainer = _getMaintainerSlot().value;

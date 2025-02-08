@@ -30,4 +30,8 @@ interface IACTFungible is IACTCommon {
     address to,
     uint256 value
   ) external returns (bool);
+
+  function mint(address to, uint256 value) external returns (bool);
+
+  function burn(address from, uint256 value) external returns (bool);
 }

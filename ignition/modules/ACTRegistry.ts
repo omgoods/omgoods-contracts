@@ -5,8 +5,6 @@ export default buildModule('ACTRegistry', (m) => {
   const deployer = m.getAccount(0);
   const owner = m.getAccount(1);
 
-  const eip712Name = m.getParameter('eip712Name', 'ACT Registry');
-
   const entryPoint = m.getParameter('entryPoint', zeroAddress);
 
   const epochWindowLength = m.getParameter(
@@ -14,7 +12,7 @@ export default buildModule('ACTRegistry', (m) => {
     60 * 60 * 24 * 7,
   ); // 7 days
 
-  const registry = m.contract('ACTRegistry', [eip712Name, owner], {
+  const registry = m.contract('ACTRegistry', [owner], {
     from: deployer,
     id: 'registry',
   });

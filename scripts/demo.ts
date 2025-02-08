@@ -1,84 +1,160 @@
-import { ignition, viem } from 'hardhat';
-import { Hex } from 'viem';
-import { ACTVariants } from '@/common';
-import ACTModule from '../ignition/modules/ACT';
-import ERC4337Module from '../ignition/modules/ERC4337';
+import { encodeFunctionData, Hex, parseEther } from 'viem';
+import {
+  getUserOperationHash,
+  UserOperation,
+  toPackedUserOperation,
+  PackedUserOperation,
+} from 'viem/account-abstraction';
+import { ACTVariants, randomAddress } from '@/common';
+import { buildHelpers } from './helpers';
 
-const { getPublicClient, getWalletClients, getContractAt } = viem;
+const TOKEN_NAME = 'Demo';
+const TOKEN_SYMBOL = 'DMO';
+
+const TOKEN_DISTRIBUTION: [to: Hex, value: bigint][] = [
+  [randomAddress(), parseEther('1000')],
+  [randomAddress(), parseEther('5000')],
+  [randomAddress(), parseEther('25000')],
+] as const;
 
 async function main() {
   const {
-    entryPoint: { address: entryPointAddress },
-  } = await ignition.deploy(ERC4337Module);
+    client,
+    owner,
+    maintainer,
+    relayer,
+    entryPoint,
+    registry,
+    getACTFungible,
+    buildTokenTypedData,
+  } = await buildHelpers();
 
-  const {
-    registry: { address: registryAddress },
-  } = await ignition.deploy(ACTModule, {
-    parameters: {
-      ACTRegistry: {
-        entryPoint: entryPointAddress,
-      },
-    },
-  });
+  let nonce = 0n;
 
-  const publicClient = await getPublicClient();
+  // Compute token address and get contract instance for it
+  const token = await getACTFungible(TOKEN_SYMBOL);
 
-  const entryPoint = await getContractAt('EntryPoint', entryPointAddress);
-  const registry = await getContractAt('ACTRegistry', registryAddress);
+  const packedUseOps: PackedUserOperation[] = [];
 
-  const [deployer, owner, maintainer] = await getWalletClients();
+  // Build first UserOp with init code
 
-  const SYMBOL = 'TEST';
-
-  const guardianSignature = await owner.signTypedData({
-    domain: {
-      name: 'ACT Registry',
-      version: '1',
-      chainId: publicClient.chain.id,
-      verifyingContract: registry.address,
-    },
-    types: {
-      Token: [
-        { name: 'variant', type: 'uint8' },
-        { name: 'maintainer', type: 'address' },
-        { name: 'name', type: 'string' },
-        { name: 'symbol', type: 'string' },
-      ],
-    },
-    primaryType: 'Token',
-    message: {
-      variant: ACTVariants.Fungible,
+  // Sign guardian signature required for token creation
+  const guardianSignature = await owner.signTypedData(
+    buildTokenTypedData({
+      variant: ACTVariants.Fungible, // Specifies that the token is fungible
       maintainer: maintainer.account.address,
-      name: 'Test',
-      symbol: SYMBOL,
+      name: TOKEN_NAME,
+      symbol: TOKEN_SYMBOL,
+    }),
+  );
+
+  const factoryData = encodeFunctionData({
+    abi: registry.abi,
+    functionName: 'createToken',
+    args: [
+      ACTVariants.Fungible,
+      maintainer.account.address,
+      TOKEN_NAME,
+      TOKEN_SYMBOL,
+      guardianSignature, // Guardian's signature for token creation
+    ],
+  });
+
+  const callData = encodeFunctionData({
+    abi: token.abi,
+    functionName: 'mint',
+    args: TOKEN_DISTRIBUTION[0],
+  });
+
+  const userOp: UserOperation<'0.7'> = {
+    sender: token.address,
+    nonce,
+    factory: registry.address,
+    factoryData, // Data for creating the token
+    callData, // Data for minting the token
+    callGasLimit: 500_000n,
+    maxFeePerGas: 0n, // Set to 0 for simplicity
+    maxPriorityFeePerGas: 0n, // Set to 0 for simplicity
+    preVerificationGas: 200_000n,
+    verificationGasLimit: 500_000n,
+    signature: '0x', // Placeholder for signature
+  };
+
+  const userOpHash = getUserOperationHash({
+    chainId: client.chain.id,
+    entryPointAddress: entryPoint.address,
+    entryPointVersion: '0.7',
+    userOperation: userOp,
+  });
+
+  console.log('userOpHash#0:', userOpHash);
+
+  userOp.signature = await maintainer.signMessage({
+    message: {
+      raw: userOpHash,
     },
   });
 
-  const tokenAddress = await registry.read.computeTokenAddress([
-    ACTVariants.Fungible,
-    SYMBOL,
-  ]);
+  packedUseOps.push(toPackedUserOperation(userOp)); // Add packed user operation
 
-  const token = await getContractAt('ACTFungibleImpl', tokenAddress as Hex);
+  // Build other UserOps
 
-  await registry.write.createToken([
-    ACTVariants.Fungible,
-    maintainer.account.address,
-    'Test',
-    SYMBOL,
-    guardianSignature,
-  ]);
+  for (let i = 1; i < TOKEN_DISTRIBUTION.length; i++) {
+    const callData = encodeFunctionData({
+      abi: token.abi,
+      functionName: 'mint',
+      args: TOKEN_DISTRIBUTION[i],
+    });
 
-  console.log();
-  console.log('token.address:', token.address);
-  console.log('token.name:', await token.read.name());
-  console.log('token.symbol:', await token.read.symbol());
+    // mint
+    const userOp: UserOperation<'0.7'> = {
+      sender: token.address,
+      nonce: ++nonce, // Incremented nonce value
+      callData, // Data for minting the token
+      callGasLimit: 500_000n,
+      maxFeePerGas: 0n,
+      maxPriorityFeePerGas: 0n,
+      preVerificationGas: 200_000n,
+      verificationGasLimit: 500_000n,
+      signature: '0x', // Placeholder for signature
+    };
 
-  console.log();
-  console.log(
-    'createdToken:',
-    await registry.read.getCreatedToken([tokenAddress]),
+    const userOpHash = getUserOperationHash({
+      chainId: client.chain.id,
+      entryPointAddress: entryPoint.address,
+      entryPointVersion: '0.7',
+      userOperation: userOp,
+    });
+
+    console.log(`userOpHash#${i}:`, userOpHash);
+
+    userOp.signature = await maintainer.signMessage({
+      message: {
+        raw: userOpHash,
+      },
+    });
+
+    packedUseOps.push(toPackedUserOperation(userOp)); // Add packed user operation
+  }
+
+  // Execute all user ops
+  const hash = await entryPoint.write.handleOps(
+    [packedUseOps, relayer.account.address],
+    relayer,
   );
+
+  const { gasUsed } = await client.waitForTransactionReceipt({ hash });
+
+  console.log();
+  console.log('tx.gasUsed:', gasUsed);
+  console.log();
+  console.log('token.totalSupply:', await token.read.totalSupply());
+  for (let i = 0; i < TOKEN_DISTRIBUTION.length; i++) {
+    console.log(
+      `token.balanceOf(account#${i}):`,
+      await token.read.balanceOf([TOKEN_DISTRIBUTION[i][0]]),
+    );
+  }
 }
 
 main().catch(console.error);

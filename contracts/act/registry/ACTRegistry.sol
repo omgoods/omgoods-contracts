@@ -101,13 +101,11 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
   /**
    * @notice Constructor for the ACTRegistry contract.
    * @dev Initializes the contract with the given EIP712 name and initializer address.
-   * @param eip712Name The name to be used for EIP712 domain separator.
    * @param initializer The address responsible for the one-time initialization of the contract.
    */
   constructor(
-    string memory eip712Name,
     address initializer
-  ) EIP712(eip712Name, "1") Initializable(initializer) {
+  ) EIP712("ACT Registry", "1") Initializable(initializer) {
     //
   }
 

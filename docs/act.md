@@ -1,12 +1,12 @@
 # ACT (Autonomous Community Token)
 
-## Features
+## Examples
 
 * Can act as **Fungible** (`ERC-20`) or **Non-Fungible** (`ERC-721`) token
-    * [./examples/act-as-fungible-token.ts](../scripts/demo.ts)
-    * [./examples/act-as-non-fungible-token.ts](../scripts/demo.ts)
+  * [examples/act-as-fungible-token.ts](../examples/act-as-fungible-token.ts)
+  * `examples/act-as-non-fungible-token.ts` 
 * Can act as **Smart Contract Wallet** (`ERC-4337`)
-    * [./examples/act-smart-wallet.ts](../scripts/demo.ts)
+  * [examples/act-as-smart-wallet.ts](../examples/act-as-smart-wallet.ts)
 * Can act as **DAO**
-    * `WIP` 
+  * `examples/act-as-dao.ts` 
 

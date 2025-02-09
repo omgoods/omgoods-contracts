@@ -5,11 +5,14 @@
   "scripts": {
     "start": "hardhat node",
     "linter": "solhint \"contracts/**/*.sol\"",
-    "format": "prettier --write \"{contracts,ignition,scripts,src,test}/**/*.{ts,sol}\"",
+    "format": "prettier --write \"{contracts,examples,ignition,src,test}/**/*.{ts,sol}\"",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy",
     "export": "hardhat export-abi",
     "test": "hardhat test",
+    "example:act-as-dao": "hardhat run ./examples/act-as-dao.ts",
+    "example:act-as-fungible-token": "hardhat run ./examples/act-as-fungible-token.ts",
+    "example:act-as-smart-wallet": "hardhat run ./examples/act-as-smart-wallet.ts",
     "hardhat": "hardhat"
   },
   "dependencies": {

@@ -1,3 +1,7 @@
+export enum TypedDataDomainNames {
+  ACTRegistry = 'ACT Registry',
+}
+
 export enum ACTVariants {
   UnknownOrAny,
   Fungible,

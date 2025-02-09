@@ -5,8 +5,8 @@ import {
   toPackedUserOperation,
   PackedUserOperation,
 } from 'viem/account-abstraction';
-import { buildHelpers, runExample } from './common';
 import { ACTVariants, randomAddress, randomEther } from '@/common';
+import { buildHelpers, runExample } from './common';
 
 const TOKEN = {
   variant: ACTVariants.Fungible,

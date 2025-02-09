@@ -1,6 +1,6 @@
 import { formatEther } from 'viem';
-import { buildHelpers, runExample } from './common';
 import { ACTStates, ACTSystems, ACTVariants, randomEther } from '@/common';
+import { buildHelpers, runExample } from './common';
 
 const TOKEN = {
   variant: ACTVariants.Fungible,

@@ -1,5 +1,5 @@
-import { buildHelpers, runExample } from './common';
 import { ACTVariants } from '@/common';
+import { buildHelpers, runExample } from './common';
 
 const TOKEN = {
   variant: ACTVariants.NonFungible,

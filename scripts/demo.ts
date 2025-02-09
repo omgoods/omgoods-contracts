@@ -45,6 +45,7 @@ async function main() {
       maintainer: maintainer.account.address,
       name: TOKEN_NAME,
       symbol: TOKEN_SYMBOL,
+      extensions: [],
     }),
   );
 
@@ -56,6 +57,7 @@ async function main() {
       maintainer.account.address,
       TOKEN_NAME,
       TOKEN_SYMBOL,
+      [],
       guardianSignature, // Guardian's signature for token creation
     ],
   });

@@ -15,7 +15,7 @@ import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
 contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
   bytes32 private constant TOKEN_TYPED_DATA_HASH =
     keccak256(
-      "Token(uint8 variant,address maintainer,string name,string symbol)"
+      "Token(uint8 variant,address maintainer,string name,string symbol,address[] extensions)"
     );
 
   // enums
@@ -33,6 +33,7 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
     address maintainer;
     string name;
     string symbol;
+    address[] extensions;
   }
 
   struct ExtensionOptions {
@@ -65,6 +66,8 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
 
   error ZeroAddressExtension();
 
+  error UnsupportedExtension();
+
   error InvalidVariant();
 
   // events
@@ -79,7 +82,9 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
   event TokenCreated(
     address token,
     Variants variant,
-    bytes data,
+    string name,
+    string symbol,
+    address[] extensions,
     uint256 timestamp
   );
 
@@ -218,7 +223,8 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
         token.variant,
         token.maintainer,
         token.name,
-        token.symbol
+        token.symbol,
+        token.extensions
       );
   }
 
@@ -302,15 +308,17 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
    * @param maintainer The address of the token's maintainer.
    * @param name The name of the token.
    * @param symbol The symbol of the token.
+   * @param extensions Initial extensions.
    * @return The address of the created token.
    */
   function createToken(
     Variants variant,
     address maintainer,
     string calldata name,
-    string calldata symbol
+    string calldata symbol,
+    address[] calldata extensions
   ) external onlyOwner returns (address) {
-    return _createToken(variant, maintainer, name, symbol);
+    return _createToken(variant, maintainer, name, symbol, extensions);
   }
 
   /**
@@ -320,6 +328,7 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
    * @param maintainer The address of the token's maintainer.
    * @param name The name of the token.
    * @param symbol The symbol of the token.
+   * @param extensions Initial extensions.
    * @param guardianSignature The signature from a guardian authorizing the token creation.
    * @return The address of the created token.
    */
@@ -328,14 +337,15 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
     address maintainer,
     string calldata name,
     string calldata symbol,
+    address[] calldata extensions,
     bytes calldata guardianSignature
   ) external returns (address) {
     _requireGuardianSignature(
-      _hashTokenTypedData(variant, maintainer, name, symbol),
+      _hashTokenTypedData(variant, maintainer, name, symbol, extensions),
       guardianSignature
     );
 
-    return _createToken(variant, maintainer, name, symbol);
+    return _createToken(variant, maintainer, name, symbol, extensions);
   }
 
   /**
@@ -361,7 +371,8 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
     Variants variant,
     address maintainer,
     string calldata name,
-    string calldata symbol
+    string calldata symbol,
+    address[] calldata extensions
   ) private view returns (bytes32) {
     return
       _hashTypedDataV4(
@@ -371,7 +382,8 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
             variant,
             maintainer,
             keccak256(abi.encodePacked(name)),
-            keccak256(abi.encodePacked(symbol))
+            keccak256(abi.encodePacked(symbol)),
+            keccak256(abi.encodePacked(extensions))
           )
         )
       );
@@ -400,18 +412,47 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
     return result;
   }
 
+  function _verifyExtensions(
+    Variants requireVariant,
+    address[] calldata extensions
+  ) private view {
+    uint256 len = extensions.length;
+
+    for (uint256 i; i < len; ) {
+      address extension = extensions[i];
+
+      require(extension != address(0), ZeroAddressExtension());
+
+      ExtensionOptions memory extensionOptions = _extensionOptions[extension];
+
+      require(
+        extensionOptions.active &&
+          (extensionOptions.variant == Variants.UnknownOrAny ||
+            extensionOptions.variant == requireVariant),
+        UnsupportedExtension()
+      );
+
+      unchecked {
+        i += 1;
+      }
+    }
+  }
+
   // private setters
 
   function _createToken(
     Variants variant,
     address maintainer,
     string calldata name,
-    string calldata symbol
+    string calldata symbol,
+    address[] calldata extensions
   ) private returns (address token) {
     address impl = _variantImpls[variant];
 
     // Ensure the implementation address for the specified variant is not zero
     require(impl != address(0), InvalidVariant());
+
+    _verifyExtensions(variant, extensions);
 
     // Compute the unique salt using the token symbol
     bytes32 salt = _computeTokenSalt(symbol);
@@ -419,30 +460,41 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
     // Deploy a new proxy instance deterministically using the implementation and salt
     token = Clones.cloneDeterministic(impl, salt);
 
-    // Prepare the initialization data for the created token
-    bytes memory data = abi.encodeCall(
-      IACTImpl.initialize,
-      (_entryPoint, maintainer, name, symbol, _epochsSettings)
-    );
+    {
+      // Prepare the initialization data for the created token
+      bytes memory data = abi.encodeCall(
+        IACTImpl.initialize,
+        (_entryPoint, maintainer, name, symbol, extensions, _epochsSettings)
+      );
 
-    // Initialize the deployed token by calling the initialize function
-    // solhint-disable-next-line avoid-low-level-calls
-    (bool success, bytes memory response) = token.call(data);
+      // Initialize the deployed token by calling the initialize function
+      // solhint-disable-next-line avoid-low-level-calls
+      (bool success, bytes memory response) = token.call(data);
 
-    // If the initialization fails, revert and return the error message
-    if (!success) {
-      // solhint-disable-next-line no-inline-assembly
-      assembly {
-        revert(add(response, 32), mload(response))
+      // If the initialization fails, revert and return the error message
+      if (!success) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+          revert(add(response, 32), mload(response))
+        }
       }
     }
 
-    // Store the created token's metadata in the mapping
-    CreatedToken storage createdToken = _createdTokens[token];
-    createdToken.salt = salt;
-    createdToken.variant = variant;
+    {
+      // Store the created token's metadata in the mapping
+      CreatedToken storage createdToken = _createdTokens[token];
+      createdToken.salt = salt;
+      createdToken.variant = variant;
+    }
 
-    emit TokenCreated(token, variant, data, block.timestamp);
+    emit TokenCreated(
+      token,
+      variant,
+      name,
+      symbol,
+      extensions,
+      block.timestamp
+    );
 
     return token;
   }

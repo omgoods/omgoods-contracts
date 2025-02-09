@@ -53,6 +53,7 @@ export async function buildHelpers() {
     name: string;
     symbol: string;
     maintainer: Hex;
+    extensions: Hex[];
   }) => {
     return {
       domain: {
@@ -67,6 +68,7 @@ export async function buildHelpers() {
           { name: 'maintainer', type: 'address' },
           { name: 'name', type: 'string' },
           { name: 'symbol', type: 'string' },
+          { name: 'extensions', type: 'address[]' },
         ],
       },
       primaryType: 'Token',

@@ -11,6 +11,7 @@ interface IACTImpl {
     address maintainer,
     string calldata name,
     string calldata symbol,
+    address[] calldata extensions,
     Epochs.Settings memory epochSettings
   ) external;
 }

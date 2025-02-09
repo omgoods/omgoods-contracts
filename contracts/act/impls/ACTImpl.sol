@@ -67,6 +67,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     address maintainer,
     string calldata name_,
     string calldata symbol_,
+    address[] calldata extensions_,
     Epochs.Settings memory epochSettings
   ) external {
     StorageSlot.AddressSlot storage registrySlot = _getRegistrySlot();
@@ -82,6 +83,8 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     _getNameSlot().value = name_;
     _getSymbolSlot().value = symbol_;
     _getSettings().epochs = epochSettings;
+
+    _enableExtensions(extensions_);
   }
 
   // receive
@@ -284,7 +287,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
   function setExtension(
     address extension,
     bool enabled
-  ) external onlyOwner returns (bool) {
+  ) external onlyOwner returns (bool result) {
     require(extension != address(0), ZeroAddressExtension());
 
     address registry = _getRegistrySlot().value;
@@ -294,61 +297,25 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
       UnsupportedExtension()
     );
 
-    // Retrieve the function selectors supported by the given extension
-    bytes4[] memory selectors = IACTExtension(extension)
-      .getSupportedSelectors();
-
     // Access the storage for managing extensions
     ACTExtensions storage extensions = _getExtensions();
 
-    // Check if the extension's enabled status is already set to the desired value
-    if (extensions.enabled[extension] == enabled) {
-      // nothing to do
-      return false;
+    result = enabled
+      ? _enableExtension(extensions, extension)
+      : _disableExtension(extensions, extension);
+
+    if (result) {
+      // Emit an event indicating the extension has been updated
+      emit ExtensionUpdated(extension, enabled);
+
+      // Trigger a registry event to notify of the change
+      _triggerRegistryEvent(
+        registry,
+        abi.encodeCall(IACTEvents.ExtensionUpdated, (extension, enabled))
+      );
     }
 
-    // Update the enabled status of the extension
-    extensions.enabled[extension] = enabled;
-
-    // Determine the address to assign to the selectors (either the extension or a null address)
-    uint256 len = selectors.length;
-
-    // Iterate through all selectors and update their mapped target
-
-    if (enabled) {
-      for (uint256 index; index < len; ) {
-        extensions.selectors[selectors[index]] = extension;
-
-        // Increment index without overflow checks
-        unchecked {
-          index += 1;
-        }
-      }
-    } else {
-      for (uint256 index; index < len; ) {
-        bytes4 selector = selectors[index];
-
-        if (extensions.selectors[selector] == extension) {
-          delete extensions.selectors[selector];
-        }
-
-        // Increment index without overflow checks
-        unchecked {
-          index += 1;
-        }
-      }
-    }
-
-    // Emit an event indicating the extension has been updated
-    emit ExtensionUpdated(extension, enabled);
-
-    // Trigger a registry event to notify of the change
-    _triggerRegistryEvent(
-      registry,
-      abi.encodeCall(IACTEvents.ExtensionUpdated, (extension, enabled))
-    );
-
-    return true;
+    return result;
   }
 
   function setModule(
@@ -402,5 +369,83 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
 
       (success);
     }
+  }
+
+  function _enableExtensions(address[] calldata extensions_) private {
+    uint256 len = extensions_.length;
+
+    if (len == 0) {
+      return;
+    }
+
+    ACTExtensions storage extensions = _getExtensions();
+
+    for (uint256 index; index < len; ) {
+      _enableExtension(extensions, extensions_[index]);
+
+      unchecked {
+        index += 1;
+      }
+    }
+  }
+
+  function _enableExtension(
+    ACTExtensions storage extensions,
+    address extension
+  ) private returns (bool) {
+    // Retrieve the function selectors supported by the given extension
+    bytes4[] memory selectors = IACTExtension(extension)
+      .getSupportedSelectors();
+
+    if (extensions.enabled[extension]) {
+      // nothing to do
+      return false;
+    }
+
+    extensions.enabled[extension] = true;
+
+    uint256 len = selectors.length;
+
+    for (uint256 index; index < len; ) {
+      extensions.selectors[selectors[index]] = extension;
+
+      unchecked {
+        index += 1;
+      }
+    }
+
+    return true;
+  }
+
+  function _disableExtension(
+    ACTExtensions storage extensions,
+    address extension
+  ) private returns (bool) {
+    // Retrieve the function selectors supported by the given extension
+    bytes4[] memory selectors = IACTExtension(extension)
+      .getSupportedSelectors();
+
+    if (!extensions.enabled[extension]) {
+      // nothing to do
+      return false;
+    }
+
+    extensions.enabled[extension] = false;
+
+    uint256 len = selectors.length;
+
+    for (uint256 index; index < len; ) {
+      bytes4 selector = selectors[index];
+
+      if (extensions.selectors[selector] == extension) {
+        delete extensions.selectors[selector];
+      }
+
+      unchecked {
+        index += 1;
+      }
+    }
+
+    return true;
   }
 }

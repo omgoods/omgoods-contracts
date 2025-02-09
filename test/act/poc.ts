@@ -30,6 +30,7 @@ describe.only('poc', function () {
       walletClients[0].account.address || zeroAddress,
       'Test',
       symbol,
+      [],
     ]);
 
     const token = await getContractAt('ACTFungibleImpl', address as Hash);

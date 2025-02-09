@@ -97,7 +97,7 @@ runExample(async (hre) => {
     };
 
     if (i === 0) {
-      // Need to add factory options the first userOp
+      // Need to add factory options to the first userOp
       userOp.factory = registry.address;
       userOp.factoryData = factoryData;
     }

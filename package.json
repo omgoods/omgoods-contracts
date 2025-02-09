@@ -12,6 +12,7 @@
     "test": "hardhat test",
     "example:act-as-dao": "hardhat run ./examples/act-as-dao.ts",
     "example:act-as-fungible-token": "hardhat run ./examples/act-as-fungible-token.ts",
+    "example:act-as-non-fungible-token": "hardhat run ./examples/act-as-non-fungible-token.ts",
     "example:act-as-smart-wallet": "hardhat run ./examples/act-as-smart-wallet.ts",
     "hardhat": "hardhat"
   },
@@ -37,6 +38,7 @@
     "globals": "15.14.0",
     "hardhat": "2.22.18",
     "hardhat-abi-exporter": "2.10.1",
+    "hardhat-chai-matchers-viem": "2.0.8",
     "hardhat-gas-reporter": "2.0.0",
     "prettier": "3.4.2",
     "prettier-plugin-solidity": "1.4.2",

@@ -1,5 +1,6 @@
 import { buildModule } from '@nomicfoundation/hardhat-ignition/modules';
 import { ACTVariants } from '@/common';
+import ACTExtensions from './ACTExtensions';
 import ACTImpls from './ACTImpls';
 import ACTRegistry from './ACTRegistry';
 
@@ -8,17 +9,57 @@ export default buildModule<'ACT', 'ACTRegistry', any>('ACT', (m) => {
 
   const { registry } = m.useModule(ACTRegistry);
 
-  const { fungible, nonFungible } = m.useModule(ACTImpls);
+  const { fungibleImpl, nonFungibleImpl } = m.useModule(ACTImpls);
 
-  m.call(registry, 'setVariant', [ACTVariants.Fungible, fungible], {
+  const { signerExtension, walletExtension } = m.useModule(ACTExtensions);
+
+  m.call(registry, 'setVariant', [ACTVariants.Fungible, fungibleImpl], {
     from: owner,
-    id: 'setFungibleVariant',
+    id: 'addFungibleVariant',
   });
 
-  m.call(registry, 'setVariant', [ACTVariants.NonFungible, nonFungible], {
+  m.call(registry, 'setVariant', [ACTVariants.NonFungible, nonFungibleImpl], {
     from: owner,
-    id: 'setNonFungibleVariant',
+    id: 'addNonFungibleVariant',
   });
 
-  return { registry };
+  m.call(
+    registry,
+    'setExtension',
+    [
+      signerExtension,
+      {
+        active: true,
+        variant: ACTVariants.UnknownOrAny,
+      },
+    ],
+    {
+      from: owner,
+      id: 'addSignerExtension',
+    },
+  );
+
+  m.call(
+    registry,
+    'setExtension',
+    [
+      walletExtension,
+      {
+        active: true,
+        variant: ACTVariants.UnknownOrAny,
+      },
+    ],
+    {
+      from: owner,
+      id: 'addWalletExtension',
+    },
+  );
+
+  return {
+    registry,
+    fungibleImpl,
+    nonFungibleImpl,
+    signerExtension,
+    walletExtension,
+  };
 });

@@ -4,19 +4,17 @@ import ACTRegistry from './ACTRegistry';
 export default buildModule('ACTImpls', (m) => {
   const deployer = m.getAccount(0);
 
-  const { registry } = m.useModule(ACTRegistry);
-
-  const fungible = m.contract('ACTFungibleImpl', [], {
+  const fungibleImpl = m.contract('ACTFungibleImpl', [], {
     from: deployer,
-    id: 'fungible',
-    after: [registry],
+    id: 'fungibleImpl',
+    after: [ACTRegistry],
   });
 
-  const nonFungible = m.contract('ACTNonFungibleImpl', [], {
+  const nonFungibleImpl = m.contract('ACTNonFungibleImpl', [], {
     from: deployer,
-    id: 'nonFungible',
-    after: [fungible],
+    id: 'nonFungibleImpl',
+    after: [fungibleImpl],
   });
 
-  return { fungible, nonFungible };
+  return { fungibleImpl, nonFungibleImpl };
 });

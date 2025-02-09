@@ -10,8 +10,8 @@ import {
 
 const TOKEN = {
   variant: ACTVariants.Fungible,
-  name: 'Example',
-  symbol: 'EXP',
+  name: 'Example Fungible',
+  symbol: 'EXF',
 };
 
 runExample(async (hre) => {
@@ -35,14 +35,12 @@ runExample(async (hre) => {
     TOKEN.symbol,
   );
 
-  const token = await getContractAt('IACTFungible', tokenAddress);
-
   logger.info('Token', {
     address: tokenAddress,
     ...TOKEN,
   });
 
-  logger.log('Creating using guardian signature...');
+  logger.log('Creating token using guardian signature...');
 
   const tokenTypedData = buildTokenTypedData({
     variant: ACTVariants.Fungible,
@@ -69,9 +67,11 @@ runExample(async (hre) => {
     ),
   );
 
+  const token = await getContractAt('IACTFungible', tokenAddress);
+
   logger.log('Minting tokens...');
 
-  for (let i = 1; i < 5; i++) {
+  for (let i = 0; i < 5; i++) {
     const to = randomAddress();
     const value = randomEther();
 
@@ -87,13 +87,15 @@ runExample(async (hre) => {
     totalSupply: formatEther((await token.read.totalSupply()) as bigint),
   });
 
-  logger.log('Activate and disable minting...');
+  logger.log('Activate token and disable minting...');
 
+  // Open transfers to all token holders
   await logger.logTx(
     'Token state changed to `Active`',
     token.write.setState([ACTStates.Active], maintainer),
   );
 
+  // Change token ownership
   await logger.logTx(
     'Token system changed to `ConstitutionalMonarchy`',
     token.write.setSystem([ACTSystems.ConstitutionalMonarchy], maintainer),

@@ -10,9 +10,18 @@
 npm i
 ```
 
+## Running examples
+
+```bash
+npm run example:<name>
+
+# e.g
+npm run example:act-as-fungible-token
+```
+
 ## Documentation
 
-* [ACT (Autonomous Community Token)](./docs/act.md)
+* [ACT - Autonomous Community Token](./docs/act.md)
 
 ## Scripts
 

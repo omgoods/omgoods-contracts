@@ -18,10 +18,7 @@ runExample(async (hre) => {
 
   const [maintainer, ...accounts] = wallets;
 
-  const tokenAddress = await computeTokenAddress(
-    ACTVariants.Fungible,
-    TOKEN.symbol,
-  );
+  const tokenAddress = await computeTokenAddress(TOKEN.variant, TOKEN.symbol);
 
   logger.info('Token', {
     address: tokenAddress,
@@ -34,12 +31,13 @@ runExample(async (hre) => {
     'Token created',
     registry.write.createToken(
       [
-        ACTVariants.Fungible,
+        TOKEN.variant,
         maintainer.account.address,
         TOKEN.name,
         TOKEN.symbol,
         [
           extensions.signer, // For proposals with signing action
+          extensions.voting,
           extensions.wallet, // For proposals with executing action
         ],
       ],

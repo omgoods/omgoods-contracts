@@ -30,10 +30,7 @@ runExample(async (hre) => {
 
   const [maintainer] = wallets;
 
-  const tokenAddress = await computeTokenAddress(
-    ACTVariants.Fungible,
-    TOKEN.symbol,
-  );
+  const tokenAddress = await computeTokenAddress(TOKEN.variant, TOKEN.symbol);
 
   logger.info('Token', {
     address: tokenAddress,
@@ -43,7 +40,7 @@ runExample(async (hre) => {
   logger.log('Creating token using guardian signature...');
 
   const tokenTypedData = buildTokenTypedData({
-    variant: ACTVariants.Fungible,
+    variant: TOKEN.variant,
     maintainer: maintainer.account.address,
     name: TOKEN.name,
     symbol: TOKEN.symbol,
@@ -56,7 +53,7 @@ runExample(async (hre) => {
     'Token created',
     registry.write.createToken(
       [
-        ACTVariants.Fungible,
+        TOKEN.variant,
         maintainer.account.address,
         TOKEN.name,
         TOKEN.symbol,

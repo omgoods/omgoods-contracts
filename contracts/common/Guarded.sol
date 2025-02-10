@@ -83,7 +83,7 @@ abstract contract Guarded is Ownable {
       }
 
       unchecked {
-        index += 1;
+        ++index;
       }
     }
   }

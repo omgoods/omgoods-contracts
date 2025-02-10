@@ -24,6 +24,7 @@ runExample(async (hre) => {
     logger,
     entryPoint,
     registry,
+    extensions,
     owner,
     wallets,
     buildTokenTypedData,
@@ -32,12 +33,9 @@ runExample(async (hre) => {
 
   const [maintainer, relayer] = wallets;
 
-  const tokenAddress = await computeTokenAddress(
-    ACTVariants.Fungible,
-    TOKEN.symbol,
-  );
+  const tokenAddress = await computeTokenAddress(TOKEN.variant, TOKEN.symbol);
 
-  const token = await getContractAt('IACTFungible', tokenAddress);
+  const token = await getContractAt('IACTFungibleCombined', tokenAddress);
 
   logger.info('Token', {
     address: tokenAddress,
@@ -49,11 +47,11 @@ runExample(async (hre) => {
   let nonceTracker = 0n;
 
   const tokenTypedData = buildTokenTypedData({
-    variant: ACTVariants.Fungible,
+    variant: TOKEN.variant,
     maintainer: maintainer.account.address,
     name: TOKEN.name,
     symbol: TOKEN.symbol,
-    extensions: [],
+    extensions: [extensions.wallet],
   });
 
   const guardianSignature = await owner.signTypedData(tokenTypedData);
@@ -62,11 +60,11 @@ runExample(async (hre) => {
     abi: registry.abi,
     functionName: 'createToken',
     args: [
-      ACTVariants.Fungible,
+      TOKEN.variant,
       maintainer.account.address,
       TOKEN.name,
       TOKEN.symbol,
-      [],
+      [extensions.wallet],
       guardianSignature,
     ],
   });

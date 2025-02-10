@@ -60,27 +60,49 @@ library Epochs {
       return currentResult;
     }
 
+    (bool exists, uint256 result) = lookup(self, epoch);
+
+    return exists ? result : currentResult;
+  }
+
+  function lookup(
+    Checkpoints storage self,
+    uint48 epoch
+  ) internal view returns (bool exists, uint256 result) {
     Checkpoint[] storage checkpoints = self.checkpoints;
 
     uint256 pos = checkpoints.length;
 
     if (pos == 0) {
-      return currentResult;
+      return (false, 0);
     }
 
     do {
       unchecked {
-        pos -= 1;
+        --pos;
       }
 
       Checkpoint memory checkpoint = _unsafeCheckpointAccess(checkpoints, pos);
 
       if (checkpoint.epoch <= epoch) {
-        return uint256(checkpoint.value);
+        return (true, uint256(checkpoint.value));
       }
     } while (pos != 0);
 
-    return 0;
+    return (true, 0);
+  }
+
+  function _unsafeCheckpointAccess(
+    Checkpoint[] storage self,
+    uint256 pos
+  ) private pure returns (Checkpoint storage result) {
+    // solhint-disable-next-line no-inline-assembly
+    assembly ("memory-safe") {
+      mstore(0, self.slot)
+      result.slot := add(keccak256(0, 0x20), pos)
+    }
+
+    return result;
   }
 
   // internal setters
@@ -101,7 +123,7 @@ library Epochs {
 
     if (pos != 0) {
       unchecked {
-        pos -= 1;
+        --pos;
       }
 
       Checkpoint storage lastCheckpoint = _unsafeCheckpointAccess(
@@ -121,20 +143,5 @@ library Epochs {
     checkpoint.value = value_;
 
     checkpoints.push(checkpoint);
-  }
-
-  // private getters
-
-  function _unsafeCheckpointAccess(
-    Checkpoint[] storage self,
-    uint256 pos
-  ) private pure returns (Checkpoint storage result) {
-    // solhint-disable-next-line no-inline-assembly
-    assembly ("memory-safe") {
-      mstore(0, self.slot)
-      result.slot := add(keccak256(0, 0x20), pos)
-    }
-
-    return result;
   }
 }

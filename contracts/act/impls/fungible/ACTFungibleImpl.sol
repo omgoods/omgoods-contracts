@@ -79,6 +79,8 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
   function transfer(address to, uint256 value) external returns (bool) {
     ACTSettings memory settings = _getSettings();
 
+    _requireOnlyMaintainerWhenLocked(settings);
+
     require(to != address(0), ZeroAddressReceiver());
 
     if (value == 0) {
@@ -112,6 +114,8 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
     uint256 value
   ) external returns (bool) {
     ACTSettings memory settings = _getSettings();
+
+    _requireOnlyMaintainerWhenLocked(settings);
 
     require(from != address(0), ZeroAddressSender());
     require(to != address(0), ZeroAddressReceiver());

@@ -8,7 +8,8 @@ enum ACTVotingProposalStatuses {
   Voting, // 3
   Accepted, // 4
   Rejected, // 5
-  Executed // 6
+  Executed, // 6
+  Reverted // 7
 }
 
 enum ACTVotingVoteKinds {

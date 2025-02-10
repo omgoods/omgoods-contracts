@@ -21,7 +21,7 @@ npm run example:act-as-fungible-token
 
 ## Documentation
 
-* [ACT - Autonomous Community Token](./docs/act.md)
+* [ACT - Autonomous Community Token](docs/act/README.md)
 
 ## Scripts
 

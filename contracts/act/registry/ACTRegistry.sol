@@ -418,8 +418,8 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
   ) private view {
     uint256 len = extensions.length;
 
-    for (uint256 i; i < len; ) {
-      address extension = extensions[i];
+    for (uint256 index; index < len; ) {
+      address extension = extensions[index];
 
       require(extension != address(0), ZeroAddressExtension());
 
@@ -433,7 +433,7 @@ contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
       );
 
       unchecked {
-        i += 1;
+        ++index;
       }
     }
   }

@@ -32,6 +32,7 @@ export async function getContracts() {
   const {
     registry: { address: registryAddress },
     signerExtension: { address: signer },
+    votingExtension: { address: voting },
     walletExtension: { address: wallet },
   } = await ignition.deploy(ACTModule, {
     parameters: {
@@ -50,6 +51,7 @@ export async function getContracts() {
     registry,
     extensions: {
       signer,
+      voting,
       wallet,
     },
   } as const;

@@ -9,7 +9,7 @@ struct ACTVotingProposal {
   address creator;
   uint256 acceptedPower;
   uint256 rejectedPower;
-  bytes[] actions;
+  bytes data;
 }
 
 struct ACTVotingProposalVote {

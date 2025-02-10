@@ -21,6 +21,8 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
 
   error MsgSenderIsNotTheOwner();
 
+  error MsgSenderIsNotTheMaintainer();
+
   error MsgSenderIsNotTheOwnerOrMaintainer();
 
   error ZeroAddressSender();
@@ -53,6 +55,12 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
     _;
   }
 
+  modifier onlyMaintainerWhenLocked() {
+    _requireOnlyMaintainerWhenLocked(_getSettings());
+
+    _;
+  }
+
   // internal getters
 
   function _requireOnlyEntryPoint() internal view {
@@ -60,20 +68,40 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
   }
 
   function _requireOnlyOwner(ACTSettings memory settings) internal view {
-    require(
-      _isEntryPointCall() ||
+    if (!_isSelfCall() && !_isEntryPointCall()) {
+      require(
         msg.sender == _getOwner(_getMaintainerSlot().value, settings),
-      MsgSenderIsNotTheOwner()
-    );
+        MsgSenderIsNotTheOwner()
+      );
+    }
   }
 
   function _requireOnlyOwnerOrMaintainer(address maintainer) internal view {
-    require(
-      _isEntryPointCall() ||
+    if (!_isSelfCall() && !_isEntryPointCall()) {
+      require(
         msg.sender == maintainer ||
-        msg.sender == _getOwner(maintainer, _getSettings()),
-      MsgSenderIsNotTheOwnerOrMaintainer()
+          msg.sender == _getOwner(maintainer, _getSettings()),
+        MsgSenderIsNotTheOwnerOrMaintainer()
+      );
+    }
+  }
+
+  function _requireOnlyMaintainer() internal view {
+    require(
+      msg.sender == _getMaintainerSlot().value,
+      MsgSenderIsNotTheMaintainer()
     );
+  }
+
+  function _requireOnlyMaintainerWhenLocked(
+    ACTSettings memory settings
+  ) internal view {
+    if (settings.state == ACTStates.Locked) {
+      require(
+        msg.sender == _getMaintainerSlot().value,
+        MsgSenderIsNotTheMaintainer()
+      );
+    }
   }
 
   function _getOwner(
@@ -124,8 +152,12 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
       );
   }
 
+  function _isSelfCall() internal view returns (bool) {
+    return msg.sender == address(this);
+  }
+
   function _isEntryPointCall() internal view returns (bool) {
-    return _getEntryPointSlot().value == msg.sender;
+    return msg.sender == _getEntryPointSlot().value;
   }
 
   function _isMinterModuleCall() internal view returns (bool) {

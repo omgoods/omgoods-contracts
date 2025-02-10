@@ -7,6 +7,7 @@ import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/Messa
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IInitializable} from "../../common/interfaces/IInitializable.sol";
+import {Address} from "../../common/Address.sol";
 import {Epochs} from "../../common/Epochs.sol";
 import {ACTCore} from "../core/ACTCore.sol";
 import {ACTStates, ACTSystems} from "../core/enums.sol";
@@ -24,6 +25,7 @@ import {IACTImpl} from "./interfaces/IACTImpl.sol";
 abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
   using ECDSA for bytes32;
   using MessageHashUtils for bytes32;
+  using Address for address;
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -173,7 +175,6 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     ACTSettings memory settings = _getSettings();
 
     if (settings.system == ACTSystems.AbsoluteMonarchy) {
-      // TODO: fix validation
       (address recovered, , ) = userOpHash.toEthSignedMessageHash().tryRecover(
         userOp.signature
       );
@@ -184,7 +185,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
         if (maintainer == recovered) {
           _validateNonce(userOp.nonce, maintainer);
 
-          _payPrefund(missingAccountFunds);
+          msg.sender.makeRefundCall(missingAccountFunds);
 
           return 0;
         }
@@ -360,17 +361,6 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     }
   }
 
-  function _payPrefund(uint256 prefund) private {
-    if (prefund != 0) {
-      (bool success, ) = payable(msg.sender).call{
-        value: prefund,
-        gas: type(uint256).max
-      }("");
-
-      (success);
-    }
-  }
-
   function _enableExtensions(address[] calldata extensions_) private {
     uint256 len = extensions_.length;
 
@@ -384,7 +374,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
       _enableExtension(extensions, extensions_[index]);
 
       unchecked {
-        index += 1;
+        ++index;
       }
     }
   }
@@ -410,7 +400,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
       extensions.selectors[selectors[index]] = extension;
 
       unchecked {
-        index += 1;
+        ++index;
       }
     }
 
@@ -442,7 +432,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
       }
 
       unchecked {
-        index += 1;
+        ++index;
       }
     }
 

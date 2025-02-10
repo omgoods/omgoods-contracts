@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+import {Address} from "../../../common/Address.sol";
 import {ACTExtension} from "../ACTExtension.sol";
 import {IACTWallet} from "./interfaces/IACTWallet.sol";
 import {IACTWalletEvents} from "./interfaces/IACTWalletEvents.sol";
 import {ACTWalletTransaction} from "./structs.sol";
 
 contract ACTWalletExtension is ACTExtension, IACTWallet {
+  using Address for address;
+
   // external getters
 
   function getSupportedSelectors()
@@ -56,7 +59,7 @@ contract ACTWalletExtension is ACTExtension, IACTWallet {
       results[index] = _executeTransaction(transactions[index]);
 
       unchecked {
-        index += 1;
+        ++index;
       }
     }
 
@@ -79,17 +82,6 @@ contract ACTWalletExtension is ACTExtension, IACTWallet {
   ) private returns (bytes memory) {
     require(transaction.to != address(0), ZeroAddressReceiver());
 
-    (bool success, bytes memory result) = transaction.to.call{
-      value: transaction.value
-    }(transaction.data);
-
-    if (!success) {
-      // solhint-disable-next-line no-inline-assembly
-      assembly {
-        revert(add(result, 32), mload(result))
-      }
-    }
-
-    return result;
+    return transaction.to.makeCall(transaction.value, transaction.data);
   }
 }

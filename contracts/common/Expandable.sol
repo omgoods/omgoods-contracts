@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+import {Address} from "./Address.sol";
+
 abstract contract Expandable {
+  using Address for address;
+
   // errors
 
   error ExtensionNotFound(bytes4 selector);
@@ -19,40 +23,11 @@ abstract contract Expandable {
   ) internal returns (bytes memory) {
     bytes4 selector = abi.decode(callData, (bytes4));
 
-    address extension = _verifyExtension(selector);
-
-    // solhint-disable-next-line avoid-low-level-calls
-    (bool success, bytes memory result) = extension.delegatecall(callData);
-
-    if (!success) {
-      // solhint-disable-next-line no-inline-assembly
-      assembly {
-        revert(add(result, 32), mload(result))
-      }
-    }
-
-    return result;
+    return _verifyExtension(selector).makeDelegateCall(callData);
   }
 
   function _callExtension() internal {
-    address extension = _verifyExtension(msg.sig);
-
-    // solhint-disable-next-line no-inline-assembly
-    assembly {
-      calldatacopy(0, 0, calldatasize())
-
-      let result := delegatecall(gas(), extension, 0, calldatasize(), 0, 0)
-
-      returndatacopy(0, 0, returndatasize())
-
-      switch result
-      case 0 {
-        revert(0, returndatasize())
-      }
-      default {
-        return(0, returndatasize())
-      }
-    }
+    _verifyExtension(msg.sig).makeDelegateCall();
   }
 
   // private getters

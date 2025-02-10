@@ -2,6 +2,7 @@
 pragma solidity 0.8.28;
 
 import {IACTSigner} from "../extensions/signer/interfaces/IACTSigner.sol";
+import {IACTVoting} from "../extensions/voting/interfaces/IACTVoting.sol";
 import {IACTWallet} from "../extensions/wallet/interfaces/IACTWallet.sol";
 import {IACTCommon} from "../impls/interfaces/IACTCommon.sol";
 

@@ -11,7 +11,8 @@ export default buildModule<'ACT', 'ACTRegistry', any>('ACT', (m) => {
 
   const { fungibleImpl, nonFungibleImpl } = m.useModule(ACTImpls);
 
-  const { signerExtension, walletExtension } = m.useModule(ACTExtensions);
+  const { signerExtension, votingExtension, walletExtension } =
+    m.useModule(ACTExtensions);
 
   m.call(registry, 'setVariant', [ACTVariants.Fungible, fungibleImpl], {
     from: owner,
@@ -43,6 +44,22 @@ export default buildModule<'ACT', 'ACTRegistry', any>('ACT', (m) => {
     registry,
     'setExtension',
     [
+      votingExtension,
+      {
+        active: true,
+        variant: ACTVariants.UnknownOrAny,
+      },
+    ],
+    {
+      from: owner,
+      id: 'addVotingExtension',
+    },
+  );
+
+  m.call(
+    registry,
+    'setExtension',
+    [
       walletExtension,
       {
         active: true,
@@ -60,6 +77,7 @@ export default buildModule<'ACT', 'ACTRegistry', any>('ACT', (m) => {
     fungibleImpl,
     nonFungibleImpl,
     signerExtension,
+    votingExtension,
     walletExtension,
   };
 });

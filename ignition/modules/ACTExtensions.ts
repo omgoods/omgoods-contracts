@@ -10,11 +10,17 @@ export default buildModule('ACTExtensions', (m) => {
     after: [ACTImpls],
   });
 
-  const walletExtension = m.contract('ACTWalletExtension', [], {
+  const votingExtension = m.contract('ACTVotingExtension', [], {
     from: deployer,
-    id: 'walletExtension',
+    id: 'votingExtension',
     after: [signerExtension],
   });
 
-  return { signerExtension, walletExtension };
+  const walletExtension = m.contract('ACTWalletExtension', [], {
+    from: deployer,
+    id: 'walletExtension',
+    after: [votingExtension],
+  });
+
+  return { signerExtension, votingExtension, walletExtension };
 });

@@ -8,5 +8,5 @@
 * Can act as **Smart Contract Wallet** (`ERC-4337`)
   * [examples/act-as-smart-wallet.ts](../../examples/act-as-smart-wallet.ts)
 * Can act as **DAO**
-  * WIP: [examples/act-as-dao.ts](../../examples/act-as-dao.ts)
+  * [examples/act-as-dao.ts](../../examples/act-as-dao.ts)
 

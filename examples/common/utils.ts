@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { Hex } from 'viem';
+import { encodeAbiParameters, Hex, keccak256 } from 'viem';
 import { TypedDataDomainNames, ACTVariants } from '@/common';
 import ERC4337Module from '@/modules/ERC4337';
 import ACTModule from '@/modules/ACT';
@@ -106,6 +106,18 @@ export async function buildHelpers() {
     ]) as Promise<Hex>;
   };
 
+  const computeProposalHash = (currentEpoch: number, data: unknown) => {
+    return keccak256(
+      encodeAbiParameters(
+        [
+          { type: 'uint48', name: 'epoch' },
+          { type: 'bytes', name: 'data' },
+        ],
+        [currentEpoch + 1, data as Hex],
+      ),
+    );
+  };
+
   return {
     client,
     ...contracts,
@@ -113,6 +125,7 @@ export async function buildHelpers() {
     logger,
     buildTokenTypedData,
     computeTokenAddress,
+    computeProposalHash,
   } as const;
 }
 

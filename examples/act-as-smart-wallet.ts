@@ -56,6 +56,7 @@ runExample(async (hre) => {
   const addUserOp = async (callData: Hash) => {
     const nonce = BigInt(userOps.length);
 
+    // All gas parameters should be calculated using an external lib/service
     const userOp: UserOperation<'0.7'> = {
       sender: tokenAddress,
       nonce,
@@ -119,37 +120,35 @@ runExample(async (hre) => {
     };
   };
 
-  // minting
-  {
-    const token = await getContractAt('ACTFungibleImpl', tokenAddress);
+  const token = await getContractAt('ACTFungibleImpl', tokenAddress);
 
-    for (let i = 0; i < 5; i++) {
-      const to = randomAddress();
-      const value = randomEther();
+  // Wallet extension
+  const tokenWallet = await getContractAt('ACTWalletExtension', tokenAddress);
 
-      const callData = encodeFunctionData({
-        abi: token.abi,
-        functionName: 'mint',
-        args: [to, value],
-      });
+  // Minting tokens
+  for (let i = 0; i < 5; i++) {
+    const to = randomAddress();
+    const value = randomEther();
 
-      logger.info(
-        `Adding userOp for minting ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
-        await addUserOp(callData),
-      );
-    }
+    const callData = encodeFunctionData({
+      abi: token.abi,
+      functionName: 'mint',
+      args: [to, value],
+    });
+
+    logger.info(
+      `Adding userOp for minting ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
+      await addUserOp(callData),
+    );
   }
 
-  // executing transaction from the token contract
+  // Executing transaction from the token contract
   {
-    // use extension
-    const token = await getContractAt('ACTWalletExtension', tokenAddress);
-
     const to = randomAddress();
     const value = parseEther('5');
 
     const callData = encodeFunctionData({
-      abi: token.abi,
+      abi: tokenWallet.abi,
       functionName: 'executeTransaction',
       args: [
         {

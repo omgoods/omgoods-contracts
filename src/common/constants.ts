@@ -19,3 +19,20 @@ export enum ACTSystems {
   ConstitutionalMonarchy,
   Democracy,
 }
+
+export enum ACTVotingVoteKinds {
+  Unknown,
+  Accept,
+  Reject,
+}
+
+export enum ACTVotingProposalStatuses {
+  Unknown,
+  New,
+  Dismissed,
+  Voting,
+  Accepted,
+  Rejected,
+  Executed,
+  Reverted,
+}

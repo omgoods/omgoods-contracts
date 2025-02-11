@@ -24,11 +24,12 @@ contract ACTSignerExtension is IERC1271, ACTExtension, ACTSignerStorage {
     override
     returns (bytes4[] memory result)
   {
-    result = new bytes4[](3);
+    result = new bytes4[](4);
 
     result[0] = IERC1271.isValidSignature.selector;
     result[1] = ACTSignerExtension.getSignature.selector;
     result[2] = ACTSignerExtension.validateSignature.selector;
+    result[3] = ACTSignerExtension.setSignature.selector;
 
     return result;
   }

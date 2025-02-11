@@ -87,7 +87,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
   // external setters
 
   function submitProposal(
-    bytes calldata data
+    bytes calldata proposalData
   ) external returns (bytes32 proposalHash) {
     Settings memory settings = _getSettings();
 
@@ -110,7 +110,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
       ++epoch;
     }
 
-    proposalHash = keccak256(abi.encodePacked(epoch, data));
+    proposalHash = keccak256(abi.encode(epoch, proposalData));
 
     Proposal storage proposal = _getProposal(proposalHash);
 
@@ -122,7 +122,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
     proposal.status = ProposalStatuses.New;
     proposal.epoch = epoch;
     proposal.creator = msg.sender;
-    proposal.data = data;
+    proposal.data = proposalData;
 
     emit ProposalSubmitted(proposalHash, proposal);
 

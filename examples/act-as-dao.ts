@@ -114,7 +114,7 @@ runExample(async (hre) => {
 
   await logger.logTx(
     'Changing token governance model to `Democracy`',
-    token.write.setSystem([ACTGovernanceModels.Democracy], maintainer),
+    token.write.setGovernanceModel([ACTGovernanceModels.Democracy], maintainer),
   );
 
   logger.info('Token', {

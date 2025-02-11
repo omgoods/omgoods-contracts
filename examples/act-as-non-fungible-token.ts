@@ -7,6 +7,8 @@ const TOKEN = {
   symbol: 'EXN',
 };
 
+// WIP
+
 runExample(async (hre) => {
   const {
     viem: { getContractAt },

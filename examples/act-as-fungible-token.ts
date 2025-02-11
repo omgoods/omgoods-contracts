@@ -89,7 +89,7 @@ runExample(async (hre) => {
   // Disable minting
   await logger.logTx(
     'Changing token governance model to `ConstitutionalMonarchy`',
-    token.write.setSystem(
+    token.write.setGovernanceModel(
       [ACTGovernanceModels.ConstitutionalMonarchy],
       maintainer,
     ),

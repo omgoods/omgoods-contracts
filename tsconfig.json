@@ -14,8 +14,7 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "@/modules/*": ["ignition/modules/*"],
-      "@/scripts/*": ["scripts/*"]
+      "@/modules/*": ["ignition/modules/*"]
     }
   }
 }

@@ -57,7 +57,7 @@ runExample(async (hre) => {
     ),
   );
 
-  const token = await getContractAt('IACTNonFungible', tokenAddress);
+  const token = await getContractAt('ACTNonFungibleImpl', tokenAddress);
 
   logger.info('Token', {
     owner: await token.read.getOwner(),

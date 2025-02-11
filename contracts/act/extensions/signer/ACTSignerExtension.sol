@@ -3,16 +3,17 @@ pragma solidity 0.8.28;
 
 import {IERC1271} from "@openzeppelin/contracts/interfaces/IERC1271.sol";
 import {ACTExtension} from "../ACTExtension.sol";
-import {IACTSigner} from "./interfaces/IACTSigner.sol";
-import {IACTSignerEvents} from "./interfaces/IACTSignerEvents.sol";
-import {ACTSignerSignatureModes} from "./enums.sol";
-import {ACTSignerSignature} from "./structs.sol";
+import {IACTSignerPseudoEvents} from "./interfaces/IACTSignerPseudoEvents.sol";
+import {ACTSignerStorage} from "./ACTSignerStorage.sol";
 
-contract ACTSignerExtension is ACTExtension, IACTSigner {
-  // slots
+contract ACTSignerExtension is IERC1271, ACTExtension, ACTSignerStorage {
+  // events
 
-  bytes32 private constant SIGNATURE_SLOT =
-    keccak256(abi.encodePacked("act.extensions.signer#signature"));
+  event SignatureUpdated(bytes32 hash, Signature signature);
+
+  // error
+
+  error InvalidSignatureHash();
 
   // external getters
 
@@ -26,8 +27,8 @@ contract ACTSignerExtension is ACTExtension, IACTSigner {
     result = new bytes4[](3);
 
     result[0] = IERC1271.isValidSignature.selector;
-    result[1] = IACTSigner.getSignature.selector;
-    result[2] = IACTSigner.validateSignature.selector;
+    result[1] = ACTSignerExtension.getSignature.selector;
+    result[2] = ACTSignerExtension.validateSignature.selector;
 
     return result;
   }
@@ -38,36 +39,34 @@ contract ACTSignerExtension is ACTExtension, IACTSigner {
   ) external view returns (bytes4) {
     bool isValid;
 
-    ACTSignerSignature memory signature = _getSignature(hash);
+    Signature memory signature = _getSignature(hash);
 
-    if (signature.mode == ACTSignerSignatureModes.TimestampBase) {
+    if (signature.mode == SignatureModes.TimestampBase) {
       uint48 timestamp = uint48(block.timestamp);
 
       isValid =
         timestamp >= signature.validAfter &&
         timestamp <= signature.validUntil;
     } else {
-      isValid = signature.mode == ACTSignerSignatureModes.Infinity;
+      isValid = signature.mode == SignatureModes.Infinity;
     }
 
     return isValid ? IERC1271.isValidSignature.selector : bytes4(0xffffffff);
   }
 
-  function getSignature(
-    bytes32 hash
-  ) external pure returns (ACTSignerSignature memory) {
+  function getSignature(bytes32 hash) external pure returns (Signature memory) {
     return _getSignature(hash);
   }
 
   function validateSignature(bytes32 hash) external pure returns (uint256) {
-    ACTSignerSignature memory signature = _getSignature(hash);
+    Signature memory signature = _getSignature(hash);
 
-    if (signature.mode == ACTSignerSignatureModes.TimestampBase) {
+    if (signature.mode == SignatureModes.TimestampBase) {
       return
         (uint256(signature.validUntil) << 160) |
         (uint256(signature.validAfter) << 208);
     } else {
-      return signature.mode == ACTSignerSignatureModes.Infinity ? 0 : 1;
+      return signature.mode == SignatureModes.Infinity ? 0 : 1;
     }
   }
 
@@ -75,11 +74,11 @@ contract ACTSignerExtension is ACTExtension, IACTSigner {
 
   function setSignature(
     bytes32 hash,
-    ACTSignerSignature calldata signature
+    Signature calldata signature
   ) external onlyOwner returns (bool) {
     require(hash != bytes32(0), InvalidSignatureHash());
 
-    ACTSignerSignature storage signature_ = _getSignature(hash);
+    Signature storage signature_ = _getSignature(hash);
 
     if (
       signature.mode == signature_.mode &&
@@ -96,24 +95,9 @@ contract ACTSignerExtension is ACTExtension, IACTSigner {
     emit SignatureUpdated(hash, signature);
 
     _triggerRegistryEvent(
-      abi.encodeCall(IACTSignerEvents.SignatureUpdated, (hash, signature))
+      abi.encodeCall(IACTSignerPseudoEvents.SignatureUpdated, (hash, signature))
     );
 
     return true;
-  }
-
-  // private getters
-
-  function _getSignature(
-    bytes32 hash
-  ) private pure returns (ACTSignerSignature storage result) {
-    bytes32 slot = keccak256(abi.encodePacked(SIGNATURE_SLOT, hash));
-
-    // solhint-disable-next-line no-inline-assembly
-    assembly ("memory-safe") {
-      result.slot := slot
-    }
-
-    return result;
   }
 }

@@ -45,7 +45,7 @@ runExample(async (hre) => {
     ),
   );
 
-  const token = await getContractAt('IACTFungibleCombined', tokenAddress);
+  const token = await getContractAt('ACTFungibleImpl', tokenAddress);
 
   logger.log('Minting tokens...');
 

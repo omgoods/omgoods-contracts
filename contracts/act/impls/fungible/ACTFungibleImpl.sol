@@ -2,20 +2,15 @@
 pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
-import {ACTSettings} from "../../core/structs.sol";
 import {ACTImpl} from "../ACTImpl.sol";
 import {IACTFungible} from "./interfaces/IACTFungible.sol";
-import {IACTFungibleEvents} from "./interfaces/IACTFungibleEvents.sol";
+import {IACTFungiblePseudoEvents} from "./interfaces/IACTFungiblePseudoEvents.sol";
+import {ACTFungibleStorage} from "./ACTFungibleStorage.sol";
 
 /**
  * @title ACTFungibleImpl
  */
-contract ACTFungibleImpl is IACTFungible, ACTImpl {
-  // slots
-
-  bytes32 private constant ALLOWANCE_SLOT =
-    keccak256(abi.encodePacked("act.fungible#allowance"));
-
+contract ACTFungibleImpl is IACTFungible, ACTImpl, ACTFungibleStorage {
   // errors
 
   error InsufficientAllowance();
@@ -77,7 +72,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
    * @dev Emits a {Transfer} event and a {FungibleTransfer} registry event.
    */
   function transfer(address to, uint256 value) external returns (bool) {
-    ACTSettings memory settings = _getSettings();
+    Settings memory settings = _getSettings();
 
     _requireOnlyMaintainerWhenLocked(settings);
 
@@ -113,7 +108,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
     address to,
     uint256 value
   ) external returns (bool) {
-    ACTSettings memory settings = _getSettings();
+    Settings memory settings = _getSettings();
 
     _requireOnlyMaintainerWhenLocked(settings);
 
@@ -166,7 +161,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
    *      Requires the caller to be an authorized minter module or the contract owner.
    */
   function mint(address to, uint256 value) external returns (bool) {
-    ACTSettings memory settings = _getSettings();
+    Settings memory settings = _getSettings();
 
     if (!_isMinterModuleCall()) {
       _requireOnlyOwner(settings);
@@ -197,7 +192,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
    *      Requires the caller to be an authorized burner module or the contract owner.
    */
   function burn(address from, uint256 value) external returns (bool) {
-    ACTSettings memory settings = _getSettings();
+    Settings memory settings = _getSettings();
 
     if (!_isBurnerModuleCall()) {
       _requireOnlyOwner(settings);
@@ -221,16 +216,6 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
 
   // private setters
 
-  function _getAllowanceSlot(
-    address owner,
-    address spender
-  ) private pure returns (StorageSlot.Uint256Slot storage) {
-    return
-      StorageSlot.getUint256Slot(
-        keccak256(abi.encodePacked(ALLOWANCE_SLOT, owner, spender)) //
-      );
-  }
-
   function _emitApprovalEvent(
     address owner,
     address spender,
@@ -240,7 +225,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        IACTFungibleEvents.FungibleApproval,
+        IACTFungiblePseudoEvents.FungibleApproval,
         (owner, spender, value)
       )
     );
@@ -256,7 +241,7 @@ contract ACTFungibleImpl is IACTFungible, ACTImpl {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        IACTFungibleEvents.FungibleTransfer,
+        IACTFungiblePseudoEvents.FungibleTransfer,
         (epoch, from, to, value)
       )
     );

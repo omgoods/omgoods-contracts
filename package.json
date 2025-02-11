@@ -10,11 +10,11 @@
     "deploy": "hardhat deploy",
     "export": "hardhat export-abi",
     "test": "hardhat test",
+    "hardhat": "hardhat",
     "example:act-as-dao": "hardhat run ./examples/act-as-dao.ts",
     "example:act-as-fungible-token": "hardhat run ./examples/act-as-fungible-token.ts",
     "example:act-as-non-fungible-token": "hardhat run ./examples/act-as-non-fungible-token.ts",
-    "example:act-as-smart-wallet": "hardhat run ./examples/act-as-smart-wallet.ts",
-    "hardhat": "hardhat"
+    "example:act-as-smart-wallet": "hardhat run ./examples/act-as-smart-wallet.ts"
   },
   "dependencies": {
     "@account-abstraction/contracts": "0.7.0",

@@ -2,24 +2,44 @@
 pragma solidity 0.8.28;
 
 import {Epochs} from "../../../common/Epochs.sol";
-import {ACTSystems, ACTStates} from "../../core/enums.sol";
-import {ACTSettings} from "../../core/structs.sol";
 import {ACTExtension} from "../ACTExtension.sol";
-import {IACTVoting} from "./interfaces/IACTVoting.sol";
-import {IACTVotingEvents} from "./interfaces/IACTVotingEvents.sol";
-import {ACTVotingProposalStatuses, ACTVotingVoteKinds} from "./enums.sol";
-import {ACTVotingProposal, ACTVotingProposalVote} from "./structs.sol";
+import {IACTVotingPseudoEvents} from "./interfaces/IACTVotingPseudoEvents.sol";
+import {ACTVotingStorage} from "./ACTVotingStorage.sol";
 
-contract ACTVotingExtension is ACTExtension, IACTVoting {
+contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
   using Epochs for Epochs.Checkpoints;
 
-  // slots
+  // errors
 
-  bytes32 private constant PROPOSAL_SLOT =
-    keccak256(abi.encodePacked("act.extensions.voting#proposal"));
+  error InvalidSystems();
 
-  bytes32 private constant PROPOSAL_VOTE_SLOT =
-    keccak256(abi.encodePacked("act.extensions.voting#proposalVote"));
+  error InvalidEpoch();
+
+  error InsufficientVotingPower();
+
+  error ProposalAlreadyExists();
+
+  error ProposalNotFound();
+
+  error MsgSenderIsNotTheProposalCreator();
+
+  error InvalidProposalStatus();
+
+  error InvalidVoteKind();
+
+  // events
+
+  event ProposalSubmitted(bytes32 proposalHash, Proposal proposal);
+
+  event ProposalDismissed(bytes32 proposalHash);
+
+  event ProposalExecuted(bytes32 proposalHash, bytes result);
+
+  event ProposalReverted(bytes32 proposalHash, bytes result);
+
+  event VoteSubmitted(bytes32 proposalHash, address account, Vote vote);
+
+  event VoteUpdated(bytes32 proposalHash, address account, Vote vote);
 
   // external getters
 
@@ -32,32 +52,32 @@ contract ACTVotingExtension is ACTExtension, IACTVoting {
   {
     result = new bytes4[](7);
 
-    result[0] = IACTVoting.getProposal.selector;
-    result[1] = IACTVoting.getProposalVote.selector;
-    result[2] = IACTVoting.getVotingPower.selector;
-    result[3] = IACTVoting.submitProposal.selector;
-    result[4] = IACTVoting.dismissProposal.selector;
-    result[5] = IACTVoting.executeProposal.selector;
-    result[6] = IACTVoting.submitProposalVote.selector;
+    result[0] = ACTVotingExtension.getProposal.selector;
+    result[1] = ACTVotingExtension.getVote.selector;
+    result[2] = ACTVotingExtension.getVotingPower.selector;
+    result[3] = ACTVotingExtension.submitProposal.selector;
+    result[4] = ACTVotingExtension.dismissProposal.selector;
+    result[5] = ACTVotingExtension.executeProposal.selector;
+    result[6] = ACTVotingExtension.submitVote.selector;
 
     return result;
   }
 
   function getProposal(
-    bytes32 hash
-  ) external view returns (ACTVotingProposal memory result) {
-    result = _getProposal(hash);
+    bytes32 proposalHash
+  ) external view returns (Proposal memory result) {
+    result = _getProposal(proposalHash);
 
     result.status = _calcProposalStatus(_getEpoch(), result);
 
     return result;
   }
 
-  function getProposalVote(
+  function getVote(
     bytes32 proposalHash,
     address account
-  ) external pure returns (ACTVotingProposalVote memory) {
-    return _getProposalVote(proposalHash, account);
+  ) external pure returns (Vote memory) {
+    return _getVote(proposalHash, account);
   }
 
   function getVotingPower(address account) external view returns (uint256) {
@@ -68,136 +88,151 @@ contract ACTVotingExtension is ACTExtension, IACTVoting {
 
   function submitProposal(
     bytes calldata data
-  ) external returns (bytes32 result) {
-    ACTSettings memory settings = _getSettings();
+  ) external returns (bytes32 proposalHash) {
+    Settings memory settings = _getSettings();
 
-    require(settings.system != ACTSystems.AbsoluteMonarchy);
+    require(settings.system != Systems.AbsoluteMonarchy, InvalidSystems());
 
     uint48 epoch = _getEpoch(settings);
 
-    require(epoch != 0);
+    require(epoch != 0, InvalidEpoch());
 
-    if (settings.system == ACTSystems.ConstitutionalMonarchy) {
+    if (settings.system == Systems.ConstitutionalMonarchy) {
       _requireOnlyMaintainer();
     } else {
-      require(_getVotingPowerAt(epoch, msg.sender) != 0);
+      require(
+        _getVotingPowerAt(epoch, msg.sender) != 0,
+        InsufficientVotingPower()
+      );
     }
 
     unchecked {
       ++epoch;
     }
 
-    result = keccak256(abi.encodePacked(epoch, data));
+    proposalHash = keccak256(abi.encodePacked(epoch, data));
 
-    ACTVotingProposal storage proposal = _getProposal(result);
+    Proposal storage proposal = _getProposal(proposalHash);
 
-    require(proposal.status == ACTVotingProposalStatuses.Unknown);
+    require(
+      proposal.status == ProposalStatuses.Unknown,
+      ProposalAlreadyExists()
+    );
 
-    proposal.status = ACTVotingProposalStatuses.New;
+    proposal.status = ProposalStatuses.New;
     proposal.epoch = epoch;
     proposal.creator = msg.sender;
     proposal.data = data;
 
-    emit ProposalSubmitted(result, proposal);
+    emit ProposalSubmitted(proposalHash, proposal);
 
     _triggerRegistryEvent(
-      abi.encodeCall(IACTVotingEvents.ProposalSubmitted, (result, proposal))
+      abi.encodeCall(
+        IACTVotingPseudoEvents.ProposalSubmitted,
+        (proposalHash, proposal)
+      )
     );
 
-    return result;
+    return proposalHash;
   }
 
-  function dismissProposal(bytes32 hash) external returns (bool) {
-    ACTVotingProposal storage proposal = _getProposal(hash);
+  function dismissProposal(bytes32 proposalHash) external returns (bool) {
+    Proposal storage proposal = _getProposal(proposalHash);
 
-    require(proposal.status != ACTVotingProposalStatuses.Unknown);
+    require(proposal.status != ProposalStatuses.Unknown, ProposalNotFound());
 
-    require(proposal.creator == msg.sender);
+    require(proposal.creator == msg.sender, MsgSenderIsNotTheProposalCreator());
 
-    ACTVotingProposalStatuses proposalStatus = _calcProposalStatus(
+    ProposalStatuses proposalStatus = _calcProposalStatus(
       _getEpoch(),
       proposal
     );
 
-    if (proposalStatus == ACTVotingProposalStatuses.Dismissed) {
+    if (proposalStatus == ProposalStatuses.Dismissed) {
       return false;
     }
 
-    require(proposalStatus == ACTVotingProposalStatuses.New);
+    require(proposalStatus == ProposalStatuses.New, InvalidProposalStatus());
 
-    proposal.status = ACTVotingProposalStatuses.Dismissed;
+    proposal.status = ProposalStatuses.Dismissed;
 
-    emit ProposalDismissed(hash);
+    emit ProposalDismissed(proposalHash);
 
     _triggerRegistryEvent(
-      abi.encodeCall(IACTVotingEvents.ProposalDismissed, (hash))
+      abi.encodeCall(IACTVotingPseudoEvents.ProposalDismissed, (proposalHash))
     );
 
     return true;
   }
 
-  function executeProposal(bytes32 hash) external returns (bool) {
-    ACTVotingProposal storage proposal = _getProposal(hash);
+  function executeProposal(bytes32 proposalHash) external returns (bool) {
+    Proposal storage proposal = _getProposal(proposalHash);
 
-    require(proposal.status != ACTVotingProposalStatuses.Unknown);
+    require(proposal.status != ProposalStatuses.Unknown, ProposalNotFound());
 
-    ACTVotingProposalStatuses proposalStatus = _calcProposalStatus(
+    ProposalStatuses proposalStatus = _calcProposalStatus(
       _getEpoch(),
       proposal
     );
 
-    if (proposalStatus >= ACTVotingProposalStatuses.Executed) {
+    if (proposalStatus >= ProposalStatuses.Executed) {
       return false;
     }
 
+    require(
+      proposalStatus == ProposalStatuses.Accepted,
+      InvalidProposalStatus()
+    );
+
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory result) = address(this).call(proposal.data);
 
     if (success) {
-      proposal.status = ACTVotingProposalStatuses.Executed;
+      proposal.status = ProposalStatuses.Executed;
 
-      emit ProposalExecuted(hash, result);
+      emit ProposalExecuted(proposalHash, result);
 
       _triggerRegistryEvent(
-        abi.encodeCall(IACTVotingEvents.ProposalExecuted, (hash, result))
+        abi.encodeCall(
+          IACTVotingPseudoEvents.ProposalExecuted,
+          (proposalHash, result)
+        )
       );
     } else {
-      proposal.status = ACTVotingProposalStatuses.Reverted;
+      proposal.status = ProposalStatuses.Reverted;
 
-      emit ProposalReverted(hash, result);
+      emit ProposalReverted(proposalHash, result);
 
       _triggerRegistryEvent(
-        abi.encodeCall(IACTVotingEvents.ProposalReverted, (hash, result))
+        abi.encodeCall(
+          IACTVotingPseudoEvents.ProposalReverted,
+          (proposalHash, result)
+        )
       );
     }
 
     return true;
   }
 
-  function submitProposalVote(
+  function submitVote(
     bytes32 proposalHash,
-    ACTVotingVoteKinds voteKind
+    VoteKinds voteKind
   ) external returns (bool) {
-    ACTVotingProposal storage proposal = _getProposal(proposalHash);
+    Proposal storage proposal = _getProposal(proposalHash);
 
-    require(proposal.status != ACTVotingProposalStatuses.Unknown);
+    require(proposal.status != ProposalStatuses.Unknown, ProposalNotFound());
 
-    require(voteKind != ACTVotingVoteKinds.Unknown);
+    require(voteKind != VoteKinds.Unknown, InvalidVoteKind());
 
     uint48 epoch = _getEpoch();
 
-    ACTVotingProposalStatuses proposalStatus = _calcProposalStatus(
-      epoch,
-      proposal
-    );
+    ProposalStatuses proposalStatus = _calcProposalStatus(epoch, proposal);
 
-    require(proposalStatus == ACTVotingProposalStatuses.Voting);
+    require(proposalStatus == ProposalStatuses.Voting, InvalidProposalStatus());
 
-    ACTVotingProposalVote storage vote = _getProposalVote(
-      proposalHash,
-      msg.sender
-    );
+    Vote storage vote = _getVote(proposalHash, msg.sender);
 
-    ACTVotingVoteKinds oldVoteKind = vote.kind;
+    VoteKinds oldVoteKind = vote.kind;
 
     if (oldVoteKind == voteKind) {
       return false;
@@ -205,26 +240,26 @@ contract ACTVotingExtension is ACTExtension, IACTVoting {
 
     uint256 votePower = _getVotingPowerAt(proposal.epoch, msg.sender);
 
-    require(votePower != 0);
+    require(votePower != 0, InsufficientVotingPower());
 
     vote.kind = voteKind;
 
-    if (oldVoteKind == ACTVotingVoteKinds.Unknown) {
+    if (oldVoteKind == VoteKinds.Unknown) {
       vote.power = votePower;
 
       unchecked {
-        if (voteKind == ACTVotingVoteKinds.Accept) {
+        if (voteKind == VoteKinds.Accept) {
           proposal.acceptedPower += votePower;
         } else {
           proposal.rejectedPower += votePower;
         }
       }
 
-      emit ProposalVoteSubmitted(proposalHash, msg.sender, vote);
+      emit VoteSubmitted(proposalHash, msg.sender, vote);
 
       _triggerRegistryEvent(
         abi.encodeCall(
-          IACTVotingEvents.ProposalVoteSubmitted,
+          IACTVotingPseudoEvents.VoteSubmitted,
           (proposalHash, msg.sender, vote)
         )
       );
@@ -232,20 +267,20 @@ contract ACTVotingExtension is ACTExtension, IACTVoting {
       uint256 oldVotePower = vote.power;
 
       unchecked {
-        if (voteKind == ACTVotingVoteKinds.Accept) {
+        if (voteKind == VoteKinds.Accept) {
           proposal.acceptedPower += votePower;
           proposal.rejectedPower -= oldVotePower;
-        } else if (voteKind == ACTVotingVoteKinds.Reject) {
+        } else if (voteKind == VoteKinds.Reject) {
           proposal.acceptedPower -= oldVotePower;
           proposal.rejectedPower += votePower;
         }
       }
 
-      emit ProposalVoteUpdated(proposalHash, msg.sender, vote);
+      emit VoteUpdated(proposalHash, msg.sender, vote);
 
       _triggerRegistryEvent(
         abi.encodeCall(
-          IACTVotingEvents.ProposalVoteUpdated,
+          IACTVotingPseudoEvents.VoteUpdated,
           (proposalHash, msg.sender, vote)
         )
       );
@@ -256,39 +291,10 @@ contract ACTVotingExtension is ACTExtension, IACTVoting {
 
   // private getters
 
-  function _getProposal(
-    bytes32 hash
-  ) private pure returns (ACTVotingProposal storage result) {
-    bytes32 slot = keccak256(abi.encodePacked(PROPOSAL_SLOT, hash));
-
-    // solhint-disable-next-line no-inline-assembly
-    assembly ("memory-safe") {
-      result.slot := slot
-    }
-
-    return result;
-  }
-
-  function _getProposalVote(
-    bytes32 proposalHash,
-    address account
-  ) private pure returns (ACTVotingProposalVote storage result) {
-    bytes32 slot = keccak256(
-      abi.encodePacked(PROPOSAL_VOTE_SLOT, proposalHash, account)
-    );
-
-    // solhint-disable-next-line no-inline-assembly
-    assembly ("memory-safe") {
-      result.slot := slot
-    }
-
-    return result;
-  }
-
   function _getVotingPowerAt(
     uint48 epoch,
     address account
-  ) internal view returns (uint256) {
+  ) private view returns (uint256) {
     if (epoch == 1) {
       return 0;
     }
@@ -312,22 +318,20 @@ contract ACTVotingExtension is ACTExtension, IACTVoting {
 
   function _calcProposalStatus(
     uint48 epoch,
-    ACTVotingProposal memory proposal
-  ) private pure returns (ACTVotingProposalStatuses) {
-    if (
-      proposal.status != ACTVotingProposalStatuses.New || epoch < proposal.epoch
-    ) {
+    Proposal memory proposal
+  ) private pure returns (ProposalStatuses) {
+    if (proposal.status != ProposalStatuses.New || epoch < proposal.epoch) {
       return proposal.status;
     }
 
     if (epoch == proposal.epoch) {
-      return ACTVotingProposalStatuses.Voting;
+      return ProposalStatuses.Voting;
     }
 
     return
       proposal.acceptedPower != 0 &&
         proposal.acceptedPower > proposal.rejectedPower
-        ? ACTVotingProposalStatuses.Accepted
-        : ACTVotingProposalStatuses.Rejected;
+        ? ProposalStatuses.Accepted
+        : ProposalStatuses.Rejected;
   }
 }

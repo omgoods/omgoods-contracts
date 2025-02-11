@@ -5,14 +5,12 @@ import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Epochs} from "../../common/Epochs.sol";
 import {Expandable} from "../../common/Expandable.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
-import {ACTCoreStorage} from "./ACTCoreStorage.sol";
-import {ACTStates, ACTSystems} from "./enums.sol";
-import {ACTSettings} from "./structs.sol";
+import {ACTCommonStorage} from "./ACTCommonStorage.sol";
 
 /**
- * @title ACTCore
+ * @title ACT Common
  */
-abstract contract ACTCore is Expandable, ACTCoreStorage {
+abstract contract ACTCommon is Expandable, ACTCommonStorage {
   using Epochs for Epochs.Checkpoints;
 
   // errors
@@ -67,7 +65,7 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
     require(_isEntryPointCall(), MsgSenderIsNotTheEntryPoint());
   }
 
-  function _requireOnlyOwner(ACTSettings memory settings) internal view {
+  function _requireOnlyOwner(Settings memory settings) internal view {
     if (!_isSelfCall() && !_isEntryPointCall()) {
       require(
         msg.sender == _getOwner(_getMaintainerSlot().value, settings),
@@ -94,9 +92,9 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
   }
 
   function _requireOnlyMaintainerWhenLocked(
-    ACTSettings memory settings
+    Settings memory settings
   ) internal view {
-    if (settings.state == ACTStates.Locked) {
+    if (settings.state == States.Locked) {
       require(
         msg.sender == _getMaintainerSlot().value,
         MsgSenderIsNotTheMaintainer()
@@ -106,12 +104,10 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
 
   function _getOwner(
     address maintainer,
-    ACTSettings memory settings
+    Settings memory settings
   ) internal view returns (address) {
     return
-      settings.system == ACTSystems.AbsoluteMonarchy
-        ? maintainer
-        : address(this);
+      settings.system == Systems.AbsoluteMonarchy ? maintainer : address(this);
   }
 
   function _getEpoch() internal view returns (uint48) {
@@ -119,12 +115,10 @@ abstract contract ACTCore is Expandable, ACTCoreStorage {
   }
 
   function _getEpoch(
-    ACTSettings memory settings
+    Settings memory settings
   ) internal view returns (uint48 result) {
     return
-      settings.state == ACTStates.Tracked
-        ? Epochs.calcEpoch(settings.epochs)
-        : 0;
+      settings.state == States.Tracked ? Epochs.calcEpoch(settings.epochs) : 0;
   }
 
   function _getTotalSupplyAt(

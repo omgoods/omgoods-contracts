@@ -3,7 +3,7 @@ pragma solidity 0.8.28;
 
 /* solhint-disable func-name-mixedcase */
 
-interface IACTFungibleEvents {
+interface IACTFungiblePseudoEvents {
   // pseudo events
 
   function FungibleApproval(

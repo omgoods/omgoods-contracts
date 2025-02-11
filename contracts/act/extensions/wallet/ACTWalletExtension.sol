@@ -3,12 +3,17 @@ pragma solidity 0.8.28;
 
 import {Address} from "../../../common/Address.sol";
 import {ACTExtension} from "../ACTExtension.sol";
-import {IACTWallet} from "./interfaces/IACTWallet.sol";
-import {IACTWalletEvents} from "./interfaces/IACTWalletEvents.sol";
-import {ACTWalletTransaction} from "./structs.sol";
+import {IACTWalletPseudoEvents} from "./interfaces/IACTWalletPseudoEvents.sol";
+import {IACTWalletTypes} from "./interfaces/IACTWalletTypes.sol";
 
-contract ACTWalletExtension is ACTExtension, IACTWallet {
+contract ACTWalletExtension is ACTExtension, IACTWalletTypes {
   using Address for address;
+
+  // events
+
+  event TransactionExecuted(Transaction transaction, bytes result);
+
+  event TransactionsExecuted(Transaction[] transactions, bytes[] results);
 
   // external getters
 
@@ -20,8 +25,8 @@ contract ACTWalletExtension is ACTExtension, IACTWallet {
   {
     result = new bytes4[](2);
 
-    result[0] = IACTWallet.executeTransaction.selector;
-    result[1] = IACTWallet.executeTransactions.selector;
+    result[0] = ACTWalletExtension.executeTransaction.selector;
+    result[1] = ACTWalletExtension.executeTransactions.selector;
 
     return result;
   }
@@ -29,7 +34,7 @@ contract ACTWalletExtension is ACTExtension, IACTWallet {
   // external setters
 
   function executeTransaction(
-    ACTWalletTransaction calldata transaction
+    Transaction calldata transaction
   ) external onlyOwner {
     bytes memory result = _executeTransaction(transaction);
 
@@ -37,14 +42,14 @@ contract ACTWalletExtension is ACTExtension, IACTWallet {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        IACTWalletEvents.TransactionExecuted,
+        IACTWalletPseudoEvents.TransactionExecuted,
         (transaction, result)
       )
     );
   }
 
   function executeTransactions(
-    ACTWalletTransaction[] calldata transactions
+    Transaction[] calldata transactions
   ) external onlyOwner returns (bool) {
     uint256 len = transactions.length;
 
@@ -67,7 +72,7 @@ contract ACTWalletExtension is ACTExtension, IACTWallet {
 
     _triggerRegistryEvent(
       abi.encodeCall(
-        IACTWalletEvents.TransactionsExecuted,
+        IACTWalletPseudoEvents.TransactionsExecuted,
         (transactions, results)
       )
     );
@@ -78,7 +83,7 @@ contract ACTWalletExtension is ACTExtension, IACTWallet {
   // private setters
 
   function _executeTransaction(
-    ACTWalletTransaction calldata transaction
+    Transaction calldata transaction
   ) private returns (bytes memory) {
     require(transaction.to != address(0), ZeroAddressReceiver());
 

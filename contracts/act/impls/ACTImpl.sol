@@ -1,28 +1,35 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
+import {IAccount} from "@account-abstraction/contracts/interfaces/IAccount.sol";
 import {PackedUserOperation} from "@account-abstraction/contracts/interfaces/PackedUserOperation.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {IInitializable} from "../../common/interfaces/IInitializable.sol";
+import {IOwnable} from "../../common/interfaces/IOwnable.sol";
 import {Address} from "../../common/Address.sol";
 import {Epochs} from "../../common/Epochs.sol";
-import {ACTCore} from "../core/ACTCore.sol";
-import {ACTStates, ACTSystems} from "../core/enums.sol";
-import {ACTSettings, ACTExtensions, ACTModules, ACTModuleAccess} from "../core/structs.sol";
+import {ACTCommon} from "../common/ACTCommon.sol";
 import {IACTExtension} from "../extensions/interfaces/IACTExtension.sol";
-import {IACTSigner} from "../extensions/signer/interfaces/IACTSigner.sol";
-import {IACTCommon} from "./interfaces/IACTCommon.sol";
+import {ACTSignerExtension} from "../extensions/signer/ACTSignerExtension.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
-import {IACTEvents} from "./interfaces/IACTEvents.sol";
+import {IACTAny} from "./interfaces/IACTAny.sol";
 import {IACTImpl} from "./interfaces/IACTImpl.sol";
+import {IACTPseudoEvents} from "./interfaces/IACTPseudoEvents.sol";
 
 /**
- * @title ACTImpl
+ * @title ACT Impl
  */
-abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
+abstract contract ACTImpl is
+  IAccount,
+  IInitializable,
+  IOwnable,
+  ACTCommon,
+  IACTAny,
+  IACTImpl
+{
   using ECDSA for bytes32;
   using MessageHashUtils for bytes32;
   using Address for address;
@@ -50,13 +57,13 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
 
   event MaintainerUpdated(address maintainer);
 
-  event StateUpdated(ACTStates state);
+  event StateUpdated(States state);
 
-  event SystemUpdated(ACTSystems system);
+  event SystemUpdated(Systems system);
 
   event ExtensionUpdated(address extension, bool enabled);
 
-  event ModuleUpdated(address module, ACTModuleAccess access);
+  event ModuleUpdated(address module, ModuleAccess access);
 
   // deployment
 
@@ -102,6 +109,14 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
 
   // external getters
 
+  function isInitialized() external view returns (bool) {
+    return _getRegistrySlot().value != address(0);
+  }
+
+  function getOwner() external view returns (address) {
+    return _getOwner(_getMaintainerSlot().value, _getSettings());
+  }
+
   function name() external view returns (string memory) {
     return _getNameSlot().value;
   }
@@ -138,11 +153,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     return _getMaintainerSlot().value;
   }
 
-  function getOwner() external view returns (address) {
-    return _getOwner(_getMaintainerSlot().value, _getSettings());
-  }
-
-  function getSettings() external pure returns (ACTSettings memory) {
+  function getSettings() external pure returns (Settings memory) {
     return _getSettings();
   }
 
@@ -157,10 +168,6 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     return _getBalanceAt(epoch, _getEpoch(), account);
   }
 
-  function isInitialized() external view returns (bool) {
-    return _getRegistrySlot().value != address(0);
-  }
-
   function getCurrentEpoch() external view returns (uint48) {
     return _getEpoch();
   }
@@ -172,9 +179,9 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     bytes32 userOpHash,
     uint256 missingAccountFunds
   ) external onlyEntryPoint returns (uint256) {
-    ACTSettings memory settings = _getSettings();
+    Settings memory settings = _getSettings();
 
-    if (settings.system == ACTSystems.AbsoluteMonarchy) {
+    if (settings.system == Systems.AbsoluteMonarchy) {
       (address recovered, , ) = userOpHash.toEthSignedMessageHash().tryRecover(
         userOp.signature
       );
@@ -195,7 +202,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     _validateNonce(userOp.nonce, address(this));
 
     bytes memory encodedData = _callExtension(
-      abi.encodeCall(IACTSigner.validateSignature, (userOpHash))
+      abi.encodeCall(ACTSignerExtension.validateSignature, (userOpHash))
     );
 
     return abi.decode(encodedData, (uint256));
@@ -213,7 +220,9 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
 
     emit NameUpdated(name_);
 
-    _triggerRegistryEvent(abi.encodeCall(IACTEvents.NameUpdated, (name_)));
+    _triggerRegistryEvent(
+      abi.encodeCall(IACTPseudoEvents.NameUpdated, (name_))
+    );
 
     return true;
   }
@@ -237,18 +246,18 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     emit MaintainerUpdated(maintainer);
 
     _triggerRegistryEvent(
-      abi.encodeCall(IACTEvents.MaintainerUpdated, (maintainer))
+      abi.encodeCall(IACTPseudoEvents.MaintainerUpdated, (maintainer))
     );
 
     return true;
   }
 
-  function setState(ACTStates state) external returns (bool) {
-    ACTSettings storage settings = _getSettings();
+  function setState(States state) external returns (bool) {
+    Settings storage settings = _getSettings();
 
     _requireOnlyOwner(settings);
 
-    ACTStates oldState = settings.state;
+    States oldState = settings.state;
 
     if (oldState == state) {
       // nothing to do
@@ -261,13 +270,15 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
 
     emit StateUpdated(state);
 
-    _triggerRegistryEvent(abi.encodeCall(IACTEvents.StateUpdated, (state)));
+    _triggerRegistryEvent(
+      abi.encodeCall(IACTPseudoEvents.StateUpdated, (state))
+    );
 
     return true;
   }
 
-  function setSystem(ACTSystems system) external returns (bool) {
-    ACTSettings storage settings = _getSettings();
+  function setSystem(Systems system) external returns (bool) {
+    Settings storage settings = _getSettings();
 
     _requireOnlyOwner(settings);
 
@@ -280,7 +291,9 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
 
     emit SystemUpdated(system);
 
-    _triggerRegistryEvent(abi.encodeCall(IACTEvents.SystemUpdated, (system)));
+    _triggerRegistryEvent(
+      abi.encodeCall(IACTPseudoEvents.SystemUpdated, (system))
+    );
 
     return true;
   }
@@ -299,7 +312,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     );
 
     // Access the storage for managing extensions
-    ACTExtensions storage extensions = _getExtensions();
+    Extensions storage extensions = _getExtensions();
 
     result = enabled
       ? _enableExtension(extensions, extension)
@@ -312,7 +325,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
       // Trigger a registry event to notify of the change
       _triggerRegistryEvent(
         registry,
-        abi.encodeCall(IACTEvents.ExtensionUpdated, (extension, enabled))
+        abi.encodeCall(IACTPseudoEvents.ExtensionUpdated, (extension, enabled))
       );
     }
 
@@ -321,13 +334,13 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
 
   function setModule(
     address module,
-    ACTModuleAccess memory access
+    ModuleAccess memory access
   ) external onlyOwner returns (bool) {
     require(module != address(0), ZeroAddressModule());
 
-    ACTModules storage modules = _getModules();
+    Modules storage modules = _getModules();
 
-    ACTModuleAccess memory oldAccess = modules.accesses[module];
+    ModuleAccess memory oldAccess = modules.accesses[module];
 
     if (
       oldAccess.isMinter == access.isMinter &&
@@ -343,7 +356,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
     emit ModuleUpdated(module, access);
 
     _triggerRegistryEvent(
-      abi.encodeCall(IACTEvents.ModuleUpdated, (module, access))
+      abi.encodeCall(IACTPseudoEvents.ModuleUpdated, (module, access))
     );
 
     return true;
@@ -368,7 +381,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
       return;
     }
 
-    ACTExtensions storage extensions = _getExtensions();
+    Extensions storage extensions = _getExtensions();
 
     for (uint256 index; index < len; ) {
       _enableExtension(extensions, extensions_[index]);
@@ -380,7 +393,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
   }
 
   function _enableExtension(
-    ACTExtensions storage extensions,
+    Extensions storage extensions,
     address extension
   ) private returns (bool) {
     // Retrieve the function selectors supported by the given extension
@@ -408,7 +421,7 @@ abstract contract ACTImpl is IInitializable, ACTCore, IACTCommon, IACTImpl {
   }
 
   function _disableExtension(
-    ACTExtensions storage extensions,
+    Extensions storage extensions,
     address extension
   ) private returns (bool) {
     // Retrieve the function selectors supported by the given extension

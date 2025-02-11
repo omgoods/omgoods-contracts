@@ -1,9 +1,9 @@
 import hre from 'hardhat';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
 import { Hex } from 'viem';
 import { TypedDataDomainNames, ACTVariants } from '@/common';
 import ERC4337Module from '@/modules/ERC4337';
 import ACTModule from '@/modules/ACT';
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
 
 export async function getWallets() {
   const {

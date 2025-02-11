@@ -3,9 +3,9 @@ pragma solidity 0.8.28;
 
 import {StorageSlot} from "@openzeppelin/contracts/utils/StorageSlot.sol";
 import {Epochs} from "../../common/Epochs.sol";
-import {ACTSettings, ACTExtensions, ACTModules} from "./structs.sol";
+import {IACTCommonTypes} from "./interfaces/IACTCommonTypes.sol";
 
-abstract contract ACTCoreStorage {
+abstract contract ACTCommonStorage is IACTCommonTypes {
   // slots
 
   bytes32 private constant NONCE_SLOT =
@@ -98,7 +98,7 @@ abstract contract ACTCoreStorage {
     return StorageSlot.getStringSlot(SYMBOL_SLOT);
   }
 
-  function _getSettings() internal pure returns (ACTSettings storage result) {
+  function _getSettings() internal pure returns (Settings storage result) {
     bytes32 slot = SETTINGS_SLOT;
 
     // solhint-disable-next-line no-inline-assembly
@@ -156,11 +156,7 @@ abstract contract ACTCoreStorage {
     return result;
   }
 
-  function _getExtensions()
-    internal
-    pure
-    returns (ACTExtensions storage result)
-  {
+  function _getExtensions() internal pure returns (Extensions storage result) {
     bytes32 slot = EXTENSIONS_SLOT;
 
     // solhint-disable-next-line no-inline-assembly
@@ -171,7 +167,7 @@ abstract contract ACTCoreStorage {
     return result;
   }
 
-  function _getModules() internal pure returns (ACTModules storage result) {
+  function _getModules() internal pure returns (Modules storage result) {
     bytes32 slot = MODULES_SLOT;
 
     // solhint-disable-next-line no-inline-assembly

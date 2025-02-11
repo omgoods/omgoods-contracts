@@ -35,7 +35,7 @@ runExample(async (hre) => {
 
   const tokenAddress = await computeTokenAddress(TOKEN.variant, TOKEN.symbol);
 
-  const token = await getContractAt('IACTFungibleCombined', tokenAddress);
+  const token = await getContractAt('ACTFungibleImpl', tokenAddress);
 
   logger.info('Token', {
     address: tokenAddress,

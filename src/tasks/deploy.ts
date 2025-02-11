@@ -28,6 +28,8 @@ task(TASK_DEPLOY, 'Deploys all modules')
         } = await ignition.deploy(ERC4337Module, {
           displayUi: !silent,
         }));
+
+        console.log();
       }
 
       await ignition.deploy(ACTModule, {

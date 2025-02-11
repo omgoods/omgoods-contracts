@@ -1,20 +1,20 @@
 // SPDX-License-Identifier: None
 pragma solidity 0.8.28;
 
-import {ACTWalletTransaction} from "../structs.sol";
+import {IACTWalletTypes} from "./IACTWalletTypes.sol";
 
 /* solhint-disable func-name-mixedcase */
 
-interface IACTWalletEvents {
+interface IACTWalletPseudoEvents is IACTWalletTypes {
   // pseudo events
 
   function TransactionExecuted(
-    ACTWalletTransaction calldata transaction,
+    Transaction calldata transaction,
     bytes calldata result
   ) external view;
 
   function TransactionsExecuted(
-    ACTWalletTransaction[] calldata transactions,
+    Transaction[] calldata transactions,
     bytes[] calldata results
   ) external view;
 }

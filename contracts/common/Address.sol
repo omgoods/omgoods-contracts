@@ -9,6 +9,7 @@ library Address {
     uint256 value,
     bytes memory data
   ) internal returns (bytes memory) {
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory result) = self.call{value: value}(data);
 
     if (!success) {
@@ -32,6 +33,7 @@ library Address {
     address self,
     bytes memory data
   ) internal returns (bytes memory) {
+    // solhint-disable-next-line avoid-low-level-calls
     (bool success, bytes memory result) = self.delegatecall(data);
 
     if (!success) {

@@ -16,7 +16,9 @@ npm i
 npm run example:<name>
 
 # e.g
+npm run example:act-as-dao
 npm run example:act-as-fungible-token
+npm run example:act-as-smart-wallet
 ```
 
 ## Documentation

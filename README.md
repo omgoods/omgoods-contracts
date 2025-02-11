@@ -15,7 +15,7 @@ needs, ensuring a seamless experience on the platform.
 npm i
 ```
 
-## Documentation
+## Components
 
 * [ACT - Autonomous Community Token](docs/act/README.md)
 

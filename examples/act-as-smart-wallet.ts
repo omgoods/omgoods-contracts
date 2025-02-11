@@ -1,4 +1,4 @@
-import { encodeFunctionData, formatEther } from 'viem';
+import { encodeFunctionData, formatEther, Hash, parseEther } from 'viem';
 import {
   getUserOperationHash,
   UserOperation,
@@ -34,70 +34,65 @@ runExample(async (hre) => {
   const [maintainer, relayer] = wallets;
 
   const tokenAddress = await computeTokenAddress(TOKEN.variant, TOKEN.symbol);
+  const tokenExtensions = [extensions.wallet];
 
-  const token = await getContractAt('ACTFungibleImpl', tokenAddress);
+  await logger.logTx(
+    'Top-up token using relayer',
+    relayer.sendTransaction({
+      to: tokenAddress,
+      value: randomEther(100, 10),
+    }),
+  );
 
   logger.info('Token', {
     address: tokenAddress,
     ...TOKEN,
+    extensions: tokenExtensions,
+    balance: formatEther(await client.getBalance({ address: tokenAddress })),
   });
 
   const userOps: PackedUserOperation[] = [];
 
-  let nonceTracker = 0n;
+  const addUserOp = async (callData: Hash) => {
+    const nonce = BigInt(userOps.length);
 
-  const tokenTypedData = buildTokenTypedData({
-    variant: TOKEN.variant,
-    maintainer: maintainer.account.address,
-    name: TOKEN.name,
-    symbol: TOKEN.symbol,
-    extensions: [extensions.wallet],
-  });
-
-  const guardianSignature = await owner.signTypedData(tokenTypedData);
-
-  const factoryData = encodeFunctionData({
-    abi: registry.abi,
-    functionName: 'createToken',
-    args: [
-      TOKEN.variant,
-      maintainer.account.address,
-      TOKEN.name,
-      TOKEN.symbol,
-      [extensions.wallet],
-      guardianSignature,
-    ],
-  });
-
-  logger.log('Create minting userOps...');
-
-  for (let i = 0; i < 5; i++) {
-    const to = randomAddress();
-    const value = randomEther();
-
-    const callData = encodeFunctionData({
-      abi: token.abi,
-      functionName: 'mint',
-      args: [to, value],
-    });
-
-    // Calculate required gas / fees should be done using external lib / service
     const userOp: UserOperation<'0.7'> = {
-      sender: token.address,
-      nonce: nonceTracker++, // Incremented nonce value
-      callData, // Data for minting the token
+      sender: tokenAddress,
+      nonce,
+      callData,
       callGasLimit: 500_000n,
-      maxFeePerGas: 0n, // Set to 0 for simplicity
-      maxPriorityFeePerGas: 0n, // Set to 0 for simplicity
+      maxFeePerGas: 100n, // Set to 100 for simplicity
+      maxPriorityFeePerGas: 100n, // Set to 100 for simplicity
       preVerificationGas: 200_000n,
       verificationGasLimit: 500_000n,
       signature: '0x', // Placeholder for signature
     };
 
-    if (i === 0) {
-      // Need to add factory options to the first userOp
+    if (nonce === 0n) {
+      const tokenTypedData = buildTokenTypedData({
+        variant: TOKEN.variant,
+        maintainer: maintainer.account.address,
+        name: TOKEN.name,
+        symbol: TOKEN.symbol,
+        extensions: tokenExtensions,
+      });
+
+      const guardianSignature = await owner.signTypedData(tokenTypedData);
+
+      // Additional parameters for token deployment
       userOp.factory = registry.address;
-      userOp.factoryData = factoryData;
+      userOp.factoryData = encodeFunctionData({
+        abi: registry.abi,
+        functionName: 'createToken',
+        args: [
+          TOKEN.variant,
+          maintainer.account.address,
+          TOKEN.name,
+          TOKEN.symbol,
+          tokenExtensions,
+          guardianSignature,
+        ],
+      });
     }
 
     const userOpHash = getUserOperationHash({
@@ -107,7 +102,6 @@ runExample(async (hre) => {
       userOperation: userOp,
     });
 
-    // Sign userOp
     userOp.signature = await maintainer.signMessage({
       message: {
         raw: userOpHash,
@@ -116,23 +110,71 @@ runExample(async (hre) => {
 
     userOps.push(toPackedUserOperation(userOp));
 
-    logger.info(
-      `UserOp for minting ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
-      {
-        userOp: {
-          nonce: userOp.nonce,
-          factory: userOp.factory,
-        },
-        userOpHash,
+    return {
+      userOp: {
+        nonce,
+        factory: userOp.factory,
       },
+      userOpHash,
+    };
+  };
+
+  // minting
+  {
+    const token = await getContractAt('ACTFungibleImpl', tokenAddress);
+
+    for (let i = 0; i < 5; i++) {
+      const to = randomAddress();
+      const value = randomEther();
+
+      const callData = encodeFunctionData({
+        abi: token.abi,
+        functionName: 'mint',
+        args: [to, value],
+      });
+
+      logger.info(
+        `Adding userOp for minting ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
+        await addUserOp(callData),
+      );
+    }
+  }
+
+  // executing transaction from the token contract
+  {
+    // use extension
+    const token = await getContractAt('ACTWalletExtension', tokenAddress);
+
+    const to = randomAddress();
+    const value = parseEther('5');
+
+    const callData = encodeFunctionData({
+      abi: token.abi,
+      functionName: 'executeTransaction',
+      args: [
+        {
+          to,
+          value,
+          data: '0x',
+        },
+      ],
+    });
+
+    logger.info(
+      `Adding userOp for transferring ${formatEther(value)} ETH to ${to}`,
+      await addUserOp(callData),
     );
   }
 
-  logger.log('Executing userOps...');
-
   // Use relayer as beneficiary
   await logger.logTx(
-    'UserOps executed',
+    'Executing userOps',
     entryPoint.write.handleOps([userOps, relayer.account.address], relayer),
   );
+
+  logger.info('Token', {
+    balance: formatEther(await client.getBalance({ address: tokenAddress })),
+  });
+
+  logger.info('UserOps', userOps);
 });

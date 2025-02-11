@@ -4,6 +4,7 @@ import { Hex } from 'viem';
 import { TypedDataDomainNames, ACTVariants } from '@/common';
 import ERC4337Module from '@/modules/ERC4337';
 import ACTModule from '@/modules/ACT';
+import { Logger } from './Logger';
 
 export async function getWallets() {
   const {
@@ -68,24 +69,7 @@ export async function buildHelpers() {
 
   const wallets = await getWallets();
 
-  const logger = {
-    log: (message?: string) => {
-      console.log(message ? `[LOG] ${message}` : '');
-    },
-    info: (message: string, ...args: unknown[]) => {
-      console.log(`[INFO] ${message}${args.length ? ':' : ''}`, ...args);
-    },
-    logTx: async (label: string, hashOrPromise: Promise<Hex> | Hex) => {
-      const hash = await hashOrPromise;
-
-      const { gasUsed } = await client.waitForTransactionReceipt({ hash });
-
-      console.log(`[COMPLETED] ${label}:`, {
-        hash,
-        gasUsed,
-      });
-    },
-  };
+  const logger = new Logger(client);
 
   const buildTokenTypedData = (message: {
     variant: ACTVariants;

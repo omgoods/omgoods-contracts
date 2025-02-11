@@ -25,10 +25,8 @@ runExample(async (hre) => {
     ...TOKEN,
   });
 
-  logger.log('Creating token ...');
-
   await logger.logTx(
-    'Token created',
+    'Creating token',
     registry.write.createToken(
       [
         TOKEN.variant,
@@ -47,14 +45,12 @@ runExample(async (hre) => {
 
   const token = await getContractAt('ACTFungibleImpl', tokenAddress);
 
-  logger.log('Minting tokens...');
-
   for (const account of accounts) {
     const to = account.account.address;
     const value = randomEther();
 
     await logger.logTx(
-      `Minted ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
+      `Minting ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
       token.write.mint([to, value], maintainer),
     );
   }
@@ -65,17 +61,14 @@ runExample(async (hre) => {
     totalSupply: formatEther((await token.read.totalSupply()) as bigint),
   });
 
-  logger.log('Activate token and disable minting...');
-
-  // Open transfers to all token holders, start balance tracking
+  // Open transfers to all token holders and start balance tracking
   await logger.logTx(
-    'Token state changed to `Tracked`',
+    'Changing token state to `Tracked`',
     token.write.setState([ACTStates.Tracked], maintainer),
   );
 
-  // Change token ownership
   await logger.logTx(
-    'Token system changed to `Democracy`',
+    'Changing token system to `Democracy`',
     token.write.setSystem([ACTSystems.Democracy], maintainer),
   );
 

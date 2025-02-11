@@ -149,6 +149,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
     );
 
     if (proposalStatus == ProposalStatuses.Dismissed) {
+      // nothing to do
       return false;
     }
 
@@ -176,6 +177,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
     );
 
     if (proposalStatus >= ProposalStatuses.Executed) {
+      // nothing to do
       return false;
     }
 
@@ -235,6 +237,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
     VoteKinds oldVoteKind = vote.kind;
 
     if (oldVoteKind == voteKind) {
+      // nothing to do
       return false;
     }
 

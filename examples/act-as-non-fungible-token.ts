@@ -30,8 +30,6 @@ runExample(async (hre) => {
     ...TOKEN,
   });
 
-  logger.log('Creating token using guardian signature...');
-
   const tokenTypedData = buildTokenTypedData({
     variant: TOKEN.variant,
     maintainer: maintainer.account.address,
@@ -43,7 +41,7 @@ runExample(async (hre) => {
   const guardianSignature = await owner.signTypedData(tokenTypedData);
 
   await logger.logTx(
-    'Token created',
+    'Creating token using guardian signature',
     registry.write.createToken(
       [
         TOKEN.variant,

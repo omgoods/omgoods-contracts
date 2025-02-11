@@ -37,8 +37,6 @@ runExample(async (hre) => {
     ...TOKEN,
   });
 
-  logger.log('Creating token using guardian signature...');
-
   const tokenTypedData = buildTokenTypedData({
     variant: TOKEN.variant,
     maintainer: maintainer.account.address,
@@ -50,7 +48,7 @@ runExample(async (hre) => {
   const guardianSignature = await owner.signTypedData(tokenTypedData);
 
   await logger.logTx(
-    'Token created',
+    'Creating token using guardian signature',
     registry.write.createToken(
       [
         TOKEN.variant,
@@ -66,14 +64,12 @@ runExample(async (hre) => {
 
   const token = await getContractAt('ACTFungibleImpl', tokenAddress);
 
-  logger.log('Minting tokens...');
-
   for (let i = 0; i < 5; i++) {
     const to = randomAddress();
     const value = randomEther();
 
     await logger.logTx(
-      `Minted ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
+      `Minting ${formatEther(value)} ${TOKEN.symbol} to ${to}`,
       token.write.mint([to, value], maintainer),
     );
   }
@@ -84,17 +80,15 @@ runExample(async (hre) => {
     totalSupply: formatEther((await token.read.totalSupply()) as bigint),
   });
 
-  logger.log('Activate token and disable minting...');
-
   // Open transfers to all token holders
   await logger.logTx(
-    'Token state changed to `Active`',
+    'Changing token state to `Active`',
     token.write.setState([ACTStates.Active], maintainer),
   );
 
-  // Change token ownership
+  // Disable minting
   await logger.logTx(
-    'Token system changed to `ConstitutionalMonarchy`',
+    'Changing token system to `ConstitutionalMonarchy`',
     token.write.setSystem([ACTSystems.ConstitutionalMonarchy], maintainer),
   );
 

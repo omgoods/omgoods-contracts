@@ -172,6 +172,16 @@ abstract contract ACTImpl is
     return _getEpoch();
   }
 
+  function isExtensionEnabled(address extension) external view returns (bool) {
+    return _getExtensions().enabled[extension];
+  }
+
+  function getModuleAccess(
+    address module
+  ) external view returns (ModuleAccess memory) {
+    return _getModules().accesses[module];
+  }
+
   // external setters
 
   function validateUserOp(

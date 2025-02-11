@@ -85,6 +85,7 @@ contract ACTSignerExtension is IERC1271, ACTExtension, ACTSignerStorage {
       signature.validAfter == signature_.validAfter &&
       signature.validUntil == signature_.validUntil
     ) {
+      // nothing to do
       return false;
     }
 

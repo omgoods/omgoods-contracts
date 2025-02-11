@@ -19,15 +19,6 @@ npm i
 
 * [ACT - Autonomous Community Token](docs/act/README.md)
 
-## Running examples
-
-```bash
-npm run example:act-as-fungible-token
-# WIP: npm run example:act-as-non-fungible-token 
-npm run example:act-as-smart-wallet
-npm run example:act-as-dao
-```
-
 ## Scripts
 
 ```bash

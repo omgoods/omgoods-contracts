@@ -2,12 +2,13 @@ import { time } from '@nomicfoundation/hardhat-network-helpers';
 import { encodeFunctionData, formatEther, Hash, parseEther } from 'viem';
 import {
   ACTStates,
-  ACTSystems,
+  ACTGovernanceModels,
   ACTVariants,
   ACTVotingVoteKinds,
   randomAddress,
   randomEther,
   randomHex32,
+  EPOCH_WINDOW_LENGTH,
 } from '@/common';
 import { buildHelpers, runExample } from './common';
 
@@ -16,8 +17,6 @@ const TOKEN = {
   name: 'Example DAO',
   symbol: 'EXD',
 };
-
-const EPOCH_TIME = 7 * 24 * 60 * 60;
 
 runExample(async (hre) => {
   const {
@@ -72,8 +71,8 @@ runExample(async (hre) => {
   );
 
   const moveToNextEpoch = async () => {
-    logger.log('Increase time by 7 days');
-    await time.increase(EPOCH_TIME);
+    logger.log('Move to next epoch');
+    await time.increase(EPOCH_WINDOW_LENGTH);
 
     const currentEpoch = await token.read.getCurrentEpoch();
 
@@ -114,8 +113,8 @@ runExample(async (hre) => {
   );
 
   await logger.logTx(
-    'Changing token system to `Democracy`',
-    token.write.setSystem([ACTSystems.Democracy], maintainer),
+    'Changing token governance model to `Democracy`',
+    token.write.setSystem([ACTGovernanceModels.Democracy], maintainer),
   );
 
   logger.info('Token', {

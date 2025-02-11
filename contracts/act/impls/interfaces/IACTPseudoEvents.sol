@@ -14,7 +14,9 @@ interface IACTPseudoEvents is IACTCommonTypes {
 
   function StateUpdated(States state) external view;
 
-  function SystemUpdated(Systems system) external view;
+  function GovernanceModelUpdated(
+    GovernanceModels governanceModel
+  ) external view;
 
   function ExtensionUpdated(address extension, bool enabled) external view;
 

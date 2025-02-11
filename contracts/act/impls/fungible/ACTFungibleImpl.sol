@@ -8,7 +8,7 @@ import {IACTFungiblePseudoEvents} from "./interfaces/IACTFungiblePseudoEvents.so
 import {ACTFungibleStorage} from "./ACTFungibleStorage.sol";
 
 /**
- * @title ACTFungibleImpl
+ * @title ACT Fungible (ERC20) Impl
  */
 contract ACTFungibleImpl is IACTFungible, ACTImpl, ACTFungibleStorage {
   // errors

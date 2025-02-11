@@ -10,7 +10,7 @@ import {IACTImpl} from "../impls/interfaces/IACTImpl.sol";
 import {IACTRegistry} from "./interfaces/IACTRegistry.sol";
 
 /**
- * @title ACTRegistry
+ * @title ACT Registry
  */
 contract ACTRegistry is EIP712, Guarded, Initializable, IACTRegistry {
   bytes32 private constant TOKEN_TYPED_DATA_HASH =

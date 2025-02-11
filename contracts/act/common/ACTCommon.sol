@@ -7,9 +7,6 @@ import {Expandable} from "../../common/Expandable.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
 import {ACTCommonStorage} from "./ACTCommonStorage.sol";
 
-/**
- * @title ACT Common
- */
 abstract contract ACTCommon is Expandable, ACTCommonStorage {
   using Epochs for Epochs.Checkpoints;
 
@@ -107,7 +104,9 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
     Settings memory settings
   ) internal view returns (address) {
     return
-      settings.system == Systems.AbsoluteMonarchy ? maintainer : address(this);
+      settings.governanceModel == GovernanceModels.AbsoluteMonarchy
+        ? maintainer
+        : address(this);
   }
 
   function _getEpoch() internal view returns (uint48) {

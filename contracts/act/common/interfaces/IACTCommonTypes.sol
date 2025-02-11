@@ -12,7 +12,7 @@ interface IACTCommonTypes {
     Tracked // 2
   }
 
-  enum Systems {
+  enum GovernanceModels {
     AbsoluteMonarchy, // 0
     ConstitutionalMonarchy, // 1
     Democracy // 2
@@ -22,7 +22,7 @@ interface IACTCommonTypes {
 
   struct Settings {
     States state;
-    Systems system;
+    GovernanceModels governanceModel;
     Epochs.Settings epochs;
   }
 

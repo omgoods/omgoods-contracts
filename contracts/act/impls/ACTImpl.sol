@@ -19,9 +19,6 @@ import {IACTAny} from "./interfaces/IACTAny.sol";
 import {IACTImpl} from "./interfaces/IACTImpl.sol";
 import {IACTPseudoEvents} from "./interfaces/IACTPseudoEvents.sol";
 
-/**
- * @title ACT Impl
- */
 abstract contract ACTImpl is
   IAccount,
   IInitializable,
@@ -59,7 +56,7 @@ abstract contract ACTImpl is
 
   event StateUpdated(States state);
 
-  event SystemUpdated(Systems system);
+  event GovernanceModelUpdated(GovernanceModels governanceModel);
 
   event ExtensionUpdated(address extension, bool enabled);
 
@@ -191,7 +188,7 @@ abstract contract ACTImpl is
   ) external onlyEntryPoint returns (uint256) {
     Settings memory settings = _getSettings();
 
-    if (settings.system == Systems.AbsoluteMonarchy) {
+    if (settings.governanceModel == GovernanceModels.AbsoluteMonarchy) {
       (address recovered, , ) = userOpHash.toEthSignedMessageHash().tryRecover(
         userOp.signature
       );
@@ -287,22 +284,24 @@ abstract contract ACTImpl is
     return true;
   }
 
-  function setSystem(Systems system) external returns (bool) {
+  function setGovernanceModel(
+    GovernanceModels governanceModel
+  ) external returns (bool) {
     Settings storage settings = _getSettings();
 
     _requireOnlyOwner(settings);
 
-    if (settings.system == system) {
+    if (settings.governanceModel == governanceModel) {
       // nothing to do
       return false;
     }
 
-    settings.system = system;
+    settings.governanceModel = governanceModel;
 
-    emit SystemUpdated(system);
+    emit GovernanceModelUpdated(governanceModel);
 
     _triggerRegistryEvent(
-      abi.encodeCall(IACTPseudoEvents.SystemUpdated, (system))
+      abi.encodeCall(IACTPseudoEvents.GovernanceModelUpdated, (governanceModel))
     );
 
     return true;

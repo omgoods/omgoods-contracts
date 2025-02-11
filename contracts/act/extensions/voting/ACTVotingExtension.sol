@@ -91,13 +91,16 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
   ) external returns (bytes32 proposalHash) {
     Settings memory settings = _getSettings();
 
-    require(settings.system != Systems.AbsoluteMonarchy, InvalidSystems());
+    require(
+      settings.governanceModel != GovernanceModels.AbsoluteMonarchy,
+      InvalidSystems()
+    );
 
     uint48 epoch = _getEpoch(settings);
 
     require(epoch != 0, InvalidEpoch());
 
-    if (settings.system == Systems.ConstitutionalMonarchy) {
+    if (settings.governanceModel == GovernanceModels.ConstitutionalMonarchy) {
       _requireOnlyMaintainer();
     } else {
       require(

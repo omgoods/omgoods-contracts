@@ -1,5 +1,6 @@
 import { buildModule } from '@nomicfoundation/hardhat-ignition/modules';
 import { zeroAddress } from 'viem';
+import { EPOCH_WINDOW_LENGTH } from '@/common';
 
 export default buildModule('ACTRegistry', (m) => {
   const deployer = m.getAccount(0);
@@ -9,8 +10,8 @@ export default buildModule('ACTRegistry', (m) => {
 
   const epochWindowLength = m.getParameter(
     'epochWindowLength',
-    60 * 60 * 24 * 7,
-  ); // 7 days
+    EPOCH_WINDOW_LENGTH,
+  );
 
   const registry = m.contract('ACTRegistry', [owner], {
     from: deployer,

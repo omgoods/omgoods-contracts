@@ -14,7 +14,7 @@ export enum ACTStates {
   Tracked,
 }
 
-export enum ACTSystems {
+export enum ACTGovernanceModels {
   AbsoluteMonarchy,
   ConstitutionalMonarchy,
   Democracy,
@@ -36,3 +36,5 @@ export enum ACTVotingProposalStatuses {
   Executed,
   Reverted,
 }
+
+export const EPOCH_WINDOW_LENGTH = 7 * 24 * 60 * 60; // 7 days

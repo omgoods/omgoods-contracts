@@ -1,7 +1,7 @@
 import { formatEther } from 'viem';
 import {
   ACTStates,
-  ACTSystems,
+  ACTGovernanceModels,
   ACTVariants,
   randomAddress,
   randomEther,
@@ -88,8 +88,11 @@ runExample(async (hre) => {
 
   // Disable minting
   await logger.logTx(
-    'Changing token system to `ConstitutionalMonarchy`',
-    token.write.setSystem([ACTSystems.ConstitutionalMonarchy], maintainer),
+    'Changing token governance model to `ConstitutionalMonarchy`',
+    token.write.setSystem(
+      [ACTGovernanceModels.ConstitutionalMonarchy],
+      maintainer,
+    ),
   );
 
   logger.info('Token', {

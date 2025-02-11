@@ -22,8 +22,8 @@ multiple governance styles.
 The ACT framework allows adding extensions to tokens for extra features:
 
 1. `ACTSignerExtension`
-    - Stores signatures that can later be verified for account abstraction userOps (`ERC-4337`) or via the
-      `ERC-1271 isValidSignature` interface.
+    - Stores signatures that can later be verified for account abstraction `userOp` (`ERC-4337`) or via <br/>
+      the `isValidSignature` (`ERC-1271`) interface.
 2. `ACTVotingExtension`
     - Enables creation and execution of proposals through a voting process.
     - The token acts on its own methods as the owner when proposals are approved.
@@ -46,16 +46,16 @@ These epoch-based balances influence voting power in the `ACTVotingExtension`.
 
 Tokens under the ACT framework can operate under one of three proposed governance models:
 
-1. **AbsoluteMonarchy**<br/>
+1. **Absolute Monarchy**<br/>
    In this model, the token's maintainer has full control over the token. This individual becomes the owner of
    the token and can make decisions independently.
-2. **ConstitutionalMonarchy**<br/>
+2. **Constitutional Monarchy**<br/>
    The token's maintainer has only limited ability to perform actions immediately. However, by using a voting module (
    for example, `ACTVotingExtension`), they can propose changes or actions. In this model, ownership is transferred to
    the token itself, meaning all actions conclude at the contract level, and the maintainer merely manages it under a
    constitutional form of authority.
 3. **Democracy**<br/>
-   This model closely resembles _ConstitutionalMonarchy_; however, the difference lies in who can initiate the voting
+   This model closely resembles _Constitutional Monarchy_; however, the difference lies in who can initiate the voting
    process. In a democracy, any token holder (with sufficient governance standing, e.g., positive voting power in the
    previous epoch) can propose and initiate votes on changes or actions, enabling a more decentralized community
    decision-making process.
@@ -63,7 +63,7 @@ Tokens under the ACT framework can operate under one of three proposed governanc
 ## Voting Process (`ACTVotingExtension`)
 
 - Depending on the governance model:
-    - `ConstitutionalMonarchy` - maintainer can propose an action.
+    - `Constitutional Monarchy` - maintainer can propose an action.
     - `Democracy` - any user with positive voting power in the previous epoch can propose an action.
 - The action is encoded as a self-call transaction the contract will perform if approved.
 - The voting power comes from the tracked balance in either the current or previous epoch, whichever is lower.

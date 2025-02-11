@@ -17,6 +17,20 @@ multiple governance styles.
     - Standard `ERC-721` interface.
     - (optional) Tracks the quantity of owned assets over 7-day epochs.
 
+## Extensibility Through Extensions
+
+The ACT framework allows adding extensions to tokens for extra features:
+
+1. `ACTSignerExtension`
+    - Stores signatures that can later be verified for account abstraction userOps (`ERC-4337`) or via the
+      `ERC-1271 isValidSignature` interface.
+2. `ACTVotingExtension`
+    - Enables creation and execution of proposals through a voting process.
+    - The token acts on its own methods as the owner when proposals are approved.
+3. `ACTWalletExtension`
+    - Allows the token (or its governance) to initiate external transactions.
+    - Useful for sending funds or interacting with other contracts from the token itself.
+
 ## Epoch Concept
 
 An epoch is a 7-day period during which each account's balance is tracked:
@@ -28,19 +42,23 @@ These epoch-based balances influence voting power in the `ACTVotingExtension`.
 
 **Note:** The usage of epochs is optional. You can enable epoch tracking as needed.
 
-## Extensibility Through Extensions
+## Governance Models
 
-The ACT framework allows adding extensions to tokens for extra features:
+Tokens under the ACT framework can operate under one of three proposed governance models:
 
-1. `ACTSignerExtension`
-    - Stores signatures that can later be verified for account abstraction userOps (`ERC-4337`) or via the
-      `IERC1271.isValidSignature` interface.
-2. `ACTVotingExtension`
-    - Enables creation and execution of proposals through a voting process.
-    - The token acts on its own methods as the owner when proposals are approved.
-3. `ACTWalletExtension`
-    - Allows the token (or its governance) to initiate external transactions.
-    - Useful for sending funds or interacting with other contracts from the token itself.
+1. **AbsoluteMonarchy**<br/>
+   In this model, the token's maintainer has full control over the token. This individual becomes the owner of
+   the token and can make decisions independently.
+2. **ConstitutionalMonarchy**<br/>
+   The token's maintainer has only limited ability to perform actions immediately. However, by using a voting module (
+   for example, `ACTVotingExtension`), they can propose changes or actions. In this model, ownership is transferred to
+   the token itself, meaning all actions conclude at the contract level, and the maintainer merely manages it under a
+   constitutional form of authority.
+3. **Democracy**<br/>
+   This model closely resembles _ConstitutionalMonarchy_; however, the difference lies in who can initiate the voting
+   process. In a democracy, any token holder (with sufficient governance standing, e.g., positive voting power in the
+   previous epoch) can propose and initiate votes on changes or actions, enabling a more decentralized community
+   decision-making process.
 
 ## Voting Process (`ACTVotingExtension`)
 
@@ -52,9 +70,9 @@ The ACT framework allows adding extensions to tokens for extra features:
 - Voting begins in the next epoch and lasts until the epoch ends.
 - Votes are cast as `Accept` or `Reject`, and if `Accept` votes exceed `Reject` votes, the proposed action executes once
   voting concludes.
+- Actions will allow the execution of all `ownerOnly` contract methods.
 - Possible actions include external transactions (via `ACTWalletExtension`), signature operations (via
   `ACTSignerExtension`).
-- Actions will allow the execution of all `ownerOnly` contract methods.
 
 ## Examples
 

@@ -17,9 +17,10 @@ npm i
 ## Running examples
 
 ```bash
-npm run example:act-as-dao
 npm run example:act-as-fungible-token
+# WIP: npm run example:act-as-non-fungible-token 
 npm run example:act-as-smart-wallet
+npm run example:act-as-dao
 ```
 
 ## Scripts

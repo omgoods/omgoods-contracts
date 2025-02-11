@@ -76,7 +76,7 @@ Tokens under the ACT framework can operate under one of three proposed governanc
 
 ## Examples
 
-### Can act as Fungible (`ERC-20`) Token
+### ACT as Fungible Token (`ERC-20`)
 
 ```bash
 npm run example:act-as-fungible-token
@@ -84,7 +84,7 @@ npm run example:act-as-fungible-token
 
 **Source:** [examples/act-as-fungible-token.ts](../../examples/act-as-fungible-token.ts)
 
-### WIP: Can act as Non-Fungible (`ERC-721`) Token
+### WIP: ACT as Non-Fungible Token (`ERC-721`)
 
 ```bash
 npm run example:act-as-non-fungible-token
@@ -92,7 +92,7 @@ npm run example:act-as-non-fungible-token
 
 **Source:** [examples/act-as-non-fungible-token.ts](../../examples/act-as-non-fungible-token.ts)
 
-### Can act as Smart Contract Wallet (`ERC-4337`)
+### ACT as Smart Contract Wallet (`ERC-4337`)
 
 ```bash
 npm run example:act-as-smart-wallet
@@ -100,7 +100,7 @@ npm run example:act-as-smart-wallet
 
 **Source:** [examples/act-as-smart-wallet.ts](../../examples/act-as-smart-wallet.ts)
 
-### Can act as DAO
+### ACT as DAO
 
 ```bash
 npm run example:act-as-dao

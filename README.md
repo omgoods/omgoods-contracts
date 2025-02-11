@@ -10,30 +10,28 @@
 npm i
 ```
 
+## Documentation
+
+* [ACT - Autonomous Community Token](docs/act/README.md)
+
 ## Running examples
 
 ```bash
-npm run example:<name>
-
-# e.g
 npm run example:act-as-dao
 npm run example:act-as-fungible-token
 npm run example:act-as-smart-wallet
 ```
 
-## Documentation
-
-* [ACT - Autonomous Community Token](docs/act/README.md)
-
 ## Scripts
 
 ```bash
-npm run linter    # runs solhint
-npm run format    # runs prettier
-npm run compile   # compiles contracts
-npm run deploy    # deploys contracts
-npm run test      # runs unit tests
-npm run hardhat   # hardhat cli wrapper
+npm run linter          # runs solhint
+npm run format          # runs prettier
+npm run compile         # compiles contracts
+npm run deploy          # deploys contracts
+npm run test            # runs tests
+npm run hardhat         # hardhat cli wrapper
+npm run example:<name>  # runs <name> example 
 ```
 
 ## License

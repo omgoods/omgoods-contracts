@@ -184,6 +184,18 @@ runExample(async (hre) => {
       await tokenSigner.read.getSignature([message.hash]),
     );
 
+    logger.info('Signature validation', {
+      // ERC 1271
+      isValidSignature: await tokenSigner.read.isValidSignature([
+        message.hash,
+        '0x',
+      ]),
+      // ERC 4337
+      validateSignature: await tokenSigner.read.validateSignature([
+        message.hash,
+      ]),
+    });
+
     const proposalData = encodeFunctionData({
       abi: tokenSigner.abi,
       functionName: 'setSignature',

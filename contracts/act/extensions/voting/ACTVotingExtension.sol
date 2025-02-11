@@ -11,7 +11,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
 
   // errors
 
-  error InvalidSystems();
+  error InvalidGovernanceModel();
 
   error InvalidEpoch();
 
@@ -93,7 +93,7 @@ contract ACTVotingExtension is ACTExtension, ACTVotingStorage {
 
     require(
       settings.governanceModel != GovernanceModels.AbsoluteMonarchy,
-      InvalidSystems()
+      InvalidGovernanceModel()
     );
 
     uint48 epoch = _getEpoch(settings);

@@ -7,6 +7,12 @@ import {Expandable} from "../../common/Expandable.sol";
 import {IACTRegistry} from "../registry/interfaces/IACTRegistry.sol";
 import {ACTCommonStorage} from "./ACTCommonStorage.sol";
 
+/**
+ * @title ACTCommon
+ * @dev Abstract base contract implementing core functionality for Autonomous Community Tokens (ACT).
+ * Provides epoch-based token accounting, access control, and modular extension support.
+ * Serves as the foundation for all ACT implementations.
+ */
 abstract contract ACTCommon is Expandable, ACTCommonStorage {
   using Epochs for Epochs.Checkpoints;
 
@@ -32,24 +38,36 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
 
   // modifiers
 
+  /**
+   * @dev Modifier that restricts function access to the entry point contract
+   */
   modifier onlyEntryPoint() {
     _requireOnlyEntryPoint();
 
     _;
   }
 
+  /**
+   * @dev Modifier that restricts function access to the token owner
+   */
   modifier onlyOwner() {
     _requireOnlyOwner(_getSettings());
 
     _;
   }
 
+  /**
+   * @dev Modifier that restricts function access to either the owner or maintainer
+   */
   modifier onlyOwnerOrMaintainer() {
     _requireOnlyOwnerOrMaintainer(_getMaintainerSlot().value);
 
     _;
   }
 
+  /**
+   * @dev Modifier that restricts function access to the maintainer when contract is locked
+   */
   modifier onlyMaintainerWhenLocked() {
     _requireOnlyMaintainerWhenLocked(_getSettings());
 
@@ -99,6 +117,12 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
     }
   }
 
+  /**
+   * @dev Gets the owner address based on governance model
+   * @param maintainer The maintainer address
+   * @param settings Current contract settings
+   * @return The owner address - either the maintainer (for absolute monarchy) or the contract itself
+   */
   function _getOwner(
     address maintainer,
     Settings memory settings
@@ -109,6 +133,10 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
         : address(this);
   }
 
+  /**
+   * @dev Gets the current epoch number
+   * @return Current epoch number, or 0 if not in tracked state
+   */
   function _getEpoch() internal view returns (uint48) {
     return _getEpoch(_getSettings());
   }
@@ -120,6 +148,12 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
       settings.state == States.Tracked ? Epochs.calcEpoch(settings.epochs) : 0;
   }
 
+  /**
+   * @dev Gets the total token supply at a specific epoch
+   * @param epoch The epoch number to query
+   * @param currentEpoch The current epoch number
+   * @return The total supply at the specified epoch
+   */
   function _getTotalSupplyAt(
     uint48 epoch,
     uint48 currentEpoch
@@ -132,6 +166,13 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
       );
   }
 
+  /**
+   * @dev Gets an account's token balance at a specific epoch
+   * @param epoch The epoch number to query
+   * @param currentEpoch The current epoch number
+   * @param account The account address to query
+   * @return The account's balance at the specified epoch
+   */
   function _getBalanceAt(
     uint48 epoch,
     uint48 currentEpoch,
@@ -173,6 +214,13 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
 
   // internal setters
 
+  /**
+   * @dev Transfers tokens between accounts, handling minting and burning
+   * @param epoch The epoch number for the transfer
+   * @param from Source address (address(0) for minting)
+   * @param to Destination address (address(0) for burning)
+   * @param value Amount of tokens to transfer
+   */
   function _transferAt(
     uint48 epoch,
     address from,
@@ -242,10 +290,19 @@ abstract contract ACTCommon is Expandable, ACTCommonStorage {
     }
   }
 
+  /**
+   * @dev Triggers an event in the registry contract
+   * @param data The event data to emit
+   */
   function _triggerRegistryEvent(bytes memory data) internal {
     _triggerRegistryEvent(_getRegistrySlot().value, data);
   }
 
+  /**
+   * @dev Triggers an event in a specific registry contract
+   * @param registry The address of the registry contract
+   * @param data The event data to emit
+   */
   function _triggerRegistryEvent(address registry, bytes memory data) internal {
     IACTRegistry(registry).emitTokenEvent(data);
   }
